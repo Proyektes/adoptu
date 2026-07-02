@@ -1208,3 +1208,4 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 16:22 | Fixed "View Details" in temporal home search: added missing `/temporal-home/{id}` UI route + `GET /api/temporal-homes/{id}`, new detail page module, fixed card link using nonexistent `home.id` (should be `home.userId`), redesigned search-result cards | TemporalHomeRoutes.kt, UIRoutes.kt, pages/TemporalHomePage.kt (backend+frontend), ApiClient.kt, I18n.kt, Main.kt, temporal-home.scss | All backend/frontend builds + full test suite + Kover 95% gate pass; verified visually via Playwright | ~45k |

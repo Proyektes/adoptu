@@ -136,6 +136,13 @@ object ApiClientModule {
 
     fun searchTemporalHomes(query: dynamic): Promise<dynamic> = apiFetch("/api/temporal-homes/search", js("({method: 'POST', body: JSON.stringify(query)})"))
 
+    fun getTemporalHomeById(id: String): Promise<dynamic> = apiFetch("/api/temporal-homes/$id")
+
+    fun sendTemporalHomeRequest(temporalHomeId: Int, message: String): Promise<dynamic> {
+        val body = js("({temporalHomeId: temporalHomeId, message: message})")
+        return apiFetch("/api/temporal-homes/request", js("({method: 'POST', body: JSON.stringify(body)})"))
+    }
+
     fun getMyPets(): Promise<dynamic> = apiFetch("/api/pets/mine")
 
     fun adoptPet(id: String, message: String): Promise<dynamic> {

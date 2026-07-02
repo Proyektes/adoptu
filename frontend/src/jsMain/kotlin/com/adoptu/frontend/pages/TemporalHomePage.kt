@@ -6,6 +6,8 @@ import com.adoptu.frontend.I18n
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.HTMLTextAreaElement
+import org.w3c.dom.events.Event
 
 @JsExport
 @JsName("TemporalHomeSearchPage")
@@ -32,14 +34,102 @@ object TemporalHomeSearchPageModule {
         val container = document.getElementById("results-container").unsafeCast<HTMLElement?>()
         val list = homes as? Array<dynamic>
         if (list == null || list.isEmpty()) {
-            container?.innerHTML = "<p data-i18n=\"noTemporalHomes\">No temporal homes found.</p>"
+            container?.innerHTML = "<p>${I18n.t("noTemporalHomes")}</p>"
             return
         }
         container?.innerHTML = list.joinToString("") { home ->
             val alias = home.alias?.toString()?.takeIf { it.isNotEmpty() } ?: "Temporal Home"
-            "<div class=\"temporal-home-card\"><h3>$alias</h3><p>${home.city}, ${home.state}, ${I18n.translateCountry(home.country?.toString())}</p>" +
-                "<a href=\"/temporal-home/${home.id}\" data-i18n=\"viewDetails\">View Details</a></div>"
+            val location = listOfNotNull(
+                home.city?.toString()?.takeIf { it.isNotEmpty() },
+                home.state?.toString()?.takeIf { it.isNotEmpty() },
+                I18n.translateCountry(home.country?.toString())
+            ).joinToString(", ")
+            "<div class=\"temporal-home-card\">" +
+                "<div class=\"temporal-home-icon\">🏠</div>" +
+                "<div class=\"temporal-home-info\"><h3>$alias</h3><p class=\"location\">$location</p></div>" +
+                "<a class=\"btn btn-small\" href=\"/temporal-home/${home.userId}\">${I18n.t("viewDetails")}</a></div>"
         }
+    }
+}
+
+@JsExport
+@JsName("TemporalHomeDetailPage")
+object TemporalHomeDetailPageModule {
+    private var temporalHomeId: Int = 0
+
+    fun init() {
+        val segments = window.location.pathname.split("/")
+        val id = segments.lastOrNull { it.isNotEmpty() }
+        if (id == null) {
+            window.location.href = "/temporal-homes"
+            return
+        }
+        temporalHomeId = id.toIntOrNull() ?: run {
+            window.location.href = "/temporal-homes"
+            return
+        }
+
+        ApiClientModule.getTemporalHomeById(id).then<Unit> { home ->
+            ApiClientModule.me().then<Unit> { user -> render(home, user) }.catch { render(home, js("({authenticated: false})")) }
+        }.catch {
+            val container = document.getElementById("temporal-home-detail").unsafeCast<HTMLElement?>()
+            container?.innerHTML = "<p>${I18n.t("temporalHomeNotFound")}</p><a href=\"/temporal-homes\">${I18n.t("backToSearch")}</a>"
+        }
+    }
+
+    private fun render(home: dynamic, user: dynamic) {
+        val container = document.getElementById("temporal-home-detail").unsafeCast<HTMLElement?>()
+        val alias = home.alias?.toString()?.takeIf { it.isNotEmpty() } ?: "Temporal Home"
+        val location = listOfNotNull(
+            home.city?.toString()?.takeIf { it.isNotEmpty() },
+            home.state?.toString()?.takeIf { it.isNotEmpty() },
+            I18n.translateCountry(home.country?.toString())
+        ).joinToString(", ")
+        val memberSince = js("new Date(home.createdAt)").toLocaleDateString()
+
+        val roles = user.activeRoles as? Array<String>
+        val isRescuer = user.authenticated != false && (roles?.contains("RESCUER") == true || roles?.contains("ADMIN") == true)
+
+        val sb = StringBuilder()
+        sb.append("<div class=\"temporal-home-detail-header\">")
+        sb.append("<div class=\"temporal-home-detail-icon\">🏠</div>")
+        sb.append("<h1>$alias</h1>")
+        if (location.isNotEmpty()) sb.append("<p class=\"location\">$location</p>")
+        sb.append("<p class=\"member-since\">${I18n.t("memberSince")} $memberSince</p>")
+        sb.append("</div>")
+
+        sb.append("<div class=\"temporal-home-detail-body\">")
+        sb.append("<h2>${I18n.t("contactThisHome")}</h2>")
+        if (isRescuer) {
+            sb.append(
+                "<form id=\"contact-form\">" +
+                    "<textarea id=\"contact-message\" rows=\"4\" placeholder=\"${I18n.t("yourMessage")}\"></textarea>" +
+                    "<button type=\"submit\" class=\"btn\">${I18n.t("sendRequestBtn")}</button></form>"
+            )
+        } else {
+            sb.append("<p>${I18n.t("loginAsRescuerToContact")}</p>")
+        }
+        sb.append("</div>")
+
+        container?.innerHTML = sb.toString()
+
+        val form = document.getElementById("contact-form")
+        form?.addEventListener("submit", { e: Event ->
+            e.preventDefault()
+            val message = (document.getElementById("contact-message") as? HTMLTextAreaElement)?.value ?: ""
+            ApiClientModule.sendTemporalHomeRequest(temporalHomeId, message).then<Unit> {
+                (document.getElementById("message") as? HTMLElement)?.let {
+                    it.className = "message success"
+                    it.textContent = I18n.t("requestSentToHome")
+                }
+                form.unsafeCast<HTMLElement>().style.display = "none"
+            }.catch { err: dynamic ->
+                (document.getElementById("message") as? HTMLElement)?.let {
+                    it.className = "message error"
+                    it.textContent = err?.message?.toString() ?: "Error"
+                }
+            }
+        })
     }
 }
 
