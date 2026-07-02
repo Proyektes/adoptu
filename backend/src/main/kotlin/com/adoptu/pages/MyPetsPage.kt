@@ -100,6 +100,5 @@ fun HTML.myPetsPage(navParams: NavParams = NavParams()) {
         }
         footer()
         commonScripts(navParams.isLoggedIn)
-        script(src = "/static/js/my-pets.js") {}
     }
 }

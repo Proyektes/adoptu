@@ -39,8 +39,13 @@ object ApiClientModule {
 
     fun logout(): Promise<dynamic> = apiFetch("/api/auth/logout", js("({method: 'POST'})"))
 
-    fun getPets(type: String? = null): Promise<dynamic> =
-        apiFetch("/api/pets" + (type?.let { "?type=${window.asDynamic().encodeURIComponent(it)}" } ?: ""))
+    fun getPets(type: String? = null, country: String? = null): Promise<dynamic> {
+        val params = mutableListOf<String>()
+        if (!type.isNullOrEmpty()) params.add("type=" + window.asDynamic().encodeURIComponent(type))
+        if (!country.isNullOrEmpty()) params.add("country=" + window.asDynamic().encodeURIComponent(country))
+        val query = if (params.isNotEmpty()) "?" + params.joinToString("&") else ""
+        return apiFetch("/api/pets$query")
+    }
 
     fun getPet(id: String): Promise<dynamic> = apiFetch("/api/pets/$id")
 
@@ -130,4 +135,48 @@ object ApiClientModule {
     fun getShelters(): Promise<dynamic> = apiFetch("/api/shelters")
 
     fun searchTemporalHomes(query: dynamic): Promise<dynamic> = apiFetch("/api/temporal-homes/search", js("({method: 'POST', body: JSON.stringify(query)})"))
+
+    fun getMyPets(): Promise<dynamic> = apiFetch("/api/pets/mine")
+
+    fun adoptPet(id: String, message: String): Promise<dynamic> {
+        val body = js("({message: message})")
+        return apiFetch("/api/pets/$id/adopt", js("({method: 'POST', body: JSON.stringify(body)})"))
+    }
+
+    fun getTemporalHomeRequests(): Promise<dynamic> = apiFetch("/api/users/temporal-home/requests")
+
+    fun blockRescuer(rescuerId: Int): Promise<dynamic> {
+        val body = js("({rescuerId: rescuerId})")
+        return apiFetch("/api/temporal-homes/block", js("({method: 'POST', body: JSON.stringify(body)})"))
+    }
+
+    fun createPhotographyRequest(photographerId: Int, petId: Int?, message: String): Promise<dynamic> {
+        val body = js("({photographerId: photographerId, petId: petId, message: message})")
+        return apiFetch("/api/photographers/requests", js("({method: 'POST', body: JSON.stringify(body)})"))
+    }
+
+    fun getAdoptionRequests(petId: Int): Promise<dynamic> = apiFetch("/api/pets/$petId/adoption-requests")
+
+    fun updateAdoptionRequest(requestId: Int, status: String): Promise<dynamic> {
+        val opts = js("({method: 'PUT', headers: {'Content-Type': 'application/x-www-form-urlencoded'}})")
+        opts.body = "status=" + window.asDynamic().encodeURIComponent(status)
+        return apiFetch("/api/pets/adoption-requests/$requestId", opts)
+    }
+
+    fun addImage(petId: String, file: dynamic, isPrimary: Boolean = false): Promise<dynamic> {
+        val formData = js("new FormData()")
+        formData.append("file", file)
+        formData.append("isPrimary", isPrimary.toString())
+        return window.asDynamic().fetch("/api/pets/$petId/images", js("({method: 'POST', body: formData, credentials: 'include'})")).then { res: dynamic ->
+            if (res.ok != true) {
+                res.text().then { text: dynamic -> throw js("new Error('Request failed: ' + text)") }
+            } else {
+                res.json()
+            }
+        }
+    }
+
+    fun removeImage(petId: String, imageId: Int): Promise<dynamic> = apiFetch("/api/pets/$petId/images/$imageId", js("({method: 'DELETE'})"))
+
+    fun setPrimaryImage(petId: String, imageId: Int): Promise<dynamic> = apiFetch("/api/pets/$petId/images/$imageId/primary", js("({method: 'PUT'})"))
 }

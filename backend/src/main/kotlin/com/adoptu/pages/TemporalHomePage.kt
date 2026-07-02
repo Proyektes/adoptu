@@ -19,7 +19,6 @@ fun HTML.temporalHomeProfilePage(navParams: NavParams = NavParams()) {
         }
         footer()
         commonScripts(navParams.isLoggedIn)
-        script(src = "/static/js/temporal-home-profile.js") {}
     }
 }
 
@@ -46,6 +45,5 @@ fun HTML.temporalHomesSearchPage(navParams: NavParams = NavParams()) {
         }
         footer()
         commonScripts(navParams.isLoggedIn)
-        script(src = "/static/js/temporal-home-search.js") {}
     }
 }

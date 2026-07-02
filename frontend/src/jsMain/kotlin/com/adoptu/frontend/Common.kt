@@ -7,6 +7,12 @@ import org.w3c.dom.*
 import org.w3c.dom.events.Event
 import kotlin.js.Promise
 
+fun NodeList.forEachElement(action: (Element) -> Unit) {
+    for (i in 0 until length) {
+        (item(i) as? Element)?.let(action)
+    }
+}
+
 @JsExport
 @JsName("Common")
 object CommonModule {
@@ -81,4 +87,20 @@ object CommonModule {
         val hasCountry = user.country != null && user.country.toString().isNotEmpty()
         return js("({hasProfile: hasProfile, hasCountry: hasCountry})")
     }
+
+    fun escapeHtml(s: String?): String {
+        if (s == null) return ""
+        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            .replace("\"", "&quot;").replace("'", "&#39;")
+    }
+
+    fun debounce(waitMs: Int, action: () -> Unit): () -> Unit {
+        var timeoutId: Int = -1
+        return {
+            if (timeoutId != -1) window.clearTimeout(timeoutId)
+            timeoutId = window.setTimeout({ action() }, waitMs)
+        }
+    }
+
+    fun buildLocationSearchParams(): dynamic = window.asDynamic().buildLocationSearchParams()
 }

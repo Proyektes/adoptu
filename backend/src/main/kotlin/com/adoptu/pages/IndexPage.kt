@@ -46,6 +46,5 @@ fun HTML.indexPage(navParams: NavParams = NavParams()) {
         }
         footer()
         commonScripts(navParams.isLoggedIn)
-        script(src = "/static/js/index.js") {}
     }
 }

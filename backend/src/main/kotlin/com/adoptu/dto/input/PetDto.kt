@@ -12,7 +12,7 @@ enum class Currency {
 }
 
 enum class Status {
-    AVAILABLE, ADOPTED, DISABLED
+    AVAILABLE, ADOPTED, DISABLED, PENDING
 }
 
 @Serializable

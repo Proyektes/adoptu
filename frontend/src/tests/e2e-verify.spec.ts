@@ -114,11 +114,19 @@ test.describe('1 · Test data', () => {
   });
 
   test('pets endpoint returns pets', async ({ page }) => {
-    const res = await page.request.get(`${BASE}/api/pets`);
-    expect(res.status()).toBe(200);
-    const pets = await res.json();
-    expect(Array.isArray(pets)).toBe(true);
-    expect(pets.length).toBeGreaterThanOrEqual(100);
+    // /api/pets requires a country filter; the seed data's 200 pets are split
+    // across a handful of countries, so query the total across the countries
+    // the fixture uses rather than assuming one country has >=100 on its own.
+    const countries = ['MEXICO', 'ARGENTINA', 'COLOMBIA', 'CHILE'];
+    let total = 0;
+    for (const country of countries) {
+      const res = await page.request.get(`${BASE}/api/pets?country=${country}`);
+      expect(res.status()).toBe(200);
+      const pets = await res.json();
+      expect(Array.isArray(pets)).toBe(true);
+      total += pets.length;
+    }
+    expect(total).toBeGreaterThanOrEqual(100);
   });
 
   test('photographers endpoint returns data', async ({ page }) => {
@@ -283,7 +291,9 @@ test.describe('6 · Search sections', () => {
   test('pets page loads and shows cards', async ({ page }) => {
     await page.goto(`${BASE}/pets`);
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    // Pet search is mandatory-country: select one before cards render.
+    await page.locator('#pets-country').selectOption({ value: 'Mexico' });
+    await page.waitForTimeout(1500);
     const cards = page.locator('.pet-card');
     await expect(cards.first()).toBeVisible({ timeout: 5000 });
     expect(await cards.count()).toBeGreaterThan(5);
@@ -292,10 +302,11 @@ test.describe('6 · Search sections', () => {
   test('pets page filter by DOG returns results', async ({ page }) => {
     await page.goto(`${BASE}/pets`);
     await page.waitForLoadState('networkidle');
+    await page.locator('#pets-country').selectOption({ value: 'Mexico' });
     await page.waitForTimeout(1000);
-    const typeSelect = page.locator('#type');
-    if (await typeSelect.isVisible()) {
-      await typeSelect.selectOption('DOG');
+    const typeButton = page.locator('.filter-btn[data-type="DOG"]');
+    if (await typeButton.isVisible()) {
+      await typeButton.click();
       await page.waitForTimeout(1500);
     }
     expect(await page.locator('.pet-card').count()).toBeGreaterThan(0);
@@ -561,7 +572,7 @@ test.describe('9 · Adoption flow', () => {
   test('adopter can open pet detail and see adoption section', async ({ page }) => {
     await loginWithPassword(page, 'juan.medina@email.com');
 
-    const res = await page.request.get(`${BASE}/api/pets?status=AVAILABLE`);
+    const res = await page.request.get(`${BASE}/api/pets?status=AVAILABLE&country=MEXICO`);
     const pets = await res.json();
     expect(pets.length).toBeGreaterThan(0);
 
@@ -583,7 +594,7 @@ test.describe('9 · Adoption flow', () => {
   test('adopter can submit adoption request', async ({ page }) => {
     await loginWithPassword(page, 'juan.medina@email.com');
 
-    const res = await page.request.get(`${BASE}/api/pets?status=AVAILABLE`);
+    const res = await page.request.get(`${BASE}/api/pets?status=AVAILABLE&country=MEXICO`);
     const pets = await res.json();
     const pet = pets[0];
 
@@ -619,8 +630,9 @@ test.describe('9 · Adoption flow', () => {
   test('rescuer can approve an adoption request via API', async ({ page }) => {
     await loginWithPassword(page, 'maria.garcia@email.com');
 
-    // Get rescuer's pets
-    const petsRes = await page.request.get(`${BASE}/api/pets`);
+    // Get rescuer's pets via the /mine endpoint, which doesn't require a country filter
+    // (the public /api/pets search does, and this rescuer's seeded pets have no country set).
+    const petsRes = await page.request.get(`${BASE}/api/pets/mine`);
     const pets = await petsRes.json();
     const myPet = pets.find((p: any) => p.rescuerId !== undefined);
     if (!myPet) return; // no pets, skip
@@ -695,7 +707,7 @@ test.describe('10 · Admin panel', () => {
 // =============================================================================
 test.describe('11 · Pet detail page', () => {
   test('pet detail page loads with correct pet name', async ({ page }) => {
-    const res = await page.request.get(`${BASE}/api/pets`);
+    const res = await page.request.get(`${BASE}/api/pets?country=MEXICO`);
     const pets = await res.json();
     const pet = pets[0];
 
