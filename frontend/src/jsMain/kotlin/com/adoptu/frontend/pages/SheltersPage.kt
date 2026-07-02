@@ -18,6 +18,8 @@ object SheltersPageModule {
         listOf("search-state", "search-city", "search-zip", "search-neighborhood").forEach { id ->
             document.getElementById(id)?.addEventListener("input", { debounced() })
         }
+
+        CommonModule.initCountrySelect("search-country") { window.asDynamic().onCountryChange() }
     }
 
     private fun search() {

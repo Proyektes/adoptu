@@ -1,6 +1,7 @@
 package com.adoptu.frontend.pages
 
 import com.adoptu.frontend.ApiClientModule
+import com.adoptu.frontend.CommonModule
 import com.adoptu.frontend.I18n
 import com.adoptu.frontend.forEachElement
 import kotlinx.browser.document
@@ -55,11 +56,7 @@ object IndexPageModule {
 
         countrySelect?.addEventListener("change", { loadPets() })
 
-        ApiClientModule.me().then<Unit> { user ->
-            if (countrySelect != null && user.authenticated != false && user.country != null) {
-                countrySelect.value = user.country.toString()
-            }
-        }.catch { }.then<Unit> { loadPets() }
+        CommonModule.initCountrySelect("pets-country").then<Unit> { loadPets() }
     }
 
     fun loadPets(): Promise<Unit> {

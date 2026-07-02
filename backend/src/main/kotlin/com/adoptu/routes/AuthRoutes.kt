@@ -484,6 +484,7 @@ private suspend fun userAuthenticationSuccess(
             email = session.email,
             displayName = session.displayName,
             language = user.language,
+            country = user.country,
             activeRoles = activeRolesList,
             lastAcceptedPrivacyPolicy = user.lastAcceptedPrivacyPolicy,
             lastAcceptedTermsAndConditions = user.lastAcceptedTermsAndConditions,

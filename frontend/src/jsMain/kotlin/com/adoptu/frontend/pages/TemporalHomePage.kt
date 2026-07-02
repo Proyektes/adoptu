@@ -15,6 +15,8 @@ object TemporalHomeSearchPageModule {
         document.getElementById("search-btn")?.addEventListener("click", { search() })
         val debounced = CommonModule.debounce(500) { search() }
         document.getElementById("search-state")?.addEventListener("input", { debounced() })
+
+        CommonModule.initCountrySelect("search-country") { window.asDynamic().onCountryChange() }
     }
 
     private fun search() {

@@ -103,4 +103,34 @@ object CommonModule {
     }
 
     fun buildLocationSearchParams(): dynamic = window.asDynamic().buildLocationSearchParams()
+
+    private const val COUNTRY_STORAGE_KEY = "adoptu.selectedCountry"
+
+    // Defaults a country <select> to the last country picked anywhere on the site (localStorage),
+    // falling back to the logged-in user's profile country on first use, and keeps both in sync
+    // as the user changes the selection so every other country selector reuses the same choice.
+    fun initCountrySelect(selectId: String, onApplied: () -> Unit = {}): Promise<Unit> {
+        val select = document.getElementById(selectId) as? HTMLSelectElement ?: return Promise.resolve(Unit)
+
+        select.addEventListener("change", {
+            val value = select.value
+            if (value.isNotEmpty()) window.localStorage.setItem(COUNTRY_STORAGE_KEY, value)
+        })
+
+        val stored = window.localStorage.getItem(COUNTRY_STORAGE_KEY)
+        if (!stored.isNullOrEmpty()) {
+            select.value = stored
+            onApplied()
+            return Promise.resolve(Unit)
+        }
+
+        return ApiClientModule.me().then<Unit> { user ->
+            val country = user.country?.toString()
+            if (user.authenticated != false && !country.isNullOrEmpty()) {
+                select.value = country
+                window.localStorage.setItem(COUNTRY_STORAGE_KEY, country)
+                onApplied()
+            }
+        }.catch { }
+    }
 }
