@@ -1030,6 +1030,87 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-02T05:19:54.403Z"
+    },
+    {
+      "id": "bug-062",
+      "timestamp": "2026-07-02T15:50:00.000Z",
+      "error_message": "Photographers page UI shows raw i18n keys (e.g. \"requestPhotoSession\", \"pleaseSelectCountry\") instead of translated text, in every language",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt",
+      "root_cause": "PhotographersPage.kt (frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/PhotographersPage.kt) calls I18n.t() with 9 keys — pleaseSelectCountry, errorLoadingPhotographers, noPhotographersAvailable, requestPhotoSession, message, sendRequest, requestSentSuccessfully, requestTo, enterMessage — that were never added to I18n.kt for any of the 5 language blocks (en/es/fr/pt/zh). I18n.t() falls back to returning the raw key string when a translation is missing, so this was invisible until someone viewed the photographers search/request-modal UI.",
+      "fix": "Added all 9 keys with translated values to englishTranslations, spanishTranslations, frenchTranslations, portugueseTranslations, and chineseTranslations in I18n.kt, then rebuilt with ./gradlew :frontend:jsBrowserProductionWebpack to regenerate backend/src/main/resources/static/js/common.js.",
+      "tags": [
+        "i18n",
+        "photographers",
+        "missing-translation",
+        "kotlin-js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T15:50:00.000Z"
+    },
+    {
+      "id": "bug-063",
+      "timestamp": "2026-07-02T21:57:34.476Z",
+      "error_message": "Significant refactor of ",
+      "file": ".claude/worktrees/country-selector-default-persist/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/IndexPage.kt",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 8→4 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T21:57:34.476Z"
+    },
+    {
+      "id": "bug-064",
+      "timestamp": "2026-07-02T21:58:00.837Z",
+      "error_message": "Null/undefined access in ",
+      "file": ".claude/worktrees/fix-temporal-home-view-details/backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: get(\"/temporal-home/{id}\") {; val id = call.parameters[\"id\"]?.toIntOrNull()",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-02T22:01:48.542Z"
+    },
+    {
+      "id": "bug-065",
+      "timestamp": "2026-07-02T22:04:17.674Z",
+      "error_message": "Missing error handling in unknown",
+      "file": ".claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/TemporalHomePage.kt",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T22:04:17.674Z"
+    },
+    {
+      "id": "bug-066",
+      "timestamp": "2026-07-02T22:05:44.697Z",
+      "error_message": "Significant refactor of ",
+      "file": ".claude/worktrees/fix-temporal-home-view-details-v2/backend/src/main/scss/temporal-home.scss",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 28→102 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T22:05:44.697Z"
     }
   ]
 }

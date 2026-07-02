@@ -1208,3 +1208,99 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+
+## Session: 2026-07-02 15:27
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-02 15:27
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-02 15:46
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-02 15:47
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:49 | Edited .claude/worktrees/fix-photographers-i18n/frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | expanded (+9 lines) | ~147 |
+| 15:49 | Edited .claude/worktrees/fix-photographers-i18n/frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | expanded (+9 lines) | ~156 |
+| 15:49 | Edited .claude/worktrees/fix-photographers-i18n/frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | expanded (+9 lines) | ~162 |
+| 15:49 | Edited .claude/worktrees/fix-photographers-i18n/frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | expanded (+9 lines) | ~144 |
+
+## Session: 2026-07-02 15:49
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:49 | Edited .claude/worktrees/fix-photographers-i18n/frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | expanded (+9 lines) | ~100 |
+| 15:50 | Session end: 1 writes across 1 files (I18n.kt) | 4 reads | ~287 tok |
+
+## Session: 2026-07-02 15:52
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:53 | Edited .claude/worktrees/fix-photographers-i18n/.wolf/cerebrum.md | 1→2 lines | ~656 |
+| 15:54 | Edited .claude/worktrees/country-selector-default-persist/backend/src/main/kotlin/com/adoptu/dto/output/AuthResponses.kt | 3→4 lines | ~41 |
+| 15:54 | Session end: 2 writes across 2 files (cerebrum.md, AuthResponses.kt) | 11 reads | ~747 tok |
+| 15:54 | Edited .claude/worktrees/country-selector-default-persist/backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt | 3→4 lines | ~44 |
+| 15:57 | Edited .claude/worktrees/country-selector-default-persist/frontend/src/jsMain/kotlin/com/adoptu/frontend/Common.kt | added error handling | ~381 |
+| 15:57 | Edited .claude/worktrees/country-selector-default-persist/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/IndexPage.kt | added 1 import(s) | ~42 |
+| 15:57 | Edited .claude/worktrees/country-selector-default-persist/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/IndexPage.kt | toString() → initCountrySelect() | ~41 |
+| 15:57 | Edited .claude/worktrees/fix-temporal-home-view-details/backend/src/main/kotlin/com/adoptu/routes/TemporalHomeRoutes.kt | added 2 condition(s) | ~224 |
+| 15:57 | Edited .claude/worktrees/country-selector-default-persist/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SheltersPage.kt | modified debounce() | ~120 |
+| 15:57 | Edited .claude/worktrees/country-selector-default-persist/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/PhotographersPage.kt | modified debounce() | ~120 |
+| 15:58 | Edited .claude/worktrees/fix-temporal-home-view-details/backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt | added optional chaining | ~159 |
+| 15:58 | Edited .claude/worktrees/country-selector-default-persist/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SterilizationLocationsPage.kt | modified debounce() | ~135 |
+| 15:58 | Edited .claude/worktrees/country-selector-default-persist/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/TemporalHomePage.kt | modified debounce() | ~110 |
+| 15:58 | Edited .claude/worktrees/fix-temporal-home-view-details/backend/src/main/kotlin/com/adoptu/pages/TemporalHomePage.kt | 7→6 lines | ~38 |
+| 15:58 | Edited .claude/worktrees/fix-temporal-home-view-details/backend/src/main/kotlin/com/adoptu/pages/TemporalHomePage.kt | modified a() | ~199 |
+| 16:01 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/backend/src/main/kotlin/com/adoptu/routes/TemporalHomeRoutes.kt | added 2 condition(s) | ~224 |
+| 16:01 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt | added optional chaining | ~159 |
+| 16:01 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/backend/src/main/kotlin/com/adoptu/pages/TemporalHomePage.kt | modified a() | ~199 |
+| 16:03 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | expanded (+10 lines) | ~180 |
+| 16:03 | Session end: 18 writes across 12 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 36 reads | ~26136 tok |
+| 16:03 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | expanded (+10 lines) | ~194 |
+| 16:03 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | expanded (+10 lines) | ~195 |
+| 16:03 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | expanded (+10 lines) | ~192 |
+| 16:03 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | expanded (+10 lines) | ~129 |
+| 16:03 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/ApiClient.kt | modified searchTemporalHomes() | ~144 |
+| 16:03 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/Main.kt | added 1 import(s) | ~66 |
+| 16:03 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/Main.kt | 2→3 lines | ~82 |
+| 16:04 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/TemporalHomePage.kt | added error handling | ~1286 |
+| 16:04 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/TemporalHomePage.kt | added 2 import(s) | ~47 |
+| 16:04 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/TemporalHomePage.kt | 20→21 lines | ~256 |
+| 16:05 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/backend/src/main/scss/temporal-home.scss | expanded (+74 lines) | ~510 |
+| 16:08 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/backend/src/test/kotlin/com/adoptu/routes/TemporalHomeRoutesE2ETest.kt | expanded (+30 lines) | ~292 |
+| 16:09 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/backend/src/test/kotlin/com/adoptu/routes/UIRoutesE2ETest.kt | expanded (+22 lines) | ~242 |
+| 16:18 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/TemporalHomePage.kt | inline fix | ~32 |
+| 16:22 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/.wolf/memory.md | 4→5 lines | ~169 |
+| 16:23 | Edited .claude/worktrees/fix-temporal-home-view-details-v2/.wolf/cerebrum.md | modified catch() | ~722 |
+| 16:25 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 47 reads | ~38040 tok |
+| 16:46 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 47 reads | ~38040 tok |
+| 16:48 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 47 reads | ~38040 tok |
+| 16:49 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 47 reads | ~38040 tok |
+| 16:50 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 16:50 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 16:51 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 16:51 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 16:52 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 16:52 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 16:53 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 16:54 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 16:54 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 16:54 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 16:55 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 16:56 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 16:56 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 16:56 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 17:01 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 17:01 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 17:02 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 17:02 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 17:03 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
+| 17:03 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |

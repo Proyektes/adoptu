@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-02T05:19:54.372Z
-> Files: 832 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-02T22:23:23.990Z
+> Files: 857 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -475,6 +475,26 @@
 
 - `LocationSearchFilters.kt` — DIV (~927 tok)
 
+## .claude/worktrees/country-selector-default-persist/backend/src/main/kotlin/com/adoptu/dto/output/
+
+- `AuthResponses.kt` — Data class: AuthMeResponse (~439 tok)
+
+## .claude/worktrees/country-selector-default-persist/backend/src/main/kotlin/com/adoptu/routes/
+
+- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~6922 tok)
+
+## .claude/worktrees/country-selector-default-persist/frontend/src/jsMain/kotlin/com/adoptu/frontend/
+
+- `Common.kt` — NodeList, onCountryChange, initI18n, initDropdowns, checkProfileCompletion (~1464 tok)
+
+## .claude/worktrees/country-selector-default-persist/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
+
+- `IndexPage.kt` — init, loadPets, updateCountryHint, showEmptyState, hideEmptyState (~2200 tok)
+- `PhotographersPage.kt` — init, search, load, render, createRequestModal (~1706 tok)
+- `SheltersPage.kt` — init, search, renderShelters (~1292 tok)
+- `SterilizationLocationsPage.kt` — init, search, render, locationCard, init (~2634 tok)
+- `TemporalHomePage.kt` — init, search, displayResults, init, loadRequests (~1344 tok)
+
 ## .claude/worktrees/elegant-coalescing-kurzweil/
 
 - `docker-compose.yml` — Docker Compose services (~118 tok)
@@ -934,10 +954,60 @@
 
 - `I18n.kt` (~17715 tok)
 
+## .claude/worktrees/fix-photographers-i18n/.wolf/
+
+- `cerebrum.md` — Cerebrum (~9950 tok)
+
+## .claude/worktrees/fix-photographers-i18n/frontend/src/jsMain/kotlin/com/adoptu/frontend/
+
+- `I18n.kt` (~20376 tok)
+
 ## .claude/worktrees/fix-sterilization-js-syntax/backend/src/main/resources/static/js/
 
 - `sterilization-locations.js` — escapeHtml: loadCountries, loadLocations, showForm + 3 more (~1318 tok)
 - `sterilization.js` — country: executedFunction (~957 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/.wolf/
+
+- `cerebrum.md` — Cerebrum (~10713 tok)
+- `memory.md` — Memory (~30223 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/backend/src/main/kotlin/com/adoptu/pages/
+
+- `TemporalHomePage.kt` — HTML, HTML, HTML (~639 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/backend/src/main/kotlin/com/adoptu/routes/
+
+- `TemporalHomeRoutes.kt` — Route (~2579 tok)
+- `UIRoutes.kt` — Data class: NavParams (~2523 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/backend/src/main/scss/
+
+- `temporal-home.scss` — Styles: 12 rules (~627 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/backend/src/test/kotlin/com/adoptu/routes/
+
+- `TemporalHomeRoutesE2ETest.kt` — E2E tests for [temporalHomeRoutes]. (~7352 tok)
+- `UIRoutesE2ETest.kt` — End-to-end tests for [uiRoutes]: mounts the real route tree in a Ktor (~6074 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/
+
+- `ApiClient.kt` — apiFetch, me, logout, getPets, getPet (~2447 tok)
+- `I18n.kt` (~20914 tok)
+- `Main.kt` — main (~1138 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
+
+- `TemporalHomePage.kt` — init, search, displayResults, init, render (~2408 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details/backend/src/main/kotlin/com/adoptu/pages/
+
+- `TemporalHomePage.kt` — HTML, HTML, HTML (~639 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details/backend/src/main/kotlin/com/adoptu/routes/
+
+- `TemporalHomeRoutes.kt` — Route (~2579 tok)
+- `UIRoutes.kt` — Data class: NavParams (~2523 tok)
 
 ## .claude/worktrees/fix-test-task/
 
