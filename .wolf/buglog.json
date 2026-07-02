@@ -7,7 +7,7 @@
       "error_message": "Significant refactor of ",
       "file": ".claude/worktrees/look-and-feel/backend/src/main/scss/_layout.scss",
       "root_cause": "3 lines replaced/restructured",
-      "fix": "Rewrote 41→72 lines (3 removed)",
+      "fix": "Rewrote 41\u219272 lines (3 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -22,8 +22,8 @@
       "timestamp": "2026-07-02T02:45:38.285Z",
       "error_message": "CSS fix: font-size",
       "file": ".claude/worktrees/look-and-feel/backend/src/main/scss/_layout.scss",
-      "root_cause": "font-size: 2rem → 1.5rem",
-      "fix": "Changed font-size: 2rem → 1.5rem",
+      "root_cause": "font-size: 2rem \u2192 1.5rem",
+      "fix": "Changed font-size: 2rem \u2192 1.5rem",
       "tags": [
         "auto-detected",
         "style-fix",
@@ -39,7 +39,7 @@
       "error_message": "Significant refactor of ",
       "file": ".claude/worktrees/country-detect/backend/src/main/resources/static/js/index.js",
       "root_cause": "4 lines replaced/restructured",
-      "fix": "Rewrote 16→28 lines (4 removed)",
+      "fix": "Rewrote 16\u219228 lines (4 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -136,7 +136,7 @@
       "timestamp": "2026-06-30T20:10:00.000Z",
       "error_message": "admin-shelters.js references DOM elements (shelter-form, country, name, city, address, currency, etc.) that AdminSheltersPage.kt never renders",
       "file": "backend/src/main/kotlin/com/adoptu/pages/AdminSheltersPage.kt; backend/src/main/resources/static/js/admin-shelters.js",
-      "root_cause": "AdminSheltersPage.kt only renders the filter-country/filter-state search controls and the shelters list container. admin-shelters.js calls document.getElementById('shelter-form').addEventListener(...) at top level (not inside DOMContentLoaded), plus getFormData()/editShelter() reference name/country/city/address/currency/etc. inputs and a shelter-form element that do not exist in the rendered page. Likely throws a TypeError on page load (shelter-form is null), which would also prevent the trailing DOMContentLoaded listener from registering. Discovered incidentally while investigating the Mexico shelter search bug (bug-050) — not fixed in that pass.",
+      "root_cause": "AdminSheltersPage.kt only renders the filter-country/filter-state search controls and the shelters list container. admin-shelters.js calls document.getElementById('shelter-form').addEventListener(...) at top level (not inside DOMContentLoaded), plus getFormData()/editShelter() reference name/country/city/address/currency/etc. inputs and a shelter-form element that do not exist in the rendered page. Likely throws a TypeError on page load (shelter-form is null), which would also prevent the trailing DOMContentLoaded listener from registering. Discovered incidentally while investigating the Mexico shelter search bug (bug-050) \u2014 not fixed in that pass.",
       "fix": "Not yet investigated/fixed. Needs: render the missing create/edit form markup in AdminSheltersPage.kt (or confirm it is intentionally a separate unfinished feature) and guard admin-shelters.js top-level listener registration.",
       "tags": [
         "admin",
@@ -157,7 +157,7 @@
       "error_message": "Significant refactor of ",
       "file": ".claude/worktrees/test-coverage-95/backend/src/test/kotlin/com/adoptu/routes/UIRoutesE2ETest.kt",
       "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 6→4 lines (2 removed)",
+      "fix": "Rewrote 6\u21924 lines (2 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -217,7 +217,7 @@
       "error_message": "Significant refactor of ",
       "file": ".claude/worktrees/test-coverage-95/backend/src/test/kotlin/com/adoptu/routes/PhotographerRoutesE2ETest.kt",
       "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 13→16 lines (2 removed)",
+      "fix": "Rewrote 13\u219216 lines (2 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -233,7 +233,7 @@
       "error_message": "Significant refactor of ",
       "file": ".claude/worktrees/opentofu-aws-infra/infra/variables.tf",
       "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 4→24 lines (2 removed)",
+      "fix": "Rewrote 4\u219224 lines (2 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -248,8 +248,8 @@
       "timestamp": "2026-06-30T21:42:00.000Z",
       "error_message": "GitHub Actions 'Playwright Tests' workflow fails on every push/PR to main (e.g. run #3, #4 on 2026-06-30 ~21:36 UTC), triggering GitHub's automatic failure-notification emails to the repo owner",
       "file": ".github/workflows/playwright.yml",
-      "root_cause": "frontend/src/tests/e2e-verify.spec.ts requires a live backend on http://localhost:8080, mailpit on http://localhost:8025, and pre-loaded test data (scripts/load_test_data.sh) per its own file header — but playwright.yml's 'test' job only runs `npm ci` + `npx playwright install --with-deps` + `npx playwright test` with no step to build/start the Ktor backend, start mailpit, or load test data, and playwright.config.ts has its webServer block commented out. Every test in the suite fails with connection-refused since nothing is listening on :8080/:8025 in the CI runner.",
-      "fix": "User opted to remove the workflow entirely rather than wire up backend/mailpit/test-data in CI. Deleted .github/workflows/playwright.yml — no CI job will run these tests until a future workflow properly provisions the backend + mailpit + test data.",
+      "root_cause": "frontend/src/tests/e2e-verify.spec.ts requires a live backend on http://localhost:8080, mailpit on http://localhost:8025, and pre-loaded test data (scripts/load_test_data.sh) per its own file header \u2014 but playwright.yml's 'test' job only runs `npm ci` + `npx playwright install --with-deps` + `npx playwright test` with no step to build/start the Ktor backend, start mailpit, or load test data, and playwright.config.ts has its webServer block commented out. Every test in the suite fails with connection-refused since nothing is listening on :8080/:8025 in the CI runner.",
+      "fix": "User opted to remove the workflow entirely rather than wire up backend/mailpit/test-data in CI. Deleted .github/workflows/playwright.yml \u2014 no CI job will run these tests until a future workflow properly provisions the backend + mailpit + test data.",
       "tags": [
         "ci",
         "playwright",
@@ -505,7 +505,7 @@
       "error_message": "Wrong reference: UserDto should be country",
       "file": "backend/src/main/kotlin/com/adoptu/ports/UserRepositoryPort.kt",
       "root_cause": "Used \"UserDto\" instead of \"country\"",
-      "fix": "Changed UserDto → country",
+      "fix": "Changed UserDto \u2192 country",
       "tags": [
         "auto-detected",
         "wrong-reference",
@@ -553,7 +553,7 @@
       "error_message": "Significant refactor of ",
       "file": "backend/src/main/kotlin/com/adoptu/adapters/db/repositories/PetRepository.kt",
       "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 29→39 lines (2 removed)",
+      "fix": "Rewrote 29\u219239 lines (2 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -608,7 +608,7 @@
       "error_message": "Significant refactor of ",
       "file": "backend/src/main/resources/static/js/index.js",
       "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 8→32 lines (2 removed)",
+      "fix": "Rewrote 8\u219232 lines (2 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -623,7 +623,7 @@
       "timestamp": "2026-07-01T03:23:00.845Z",
       "error_message": "Missing error handling in function",
       "file": "backend/src/main/resources/static/js/index.js",
-      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "root_cause": "Code path had no error handling \u2014 exceptions would propagate uncaught",
       "fix": "Added try/catch block",
       "tags": [
         "auto-detected",
@@ -656,7 +656,7 @@
       "error_message": "Significant refactor of ",
       "file": "backend/src/test/kotlin/com/adoptu/services/PetServiceTest.kt",
       "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 16→53 lines (2 removed)",
+      "fix": "Rewrote 16\u219253 lines (2 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -671,7 +671,7 @@
       "timestamp": "2026-07-01T03:26:50.497Z",
       "error_message": "Missing error handling in unknown",
       "file": "backend/src/main/kotlin/com/adoptu/routes/PetsRoutes.kt",
-      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "root_cause": "Code path had no error handling \u2014 exceptions would propagate uncaught",
       "fix": "Added try/catch block | Also: try {; } catch (e: IllegalArgumentException) {",
       "tags": [
         "auto-detected",
@@ -688,7 +688,7 @@
       "error_message": "Significant refactor of ",
       "file": "backend/src/test/kotlin/com/adoptu/routes/PetsRoutesE2ETest.kt",
       "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 31→69 lines (2 removed)",
+      "fix": "Rewrote 31\u219269 lines (2 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -720,7 +720,7 @@
       "error_message": "Significant refactor of ",
       "file": ".claude/worktrees/bump-task-cpu/infra/cloudfront.tf",
       "root_cause": "9 lines replaced/restructured",
-      "fix": "Rewrote 12→14 lines (9 removed)",
+      "fix": "Rewrote 12\u219214 lines (9 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -857,7 +857,7 @@
       "error_message": "Significant refactor of ",
       "file": ".claude/worktrees/sprightly-splashing-blum/backend/src/main/resources/static/js/i18n/i18n.js",
       "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 7→3 lines (2 removed)",
+      "fix": "Rewrote 7\u21923 lines (2 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -908,8 +908,8 @@
       "timestamp": "2026-07-02T03:58:56.070Z",
       "error_message": "CSS fix: display, gap",
       "file": ".claude/worktrees/pets-listing-ux/backend/src/main/scss/style.scss",
-      "root_cause": "display: grid → none; gap: 1.5rem → 0.5rem",
-      "fix": "Changed display: grid → none; gap: 1.5rem → 0.5rem",
+      "root_cause": "display: grid \u2192 none; gap: 1.5rem \u2192 0.5rem",
+      "fix": "Changed display: grid \u2192 none; gap: 1.5rem \u2192 0.5rem",
       "tags": [
         "auto-detected",
         "style-fix",
@@ -925,7 +925,7 @@
       "error_message": "Significant refactor of ",
       "file": ".claude/worktrees/migrate-legacy-js-to-kotlin/frontend/src/tests/e2e-verify.spec.ts",
       "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 6→14 lines (2 removed)",
+      "fix": "Rewrote 6\u219214 lines (2 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -941,7 +941,7 @@
       "error_message": "Significant refactor of ",
       "file": ".claude/worktrees/migrate-legacy-js-to-kotlin/backend/src/main/kotlin/com/adoptu/pages/Shared.kt",
       "root_cause": "5 lines replaced/restructured",
-      "fix": "Rewrote 9→4 lines (5 removed)",
+      "fix": "Rewrote 9\u21924 lines (5 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -989,7 +989,7 @@
       "error_message": "Significant refactor of ",
       "file": ".claude/worktrees/migrate-legacy-js-to-kotlin/frontend/src/tests/e2e-verify.spec.ts",
       "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 5→6 lines (2 removed)",
+      "fix": "Rewrote 5\u21926 lines (2 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -1021,7 +1021,7 @@
       "error_message": "Significant refactor of ",
       "file": ".claude/worktrees/country-detect/backend/src/main/resources/static/js/index.js",
       "root_cause": "7 lines replaced/restructured",
-      "fix": "Rewrote 11→5 lines (7 removed)",
+      "fix": "Rewrote 11\u21925 lines (7 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -1111,6 +1111,23 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-02T22:05:44.697Z"
+      "id": "bug-088",
+      "timestamp": "2026-07-02T22:22:00.000Z",
+      "error_message": "View Details in temporal home is not working and has bad design",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/TemporalHomePage.kt, backend/src/main/kotlin/com/adoptu/routes/{TemporalHomeRoutes,UIRoutes}.kt, backend/src/main/kotlin/com/adoptu/pages/TemporalHomePage.kt, backend/src/main/scss/temporal-home.scss",
+      "root_cause": "Two compounding bugs: (1) the search-results card linked to /temporal-home/${home.id}, but TemporalHomeDto has no id field (its identifier is userId), so every link pointed to /temporal-home/undefined; (2) even a correct id would 404 anyway, since no UI route or API endpoint for a single temporal home (/temporal-home/{id}, GET /api/temporal-homes/{id}) had ever been implemented - only /temporal-home (own profile), /temporal-homes (search), and /temporal-home/block/{id} existed.",
+      "fix": "Added a public GET /api/temporal-homes/{id} endpoint (TemporalHomeRoutes.kt, mirrors the existing no-auth/CDN-cacheable search endpoint), a GET /temporal-home/{id} UI route + temporalHomeDetailPage() shell (UIRoutes.kt/TemporalHomePage.kt), a new TemporalHomeDetailPageModule in the frontend that fetches and renders the profile plus a contact-request form for logged-in rescuers, fixed the card link to use home.userId, and redesigned both the search-result cards and the new detail page (icon badge, cleaner layout) in temporal-home.scss. Added i18n keys (several, e.g. viewDetails/noTemporalHomes, were missing entirely - t() was falling back to raw key names). Verified via new backend E2E tests plus a live Playwright walkthrough against seeded dev data (search -> click View Details -> detail page renders correctly).",
+      "tags": [
+        "frontend",
+        "kotlin-js",
+        "routing",
+        "ui-design",
+        "i18n",
+        "temporal-home"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T22:22:00.000Z"
     }
   ]
 }

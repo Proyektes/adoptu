@@ -443,6 +443,36 @@ class TemporalHomeRoutesE2ETest {
         }
     }
 
+    // ==================== GET /api/temporal-homes/{id} ====================
+
+    @Test
+    fun `GET temporal-homes by id returns 400 for a non-numeric id`() {
+        testApplication {
+            setupApp()
+            val response = client.get("/api/temporal-homes/abc")
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+        }
+    }
+
+    @Test
+    fun `GET temporal-homes by id returns 404 when no profile exists for that id`() {
+        testApplication {
+            setupApp()
+            val response = client.get("/api/temporal-homes/9999")
+            assertEquals(HttpStatusCode.NotFound, response.status)
+        }
+    }
+
+    @Test
+    fun `GET temporal-homes by id returns the profile without requiring a session`() {
+        testApplication {
+            setupApp()
+            val response = client.get("/api/temporal-homes/2")
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertTrue(response.bodyAsText().contains("Cozy Home"))
+        }
+    }
+
     // ==================== POST /api/temporal-homes/request ====================
 
     @Test

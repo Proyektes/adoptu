@@ -18,6 +18,7 @@ import com.adoptu.frontend.pages.ResetPasswordPageModule
 import com.adoptu.frontend.pages.SheltersPageModule
 import com.adoptu.frontend.pages.SterilizationLocationsPageModule
 import com.adoptu.frontend.pages.TemporalHomeBlockPageModule
+import com.adoptu.frontend.pages.TemporalHomeDetailPageModule
 import com.adoptu.frontend.pages.TemporalHomeProfilePageModule
 import com.adoptu.frontend.pages.TemporalHomeSearchPageModule
 import kotlinx.browser.window
@@ -51,6 +52,7 @@ fun main() {
                     path == "/temporal-homes" || path == "/temporal-homes/" -> TemporalHomeSearchPageModule.init()
                     path == "/temporal-home" || path == "/temporal-home/" -> TemporalHomeProfilePageModule.init()
                     path.startsWith("/temporal-home/block/") -> TemporalHomeBlockPageModule.init()
+                    path.startsWith("/temporal-home/") -> TemporalHomeDetailPageModule.init()
                     path == "/photographers" || path == "/photographers/" -> PhotographersPageModule.init()
                     path == "/sterilization-locations" || path == "/sterilization-locations/" -> SterilizationLocationsPageModule.init()
                     path == "/admin/sterilization-locations" || path == "/admin/sterilization-locations/" -> AdminSterilizationLocationsPageModule.init()

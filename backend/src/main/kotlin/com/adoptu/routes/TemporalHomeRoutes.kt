@@ -133,6 +133,21 @@ fun Route.temporalHomeRoutes() {
             call.respond(results)
         }
 
+        get("/{id}") {
+            val temporalHomeIdResult = validationService.validateTemporalHomeId(call.parameters["id"])
+            if (temporalHomeIdResult is ServiceResult.Error) {
+                return@get call.respondError(temporalHomeIdResult.message, 400)
+            }
+            val temporalHomeId = (temporalHomeIdResult as ServiceResult.Success).data
+
+            val temporalHome = temporalHomeService.getTemporalHome(temporalHomeId)
+            if (temporalHome == null) {
+                return@get call.respondNotFound()
+            }
+            call.response.header(HttpHeaders.CacheControl, "public, max-age=30")
+            call.respond(temporalHome)
+        }
+
         post("/request") {
             val sessionResult = validationService.validateSession(call.sessions.get<SessionUser>())
             if (sessionResult is ServiceResult.Forbidden) {

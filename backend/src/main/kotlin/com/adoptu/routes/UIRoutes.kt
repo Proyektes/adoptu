@@ -116,12 +116,19 @@ fun Route.uiRoutes() {
         val navParams = getNavParams(session)
         call.respondHtml(HttpStatusCode.OK) { temporalHomeProfilePage(navParams) } 
     }
-    get("/temporal-homes") { 
+    get("/temporal-homes") {
         val session: SessionUser? = call.sessions.get()
         val navParams = getNavParams(session)
-        call.respondHtml(HttpStatusCode.OK) { temporalHomesSearchPage(navParams) } 
+        call.respondHtml(HttpStatusCode.OK) { temporalHomesSearchPage(navParams) }
     }
-    get("/shelters") { 
+    get("/temporal-home/{id}") {
+        val id = call.parameters["id"]?.toIntOrNull()
+        if (id == null) return@get call.respondRedirect("/temporal-homes")
+        val session: SessionUser? = call.sessions.get()
+        val navParams = getNavParams(session)
+        call.respondHtml(HttpStatusCode.OK) { temporalHomeDetailPage(navParams) }
+    }
+    get("/shelters") {
         val session: SessionUser? = call.sessions.get()
         val navParams = getNavParams(session)
         call.respondHtml(HttpStatusCode.OK) { sheltersPage(navParams) } 
