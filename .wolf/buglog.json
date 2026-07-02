@@ -96,6 +96,23 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-02T03:16:51.741Z"
+    },
+    {
+      "id": "bug-007",
+      "timestamp": "2026-07-02T15:50:00.000Z",
+      "error_message": "Photographers page UI shows raw i18n keys (e.g. \"requestPhotoSession\", \"pleaseSelectCountry\") instead of translated text, in every language",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt",
+      "root_cause": "PhotographersPage.kt calls I18n.t() with 9 keys — pleaseSelectCountry, errorLoadingPhotographers, noPhotographersAvailable, requestPhotoSession, message, sendRequest, requestSentSuccessfully, requestTo, enterMessage — that were never added to I18n.kt for any of the 5 language blocks (en/es/fr/pt/zh). I18n.t() falls back to returning the raw key string when a translation is missing, so this was invisible until someone viewed the photographers search/request-modal UI.",
+      "fix": "Added all 9 keys with translated values to englishTranslations, spanishTranslations, frenchTranslations, portugueseTranslations, and chineseTranslations in I18n.kt, then rebuilt with ./gradlew :frontend:jsBrowserProductionWebpack to regenerate backend/src/main/resources/static/js/common.js.",
+      "tags": [
+        "i18n",
+        "photographers",
+        "missing-translation",
+        "kotlin-js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T15:50:00.000Z"
     }
   ]
 }
