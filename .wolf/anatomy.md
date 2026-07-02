@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-02T05:12:13.321Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-02T05:19:54.372Z
 > Files: 832 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
@@ -427,7 +427,7 @@
 ## .claude/worktrees/country-detect/backend/src/main/resources/static/js/
 
 - `api.js` — Declares api (~2546 tok)
-- `index.js` — emoji: updateCountryHint, loadPets, initCountry (~1192 tok)
+- `index.js` — emoji: updateCountryHint, showEmptyState, hideEmptyState + 6 more (~1997 tok)
 
 ## .claude/worktrees/country-detect/infra/
 
