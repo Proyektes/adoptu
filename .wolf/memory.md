@@ -1675,3 +1675,16 @@
 | 17:38 | Edited .gitignore | 2→5 lines | ~43 |
 | 17:38 | Session end: 93 writes across 53 files (anatomy.md, buglog.json, 20260703T211336Z_graalvm-native-home-retest.txt, 20260703T211336Z_graalvm-native-pets-retest.txt, cerebrum.md) | 83 reads | ~311699 tok |
 | 17:39 | Session end: 93 writes across 53 files (anatomy.md, buglog.json, 20260703T211336Z_graalvm-native-home-retest.txt, 20260703T211336Z_graalvm-native-pets-retest.txt, cerebrum.md) | 83 reads | ~311699 tok |
+
+## Session: 2026-07-03 15:38 (worktree-helidon-nima-migration)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:38 | Scoped full Ktor→Helidon Níma+Jackson backend migration; created worktree-helidon-nima-migration off latest adoptu | build.gradle.kts, config/AppConfig.kt, web/*.kt (6 files), Application.kt | Helidon 4.5.0 + Jackson deps added, Ktor deps removed, config/session/response/request/html/logging glue layer written | ~15000 |
+| 16:00 | Hand-ported UIRoutes.kt and AuthRoutes.kt as exemplars; delegated remaining 8 route files to parallel agents | routes/*.kt (10 files) | All 10 route files ported Ktor Route DSL → Helidon HttpRules; live server smoke-tested against real Postgres | ~40000 |
+| 16:15 | Stripped kotlinx.serialization annotations from all DTOs (hard blocker once kotlinx.serialization removed from build) | dto/input/*.kt, dto/output/AuthResponses.kt, SessionUser.kt, WebAuthnService.kt | Clean compile of main source set | ~2000 |
+| 16:20 | Built testsupport/TestServer.kt + TestHttp.kt harness; validated with RoutingTest.kt end-to-end before delegating remaining 16 test files to 12 parallel agents | testsupport/*.kt, 20+ test files | All 17+ Ktor testApplication-based test files ported | ~180000 |
+| 16:50 | Fixed 2 systemic bugs found via full test run (233→19→1→0 failures): Koin/AppConfig cascading failure (bug-035), Jackson pretty-printer format mismatches (bug-036), empty-body receiveText() (bug-037), NotFoundException swallowed by catch-all (bug-038) | TestServer.kt, JsonSupport.kt, RequestExtensions.kt, Application.kt | ./gradlew :backend:test: 1084/1084 passing | ~30000 |
+| 17:00 | Verified shadowJar builds and runs correctly end-to-end (curl against live process) against real Postgres; confirmed Dockerfile needs no changes (jdeps re-derives modules dynamically) | (verification only) | Production packaging validated | ~3000 |
+| 17:05 | Updated .wolf bookkeeping (fixed pre-existing buglog.json JSON corruption again, added bug-035..038, cerebrum.md Key Learnings + Decision Log, anatomy.md) | .wolf/buglog.json, cerebrum.md, anatomy.md, memory.md | Session documented | ~8000 |
+| 17:45 | Edited .gitignore | 7→4 lines | ~23 |

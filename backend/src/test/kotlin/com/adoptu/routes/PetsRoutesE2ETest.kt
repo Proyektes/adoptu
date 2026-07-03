@@ -15,47 +15,31 @@ import com.adoptu.dto.input.PetDto
 import com.adoptu.dto.input.PetImageDto
 import com.adoptu.dto.input.Status
 import com.adoptu.dto.input.UpdatePetRequest
-import com.adoptu.dto.input.UserRole
 import com.adoptu.mocks.MockImageStorage
 import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestDatabase
-import com.adoptu.plugins.configureSerialization
-import com.adoptu.plugins.configureSessions
 import com.adoptu.ports.ImageStoragePort
 import com.adoptu.ports.PetRepositoryPort
 import com.adoptu.services.PetService
 import com.adoptu.services.ServiceResult
-import com.adoptu.services.auth.SessionUser
 import com.adoptu.services.auth.WebAuthnService
-import io.ktor.client.HttpClient
-import io.ktor.client.request.*
-import io.ktor.client.request.forms.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.config.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
-import io.ktor.server.testing.*
+import com.adoptu.testsupport.TestHttp
+import com.adoptu.testsupport.TestServer
+import com.adoptu.testsupport.buildMultipartBody
+import com.adoptu.web.JsonSupport
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
-import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.koin.dsl.module
-import org.koin.ktor.plugin.Koin
 import java.math.BigDecimal
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -115,57 +99,35 @@ class PetsRoutesE2ETest {
         }
     }
 
-    private fun TestApplicationBuilder.setupApp() {
-        val config = MapApplicationConfig(
-            "env" to "test",
-            "ktor.deployment.port" to "80"
-        )
-
-        val testModules = module {
-            single<ApplicationConfig> { config }
-            single<kotlin.time.Clock> { kotlin.time.Clock.System }
-            single { WebAuthnService(get(), get(), get(), get(), get(), config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com", config.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost", config.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption", listOf(config.propertyOrNull("webauthn.origin")?.getString() ?: "http://localhost:80")) }
-            single<ImageStoragePort> { MockImageStorage() }
-            single { MockNotificationAdapter() }
-            single<com.adoptu.ports.NotificationPort> { get<MockNotificationAdapter>() }
-            single<PetRepositoryPort> { PetRepositoryImpl(get()) }
-            single<com.adoptu.ports.UserRepositoryPort> { UserRepository(get()) }
-            single<com.adoptu.ports.PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
-            single { com.adoptu.services.PhotographerService(get(), get(), get(), get()) }
-            single { com.adoptu.services.UserService(get()) }
-            single { PetService(get(), get(), get(), get()) }
-            single { com.adoptu.services.validation.PetsValidationService() }
-        }
-
-        environment {
-            this.config = config
-        }
-
-        application {
-            install(Koin) {
-                modules(testModules)
-            }
-            configureSerialization()
-            configureSessions()
-            routing {
-                petsRoutes()
-                // Test-only helper to establish a real, correctly-signed session cookie
-                // without re-implementing the production login flow.
-                post("/test/login/{userId}") {
-                    val userId = call.parameters["userId"]!!.toInt()
-                    call.sessions.set(SessionUser(userId, "user$userId@test.com", "Test User $userId"))
-                    call.respondText("OK")
+    private fun startTestServer() = TestServer.start(
+        modules = listOf(
+            module {
+                single { com.adoptu.config.AppConfig.fromMap(mapOf("admin.email" to "admin@adopt-u.com")) }
+                single<Clock> { Clock.System }
+                single {
+                    WebAuthnService(
+                        get(), get(), get(), get(), get(),
+                        "admin@adopt-u.com",
+                        "localhost",
+                        "Adopt-U Pet Adoption",
+                        listOf("http://localhost:80")
+                    )
                 }
+                single<ImageStoragePort> { MockImageStorage() }
+                single { MockNotificationAdapter() }
+                single<com.adoptu.ports.NotificationPort> { get<MockNotificationAdapter>() }
+                single<PetRepositoryPort> { PetRepositoryImpl(get()) }
+                single<com.adoptu.ports.UserRepositoryPort> { UserRepository(get()) }
+                single<com.adoptu.ports.PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
+                single { com.adoptu.services.PhotographerService(get(), get(), get(), get()) }
+                single { com.adoptu.services.UserService(get()) }
+                single { PetService(get(), get(), get(), get()) }
+                single { com.adoptu.services.validation.PetsValidationService() }
             }
-        }
-    }
-
-    private suspend fun HttpClient.loginAs(userId: Int): String {
-        val response = post("/test/login/$userId")
-        val setCookie = response.headers[HttpHeaders.SetCookie]
-            ?: error("No session cookie returned from test login")
-        return setCookie.substringBefore(";")
-    }
+        ),
+        initDatabase = false,
+        withTestLogin = true
+    )
 
     private fun generateTestImageBytes(): ByteArray {
         val image = java.awt.image.BufferedImage(10, 10, java.awt.image.BufferedImage.TYPE_INT_RGB)
@@ -191,31 +153,37 @@ class PetsRoutesE2ETest {
     fun `GET pets returns empty list when no pets`() {
         TestDatabase.clearAllData()
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/pets?country=United%20States")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/pets?country=United%20States")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body == "[]" || !body.contains("id"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET pets returns 400 when country is missing`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/pets")
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("Country is required"))
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/pets")
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Country is required"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET pets returns 400 when country is blank`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/pets?country=")
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/pets?country=")
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -224,12 +192,14 @@ class PetsRoutesE2ETest {
         createPetInDb("Buddy", "DOG")
         createPetInDb("Whiskers", "CAT")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/pets?country=United%20States")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/pets?country=United%20States")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Buddy") || body.contains("Whiskers"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -238,13 +208,15 @@ class PetsRoutesE2ETest {
         createPetInDb("Buddy", "DOG", country = "United States")
         createPetInDb("Milo", "DOG", country = "Canada")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/pets?country=United%20States")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/pets?country=United%20States")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Buddy"))
             assertTrue(!body.contains("Milo"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -253,14 +225,15 @@ class PetsRoutesE2ETest {
         createPetInDb("Buddy", "DOG")
         createPetInDb("Max", "DOG")
 
-        testApplication {
-            setupApp()
-
-            val dogsResponse = client.get("/api/pets?type=DOG&country=United%20States")
-            assertEquals(HttpStatusCode.OK, dogsResponse.status)
-            val body = dogsResponse.bodyAsText()
+        val handle = startTestServer()
+        try {
+            val dogsResponse = TestHttp.get("${handle.baseUrl}/api/pets?type=DOG&country=United%20States")
+            assertEquals(200, dogsResponse.statusCode())
+            val body = dogsResponse.body()
             assertTrue(body.contains("Buddy"))
             assertTrue(body.contains("Max"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -269,13 +242,15 @@ class PetsRoutesE2ETest {
         createPetInDb("Buddy", "DOG", status = "ADOPTED")
         createPetInDb("Whiskers", "CAT")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/pets?country=United%20States")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/pets?country=United%20States")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Whiskers"))
             assertTrue(!body.contains("Buddy") || body.indexOf("Buddy") > body.indexOf("Whiskers"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -283,23 +258,25 @@ class PetsRoutesE2ETest {
 
     @Test
     fun `GET pets mine returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/pets/mine")
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/mine")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET pets mine returns 403 for adopter role`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2) // adopter
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter
 
-            val response = client.get("/api/pets/mine") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.Forbidden, response.status)
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/mine", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -308,17 +285,17 @@ class PetsRoutesE2ETest {
         createPetInDb("NoCountryPet", "DOG", country = null)
         createPetInDb("AdoptedPet", "DOG", status = "ADOPTED", country = "Canada")
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1) // rescuer/owner
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer/owner
 
-            val response = client.get("/api/pets/mine") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/mine", cookie)
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("NoCountryPet"))
             assertTrue(body.contains("AdoptedPet"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -326,10 +303,12 @@ class PetsRoutesE2ETest {
 
     @Test
     fun `GET pet by id returns 404 for non-existent pet`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/pets/999")
-            assertEquals(HttpStatusCode.NotFound, response.status)
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/999")
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -337,22 +316,26 @@ class PetsRoutesE2ETest {
     fun `GET pet by id returns pet when exists`() {
         val petId = createPetInDb("Buddy", "DOG")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/pets/$petId")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/$petId")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Buddy"))
             assertTrue(body.contains("DOG"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET pet by id returns 400 for invalid id`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/pets/abc")
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/abc")
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -360,13 +343,15 @@ class PetsRoutesE2ETest {
     fun `GET pet by id returns pet even if adopted`() {
         val petId = createPetInDb("Buddy", "DOG", status = "ADOPTED")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/pets/$petId")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/$petId")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Buddy"))
             assertTrue(body.contains("ADOPTED"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -374,15 +359,15 @@ class PetsRoutesE2ETest {
 
     @Test
     fun `POST pets returns 401 when no session`() {
-        testApplication {
-            setupApp()
-
-            val response = client.post("/api/pets") {
-                contentType(ContentType.Application.Json)
-                setBody("""{"name":"Test","type":"DOG"}""")
-            }
-
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/pets",
+                """{"name":"Test","type":"DOG"}"""
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -392,15 +377,15 @@ class PetsRoutesE2ETest {
     fun `PUT pets returns 401 when no session`() {
         val petId = createPetInDb("Buddy", "DOG")
 
-        testApplication {
-            setupApp()
-
-            val response = client.put("/api/pets/$petId") {
-                contentType(ContentType.Application.Json)
-                setBody("""{"name":"Updated"}""")
-            }
-
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/pets/$petId",
+                """{"name":"Updated"}"""
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -410,12 +395,13 @@ class PetsRoutesE2ETest {
     fun `DELETE pets returns 401 when no session`() {
         val petId = createPetInDb("Buddy", "DOG")
 
-        testApplication {
-            setupApp()
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/$petId")
 
-            val response = client.delete("/api/pets/$petId")
-
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -425,15 +411,16 @@ class PetsRoutesE2ETest {
     fun `POST adopt returns 401 when no session`() {
         val petId = createPetInDb("Buddy", "DOG")
 
-        testApplication {
-            setupApp()
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/pets/$petId/adopt",
+                """{"message":"I want to adopt"}"""
+            )
 
-            val response = client.post("/api/pets/$petId/adopt") {
-                contentType(ContentType.Application.Json)
-                setBody("""{"message":"I want to adopt"}""")
-            }
-
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -443,12 +430,13 @@ class PetsRoutesE2ETest {
     fun `POST pets images returns 401 when no session`() {
         val petId = createPetInDb("Buddy", "DOG")
 
-        testApplication {
-            setupApp()
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.post("${handle.baseUrl}/api/pets/$petId/images")
 
-            val response = client.post("/api/pets/$petId/images")
-
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -458,14 +446,16 @@ class PetsRoutesE2ETest {
     fun `GET pets returns pets with correct fields`() {
         createPetInDb("Buddy", "DOG", breed = "Golden Retriever")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/pets?country=United%20States")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/pets?country=United%20States")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Buddy"))
             assertTrue(body.contains("Golden Retriever"))
             assertTrue(body.contains("DOG"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -473,10 +463,12 @@ class PetsRoutesE2ETest {
     fun `GET pets handles case insensitive type filter`() {
         createPetInDb("Buddy", "DOG")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/pets?type=dog&country=United%20States")
-            assertEquals(HttpStatusCode.OK, response.status)
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/pets?type=dog&country=United%20States")
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -484,13 +476,15 @@ class PetsRoutesE2ETest {
     fun `GET pet by id returns correct pet details`() {
         val petId = createPetInDb("Buddy", "DOG", description = "A lovely dog", weight = 25.5)
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/pets/$petId")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/$petId")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Buddy"))
             assertTrue(body.contains("25.5"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -498,12 +492,14 @@ class PetsRoutesE2ETest {
     fun `GET pet by id includes rescuer info`() {
         val petId = createPetInDb("Buddy", "DOG")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/pets/$petId")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/$petId")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("rescuerId") || body.contains("1"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -513,12 +509,13 @@ class PetsRoutesE2ETest {
     fun `DELETE pets images returns 401 when no session`() {
         val petId = createPetInDb("Buddy", "DOG")
 
-        testApplication {
-            setupApp()
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/$petId/images/1")
 
-            val response = client.delete("/api/pets/$petId/images/1")
-
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -529,7 +526,7 @@ class PetsRoutesE2ETest {
         val mockRepository = mockk<PetRepositoryPort>(relaxed = true)
         val mockImageStorage = mockk<ImageStoragePort>(relaxed = true)
         val petService = PetService(mockRepository, mockImageStorage, mockk(relaxed = true), mockk(relaxed = true))
-        
+
         coEvery { mockRepository.getById(1) } returns createMockPetDto(1, rescuerId = 1)
         coEvery { mockRepository.addImage(1, "https://test.com/new.jpg", false) } returns createMockPetImage()
 
@@ -549,7 +546,7 @@ class PetsRoutesE2ETest {
         val mockRepository = mockk<PetRepositoryPort>(relaxed = true)
         val mockImageStorage = mockk<ImageStoragePort>(relaxed = true)
         val petService = PetService(mockRepository, mockImageStorage, mockk(relaxed = true), mockk(relaxed = true))
-        
+
         coEvery { mockRepository.getById(1) } returns createMockPetDto(1, rescuerId = 99)
         coEvery { mockRepository.addImage(1, "test.jpg", false) } returns createMockPetImage()
 
@@ -569,7 +566,7 @@ class PetsRoutesE2ETest {
         val mockRepository = mockk<PetRepositoryPort>(relaxed = true)
         val mockImageStorage = mockk<ImageStoragePort>(relaxed = true)
         val petService = PetService(mockRepository, mockImageStorage, mockk(relaxed = true), mockk(relaxed = true))
-        
+
         coEvery { mockRepository.getById(999) } returns null
 
         val result = petService.addImage(
@@ -588,7 +585,7 @@ class PetsRoutesE2ETest {
         val mockRepository = mockk<PetRepositoryPort>(relaxed = true)
         val mockImageStorage = mockk<ImageStoragePort>(relaxed = true)
         val petService = PetService(mockRepository, mockImageStorage, mockk(relaxed = true), mockk(relaxed = true))
-        
+
         coEvery { mockRepository.getById(1) } returns createMockPetDto(1, rescuerId = 99)
 
         val result = petService.addImage(
@@ -609,7 +606,7 @@ class PetsRoutesE2ETest {
         val mockRepository = mockk<PetRepositoryPort>(relaxed = true)
         val mockImageStorage = mockk<ImageStoragePort>(relaxed = true)
         val petService = PetService(mockRepository, mockImageStorage, mockk(relaxed = true), mockk(relaxed = true))
-        
+
         coEvery { mockRepository.getById(1) } returns createMockPetDto(1, rescuerId = 1)
         coEvery { mockRepository.getImages(1) } returns listOf(createMockPetImage(10))
         coEvery { mockRepository.removeImage(1, 10) } returns true
@@ -630,7 +627,7 @@ class PetsRoutesE2ETest {
         val mockRepository = mockk<PetRepositoryPort>(relaxed = true)
         val mockImageStorage = mockk<ImageStoragePort>(relaxed = true)
         val petService = PetService(mockRepository, mockImageStorage, mockk(relaxed = true), mockk(relaxed = true))
-        
+
         coEvery { mockRepository.getById(1) } returns createMockPetDto(1, rescuerId = 99)
         coEvery { mockRepository.getImages(1) } returns listOf(createMockPetImage(10))
         coEvery { mockRepository.removeImage(1, 10) } returns true
@@ -650,7 +647,7 @@ class PetsRoutesE2ETest {
         val mockRepository = mockk<PetRepositoryPort>(relaxed = true)
         val mockImageStorage = mockk<ImageStoragePort>(relaxed = true)
         val petService = PetService(mockRepository, mockImageStorage, mockk(relaxed = true), mockk(relaxed = true))
-        
+
         coEvery { mockRepository.getById(999) } returns null
 
         val result = petService.removeImage(
@@ -668,7 +665,7 @@ class PetsRoutesE2ETest {
         val mockRepository = mockk<PetRepositoryPort>(relaxed = true)
         val mockImageStorage = mockk<ImageStoragePort>(relaxed = true)
         val petService = PetService(mockRepository, mockImageStorage, mockk(relaxed = true), mockk(relaxed = true))
-        
+
         coEvery { mockRepository.getById(1) } returns createMockPetDto(1, rescuerId = 1)
         coEvery { mockRepository.getImages(1) } returns emptyList()
 
@@ -687,7 +684,7 @@ class PetsRoutesE2ETest {
         val mockRepository = mockk<PetRepositoryPort>(relaxed = true)
         val mockImageStorage = mockk<ImageStoragePort>(relaxed = true)
         val petService = PetService(mockRepository, mockImageStorage, mockk(relaxed = true), mockk(relaxed = true))
-        
+
         coEvery { mockRepository.getById(1) } returns createMockPetDto(1, rescuerId = 99)
 
         val result = petService.removeImage(
@@ -705,7 +702,7 @@ class PetsRoutesE2ETest {
         val mockRepository = mockk<PetRepositoryPort>(relaxed = true)
         val mockImageStorage = mockk<ImageStoragePort>(relaxed = true)
         val petService = PetService(mockRepository, mockImageStorage, mockk(relaxed = true), mockk(relaxed = true))
-        
+
         coEvery { mockRepository.getById(1) } returns createMockPetDto(1, rescuerId = 99)
 
         val result = petService.removeImage(
@@ -722,79 +719,89 @@ class PetsRoutesE2ETest {
 
     @Test
     fun `POST pets returns 403 for adopter role`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2) // adopter
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter
 
-            val response = client.post("/api/pets") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreatePetRequest(name = "Test", type = "DOG")))
-            }
-            assertEquals(HttpStatusCode.Forbidden, response.status)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/pets",
+                JsonSupport.objectMapper.writeValueAsString(CreatePetRequest(name = "Test", type = "DOG")),
+                cookie
+            )
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST pets returns 404 when session user does not exist`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(9999)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
 
-            val response = client.post("/api/pets") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreatePetRequest(name = "Test", type = "DOG")))
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/pets",
+                JsonSupport.objectMapper.writeValueAsString(CreatePetRequest(name = "Test", type = "DOG")),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST pets succeeds for rescuer`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1) // rescuer
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer
 
-            val response = client.post("/api/pets") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreatePetRequest(name = "Rover", type = "DOG", country = "United States")))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("Rover"))
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/pets",
+                JsonSupport.objectMapper.writeValueAsString(CreatePetRequest(name = "Rover", type = "DOG", country = "United States")),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("Rover"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST pets succeeds for admin`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(3) // admin
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
 
-            val response = client.post("/api/pets") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreatePetRequest(name = "AdminPet", type = "CAT", country = "United States")))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("AdminPet"))
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/pets",
+                JsonSupport.objectMapper.writeValueAsString(CreatePetRequest(name = "AdminPet", type = "CAT", country = "United States")),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("AdminPet"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST pets returns 400 when no country provided and rescuer profile has no country`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1) // rescuer, no profile country set
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer, no profile country set
 
-            val response = client.post("/api/pets") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreatePetRequest(name = "NoCountry", type = "DOG")))
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("Country is required"))
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/pets",
+                JsonSupport.objectMapper.writeValueAsString(CreatePetRequest(name = "NoCountry", type = "DOG")),
+                cookie
+            )
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Country is required"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -806,17 +813,19 @@ class PetsRoutesE2ETest {
             }
         }
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1) // rescuer with profile country set
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer with profile country set
 
-            val response = client.post("/api/pets") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreatePetRequest(name = "DefaultedCountryPet", type = "DOG")))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("Canada"))
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/pets",
+                JsonSupport.objectMapper.writeValueAsString(CreatePetRequest(name = "DefaultedCountryPet", type = "DOG")),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("Canada"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -825,96 +834,108 @@ class PetsRoutesE2ETest {
     @Test
     fun `PUT pets returns 404 when session user does not exist`() {
         val petId = createPetInDb("Buddy", "DOG")
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(9999)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
 
-            val response = client.put("/api/pets/$petId") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdatePetRequest(name = "Updated")))
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/pets/$petId",
+                JsonSupport.objectMapper.writeValueAsString(UpdatePetRequest(name = "Updated")),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT pets returns 400 for invalid id`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.put("/api/pets/abc") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdatePetRequest(name = "Updated")))
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/pets/abc",
+                JsonSupport.objectMapper.writeValueAsString(UpdatePetRequest(name = "Updated")),
+                cookie
+            )
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT pets returns 404 when pet does not exist`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.put("/api/pets/9999") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdatePetRequest(name = "Updated")))
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/pets/9999",
+                JsonSupport.objectMapper.writeValueAsString(UpdatePetRequest(name = "Updated")),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT pets returns 403 for non-owner`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2) // adopter, not the owner
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter, not the owner
 
-            val response = client.put("/api/pets/$petId") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdatePetRequest(name = "Updated")))
-            }
-            assertEquals(HttpStatusCode.Forbidden, response.status)
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/pets/$petId",
+                JsonSupport.objectMapper.writeValueAsString(UpdatePetRequest(name = "Updated")),
+                cookie
+            )
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT pets succeeds for owner`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.put("/api/pets/$petId") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdatePetRequest(name = "UpdatedName")))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("UpdatedName"))
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/pets/$petId",
+                JsonSupport.objectMapper.writeValueAsString(UpdatePetRequest(name = "UpdatedName")),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("UpdatedName"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT pets succeeds for admin on someone else's pet`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(3) // admin
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
 
-            val response = client.put("/api/pets/$petId") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdatePetRequest(name = "AdminUpdated")))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("AdminUpdated"))
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/pets/$petId",
+                JsonSupport.objectMapper.writeValueAsString(UpdatePetRequest(name = "AdminUpdated")),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("AdminUpdated"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -923,82 +944,82 @@ class PetsRoutesE2ETest {
     @Test
     fun `DELETE pets returns 404 when session user does not exist`() {
         val petId = createPetInDb("Buddy", "DOG")
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(9999)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
 
-            val response = client.delete("/api/pets/$petId") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/$petId", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `DELETE pets returns 400 for invalid id`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.delete("/api/pets/abc") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/abc", cookie)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `DELETE pets returns 404 when pet does not exist`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.delete("/api/pets/9999") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/9999", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `DELETE pets returns 403 for non-owner`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
 
-            val response = client.delete("/api/pets/$petId") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.Forbidden, response.status)
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/$petId", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `DELETE pets succeeds for owner`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.delete("/api/pets/$petId") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/$petId", cookie)
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `DELETE pets succeeds for admin on someone else's pet`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(3)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3)
 
-            val response = client.delete("/api/pets/$petId") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/$petId", cookie)
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1007,179 +1028,169 @@ class PetsRoutesE2ETest {
     @Test
     fun `POST pets images returns 404 when session user does not exist`() {
         val petId = createPetInDb("Buddy", "DOG")
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(9999)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
 
-            val response = client.post("/api/pets/$petId/images") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = TestHttp.post("${handle.baseUrl}/api/pets/$petId/images", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST pets images returns 400 for invalid id`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.post("/api/pets/abc/images") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            val response = TestHttp.post("${handle.baseUrl}/api/pets/abc/images", cookie)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST pets images via imageIds param returns 404 for non-existent pet`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.post("/api/pets/9999/images?imageIds=1,2") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = TestHttp.post("${handle.baseUrl}/api/pets/9999/images?imageIds=1,2", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST pets images via imageIds param returns 403 for non-owner`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
 
-            val response = client.post("/api/pets/$petId/images?imageIds=1,2") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.Forbidden, response.status)
+            val response = TestHttp.post("${handle.baseUrl}/api/pets/$petId/images?imageIds=1,2", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST pets images via imageIds param succeeds for owner`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.post("/api/pets/$petId/images?imageIds=1,2") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("images"))
+            val response = TestHttp.post("${handle.baseUrl}/api/pets/$petId/images?imageIds=1,2", cookie)
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("images"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST pets images multipart returns 400 when no file provided`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.submitFormWithBinaryData(
-                url = "/api/pets/$petId/images",
-                formData = formData {
-                    append("isPrimary", "false")
-                }
-            ) {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("No storage provided"))
+            val boundary = "----TestBoundary${System.nanoTime()}"
+            val body = buildMultipartBody(boundary, fields = mapOf("isPrimary" to "false"))
+
+            val response = TestHttp.multipart("${handle.baseUrl}/api/pets/$petId/images", boundary, body, cookie)
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("No storage provided"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST pets images multipart returns 404 when pet does not exist`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.submitFormWithBinaryData(
-                url = "/api/pets/9999/images",
-                formData = formData {
-                    append("file", generateTestImageBytes(), Headers.build {
-                        append(HttpHeaders.ContentType, "image/jpeg")
-                        append(HttpHeaders.ContentDisposition, "filename=\"test.jpg\"")
-                    })
-                }
-            ) {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val boundary = "----TestBoundary${System.nanoTime()}"
+            val body = buildMultipartBody(
+                boundary,
+                files = mapOf("file" to Triple("test.jpg", "image/jpeg", generateTestImageBytes()))
+            )
+
+            val response = TestHttp.multipart("${handle.baseUrl}/api/pets/9999/images", boundary, body, cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST pets images multipart returns 403 for non-owner`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
 
-            val response = client.submitFormWithBinaryData(
-                url = "/api/pets/$petId/images",
-                formData = formData {
-                    append("file", generateTestImageBytes(), Headers.build {
-                        append(HttpHeaders.ContentType, "image/jpeg")
-                        append(HttpHeaders.ContentDisposition, "filename=\"test.jpg\"")
-                    })
-                }
-            ) {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.Forbidden, response.status)
+            val boundary = "----TestBoundary${System.nanoTime()}"
+            val body = buildMultipartBody(
+                boundary,
+                files = mapOf("file" to Triple("test.jpg", "image/jpeg", generateTestImageBytes()))
+            )
+
+            val response = TestHttp.multipart("${handle.baseUrl}/api/pets/$petId/images", boundary, body, cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST pets images multipart succeeds with valid image for owner`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.submitFormWithBinaryData(
-                url = "/api/pets/$petId/images",
-                formData = formData {
-                    append("file", generateTestImageBytes(), Headers.build {
-                        append(HttpHeaders.ContentType, "image/jpeg")
-                        append(HttpHeaders.ContentDisposition, "filename=\"test.jpg\"")
-                    })
-                    append("isPrimary", "true")
-                }
-            ) {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("mock-storage"))
+            val boundary = "----TestBoundary${System.nanoTime()}"
+            val body = buildMultipartBody(
+                boundary,
+                fields = mapOf("isPrimary" to "true"),
+                files = mapOf("file" to Triple("test.jpg", "image/jpeg", generateTestImageBytes()))
+            )
+
+            val response = TestHttp.multipart("${handle.baseUrl}/api/pets/$petId/images", boundary, body, cookie)
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("mock-storage"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST pets images multipart returns 500 for unparseable image data`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.submitFormWithBinaryData(
-                url = "/api/pets/$petId/images",
-                formData = formData {
-                    append("file", "not-a-real-image".toByteArray(), Headers.build {
-                        append(HttpHeaders.ContentType, "image/jpeg")
-                        append(HttpHeaders.ContentDisposition, "filename=\"test.jpg\"")
-                    })
-                }
-            ) {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.InternalServerError, response.status)
-            assertTrue(response.bodyAsText().contains("Failed to upload storage"))
+            val boundary = "----TestBoundary${System.nanoTime()}"
+            val body = buildMultipartBody(
+                boundary,
+                files = mapOf("file" to Triple("test.jpg", "image/jpeg", "not-a-real-image".toByteArray()))
+            )
+
+            val response = TestHttp.multipart("${handle.baseUrl}/api/pets/$petId/images", boundary, body, cookie)
+            assertEquals(500, response.statusCode())
+            assertTrue(response.body().contains("Failed to upload storage"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1188,70 +1199,70 @@ class PetsRoutesE2ETest {
     @Test
     fun `DELETE pets images returns 404 when session user does not exist`() {
         val petId = createPetInDb("Buddy", "DOG")
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(9999)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
 
-            val response = client.delete("/api/pets/$petId/images/1") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/$petId/images/1", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `DELETE pets images returns error for invalid pet id`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.delete("/api/pets/abc/images/1") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("Invalid pet ID"))
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/abc/images/1", cookie)
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Invalid pet ID"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `DELETE pets images returns error for invalid image id`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.delete("/api/pets/$petId/images/abc") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("Invalid storage ID"))
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/$petId/images/abc", cookie)
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Invalid storage ID"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `DELETE pets images returns 404 when pet does not exist`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.delete("/api/pets/9999/images/1") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/9999/images/1", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `DELETE pets images returns 404 when image does not exist`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.delete("/api/pets/$petId/images/9999") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/$petId/images/9999", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1259,14 +1270,14 @@ class PetsRoutesE2ETest {
     fun `DELETE pets images returns 403 for non-owner`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
         val imageId = createImageInDb(petId)
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
 
-            val response = client.delete("/api/pets/$petId/images/$imageId") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.Forbidden, response.status)
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/$petId/images/$imageId", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1274,14 +1285,14 @@ class PetsRoutesE2ETest {
     fun `DELETE pets images succeeds for owner`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
         val imageId = createImageInDb(petId)
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.delete("/api/pets/$petId/images/$imageId") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/$petId/images/$imageId", cookie)
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1290,65 +1301,73 @@ class PetsRoutesE2ETest {
     @Test
     fun `POST adopt returns 404 when session user does not exist`() {
         val petId = createPetInDb("Buddy", "DOG")
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(9999)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
 
-            val response = client.post("/api/pets/$petId/adopt") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateAdoptionRequestRequest("I want to adopt")))
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/pets/$petId/adopt",
+                JsonSupport.objectMapper.writeValueAsString(CreateAdoptionRequestRequest("I want to adopt")),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST adopt returns 403 for non-adopter role`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1) // rescuer, not an adopter
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer, not an adopter
 
-            val response = client.post("/api/pets/$petId/adopt") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateAdoptionRequestRequest("I want to adopt")))
-            }
-            assertEquals(HttpStatusCode.Forbidden, response.status)
-            assertTrue(response.bodyAsText().contains("Only adopters can request adoption"))
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/pets/$petId/adopt",
+                JsonSupport.objectMapper.writeValueAsString(CreateAdoptionRequestRequest("I want to adopt")),
+                cookie
+            )
+            assertEquals(403, response.statusCode())
+            assertTrue(response.body().contains("Only adopters can request adoption"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST adopt returns 400 for invalid id`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2) // adopter
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter
 
-            val response = client.post("/api/pets/abc/adopt") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateAdoptionRequestRequest("I want to adopt")))
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/pets/abc/adopt",
+                JsonSupport.objectMapper.writeValueAsString(CreateAdoptionRequestRequest("I want to adopt")),
+                cookie
+            )
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST adopt succeeds for adopter`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2) // adopter
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter
 
-            val response = client.post("/api/pets/$petId/adopt") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateAdoptionRequestRequest("I want to adopt Buddy")))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("I want to adopt Buddy"))
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/pets/$petId/adopt",
+                JsonSupport.objectMapper.writeValueAsString(CreateAdoptionRequestRequest("I want to adopt Buddy")),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("I want to adopt Buddy"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1427,22 +1446,24 @@ class PetsRoutesE2ETest {
         val petId = createPetInDb("Buddy", "DOG")
         val imageId = createImageInDb(petId)
 
-        testApplication {
-            setupApp()
-            val response = client.put("/api/pets/$petId/images/$imageId/primary")
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.put("${handle.baseUrl}/api/pets/$petId/images/$imageId/primary")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT primary image returns 400 for invalid pet id`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
-            val response = client.put("/api/pets/not-a-number/images/1/primary") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.put("${handle.baseUrl}/api/pets/not-a-number/images/1/primary", cookie)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1451,14 +1472,14 @@ class PetsRoutesE2ETest {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
         val imageId = createImageInDb(petId)
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2) // adopter, not the owner
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter, not the owner
 
-            val response = client.put("/api/pets/$petId/images/$imageId/primary") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.Forbidden, response.status)
+            val response = TestHttp.put("${handle.baseUrl}/api/pets/$petId/images/$imageId/primary", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1467,14 +1488,14 @@ class PetsRoutesE2ETest {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
         val imageId = createImageInDb(petId)
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.put("/api/pets/$petId/images/$imageId/primary") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
+            val response = TestHttp.put("${handle.baseUrl}/api/pets/$petId/images/$imageId/primary", cookie)
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1483,27 +1504,27 @@ class PetsRoutesE2ETest {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
         val imageId = createImageInDb(petId)
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(3) // admin
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
 
-            val response = client.put("/api/pets/$petId/images/$imageId/primary") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
+            val response = TestHttp.put("${handle.baseUrl}/api/pets/$petId/images/$imageId/primary", cookie)
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT primary image returns 404 when pet does not exist`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.put("/api/pets/9999/images/9999/primary") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = TestHttp.put("${handle.baseUrl}/api/pets/9999/images/9999/primary", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1513,22 +1534,24 @@ class PetsRoutesE2ETest {
     fun `GET adoption-requests returns 401 when no session`() {
         val petId = createPetInDb("Buddy", "DOG")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/pets/$petId/adoption-requests")
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/$petId/adoption-requests")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET adoption-requests returns 400 for invalid id`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
-            val response = client.get("/api/pets/not-a-number/adoption-requests") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/not-a-number/adoption-requests", cookie)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1537,14 +1560,14 @@ class PetsRoutesE2ETest {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
         createAdoptionRequestInDb(petId)
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2) // adopter, not the owner
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter, not the owner
 
-            val response = client.get("/api/pets/$petId/adoption-requests") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.Forbidden, response.status)
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/$petId/adoption-requests", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1553,15 +1576,15 @@ class PetsRoutesE2ETest {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
         createAdoptionRequestInDb(petId)
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.get("/api/pets/$petId/adoption-requests") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("Please let me adopt"))
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/$petId/adoption-requests", cookie)
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("Please let me adopt"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1570,14 +1593,14 @@ class PetsRoutesE2ETest {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
         createAdoptionRequestInDb(petId)
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(3) // admin
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
 
-            val response = client.get("/api/pets/$petId/adoption-requests") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/$petId/adoption-requests", cookie)
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1585,27 +1608,24 @@ class PetsRoutesE2ETest {
 
     @Test
     fun `PUT adoption-requests returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.put("/api/pets/adoption-requests/1") {
-                contentType(ContentType.Application.FormUrlEncoded)
-                setBody("status=APPROVED")
-            }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.putForm("${handle.baseUrl}/api/pets/adoption-requests/1", "status=APPROVED")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT adoption-requests returns 400 for invalid request id`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
-            val response = client.put("/api/pets/adoption-requests/not-a-number") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.FormUrlEncoded)
-                setBody("status=APPROVED")
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.putForm("${handle.baseUrl}/api/pets/adoption-requests/not-a-number", "status=APPROVED", cookie)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1614,29 +1634,25 @@ class PetsRoutesE2ETest {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
         val requestId = createAdoptionRequestInDb(petId)
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
-            val response = client.put("/api/pets/adoption-requests/$requestId") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.FormUrlEncoded)
-                setBody("")
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.putForm("${handle.baseUrl}/api/pets/adoption-requests/$requestId", "", cookie)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT adoption-requests returns 404 for non-existent request`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
-            val response = client.put("/api/pets/adoption-requests/9999") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.FormUrlEncoded)
-                setBody("status=APPROVED")
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.putForm("${handle.baseUrl}/api/pets/adoption-requests/9999", "status=APPROVED", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1645,16 +1661,14 @@ class PetsRoutesE2ETest {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
         val requestId = createAdoptionRequestInDb(petId)
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2) // adopter, not the owner
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter, not the owner
 
-            val response = client.put("/api/pets/adoption-requests/$requestId") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.FormUrlEncoded)
-                setBody("status=APPROVED")
-            }
-            assertEquals(HttpStatusCode.Forbidden, response.status)
+            val response = TestHttp.putForm("${handle.baseUrl}/api/pets/adoption-requests/$requestId", "status=APPROVED", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1663,16 +1677,14 @@ class PetsRoutesE2ETest {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
         val requestId = createAdoptionRequestInDb(petId)
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.put("/api/pets/adoption-requests/$requestId") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.FormUrlEncoded)
-                setBody("status=NOT_A_REAL_STATUS")
-            }
-            assertEquals(HttpStatusCode.Forbidden, response.status)
+            val response = TestHttp.putForm("${handle.baseUrl}/api/pets/adoption-requests/$requestId", "status=NOT_A_REAL_STATUS", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1681,17 +1693,15 @@ class PetsRoutesE2ETest {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
         val requestId = createAdoptionRequestInDb(petId)
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.put("/api/pets/adoption-requests/$requestId") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.FormUrlEncoded)
-                setBody("status=APPROVED")
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("APPROVED"))
+            val response = TestHttp.putForm("${handle.baseUrl}/api/pets/adoption-requests/$requestId", "status=APPROVED", cookie)
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("APPROVED"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1700,17 +1710,15 @@ class PetsRoutesE2ETest {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
         val requestId = createAdoptionRequestInDb(petId)
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(3) // admin
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
 
-            val response = client.put("/api/pets/adoption-requests/$requestId") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.FormUrlEncoded)
-                setBody("status=REJECTED")
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("REJECTED"))
+            val response = TestHttp.putForm("${handle.baseUrl}/api/pets/adoption-requests/$requestId", "status=REJECTED", cookie)
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("REJECTED"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1718,10 +1726,12 @@ class PetsRoutesE2ETest {
 
     @Test
     fun `GET my-adoption-requests returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/pets/my-adoption-requests")
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/my-adoption-requests")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1730,15 +1740,15 @@ class PetsRoutesE2ETest {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
         createAdoptionRequestInDb(petId, adopterId = 2)
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2) // adopter
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter
 
-            val response = client.get("/api/pets/my-adoption-requests") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("Please let me adopt"))
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/my-adoption-requests", cookie)
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("Please let me adopt"))
+        } finally {
+            handle.stop()
         }
     }
 }

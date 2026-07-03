@@ -6,59 +6,62 @@ import com.adoptu.dto.input.PhotographerSettingsRequest
 import com.adoptu.dto.input.RoleActivationRequest
 import com.adoptu.dto.input.UpdatePhotographyRequestRequest
 import com.adoptu.dto.input.UserDto
-import com.adoptu.plugins.respondData
-import com.adoptu.plugins.respondError
-import com.adoptu.plugins.respondForbidden
-import com.adoptu.plugins.respondNotFound
-import com.adoptu.plugins.respondUnauthorized
 import com.adoptu.services.PhotographerService
 import com.adoptu.services.ServiceResult
-import com.adoptu.services.UserService
 import com.adoptu.services.validation.PhotographersValidationService
-import com.adoptu.services.auth.SessionUser
-import io.ktor.http.HttpHeaders
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
-import org.koin.ktor.ext.inject
+import com.adoptu.web.Deps
+import com.adoptu.web.getSession
+import com.adoptu.web.pathParam
+import com.adoptu.web.queryParam
+import com.adoptu.web.receiveJson
+import com.adoptu.web.respondData
+import com.adoptu.web.respondError
+import com.adoptu.web.respondForbidden
+import com.adoptu.web.respondNotFound
+import com.adoptu.web.respondUnauthorized
+import io.helidon.http.HeaderNames
+import io.helidon.webserver.http.Handler
+import io.helidon.webserver.http.HttpRules
+import io.helidon.webserver.http.ServerRequest
+import kotlinx.coroutines.runBlocking
+import org.koin.core.component.inject
 
-fun Route.photographerRoutes() {
-    val photographerService by inject<PhotographerService>()
-    val validationService by inject<PhotographersValidationService>()
+fun HttpRules.photographerRoutes() {
+    val photographerService by Deps.inject<PhotographerService>()
+    val validationService by Deps.inject<PhotographersValidationService>()
 
-    suspend fun RoutingContext.validateUser(): ServiceResult<UserDto> {
-        val sessionResult = validationService.validateSession(call.sessions.get<SessionUser>())
+    fun validateUser(req: ServerRequest): ServiceResult<UserDto> = runBlocking {
+        val sessionResult = validationService.validateSession(req.getSession())
         if (sessionResult is ServiceResult.Forbidden) {
-            return ServiceResult.Forbidden
+            return@runBlocking ServiceResult.Forbidden
         }
         val session = (sessionResult as ServiceResult.Success).data
-        return validationService.validateUserById(session.userId)
+        validationService.validateUserById(session.userId)
     }
 
-    route("/api/photographers") {
-        get {
-            val country = call.parameters["country"]
-            val state = call.parameters["state"]
-            val photographers = photographerService.getPhotographers(country, state)
-            // Public, unauthenticated listing - cached at the CDN edge via an
-            // EXACT path_pattern ("/api/photographers", no wildcard) in
-            // infra/cloudfront.tf. This prefix also has authenticated routes
-            // like GET /api/photographers/requests (a user's own requests) -
-            // a wildcard here would risk serving one user's private request
-            // list to another from the shared edge cache.
-            call.response.header(HttpHeaders.CacheControl, "public, max-age=30")
-            call.respond(photographers)
-        }
+    get("/api/photographers", Handler { req, res ->
+        val country = req.queryParam("country")
+        val state = req.queryParam("state")
+        val photographers = runBlocking { photographerService.getPhotographers(country, state) }
+        // Public, unauthenticated listing - cached at the CDN edge via an
+        // EXACT path_pattern ("/api/photographers", no wildcard) in
+        // infra/cloudfront.tf. This prefix also has authenticated routes
+        // like GET /api/photographers/requests (a user's own requests) -
+        // a wildcard here would risk serving one user's private request
+        // list to another from the shared edge cache.
+        res.header(HeaderNames.CACHE_CONTROL, "public, max-age=30")
+        res.send(photographers)
+    })
 
-        post("/profile") {
-            val sessionResult = validationService.validateSession(call.sessions.get<SessionUser>())
+    post("/api/photographers/profile", Handler { req, res ->
+        runBlocking {
+            val sessionResult = validationService.validateSession(req.getSession())
             if (sessionResult is ServiceResult.Forbidden) {
-                return@post call.respondUnauthorized()
+                return@runBlocking res.respondUnauthorized()
             }
             val session = (sessionResult as ServiceResult.Success).data
 
-            val body = call.receive<RoleActivationRequest>()
+            val body = req.receiveJson<RoleActivationRequest>()
             val user = if (body.activate) {
                 photographerService.activatePhotographerProfile(session.userId)
             } else {
@@ -66,52 +69,56 @@ fun Route.photographerRoutes() {
             }
             val userResult = validationService.validateUser(user)
             if (userResult is ServiceResult.NotFound) {
-                return@post call.respondNotFound()
+                return@runBlocking res.respondNotFound()
             }
 
-            call.respond(user!!)
+            res.send(user!!)
         }
+    })
 
-        put("/settings") {
-            val userResult = validateUser()
+    put("/api/photographers/settings", Handler { req, res ->
+        runBlocking {
+            val userResult = validateUser(req)
             when (userResult) {
-                is ServiceResult.Forbidden -> return@put call.respondUnauthorized()
-                is ServiceResult.NotFound -> return@put call.respondNotFound()
+                is ServiceResult.Forbidden -> return@runBlocking res.respondUnauthorized()
+                is ServiceResult.NotFound -> return@runBlocking res.respondNotFound()
                 else -> {}
             }
             val user = (userResult as ServiceResult.Success).data
-            val session = (validationService.validateSession(call.sessions.get<SessionUser>()) as ServiceResult.Success).data
+            val session = (validationService.validateSession(req.getSession()) as ServiceResult.Success).data
 
             val roleResult = validationService.validateRole(user, "PHOTOGRAPHER")
             if (roleResult is ServiceResult.Forbidden) {
-                return@put call.respondForbidden()
+                return@runBlocking res.respondForbidden()
             }
 
-            val body = call.receive<PhotographerSettingsRequest>()
+            val body = req.receiveJson<PhotographerSettingsRequest>()
             val feeResult = validationService.validatePhotographerFee(body.photographerFee)
             if (feeResult is ServiceResult.Error) {
-                return@put call.respondError(feeResult.message, 400)
+                return@runBlocking res.respondError(feeResult.message, 400)
             }
 
             try {
                 val photographer = photographerService.updatePhotographerSettings(session.userId, body)
                 if (photographer == null) {
-                    return@put call.respondNotFound()
+                    return@runBlocking res.respondNotFound()
                 }
-                call.respond(photographer)
+                res.send(photographer)
             } catch (e: IllegalArgumentException) {
-                call.respondError(e.message ?: "Invalid request", 400)
+                res.respondError(e.message ?: "Invalid request", 400)
             }
         }
+    })
 
-        post("/requests") {
-            val sessionResult = validationService.validateSession(call.sessions.get<SessionUser>())
+    post("/api/photographers/requests", Handler { req, res ->
+        runBlocking {
+            val sessionResult = validationService.validateSession(req.getSession())
             if (sessionResult is ServiceResult.Forbidden) {
-                return@post call.respondUnauthorized()
+                return@runBlocking res.respondUnauthorized()
             }
             val session = (sessionResult as ServiceResult.Success).data
 
-            val body = call.receive<CreatePhotographyRequestRequest>()
+            val body = req.receiveJson<CreatePhotographyRequestRequest>()
 
             val result = photographerService.createPhotographyRequest(
                 requesterId = session.userId,
@@ -120,17 +127,19 @@ fun Route.photographerRoutes() {
                 message = body.message
             )
 
-            call.respond(result)
+            res.send(result)
         }
+    })
 
-        post("/requests/multiple") {
-            val sessionResult = validationService.validateSession(call.sessions.get<SessionUser>())
+    post("/api/photographers/requests/multiple", Handler { req, res ->
+        runBlocking {
+            val sessionResult = validationService.validateSession(req.getSession())
             if (sessionResult is ServiceResult.Forbidden) {
-                return@post call.respondUnauthorized()
+                return@runBlocking res.respondUnauthorized()
             }
             val session = (sessionResult as ServiceResult.Success).data
 
-            val body = call.receive<CreateMultiPhotographerRequestRequest>()
+            val body = req.receiveJson<CreateMultiPhotographerRequestRequest>()
 
             val result = photographerService.createPhotographyRequest(
                 requesterId = session.userId,
@@ -141,49 +150,53 @@ fun Route.photographerRoutes() {
 
             result.fold(
                 onSuccess = { requestIds ->
-                    call.respond(mapOf("success" to true, "requestIds" to requestIds))
+                    res.send(mapOf("success" to true, "requestIds" to requestIds))
                 },
                 onFailure = { error ->
-                    call.respondError(error.message ?: "Failed to create requests", 400)
+                    res.respondError(error.message ?: "Failed to create requests", 400)
                 }
             )
         }
+    })
 
-        get("/requests") {
-            val userResult = validateUser()
+    get("/api/photographers/requests", Handler { req, res ->
+        runBlocking {
+            val userResult = validateUser(req)
             when (userResult) {
-                is ServiceResult.Forbidden -> return@get call.respondUnauthorized()
-                is ServiceResult.NotFound -> return@get call.respondNotFound()
+                is ServiceResult.Forbidden -> return@runBlocking res.respondUnauthorized()
+                is ServiceResult.NotFound -> return@runBlocking res.respondNotFound()
                 else -> {}
             }
             val user = (userResult as ServiceResult.Success).data
 
             val result = photographerService.getRequestsForUser(user)
-            call.respond(result)
+            res.send(result)
         }
+    })
 
-        put("/requests/{id}") {
-            val sessionResult = validationService.validateSession(call.sessions.get<SessionUser>())
+    put("/api/photographers/requests/{id}", Handler { req, res ->
+        runBlocking {
+            val sessionResult = validationService.validateSession(req.getSession())
             if (sessionResult is ServiceResult.Forbidden) {
-                return@put call.respondUnauthorized()
+                return@runBlocking res.respondUnauthorized()
             }
             val session = (sessionResult as ServiceResult.Success).data
 
-            val idResult = validationService.validateId(call.parameters["id"])
+            val idResult = validationService.validateId(req.pathParam("id"))
             if (idResult is ServiceResult.Error) {
-                return@put call.respondError(idResult.message, 400)
+                return@runBlocking res.respondError(idResult.message, 400)
             }
             val requestId = (idResult as ServiceResult.Success).data
 
-            val body = call.receive<UpdatePhotographyRequestRequest>()
+            val body = req.receiveJson<UpdatePhotographyRequestRequest>()
             val userResult = validationService.validateUserById(session.userId)
             val user = if (userResult is ServiceResult.Success) userResult.data else null
 
             try {
-                call.respondData(photographerService.updatePhotographyRequest(session.userId, user, requestId, body))
+                res.respondData(photographerService.updatePhotographyRequest(session.userId, user, requestId, body))
             } catch (e: IllegalArgumentException) {
-                call.respondError(e.message ?: "Invalid request", 400)
+                res.respondError(e.message ?: "Invalid request", 400)
             }
         }
-    }
+    })
 }

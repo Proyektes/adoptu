@@ -21,7 +21,6 @@ import com.webauthn4j.data.client.Origin
 import com.webauthn4j.data.client.challenge.DefaultChallenge
 import com.webauthn4j.server.ServerProperty
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -49,31 +48,26 @@ class WebAuthnService(
     private val attestedCredentialDataConverter = AttestedCredentialDataConverter(objectConverter)
     private val secureRandom = SecureRandom()
 
-    @Serializable
     data class RelyingParty(
         val id: String,
         val name: String
     )
 
-    @Serializable
     data class PublicKeyUser(
         val id: String,
         val name: String,
         val displayName: String
     )
 
-    @Serializable
     data class PubKeyCredParam(
         val type: String,
         val alg: Int
     )
 
-    @Serializable
     data class RegistrationOptionsResponse(
         val publicKey: PublicKeyOptions
     )
 
-    @Serializable
     data class PublicKeyOptions(
         val rp: RelyingParty,
         val user: PublicKeyUser,
@@ -81,14 +75,12 @@ class WebAuthnService(
         val pubKeyCredParams: List<PubKeyCredParam>
     )
 
-    @Serializable
     data class AssertionOptionsResponse(
         val challenge: String,
         val rpId: String,
         val userVerification: String
     )
 
-    @Serializable
     data class AuthenticatedUser(
         val id: Int,
         val username: String,
@@ -96,7 +88,6 @@ class WebAuthnService(
         val role: String
     )
 
-    @Serializable
     data class AuthResult(
         val userId: Int,
         val user: AuthenticatedUser

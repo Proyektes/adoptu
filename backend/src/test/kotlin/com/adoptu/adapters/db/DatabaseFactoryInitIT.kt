@@ -1,7 +1,7 @@
 package com.adoptu.adapters.db
 
+import com.adoptu.config.AppConfig
 import com.adoptu.dto.input.UserRole
-import io.ktor.server.config.*
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
@@ -63,8 +63,8 @@ class DatabaseFactoryInitIT {
         postgresContainer?.stop()
     }
 
-    private fun createConfig(databaseName: String, env: String = "prod", adminEmail: String? = null): ApplicationConfig {
-        val config = MapApplicationConfig(
+    private fun createConfig(databaseName: String, env: String = "prod", adminEmail: String? = null): AppConfig {
+        val values = mutableMapOf<String, Any>(
             "env" to env,
             "db.$env.postgres.driver" to "org.postgresql.Driver",
             "db.$env.postgres.url" to "jdbc:postgresql://${postgresContainer!!.host}:${postgresContainer!!.firstMappedPort}/$databaseName",
@@ -72,9 +72,9 @@ class DatabaseFactoryInitIT {
             "db.$env.postgres.password" to (postgresContainer?.password ?: "testpassword")
         )
         if (adminEmail != null) {
-            config.put("admin.email", adminEmail)
+            values["admin.email"] = adminEmail
         }
-        return config
+        return AppConfig.fromMap(values)
     }
 
     @Test

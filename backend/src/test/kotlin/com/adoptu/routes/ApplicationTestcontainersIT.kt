@@ -7,18 +7,13 @@ import com.adoptu.adapters.db.repositories.TemporalHomeRepositoryImpl
 import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.adapters.notification.SesEmailAdapter
 import com.adoptu.adapters.storage.S3ImageStorageAdapter
+import com.adoptu.config.AppConfig
 import com.adoptu.mocks.TestClock
-import com.adoptu.plugins.configureRouting
-import com.adoptu.plugins.configureSerialization
-import com.adoptu.plugins.configureSessions
-import com.adoptu.plugins.configureWebAuthn
 import com.adoptu.ports.*
 import com.adoptu.services.auth.WebAuthnService
-import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.config.*
-import io.ktor.server.testing.*
+import com.adoptu.testsupport.TestHttp
+import com.adoptu.testsupport.TestServer
+import com.adoptu.testsupport.TestServerHandle
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
@@ -26,7 +21,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInfo
 import org.koin.dsl.module
-import org.koin.ktor.plugin.Koin
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.containers.wait.strategy.Wait
@@ -59,10 +53,9 @@ class ApplicationTestcontainersIT {
 
     private val testClock: Clock = TestClock()
 
-    private fun createAppConfig(): ApplicationConfig {
-        return MapApplicationConfig(
+    private fun createConfigOverrides(): Map<String, Any> {
+        return mapOf(
             "env" to "test",
-            "ktor.deployment.port" to "0",
             "db.test.postgres.driver" to "org.postgresql.Driver",
             "db.test.postgres.url" to postgresContainer.jdbcUrl,
             "db.test.postgres.user" to postgresContainer.username,
@@ -78,7 +71,7 @@ class ApplicationTestcontainersIT {
         )
     }
 
-    private fun initDatabase(config: ApplicationConfig) {
+    private fun initDatabase(config: AppConfig) {
         val driverClassName = config.property("db.test.postgres.driver").getString()
         val jdbcURL = config.property("db.test.postgres.url").getString()
         val user = config.property("db.test.postgres.user").getString()
@@ -118,14 +111,15 @@ class ApplicationTestcontainersIT {
         }
     }
 
-    private fun TestApplicationBuilder.setupApp() {
-        val config = createAppConfig()
+    private fun startTestServer(): TestServerHandle {
+        val configOverrides = createConfigOverrides()
+        val config = AppConfig.fromMap(configOverrides)
 
         // Initialize database connection and schema
         initDatabase(config)
 
         val testModules = module {
-            single<ApplicationConfig> { config }
+            single { config }
             single<Clock> { testClock }
             single<UserRepositoryPort> { UserRepository(get()) }
             single<com.adoptu.services.UserService> { com.adoptu.services.UserService(get()) }
@@ -152,19 +146,7 @@ class ApplicationTestcontainersIT {
             single<com.adoptu.services.TemporalHomeService> { com.adoptu.services.TemporalHomeService(get(), get(), get(), get()) }
         }
 
-        environment {
-            this.config = config
-        }
-
-        application {
-            install(Koin) {
-                modules(testModules)
-            }
-            configureSerialization()
-            configureSessions()
-            configureWebAuthn()
-            configureRouting()
-        }
+        return TestServer.start(configOverrides = configOverrides, modules = listOf(testModules), initDatabase = false)
     }
 
     @BeforeEach
@@ -176,41 +158,44 @@ class ApplicationTestcontainersIT {
 
     @Test
     fun `health endpoint responds`() {
-        testApplication {
-            setupApp()
-            
-            val response = client.get("/health")
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/health")
             assertTrue(
-                response.status in listOf(HttpStatusCode.OK, HttpStatusCode.NotFound),
+                response.statusCode() in listOf(200, 404),
                 "Health endpoint should respond"
             )
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `S3 storage is accessible via localstack`() {
-        testApplication {
-            setupApp()
-            
+        val handle = startTestServer()
+        try {
             // The S3ImageStorageAdapter should be able to connect to localstack
             // This test verifies the container is properly configured
             assertNotNull(localstackContainer.getEndpointOverride(LocalStackContainer.Service.S3))
             assertTrue(localstackContainer.isRunning)
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `database connection works`() {
-        testApplication {
-            setupApp()
-            
+        val handle = startTestServer()
+        try {
             // Test that database connection is working by accessing an endpoint that queries the DB
-            val response = client.get("/api/pets")
-            println("Response status: ${response.status}")
+            val response = TestHttp.get("${handle.baseUrl}/api/pets")
+            println("Response status: ${response.statusCode()}")
             assertTrue(
-                response.status.value < 500,
-                "Database connection should work without 5xx errors, got: ${response.status}"
+                response.statusCode() < 500,
+                "Database connection should work without 5xx errors, got: ${response.statusCode()}"
             )
+        } finally {
+            handle.stop()
         }
     }
 }

@@ -1,28 +1,15 @@
 package com.adoptu.e2e
 
-import com.adoptu.adapters.db.DatabaseFactory
-import com.adoptu.di.appModule
-import com.adoptu.plugins.configureRouting
-import com.adoptu.plugins.configureSerialization
-import com.adoptu.plugins.configureSessions
-import com.adoptu.plugins.configureWebAuthn
+import com.adoptu.testsupport.TestServer
+import com.adoptu.testsupport.TestServerHandle
 import com.microsoft.playwright.Browser
 import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.BrowserType
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Playwright
-import io.ktor.server.application.*
-import io.ktor.server.config.MapApplicationConfig
-import io.ktor.server.engine.EmbeddedServer
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
-import io.ktor.server.netty.NettyApplicationEngine
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
-import org.koin.ktor.plugin.Koin
-import org.koin.logger.slf4jLogger
-import java.net.ServerSocket
 import java.util.concurrent.atomic.AtomicBoolean
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -30,11 +17,17 @@ abstract class BaseE2ETest {
 
     companion object {
         private val started = AtomicBoolean(false)
-        private var server: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>? = null
-        private var serverPort = 0
+        private var handle: TestServerHandle? = null
         private var serverHost = "localhost"
 
-        protected fun getBaseUrl(): String = "http://$serverHost:$serverPort"
+        protected fun getBaseUrl(): String {
+            val baseUrl = handle!!.baseUrl
+            return if (serverHost != "localhost") {
+                baseUrl.replaceFirst("localhost", serverHost)
+            } else {
+                baseUrl
+            }
+        }
     }
 
     protected lateinit var playwright: Playwright
@@ -53,44 +46,12 @@ abstract class BaseE2ETest {
     }
 
     private fun startTestServer() {
-        serverPort = findFreePort()
-
         val hostOverride = System.getenv("PLAYWRIGHT_SERVER_HOST")
         if (!hostOverride.isNullOrBlank()) {
             serverHost = hostOverride
         }
 
-        val config = MapApplicationConfig(
-            "env" to "test",
-            "db.test.postgres.driver" to "org.h2.Driver",
-            "db.test.postgres.url" to "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL",
-            "db.test.postgres.user" to "sa",
-            "db.test.postgres.password" to "",
-            "storage.test.bucket" to "test-bucket",
-            "storage.test.region" to "us-east-1",
-            "storage.test.endpoint" to "",
-            "storage.test.path_style_access" to "false",
-            "email.from" to "test@test.com",
-            "admin.email" to "admin@adopt-u.com"
-        )
-
-        server = embeddedServer(Netty, port = serverPort, host = "0.0.0.0") {
-            install(Koin) {
-                slf4jLogger()
-                modules(appModule(config))
-            }
-            DatabaseFactory.init(config)
-            configureSerialization()
-            configureSessions()
-            configureWebAuthn()
-            configureRouting()
-        }
-
-        server!!.start()
-    }
-
-    private fun findFreePort(): Int {
-        return ServerSocket(0).use { socket -> socket.localPort }
+        handle = TestServer.start()
     }
 
     @BeforeAll
@@ -125,7 +86,7 @@ abstract class BaseE2ETest {
         context.close()
         browser.close()
         playwright.close()
-        server?.stop(1000, 2000)
+        handle?.stop()
     }
 
     protected fun clearErrors() {

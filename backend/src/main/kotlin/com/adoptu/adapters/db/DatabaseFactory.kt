@@ -1,9 +1,9 @@
 package com.adoptu.adapters.db
 
+import com.adoptu.config.AppConfig
 import com.adoptu.dto.input.UserRole
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.server.config.*
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
@@ -43,7 +43,7 @@ object DatabaseFactory {
         UserSterilizationLocations,
         PasswordResetTokens,
         EmailChangeTokens)
-    fun init(config: ApplicationConfig) {
+    fun init(config: AppConfig) {
         val env = config.propertyOrNull("env")?.getString() ?: "prod"
         val prefix = "db.$env"
 
@@ -102,7 +102,7 @@ object DatabaseFactory {
         createDefaultAdmin(config)
     }
 
-    private fun createDefaultAdmin(config: ApplicationConfig) {
+    private fun createDefaultAdmin(config: AppConfig) {
         val adminEmail = config.propertyOrNull("admin.email")?.getString() ?: "adopt-u@adopt-u.org"
 
         transaction {

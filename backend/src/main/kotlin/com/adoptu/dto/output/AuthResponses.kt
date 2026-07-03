@@ -1,8 +1,6 @@
 package com.adoptu.dto.output
 
-import kotlinx.serialization.Serializable
 
-@Serializable
 data class AuthMeResponse(
     val authenticated: Boolean,
     val id: Int? = null,
@@ -22,7 +20,6 @@ data class AuthMeResponse(
     val photographerState: String? = null
 )
 
-@Serializable
 data class SuccessWithErrorResponse(
     val success: Boolean,
     val error: String? = null,
@@ -30,20 +27,17 @@ data class SuccessWithErrorResponse(
     val email: String? = null
 )
 
-@Serializable
 data class RegistrationResponse(
     val success: Boolean,
     val message: String? = null,
     val emailVerificationSent: Boolean = false
 )
 
-@Serializable
 data class VerificationResponse(
     val success: Boolean,
     val message: String? = null
 )
 
-@Serializable
 data class PhotographerProfileResponse(
     val id: Int,
     val username: String,

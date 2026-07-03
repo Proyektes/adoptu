@@ -69,3 +69,4 @@ node_modules/
 
 # Playwright MCP debug snapshots (temporary, not for VCS)
 .playwright-mcp/
+.tokensave

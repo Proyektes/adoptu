@@ -1,7 +1,7 @@
 package com.adoptu.adapters.notification
 
 import com.adoptu.ports.NotificationPort
-import io.ktor.server.config.*
+import com.adoptu.config.AppConfig
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
@@ -11,9 +11,9 @@ class SesEmailAdapterTest {
 
     @Test
     fun `sendEmail returns false when not configured in prod mode`() {
-        val config = MapApplicationConfig(
+        val config = AppConfig.fromMap(mapOf(
             "env" to "prod"
-        )
+        ))
         val adapter = SesEmailAdapter(config)
 
         val result = kotlinx.coroutines.runBlocking {
@@ -25,9 +25,9 @@ class SesEmailAdapterTest {
 
     @Test
     fun `sendEmail returns false when not configured in dev mode with no smtp`() {
-        val config = MapApplicationConfig(
+        val config = AppConfig.fromMap(mapOf(
             "env" to "dev"
-        )
+        ))
         val adapter = SesEmailAdapter(config)
 
         val result = kotlinx.coroutines.runBlocking {
@@ -39,13 +39,13 @@ class SesEmailAdapterTest {
 
     @Test
     fun `sendEmail returns false when smtp host missing in dev mode`() {
-        val config = MapApplicationConfig(
+        val config = AppConfig.fromMap(mapOf(
             "env" to "dev",
             "email.port" to "587",
             "email.username" to "test",
             "email.password" to "test",
             "email.from" to "test@example.com"
-        )
+        ))
         val adapter = SesEmailAdapter(config)
 
         val result = kotlinx.coroutines.runBlocking {
@@ -57,13 +57,13 @@ class SesEmailAdapterTest {
 
     @Test
     fun `sendEmail returns false when smtp port missing in dev mode`() {
-        val config = MapApplicationConfig(
+        val config = AppConfig.fromMap(mapOf(
             "env" to "dev",
             "email.host" to "localhost",
             "email.username" to "test",
             "email.password" to "test",
             "email.from" to "test@example.com"
-        )
+        ))
         val adapter = SesEmailAdapter(config)
 
         val result = kotlinx.coroutines.runBlocking {
@@ -75,12 +75,12 @@ class SesEmailAdapterTest {
 
     @Test
     fun `sendEmail returns false when smtp credentials missing in dev mode`() {
-        val config = MapApplicationConfig(
+        val config = AppConfig.fromMap(mapOf(
             "env" to "dev",
             "email.host" to "localhost",
             "email.port" to "587",
             "email.from" to "test@example.com"
-        )
+        ))
         val adapter = SesEmailAdapter(config)
 
         val result = kotlinx.coroutines.runBlocking {
@@ -92,9 +92,9 @@ class SesEmailAdapterTest {
 
     @Test
     fun `sendPhotographerRequest returns false when not configured in prod mode`() {
-        val config = MapApplicationConfig(
+        val config = AppConfig.fromMap(mapOf(
             "env" to "prod"
-        )
+        ))
         val adapter = SesEmailAdapter(config)
 
         val result = kotlinx.coroutines.runBlocking {
@@ -114,9 +114,9 @@ class SesEmailAdapterTest {
 
     @Test
     fun `sendPhotographerRequest returns false when not configured in dev mode`() {
-        val config = MapApplicationConfig(
+        val config = AppConfig.fromMap(mapOf(
             "env" to "dev"
-        )
+        ))
         val adapter = SesEmailAdapter(config)
 
         val result = kotlinx.coroutines.runBlocking {
@@ -136,9 +136,9 @@ class SesEmailAdapterTest {
 
     @Test
     fun `sendAdoptionRequestNotification returns false when not configured in prod mode`() {
-        val config = MapApplicationConfig(
+        val config = AppConfig.fromMap(mapOf(
             "env" to "prod"
-        )
+        ))
         val adapter = SesEmailAdapter(config)
 
         val result = kotlinx.coroutines.runBlocking {
@@ -155,9 +155,9 @@ class SesEmailAdapterTest {
 
     @Test
     fun `sendAdoptionRequestNotification returns false when not configured in dev mode`() {
-        val config = MapApplicationConfig(
+        val config = AppConfig.fromMap(mapOf(
             "env" to "dev"
-        )
+        ))
         val adapter = SesEmailAdapter(config)
 
         val result = kotlinx.coroutines.runBlocking {
@@ -174,7 +174,7 @@ class SesEmailAdapterTest {
 
     @Test
     fun `sendEmail returns false for not configured in default prod mode`() {
-        val config = MapApplicationConfig()
+        val config = AppConfig.fromMap(mapOf())
         val adapter = SesEmailAdapter(config)
 
         val result = kotlinx.coroutines.runBlocking {
@@ -185,7 +185,7 @@ class SesEmailAdapterTest {
 
     @Test
     fun `NotificationPort interface is implemented correctly`() {
-        val config = MapApplicationConfig()
+        val config = AppConfig.fromMap(mapOf())
         val adapter: NotificationPort = SesEmailAdapter(config)
 
         assertNotNull(adapter)
@@ -193,9 +193,9 @@ class SesEmailAdapterTest {
 
     @Test
     fun `sendTemporalHomeRequest returns false when not configured in prod mode`() {
-        val config = MapApplicationConfig(
+        val config = AppConfig.fromMap(mapOf(
             "env" to "prod"
-        )
+        ))
         val adapter = SesEmailAdapter(config)
 
         val result = kotlinx.coroutines.runBlocking {
@@ -214,9 +214,9 @@ class SesEmailAdapterTest {
 
     @Test
     fun `sendTemporalHomeRequest returns false when not configured in dev mode`() {
-        val config = MapApplicationConfig(
+        val config = AppConfig.fromMap(mapOf(
             "env" to "dev"
-        )
+        ))
         val adapter = SesEmailAdapter(config)
 
         val result = kotlinx.coroutines.runBlocking {
@@ -235,40 +235,40 @@ class SesEmailAdapterTest {
 
     @Test
     fun `adapter can be instantiated with empty config`() {
-        val config = MapApplicationConfig()
+        val config = AppConfig.fromMap(mapOf())
         val adapter = SesEmailAdapter(config)
         assertNotNull(adapter)
     }
 
     @Test
     fun `adapter can be instantiated with ses config`() {
-        val config = MapApplicationConfig(
+        val config = AppConfig.fromMap(mapOf(
             "env" to "prod",
             "ses.region" to "us-west-2"
-        )
+        ))
         val adapter = SesEmailAdapter(config)
         assertNotNull(adapter)
     }
 
     @Test
     fun `adapter can be instantiated with smtp config`() {
-        val config = MapApplicationConfig(
+        val config = AppConfig.fromMap(mapOf(
             "env" to "dev",
             "email.host" to "localhost",
             "email.port" to "587",
             "email.username" to "user",
             "email.password" to "pass",
             "email.from" to "test@example.com"
-        )
+        ))
         val adapter = SesEmailAdapter(config)
         assertNotNull(adapter)
     }
 
     @Test
     fun `sendPhotographerRequest with fee and currency builds correct parameters in dev mode`() {
-        val config = MapApplicationConfig(
+        val config = AppConfig.fromMap(mapOf(
             "env" to "dev"
-        )
+        ))
         val adapter = SesEmailAdapter(config)
 
         val result = kotlinx.coroutines.runBlocking {
@@ -287,9 +287,9 @@ class SesEmailAdapterTest {
 
     @Test
     fun `sendPhotographerRequest with zero fee does not include fee in dev mode`() {
-        val config = MapApplicationConfig(
+        val config = AppConfig.fromMap(mapOf(
             "env" to "dev"
-        )
+        ))
         val adapter = SesEmailAdapter(config)
 
         val result = kotlinx.coroutines.runBlocking {
@@ -308,9 +308,9 @@ class SesEmailAdapterTest {
 
     @Test
     fun `sendAdoptionRequestNotification with blank message in dev mode`() {
-        val config = MapApplicationConfig(
+        val config = AppConfig.fromMap(mapOf(
             "env" to "dev"
-        )
+        ))
         val adapter = SesEmailAdapter(config)
 
         val result = kotlinx.coroutines.runBlocking {
@@ -326,9 +326,9 @@ class SesEmailAdapterTest {
 
     @Test
     fun `sendAdoptionRequestNotification with blank message string in dev mode`() {
-        val config = MapApplicationConfig(
+        val config = AppConfig.fromMap(mapOf(
             "env" to "dev"
-        )
+        ))
         val adapter = SesEmailAdapter(config)
 
         val result = kotlinx.coroutines.runBlocking {
@@ -344,7 +344,7 @@ class SesEmailAdapterTest {
 
     @Test
     fun `defaults to prod mode when env not specified`() {
-        val config = MapApplicationConfig()
+        val config = AppConfig.fromMap(mapOf())
         val adapter = SesEmailAdapter(config)
 
         val result = kotlinx.coroutines.runBlocking {

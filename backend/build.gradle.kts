@@ -1,6 +1,5 @@
 plugins {
     kotlin("jvm")
-    kotlin("plugin.serialization")
     application
     id("com.gradleup.shadow") version "9.4.3"
     id("org.jetbrains.kotlinx.kover")
@@ -17,7 +16,8 @@ kotlin {
     jvmToolchain(25)
 }
 
-val ktorVersion = "3.5.1"
+val helidonVersion = "4.5.0"
+val jacksonKotlinVersion = "2.22.0"
 val exposedVersion = "1.3.0"
 val postgresVersion = "42.7.12"
 val koinVersion = "4.2.2"
@@ -28,15 +28,13 @@ val playwrightVersion = "1.61.0"
 
 dependencies {
     // runtime / implementation
-    implementation("io.ktor:ktor-server-core:$ktorVersion")
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
-    implementation("io.ktor:ktor-server-sessions:$ktorVersion")
-    implementation("io.ktor:ktor-server-auth:$ktorVersion")
-    implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
-    implementation("io.ktor:ktor-server-html-builder:$ktorVersion")
-    implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
+    implementation("io.helidon.webserver:helidon-webserver:$helidonVersion")
+    implementation("io.helidon.webserver:helidon-webserver-static-content:$helidonVersion")
+    implementation("io.helidon.http.media:helidon-http-media-jackson:$helidonVersion")
+    implementation("io.helidon.http.media:helidon-http-media-multipart:$helidonVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonKotlinVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.12.0")
+    implementation("com.typesafe:config:1.4.5")
 
     implementation("com.webauthn4j:webauthn4j-core:0.31.7.RELEASE")
 
@@ -52,7 +50,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-migration-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-migration-jdbc:$exposedVersion")
 
-    implementation("io.insert-koin:koin-ktor:$koinVersion")
+    implementation("io.insert-koin:koin-core:$koinVersion")
     implementation("io.insert-koin:koin-logger-slf4j:$koinVersion")
 
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
@@ -84,19 +82,15 @@ dependencies {
     testImplementation("io.kotest:kotest-property:$kotestVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:5.14.4")
     testImplementation("io.mockk:mockk:1.14.11")
-    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
+    testImplementation("io.helidon.webserver.testing.junit5:helidon-webserver-testing-junit5:$helidonVersion")
+    testImplementation("io.helidon.webclient:helidon-webclient:$helidonVersion")
     testImplementation("com.h2database:h2:2.4.240")
     testImplementation(platform("org.testcontainers:testcontainers-bom:1.21.4"))
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:junit-jupiter:1.21.4")
     testImplementation("org.testcontainers:localstack:1.21.4")
     testImplementation("org.testcontainers:postgresql:1.21.4")
-    testImplementation("io.ktor:ktor-client-okhttp:$ktorVersion")
-    testImplementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     testImplementation("com.microsoft.playwright:playwright:$playwrightVersion")
-
-    // serialization
-    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 }
 
 application {
@@ -182,12 +176,6 @@ kover {
                 // entrypoint / bootstrap wiring, exercised by ApplicationIntegrationTest+ApplicationContainerTest
                 // (Docker-only IT suite) rather than unit coverage
                 classes("com.adoptu.ApplicationKt")
-                annotatedBy("kotlinx.serialization.Serializable")
-                // Dead code: imported in PetsRoutes.kt but never instantiated anywhere in production.
-                // respondData()/respondSuccess() extension functions are used directly instead.
-                classes("com.adoptu.plugins.DataResponder")
-                classes("com.adoptu.plugins.SuccessResponder")
-                classes("com.adoptu.plugins.CustomResponder")
             }
         }
         verify {
