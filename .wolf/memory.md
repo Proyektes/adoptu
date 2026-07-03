@@ -1306,6 +1306,13 @@
 | 17:03 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
 | 16:22 | Fixed "View Details" in temporal home search: added missing `/temporal-home/{id}` UI route + `GET /api/temporal-homes/{id}`, new detail page module, fixed card link using nonexistent `home.id` (should be `home.userId`), redesigned search-result cards | TemporalHomeRoutes.kt, UIRoutes.kt, pages/TemporalHomePage.kt (backend+frontend), ApiClient.kt, I18n.kt, Main.kt, temporal-home.scss | All backend/frontend builds + full test suite + Kover 95% gate pass; verified visually via Playwright | ~45k |
 
+## Session: 2026-07-03 11:04 (worktree-graalvm-native-image)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 18:25 | Built GraalVM native-image support: CIO-based native entry point (Netty unsupported), org.graalvm.buildtools.native plugin, native-image.properties with ~30 logback build-time-init classes discovered via real build errors, agent-traced reachability-metadata.json | ApplicationNative.kt, backend/build.gradle.kts, settings.gradle.kts, native-image.properties, reachability-metadata.json, scripts/build-native-image.sh | Native binary (134MB) built successfully via Docker+Gradle two-phase build; smoke-tested against live Postgres - all routes (home, static, pets/shelters/photographers/temporal-home/admin pages, password login+crypto path) return correct responses, ~1.3s startup vs ~4s JVM | ~180k |
+| 18:26 | Fixed pre-existing buglog.json merge corruption (missing `},` between bug-066 and bug-088) found while appending new entries | .wolf/buglog.json | Valid JSON restored, 69 entries | ~2k |
+| 18:51 | Rebuilt native binary from latest adoptu HEAD (e503b29, unchanged - no new commits since prior merge), load-tested under --cpus=0.5 --memory=1024m (ECS Fargate equivalent) via containerized wrk against `/` and `/pets` | scripts/build-native-image.sh, scripts/benchmark-results/*.txt | GET /: 143.1 RPS, p50 102ms/p99 555ms, ~11.7% of 1GiB mem. GET /pets (DB-backed): 127.8 RPS, p50 104ms/p99 738ms, ~10.9% of 1GiB mem. Zero errors across 8188 total requests; idle memory ~62-86MiB | ~15k |
 ## Session: 2026-07-02 17:20
 
 | Time | Action | File(s) | Outcome | ~Tokens |
@@ -1690,3 +1697,17 @@
 | 17:45 | Edited .gitignore | 7→4 lines | ~23 |
 | 17:46 | Session end: 94 writes across 53 files (anatomy.md, buglog.json, 20260703T211336Z_graalvm-native-home-retest.txt, 20260703T211336Z_graalvm-native-pets-retest.txt, cerebrum.md) | 83 reads | ~311724 tok |
 | 17:47 | Session end: 94 writes across 53 files (anatomy.md, buglog.json, 20260703T211336Z_graalvm-native-home-retest.txt, 20260703T211336Z_graalvm-native-pets-retest.txt, cerebrum.md) | 83 reads | ~311724 tok |
+
+## Session: 2026-07-03 15:02 (retest against merged adoptu branch)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:02 | Merged local adoptu branch (6 commits: HikariCP pooling, dedicated DB dispatcher, N+1 fix, benchmark.sh) into worktree | .wolf/anatomy.md, .wolf/buglog.json | 1 conflict resolved, 1 JSON corruption fixed, merge commit b95d1a0 | ~3500 |
+| 15:03 | First native-image rebuild attempt | scripts/build-native-image.sh | Failed: Gradle journal-1 lock contention | ~500 |
+| 15:06 | Retried with isolated GRADLE_USER_HOME | scripts/build-native-image.sh | Failed: orphaned container from prior kill held project .gradle lock | ~500 |
+| 15:08 | Diagnosed and stopped orphaned docker container (naughty_ramanujan), logged bug-091 | .wolf/buglog.json | Fixed, JSON valid (53 entries) | ~800 |
+| 15:11 | Native-image rebuild succeeded (5m47s) | backend/build/native/nativeCompile/adoptu-backend | 136MB binary, HikariCP confirmed native-image compatible | ~400 |
+| 15:13 | Load test under 0.5 CPU/1024MB ECS-equivalent constraint | scripts/benchmark-results/20260703T211336Z_graalvm-native-{home,pets}-retest.txt | home 143.47 RPS (~flat), /pets 136.38 RPS (up from 127.79), zero errors, mem ~11-14% | ~1200 |
+| 15:16 | Updated cerebrum.md (retest decision note, orphaned-container Do-Not-Repeat entry) | .wolf/cerebrum.md | Documented | ~900 |
+| 17:49 | Edited backend/build.gradle.kts | reduced (-16 lines) | ~148 |
+| 17:49 | Edited backend/build.gradle.kts | modified named() | ~81 |

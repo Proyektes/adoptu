@@ -3,19 +3,19 @@
   "bugs": [
     {
       "id": "bug-001",
-      "timestamp": "2026-07-03T23:45:25.582Z",
+      "timestamp": "2026-07-03T23:49:41.777Z",
       "error_message": "Significant refactor of ",
-      "file": ".gitignore",
-      "root_cause": "3 lines replaced/restructured",
-      "fix": "Rewrote 7→4 lines (3 removed)",
+      "file": "backend/build.gradle.kts",
+      "root_cause": "16 lines replaced/restructured",
+      "fix": "Rewrote 23→7 lines (16 removed)",
       "tags": [
         "auto-detected",
         "refactor",
-        "unknown"
+        "kts"
       ],
       "related_bugs": [],
       "occurrences": 1,
-      "last_seen": "2026-07-03T23:45:25.582Z"
+      "last_seen": "2026-07-03T23:49:41.777Z"
     }
   ]
 }

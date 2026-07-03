@@ -1,0 +1,41 @@
+label: graalvm-native-image-home
+endpoint: /
+duration_s: 30
+concurrency: 20
+cgroup: --cpus=0.5 --memory=1024m (ECS Fargate equivalent)
+binary: backend/build/native/nativeCompile/adoptu-backend (134MB, built from adoptu HEAD e503b29 + this branch's native-image work)
+---
+Running 30s test @ http://host.docker.internal:18099/
+  20 threads and 20 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   152.35ms  111.38ms 800.45ms   75.61%
+    Req/Sec     8.82      4.84    30.00     76.14%
+  Latency Distribution
+     50%  102.14ms
+     75%  200.38ms
+     90%  300.46ms
+     99%  555.01ms
+  4301 requests in 30.06s, 46.72MB read
+Requests/sec:    143.09
+Transfer/sec:      1.55MB
+--- container memory samples during load (CPU% MemUsage MemPerc) ---
+55.14% 104.4MiB / 1GiB 10.19%
+51.98% 109.6MiB / 1GiB 10.70%
+50.97% 113.4MiB / 1GiB 11.07%
+50.74% 115.7MiB / 1GiB 11.30%
+50.01% 117.7MiB / 1GiB 11.49%
+49.90% 120.2MiB / 1GiB 11.73%
+51.09% 120.2MiB / 1GiB 11.74%
+49.11% 119.8MiB / 1GiB 11.70%
+53.12% 117.9MiB / 1GiB 11.52%
+0.27% 85.69MiB / 1GiB 8.37%
+0.11% 85.28MiB / 1GiB 8.33%
+0.10% 85.28MiB / 1GiB 8.33%
+0.15% 85.28MiB / 1GiB 8.33%
+0.14% 85.28MiB / 1GiB 8.33%
+0.15% 86.39MiB / 1GiB 8.44%
+0.05% 86.39MiB / 1GiB 8.44%
+0.10% 86.39MiB / 1GiB 8.44%
+0.23% 86.39MiB / 1GiB 8.44%
+0.12% 86.39MiB / 1GiB 8.44%
+0.09% 86.39MiB / 1GiB 8.44%

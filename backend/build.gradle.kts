@@ -1,8 +1,12 @@
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.jvm.toolchain.JvmVendorSpec
+
 plugins {
     kotlin("jvm")
     application
     id("com.gradleup.shadow") version "9.4.3"
     id("org.jetbrains.kotlinx.kover")
+    id("org.graalvm.buildtools.native") version "1.1.3"
 }
 
 group = "com.adoptu"
@@ -95,6 +99,29 @@ dependencies {
 
 application {
     mainClass.set("com.adoptu.ApplicationKt")
+}
+
+graalvmNative {
+    metadataRepository {
+        enabled.set(true)
+    }
+    binaries {
+        named("main") {
+            imageName.set("adoptu-backend")
+            // Helidon's WebServer has no Netty-style native-image incompatibility, so the
+            // production entry point works directly - no separate native main() needed.
+            mainClass.set("com.adoptu.ApplicationKt")
+            javaLauncher.set(
+                javaToolchains.launcherFor {
+                    languageVersion.set(JavaLanguageVersion.of(25))
+                    vendor.set(JvmVendorSpec.matching("GraalVM"))
+                }
+            )
+            buildArgs.add("--no-fallback")
+            buildArgs.add("-H:+ReportExceptionStackTraces")
+            quickBuild.set(true)
+        }
+    }
 }
 
 tasks.withType<Test> {

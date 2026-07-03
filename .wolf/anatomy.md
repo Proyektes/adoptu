@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-03T23:45:25.556Z
-> Files: 966 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-03T23:49:52.258Z
+> Files: 971 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -1809,9 +1809,17 @@
 
 - `workspace.xml` (~7543 tok)
 
+## backend/
+
+- `build.gradle.kts` (~2471 tok)
+
 ## backend/ (canonical)
 
 - `build.gradle.kts` — Backend Gradle module: Ktor/Exposed/AWS SDK deps, application plugin, com.gradleup.shadow 9.4.3 (fat jar -> *-all.jar), jvmToolchain(25) (~750 tok)
+
+## backend/src/main/kotlin/com/adoptu/ (graalvm-native-image worktree)
+
+- `ApplicationNative.kt` — GraalVM native-image entry point: same Application.module() as production, Ktor CIO engine instead of Netty (unsupported under native-image) (~150 tok)
 
 ## backend/src/main/kotlin/com/adoptu/ (helidon-nima-migration worktree)
 
@@ -1883,6 +1891,11 @@
 - `Responses.kt` — `ServerResponse` extensions: `respondError`/`respondUnauthorized`/`respondForbidden`/`respondNotFound`/`respondInvalidId`/`respondRedirect`/`respondData`/`respondSuccess`, replacing `plugins/Responses.kt` (dropped the confirmed-dead `DataResponder`/`SuccessResponder`/`CustomResponder` classes) (~250 tok)
 - `Sessions.kt` — HMAC-SHA256-signed cookie session (`getSession()`/`setSession()`/`clearSession()` on `ServerRequest`/`ServerResponse`), replacing Ktor's `Sessions` plugin; not wire-compatible with old Ktor session cookies (one-time silent logout on cutover, expected) (~350 tok)
 
+## backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/ (graalvm-native-image worktree)
+
+- `native-image.properties` — resource includes for static/js/css assets + ~30 logback classes requiring --initialize-at-build-time (Netty's own build-time-init classes transitively reach the app's live LoggerContext) (~300 tok)
+- `reachability-metadata.json` — agent-traced reflection/resource config from hitting real routes (pages, static assets, password-login/crypto path) against live Postgres with -agentlib:native-image-agent (~2000 tok)
+
 ## backend/src/main/resources/static/js/
 
 - `api.js` — Declares api (~2504 tok)
@@ -1931,6 +1944,7 @@
 - `variables.tf` — all configurable inputs: region/profile, domain, container image/port, RDS sizing, db_app_password (sensitive, no default) (~700 tok)
 - `versions.tf` — OpenTofu/AWS+archive provider version pins, backend notes (local by default) (~170 tok)
 
-## scripts/
+## scripts/ (graalvm-native-image worktree)
 
 - `benchmark.sh` — Load-tests the backend in Docker under `--cpus=0.5 --memory=1024m` (matches ECS Fargate, same profile that produced the validated 18.2 RPS baseline in cerebrum.md). Prefers `hey`, falls back to `wrk`/`ab`/plain curl+xargs. Usage: `scripts/benchmark.sh <label> [endpoint] [duration_s] [concurrency]`; results land in `scripts/benchmark-results/`. Change one thing per run. (~650 tok)
+- `build-native-image.sh` — builds the native binary via ghcr.io/graalvm/native-image-community Docker image; runs :backend:jar and :backend:nativeCompile as two separate Gradle invocations to avoid an OOM (native-image's own JVM competing with the Kotlin-compile JVM for container memory) (~150 tok)
