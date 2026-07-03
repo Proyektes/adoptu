@@ -3,10 +3,11 @@ package com.adoptu.services
 import com.adoptu.adapters.db.MagicLinkTokens
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
+import com.adoptu.adapters.db.dbDispatcher
 import com.adoptu.ports.NotificationPort
 import com.adoptu.ports.UserRepositoryPort
 import com.adoptu.services.EmailVerificationService
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.greaterEq
@@ -57,7 +58,7 @@ class MagicLinkService(
                 return Result.failure(Exception("Verification email already sent. Please check your inbox or wait for the link to expire."))
             }
 
-            val result = runBlocking { emailVerificationService.resendVerificationEmail(user.id, email, user.displayName, language) }
+            val result = emailVerificationService.resendVerificationEmail(user.id, email, user.displayName, language)
             return if (result.isSuccess && result.getOrDefault(false)) {
                 Result.failure(Exception("Email not verified. A new verification email has been sent to your inbox."))
             } else {
@@ -65,12 +66,14 @@ class MagicLinkService(
             }
         }
 
-        val requestsToday = transaction {
-            val startOfDay = getStartOfDayMillis()
-            MagicLinkTokens.deleteWhere { MagicLinkTokens.expiresAt lessEq clock.now().toEpochMilliseconds() }
-            MagicLinkTokens.selectAll()
-                .where { (MagicLinkTokens.userId eq user.id) and (MagicLinkTokens.createdAt greaterEq startOfDay) }
-                .count()
+        val requestsToday = withContext(dbDispatcher) {
+            transaction {
+                val startOfDay = getStartOfDayMillis()
+                MagicLinkTokens.deleteWhere { MagicLinkTokens.expiresAt lessEq clock.now().toEpochMilliseconds() }
+                MagicLinkTokens.selectAll()
+                    .where { (MagicLinkTokens.userId eq user.id) and (MagicLinkTokens.createdAt greaterEq startOfDay) }
+                    .count()
+            }
         }
 
         if (requestsToday >= maxMagicLinksPerDay) {
@@ -81,19 +84,21 @@ class MagicLinkService(
         val token = generateToken()
         val expiresAt = clock.now().toEpochMilliseconds() + magicLinkExpirationMs
 
-        val tokenSaved = transaction {
-            try {
-                MagicLinkTokens.insert {
-                    it[MagicLinkTokens.userId] = user.id
-                    it[MagicLinkTokens.token] = token
-                    it[MagicLinkTokens.expiresAt] = expiresAt
-                    it[MagicLinkTokens.createdAt] = clock.now().toEpochMilliseconds()
-                    it[MagicLinkTokens.usedAt] = null
+        val tokenSaved = withContext(dbDispatcher) {
+            transaction {
+                try {
+                    MagicLinkTokens.insert {
+                        it[MagicLinkTokens.userId] = user.id
+                        it[MagicLinkTokens.token] = token
+                        it[MagicLinkTokens.expiresAt] = expiresAt
+                        it[MagicLinkTokens.createdAt] = clock.now().toEpochMilliseconds()
+                        it[MagicLinkTokens.usedAt] = null
+                    }
+                    true
+                } catch (e: Exception) {
+                    logger.error("Failed to insert magic link token for userId=${user.id}: ${e.message}")
+                    false
                 }
-                true
-            } catch (e: Exception) {
-                logger.error("Failed to insert magic link token for userId=${user.id}: ${e.message}")
-                false
             }
         }
 
@@ -104,7 +109,7 @@ class MagicLinkService(
         val loginUrl = "$baseUrl/api/auth/magic-link-login?token=$token"
         val (subject, body) = getLocalizedMagicLinkContent(language, user.displayName, loginUrl)
 
-        val sent = runBlocking { notificationPort.sendEmail(email, subject, body) }
+        val sent = notificationPort.sendEmail(email, subject, body)
         if (sent) {
             logger.info("Magic link sent to userId=${user.id}")
         } else {
@@ -113,8 +118,8 @@ class MagicLinkService(
         return Result.success(sent)
     }
 
-    fun verifyMagicLink(token: String): MagicLinkResult? {
-        return transaction {
+    suspend fun verifyMagicLink(token: String): MagicLinkResult? = withContext(dbDispatcher) {
+        transaction {
             val now = clock.now().toEpochMilliseconds()
             val tokenRow = MagicLinkTokens
                 .selectAll()
@@ -150,10 +155,12 @@ class MagicLinkService(
         }
     }
 
-    fun consumeMagicLink(token: String) {
-        transaction {
-            MagicLinkTokens.update({ MagicLinkTokens.token eq token }) {
-                it[MagicLinkTokens.usedAt] = clock.now().toEpochMilliseconds()
+    suspend fun consumeMagicLink(token: String) {
+        withContext(dbDispatcher) {
+            transaction {
+                MagicLinkTokens.update({ MagicLinkTokens.token eq token }) {
+                    it[MagicLinkTokens.usedAt] = clock.now().toEpochMilliseconds()
+                }
             }
         }
     }
@@ -162,7 +169,7 @@ class MagicLinkService(
         // Token is not consumed - no action needed, it remains valid
     }
 
-    fun verifyAndConsumeMagicLink(token: String): MagicLinkResult? {
+    suspend fun verifyAndConsumeMagicLink(token: String): MagicLinkResult? {
         val result = verifyMagicLink(token)
         if (result != null) {
             consumeMagicLink(token)

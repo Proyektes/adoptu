@@ -25,7 +25,6 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
-import kotlinx.coroutines.runBlocking
 import org.koin.ktor.ext.inject
 
 fun Route.petsRoutes() {
@@ -138,7 +137,7 @@ fun Route.petsRoutes() {
             if (imageIdsParam != null) {
                 try {
                     val imageIds = imageIdsParam.split(",").mapNotNull { it.toIntOrNull() }
-                    val result = runBlocking { petService.updatePetImages(petId, session.userId, activeRoles, imageIds) }
+                    val result = petService.updatePetImages(petId, session.userId, activeRoles, imageIds)
                     when (result) {
                         is ServiceResult.Success -> call.respond(mapOf("images" to result.data))
                         is ServiceResult.NotFound -> call.respondError(ValidationConstants.NOT_FOUND, 404)
@@ -180,7 +179,7 @@ fun Route.petsRoutes() {
 
             try {
                 call.respondData(
-                    runBlocking { petService.uploadAndAddImage(
+                    petService.uploadAndAddImage(
                         petId = petId,
                         userId = session.userId,
                         userRoles = activeRoles,
@@ -188,7 +187,7 @@ fun Route.petsRoutes() {
                         contentType = contentType,
                         imageData = imageData,
                         isPrimary = isPrimary
-                    ) }
+                    )
                 )
             } catch (e: Exception) {
                 call.respondError("Failed to upload storage. Please try again later.", 500)

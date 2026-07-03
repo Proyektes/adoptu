@@ -3,6 +3,7 @@ package com.adoptu.services.auth
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.WebAuthnCredentials
+import com.adoptu.adapters.db.dbDispatcher
 import com.adoptu.dto.input.UserRole
 import com.adoptu.services.EmailVerificationService
 import com.adoptu.services.MagicLinkService
@@ -19,7 +20,7 @@ import com.webauthn4j.data.RegistrationParameters
 import com.webauthn4j.data.client.Origin
 import com.webauthn4j.data.client.challenge.DefaultChallenge
 import com.webauthn4j.server.ServerProperty
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -155,51 +156,51 @@ class WebAuthnService(
         )
     }
 
-    fun registerWithPassword(email: String, displayName: String, roles: Set<UserRole>, encryptedPassword: String): RegistrationResult? {
+    suspend fun registerWithPassword(email: String, displayName: String, roles: Set<UserRole>, encryptedPassword: String): RegistrationResult? {
         val passwordService = this.passwordService
         val decryptedPassword = CryptoService.decrypt(encryptedPassword) ?: return null
         if (!isPasswordValid(decryptedPassword)) return null
 
-        val userId = transaction {
-            val existingUser = Users.selectAll().where { Users.username eq email }.firstOrNull()
+        val userId = withContext(dbDispatcher) {
+            transaction {
+                val existingUser = Users.selectAll().where { Users.username eq email }.firstOrNull()
 
-            val id = if (existingUser != null) {
-                existingUser[Users.id]
-            } else {
-                Users.insert {
-                    it[Users.username] = email
-                    it[Users.displayName] = displayName
-                    it[Users.createdAt] = clock.now().toEpochMilliseconds()
-                } get Users.id
-            }
-
-            if (existingUser == null) {
-                val effectiveRoles = if (email.equals(adminEmail, ignoreCase = true)) {
-                    roles + UserRole.ADMIN
+                val id = if (existingUser != null) {
+                    existingUser[Users.id]
                 } else {
-                    roles
+                    Users.insert {
+                        it[Users.username] = email
+                        it[Users.displayName] = displayName
+                        it[Users.createdAt] = clock.now().toEpochMilliseconds()
+                    } get Users.id
                 }
-                effectiveRoles.forEach { role ->
-                    UserActiveRoles.insert {
-                        it[UserActiveRoles.userId] = id
-                        it[UserActiveRoles.role] = role.name
+
+                if (existingUser == null) {
+                    val effectiveRoles = if (email.equals(adminEmail, ignoreCase = true)) {
+                        roles + UserRole.ADMIN
+                    } else {
+                        roles
+                    }
+                    effectiveRoles.forEach { role ->
+                        UserActiveRoles.insert {
+                            it[UserActiveRoles.userId] = id
+                            it[UserActiveRoles.role] = role.name
+                        }
                     }
                 }
+                id
             }
-            id
         }
 
         passwordService.setPassword(userId, encryptedPassword)
 
-        val emailResult = runBlocking {
-            emailVerificationService.generateAndSendVerificationEmail(userId, email, displayName, "en")
-        }
+        val emailResult = emailVerificationService.generateAndSendVerificationEmail(userId, email, displayName, "en")
         val emailSent = emailResult.getOrDefault(false)
         return RegistrationResult(userId = userId, emailSent = emailSent)
     }
 
-    fun hasPasskey(userId: Int): Boolean {
-        return transaction {
+    suspend fun hasPasskey(userId: Int): Boolean = withContext(dbDispatcher) {
+        transaction {
             WebAuthnCredentials.selectAll()
                 .where { WebAuthnCredentials.userId eq userId }
                 .firstOrNull() != null
@@ -216,7 +217,7 @@ class WebAuthnService(
         return true
     }
 
-    fun registerAdditionalPasskey(userId: Int, registrationResponseJson: String): Boolean {
+    suspend fun registerAdditionalPasskey(userId: Int, registrationResponseJson: String): Boolean {
         val storedChallenge = ChallengeStore.retrieveForUser(userId) ?: return false
         ChallengeStore.removeForUser(userId)
 
@@ -236,14 +237,16 @@ class WebAuthnService(
                 registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!
             val acdBytes = attestedCredentialDataConverter.convert(attestedCredentialData)
 
-            transaction {
-                WebAuthnCredentials.insert {
-                    it[WebAuthnCredentials.userId] = userId
-                    it[WebAuthnCredentials.credentialId] = base64UrlEncode(attestedCredentialData.credentialId)
-                    it[WebAuthnCredentials.attestedCredentialDataBase64] = Base64.getEncoder().encodeToString(acdBytes)
-                    it[WebAuthnCredentials.signCount] = registrationData.attestationObject!!.authenticatorData.signCount
-                    it[WebAuthnCredentials.transports] = null
-                    it[WebAuthnCredentials.createdAt] = clock.now().toEpochMilliseconds()
+            withContext(dbDispatcher) {
+                transaction {
+                    WebAuthnCredentials.insert {
+                        it[WebAuthnCredentials.userId] = userId
+                        it[WebAuthnCredentials.credentialId] = base64UrlEncode(attestedCredentialData.credentialId)
+                        it[WebAuthnCredentials.attestedCredentialDataBase64] = Base64.getEncoder().encodeToString(acdBytes)
+                        it[WebAuthnCredentials.signCount] = registrationData.attestationObject!!.authenticatorData.signCount
+                        it[WebAuthnCredentials.transports] = null
+                        it[WebAuthnCredentials.createdAt] = clock.now().toEpochMilliseconds()
+                    }
                 }
             }
             true
@@ -254,7 +257,7 @@ class WebAuthnService(
         }
     }
 
-    fun verifyAndRegister(
+    suspend fun verifyAndRegister(
         email: String,
         displayName: String,
         roles: Set<UserRole>,
@@ -280,55 +283,55 @@ class WebAuthnService(
                 registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!
             val acdBytes = attestedCredentialDataConverter.convert(attestedCredentialData)
 
-            val userId = transaction {
-                val existingUser = Users.selectAll().where { Users.username eq email }.firstOrNull()
+            val userId = withContext(dbDispatcher) {
+                transaction {
+                    val existingUser = Users.selectAll().where { Users.username eq email }.firstOrNull()
 
-                val id = if (existingUser != null) {
-                    existingUser[Users.id]
-                } else {
-                    Users.insert {
-                        it[Users.username] = email
-                        it[Users.displayName] = displayName
-                        it[Users.createdAt] = clock.now().toEpochMilliseconds()
-                    } get Users.id
-                }
-
-                val existingCredential = WebAuthnCredentials
-                    .selectAll()
-                    .where { WebAuthnCredentials.userId eq id }
-                    .firstOrNull()
-
-                if (existingCredential == null) {
-                    WebAuthnCredentials.insert {
-                        it[WebAuthnCredentials.userId] = id
-                        it[WebAuthnCredentials.credentialId] = base64UrlEncode(attestedCredentialData.credentialId)
-                        it[WebAuthnCredentials.attestedCredentialDataBase64] = Base64.getEncoder().encodeToString(acdBytes)
-                        it[WebAuthnCredentials.signCount] = registrationData.attestationObject!!.authenticatorData.signCount
-                        it[WebAuthnCredentials.transports] = null
-                        it[WebAuthnCredentials.createdAt] = clock.now().toEpochMilliseconds()
-                    }
-                }
-
-                if (existingUser == null) {
-                    val effectiveRoles = if (email.equals(adminEmail, ignoreCase = true)) {
-                        roles + UserRole.ADMIN
+                    val id = if (existingUser != null) {
+                        existingUser[Users.id]
                     } else {
-                        roles
+                        Users.insert {
+                            it[Users.username] = email
+                            it[Users.displayName] = displayName
+                            it[Users.createdAt] = clock.now().toEpochMilliseconds()
+                        } get Users.id
                     }
-                    effectiveRoles.forEach { role ->
-                        UserActiveRoles.insert {
-                            it[UserActiveRoles.userId] = id
-                            it[UserActiveRoles.role] = role.name
+
+                    val existingCredential = WebAuthnCredentials
+                        .selectAll()
+                        .where { WebAuthnCredentials.userId eq id }
+                        .firstOrNull()
+
+                    if (existingCredential == null) {
+                        WebAuthnCredentials.insert {
+                            it[WebAuthnCredentials.userId] = id
+                            it[WebAuthnCredentials.credentialId] = base64UrlEncode(attestedCredentialData.credentialId)
+                            it[WebAuthnCredentials.attestedCredentialDataBase64] = Base64.getEncoder().encodeToString(acdBytes)
+                            it[WebAuthnCredentials.signCount] = registrationData.attestationObject!!.authenticatorData.signCount
+                            it[WebAuthnCredentials.transports] = null
+                            it[WebAuthnCredentials.createdAt] = clock.now().toEpochMilliseconds()
                         }
                     }
+
+                    if (existingUser == null) {
+                        val effectiveRoles = if (email.equals(adminEmail, ignoreCase = true)) {
+                            roles + UserRole.ADMIN
+                        } else {
+                            roles
+                        }
+                        effectiveRoles.forEach { role ->
+                            UserActiveRoles.insert {
+                                it[UserActiveRoles.userId] = id
+                                it[UserActiveRoles.role] = role.name
+                            }
+                        }
+                    }
+
+                    id
                 }
-
-                id
             }
 
-            val emailResult = runBlocking {
-                emailVerificationService.generateAndSendVerificationEmail(userId, email, displayName, language)
-            }
+            val emailResult = emailVerificationService.generateAndSendVerificationEmail(userId, email, displayName, language)
 
             val emailSent = emailResult.getOrDefault(false)
             RegistrationResult(userId = userId, emailSent = emailSent)
@@ -350,7 +353,7 @@ class WebAuthnService(
         )
     }
 
-    fun verifyAndAuthenticate(authenticationResponseJson: String): AuthResult? {
+    suspend fun verifyAndAuthenticate(authenticationResponseJson: String): AuthResult? {
         val authenticationData = try {
             webAuthnManager.parseAuthenticationResponseJSON(authenticationResponseJson)
         } catch (_: Exception) {
@@ -360,11 +363,13 @@ class WebAuthnService(
         val credentialId = authenticationData.credentialId
         val credentialIdB64 = base64UrlEncode(credentialId)
 
-        val credentialRow = transaction {
-            WebAuthnCredentials
-                .selectAll()
-                .where { WebAuthnCredentials.credentialId eq credentialIdB64 }
-                .firstOrNull()
+        val credentialRow = withContext(dbDispatcher) {
+            transaction {
+                WebAuthnCredentials
+                    .selectAll()
+                    .where { WebAuthnCredentials.credentialId eq credentialIdB64 }
+                    .firstOrNull()
+            }
         } ?: return null
 
         val storedChallenge = ChallengeStore.retrieveAssertion() ?: return null
@@ -396,22 +401,28 @@ class WebAuthnService(
             val params = AuthenticationParameters(serverProperty, credentialRecord, null, true, true)
             webAuthnManager.verify(authenticationData, params)
 
-            transaction {
-                WebAuthnCredentials.update({ WebAuthnCredentials.id eq credentialRow[WebAuthnCredentials.id] }) {
-                    it[signCount] = authenticationData.authenticatorData!!.signCount
+            withContext(dbDispatcher) {
+                transaction {
+                    WebAuthnCredentials.update({ WebAuthnCredentials.id eq credentialRow[WebAuthnCredentials.id] }) {
+                        it[signCount] = authenticationData.authenticatorData!!.signCount
+                    }
                 }
             }
 
             val userId = credentialRow[WebAuthnCredentials.userId]
-            val user = transaction {
-                Users.selectAll().where { Users.id eq userId }.firstOrNull()
+            val user = withContext(dbDispatcher) {
+                transaction {
+                    Users.selectAll().where { Users.id eq userId }.firstOrNull()
+                }
             } ?: return null
 
-            val primaryRole = transaction {
-                val roles = UserActiveRoles.selectAll()
-                    .where { UserActiveRoles.userId eq userId }
-                    .map { it[UserActiveRoles.role] }
-                if (roles.contains("ADMIN")) "ADMIN" else roles.firstOrNull() ?: "ADOPTER"
+            val primaryRole = withContext(dbDispatcher) {
+                transaction {
+                    val roles = UserActiveRoles.selectAll()
+                        .where { UserActiveRoles.userId eq userId }
+                        .map { it[UserActiveRoles.role] }
+                    if (roles.contains("ADMIN")) "ADMIN" else roles.firstOrNull() ?: "ADOPTER"
+                }
             }
 
             AuthResult(
@@ -480,7 +491,7 @@ class WebAuthnService(
         return userService.getByEmail(email)?.language ?: "en"
     }
 
-    fun verifyPassword(userId: Int, encryptedPassword: String): Boolean {
+    suspend fun verifyPassword(userId: Int, encryptedPassword: String): Boolean {
         return passwordService.verifyPassword(userId, encryptedPassword)
     }
 
@@ -494,19 +505,19 @@ class WebAuthnService(
         return passwordService.requestPasswordReset(email, language)
     }
 
-    fun resetPassword(token: String, encryptedNewPassword: String): Boolean {
+    suspend fun resetPassword(token: String, encryptedNewPassword: String): Boolean {
         return passwordService.resetPassword(token, encryptedNewPassword)
     }
 
-    fun verifyAndConsumeMagicLink(token: String): MagicLinkService.MagicLinkResult? {
+    suspend fun verifyAndConsumeMagicLink(token: String): MagicLinkService.MagicLinkResult? {
         return magicLinkService.verifyAndConsumeMagicLink(token)
     }
 
-    fun verifyMagicLink(token: String): MagicLinkService.MagicLinkResult? {
+    suspend fun verifyMagicLink(token: String): MagicLinkService.MagicLinkResult? {
         return magicLinkService.verifyMagicLink(token)
     }
 
-    fun consumeMagicLink(token: String) {
+    suspend fun consumeMagicLink(token: String) {
         magicLinkService.consumeMagicLink(token)
     }
 
