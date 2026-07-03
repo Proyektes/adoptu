@@ -1,12 +1,10 @@
 package com.adoptu.dto.input
 
-import kotlinx.serialization.Serializable
 
 enum class UserRole {
     ADMIN, RESCUER, ADOPTER, PHOTOGRAPHER, TEMPORAL_HOME, SHELTER, STERILIZATION_SERVICE
 }
 
-@Serializable
 data class UserDto(
     val id: Int,
     val username: String,
@@ -26,22 +24,18 @@ data class UserDto(
     val photographerState: String? = null
 )
 
-@Serializable
 data class BanUserRequest(
     val reason: String? = null
 )
 
-@Serializable
 data class UpdateProfileRequest(
     val displayName: String
 )
 
-@Serializable
 data class UpdateLanguageRequest(
     val language: String
 )
 
-@Serializable
 data class PhotographerDto(
     val userId: Int,
     val displayName: String,
@@ -52,13 +46,11 @@ data class PhotographerDto(
     val state: String? = null
 )
 
-@Serializable
 data class AcceptTermsRequest(
     val acceptPrivacyPolicy: Boolean = false,
     val acceptTermsAndConditions: Boolean = false
 )
 
-@Serializable
 data class PhotographerSettingsRequest(
     val photographerFee: Double,
     val photographerCurrency: String,
@@ -66,7 +58,6 @@ data class PhotographerSettingsRequest(
     val state: String? = null
 )
 
-@Serializable
 data class PhotographyRequestDto(
     val id: Int,
     val photographerId: Int,
@@ -81,32 +72,27 @@ data class PhotographyRequestDto(
     val createdAt: Long
 )
 
-@Serializable
 data class CreatePhotographyRequestRequest(
     val photographerId: Int,
     val petId: Int? = null,
     val message: String? = null
 )
 
-@Serializable
 data class UpdatePhotographyRequestRequest(
     val status: String? = null,
     val scheduledDate: Long? = null
 )
 
-@Serializable
 data class CreateMultiPhotographerRequestRequest(
     val photographerIds: List<Int>,
     val petId: Int? = null,
     val message: String
 )
 
-@Serializable
 data class RoleActivationRequest(
     val activate: Boolean
 )
 
-@Serializable
 data class TemporalHomeDto(
     val userId: Int,
     val alias: String,
@@ -118,7 +104,6 @@ data class TemporalHomeDto(
     val createdAt: Long
 )
 
-@Serializable
 data class TemporalHomeSearchParams(
     val country: String? = null,
     val state: String? = null,
@@ -127,7 +112,6 @@ data class TemporalHomeSearchParams(
     val neighborhood: String? = null
 )
 
-@Serializable
 data class CreateTemporalHomeRequest(
     val alias: String,
     val country: String,
@@ -139,7 +123,6 @@ data class CreateTemporalHomeRequest(
     val phone: String? = null
 )
 
-@Serializable
 data class UpdateTemporalHomeRequest(
     val alias: String? = null,
     val country: String? = null,
@@ -151,19 +134,16 @@ data class UpdateTemporalHomeRequest(
     val phone: String? = null
 )
 
-@Serializable
 data class SendTemporalHomeRequestRequest(
     val temporalHomeId: Int,
     val petId: Int? = null,
     val message: String
 )
 
-@Serializable
 data class BlockRescuerRequest(
     val rescuerId: Int
 )
 
-@Serializable
 data class TemporalHomeRequestDto(
     val id: Int,
     val temporalHomeId: Int,

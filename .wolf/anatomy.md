@@ -1749,19 +1749,39 @@
 
 - `Shared.kt` — `countrySelect()` now renders `<option>`s from `Country.entries` instead of a hardcoded 112-line list (~3000 tok)
 
-## backend/src/main/kotlin/com/adoptu/plugins/
+## backend/src/main/kotlin/com/adoptu/ (helidon-nima-migration worktree)
 
-- `Sessions.kt` — Application (~152 tok)
+- `Application.kt` — `fun main()` (no more Ktor `EngineMain`): loads `AppConfig`, `startKoin`, `DatabaseFactory.init`, `CryptoService.initialize`, then `WebServer.builder().port(...).mediaContext(JsonSupport.mediaContext()).routing(::configureRouting).build().start()`. `internal fun configureRouting(routing: HttpRouting.Builder)` registers the `NotFoundException`→404 and `Throwable`→500 error handlers (order matters — specific before generic, see bug-038), `/static` (legacy `StaticContentService`), `/health`, and all 10 route groups; `internal` visibility so `testsupport/TestServer.kt` can reuse it directly (~400 tok)
+
+## backend/src/test/kotlin/com/adoptu/testsupport/ (helidon-nima-migration worktree)
+
+- `TestServer.kt` — replaces Ktor's `testApplication{}`/`embeddedServer(Netty,...)`. `TestServer.start(configOverrides, modules, initDatabase, withTestLogin)` starts a real Helidon `WebServer` on a random port through the same `configureRouting` production path, against H2 (`MODE=PostgreSQL`). Always appends a `single { config }` Koin fallback so route files that eagerly resolve `AppConfig` (namely `authRoutes()`) don't crash when a test supplies its own narrow custom module (see bug-035); cleans up Koin via `stopKoin()` both on `TestServerHandle.stop()` and on any startup failure (~600 tok)
+- `TestHttp.kt` — `java.net.http.HttpClient`-based replacement for Ktor's test `HttpClient`: `get/delete/post/postJson/postForm/put/putJson/putForm(url, cookie)` returning `HttpResponse<String>` (use `.statusCode()`/`.body()`), `loginAs(baseUrl, userId)` hitting the harness's built-in `/test/login/{userId}` route, and `buildMultipartBody(boundary, fields, files)` for multipart upload tests (~400 tok)
+
+## backend/src/main/kotlin/com/adoptu/config/ (helidon-nima-migration worktree)
+
+- `AppConfig.kt` — drop-in replacement for Ktor's `ApplicationConfig` (same `propertyOrNull(path)?.getString()`/`property(path).getString()`/`.getList()` shape), backed by `com.typesafe.config.Config` directly. `AppConfig.load()` reads `application.conf` unchanged; `AppConfig.fromMap(Map<String,Any>)` is the test-only equivalent of Ktor's `MapApplicationConfig` (~200 tok)
+
+## backend/src/main/kotlin/com/adoptu/web/ (helidon-nima-migration worktree — replaces the deleted `plugins/` package)
+
+- `JsonSupport.kt` — Jackson `ObjectMapper` (registerKotlinModule, ignore-unknown-properties) + a custom `DefaultPrettyPrinter` subclass fixing two Jackson-vs-kotlinx.serialization pretty-print formatting mismatches (empty `[]`/`{}` vs `[ ]`/`{ }`, `": "` vs `" : "` field separator — see bug-036); `mediaContext()` wires Jackson + multipart support into Helidon's `MediaContext` (~250 tok)
+- `Sessions.kt` — HMAC-SHA256-signed cookie session (`getSession()`/`setSession()`/`clearSession()` on `ServerRequest`/`ServerResponse`), replacing Ktor's `Sessions` plugin; not wire-compatible with old Ktor session cookies (one-time silent logout on cutover, expected) (~350 tok)
+- `Responses.kt` — `ServerResponse` extensions: `respondError`/`respondUnauthorized`/`respondForbidden`/`respondNotFound`/`respondInvalidId`/`respondRedirect`/`respondData`/`respondSuccess`, replacing `plugins/Responses.kt` (dropped the confirmed-dead `DataResponder`/`SuccessResponder`/`CustomResponder` classes) (~250 tok)
+- `RequestExtensions.kt` — `ServerRequest` extensions: `pathParam`/`queryParam`/`receiveJson<T>()`/`receiveText()` (defensive against empty/absent body, see bug-037)/`receiveFormParameters()`/`receiveMultipart()` (~300 tok)
+- `Html.kt` — `ServerResponse.respondHtml { }` rendering a kotlinx.html `HTML` builder to bytes, replacing Ktor's `ktor-server-html-builder` (~100 tok)
+- `AccessLogFilter.kt` — Helidon `Filter` logging `METHOD path → status (ms)`, skipping `/health`/`/static`/`/css`/`/js`, replacing `plugins/Logging.kt`'s `CallLogging` (~150 tok)
+- `Deps.kt` — `object Deps : KoinComponent`, giving route files `by Deps.inject<T>()` as a drop-in for Ktor's `org.koin.ktor.ext.inject` (~80 tok)
 
 ## backend/src/main/kotlin/com/adoptu/ports/
 
 - `PetRepositoryPort.kt` — getAll, getAllUnfiltered, getById, create, update (~682 tok)
 - `UserRepositoryPort.kt` — getById, getByEmail, getAllUsers, getPhotographers, getRescuers (~614 tok)
 
-## backend/src/main/kotlin/com/adoptu/routes/
+## backend/src/main/kotlin/com/adoptu/routes/ (ported Ktor Route DSL → Helidon HttpRules/Handler, helidon-nima-migration worktree)
 
-- `PetsRoutes.kt` — Route (~3615 tok)
-- `UsersRoutes.kt` — Data class: UpdateProfileRequest (~3500 tok)
+- `PetsRoutes.kt` — `fun HttpRules.petsRoutes()`, flattened from Ktor's nested `route("/api/pets"){}`; multipart image upload via `req.receiveMultipart()`; literal `/mine`/`/my-adoption-requests` deliberately registered before `/{id}` (Helidon matches routes in registration order, unlike Ktor's specificity-first tree — see Key Learnings) (~3615 tok)
+- `UsersRoutes.kt` — `fun HttpRules.usersRoutes()`/`adminUsersRoutes()`; local request DTOs (UpdateProfileRequest etc.) now plain data classes, no `@Serializable` (~3500 tok)
+- All other route files (`AuthRoutes.kt`, `PhotographerRoutes.kt`, `ShelterRoutes.kt`, `SterilizationLocationRoutes.kt`, `TemporalHomeRoutes.kt`, `UIRoutes.kt`, `UserShelterRoutes.kt`, `UserSterilizationLocationRoutes.kt`) follow the same `fun HttpRules.xxxRoutes()` + `Handler { req, res -> ... }` + `runBlocking { }`-bridged suspend service calls pattern; business logic unchanged from their Ktor originals
 
 ## backend/src/main/kotlin/com/adoptu/services/
 
@@ -1777,7 +1797,7 @@
 
 ## backend/src/test/kotlin/com/adoptu/routes/
 
-- `PetsRoutesE2ETest.kt` — Ktor routing (~16534 tok)
+- All `*RoutesE2ETest.kt`/`ApplicationTestcontainersIT.kt` files (helidon-nima-migration worktree) ported from Ktor `testApplication{}` to `TestServer.start(...)`/`TestHttp.*` (see `testsupport/` above) — same assertions/business logic, only the HTTP-invocation layer changed. `PetsRoutesE2ETest.kt` is the largest (94 @Test methods, multipart upload via `buildMultipartBody`) (~16534 tok)
 
 ## backend/src/test/kotlin/com/adoptu/services/
 

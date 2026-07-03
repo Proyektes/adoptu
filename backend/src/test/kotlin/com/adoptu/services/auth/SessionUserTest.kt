@@ -1,6 +1,6 @@
 package com.adoptu.services.auth
 
-import kotlinx.serialization.json.Json
+import com.adoptu.web.JsonSupport
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -40,14 +40,14 @@ class SessionUserTest {
     }
 
     @Test
-    fun `serializes and deserializes round trip via kotlinx serialization`() {
+    fun `serializes and deserializes round trip via Jackson`() {
         val user = SessionUser(userId = 42, email = "round@trip.com", displayName = "Round Tripper")
 
-        val json = Json.encodeToString(SessionUser.serializer(), user)
-        val decoded = Json.decodeFromString(SessionUser.serializer(), json)
+        val json = JsonSupport.objectMapper.writeValueAsString(user)
+        val decoded = JsonSupport.objectMapper.readValue(json, SessionUser::class.java)
 
         assertEquals(user, decoded)
-        assertTrue(json.contains("\"userId\":42"))
+        assertTrue(json.contains("\"userId\": 42"))
         assertTrue(json.contains("round@trip.com"))
         assertTrue(json.contains("Round Tripper"))
     }

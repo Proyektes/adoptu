@@ -1,6 +1,5 @@
 package com.adoptu.dto.input
 
-import kotlinx.serialization.Serializable
 
 enum class Gender {
     MALE, FEMALE
@@ -15,7 +14,6 @@ enum class Status {
     AVAILABLE, ADOPTED, DISABLED, PENDING
 }
 
-@Serializable
 data class PetDto(
     val id: Int,
     val rescuerId: Int,
@@ -52,7 +50,6 @@ data class PetDto(
     val images: List<PetImageDto> = emptyList()
 )
 
-@Serializable
 data class PetImageDto(
     val id: Int,
     val imageUrl: String,
@@ -60,7 +57,6 @@ data class PetImageDto(
     val sortOrder: Int
 )
 
-@Serializable
 data class CreatePetRequest(
     val name: String,
     val type: String,
@@ -94,7 +90,6 @@ data class CreatePetRequest(
     val isPromoted: Boolean = false
 )
 
-@Serializable
 data class UpdatePetRequest(
     val name: String? = null,
     val type: String? = null,

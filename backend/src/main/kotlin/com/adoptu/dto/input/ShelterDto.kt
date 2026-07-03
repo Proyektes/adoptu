@@ -1,8 +1,6 @@
 package com.adoptu.dto.input
 
-import kotlinx.serialization.Serializable
 
-@Serializable
 data class ShelterDto(
     val id: Int,
     val userId: Int? = null,
@@ -28,7 +26,6 @@ data class ShelterDto(
     val updatedAt: Long
 )
 
-@Serializable
 data class CreateShelterRequest(
     val name: String,
     val country: String,
@@ -50,7 +47,6 @@ data class CreateShelterRequest(
     val description: String? = null
 )
 
-@Serializable
 data class UpdateShelterRequest(
     val name: String? = null,
     val country: String? = null,
@@ -72,7 +68,6 @@ data class UpdateShelterRequest(
     val description: String? = null
 )
 
-@Serializable
 data class ShelterSearchParams(
     val country: String,
     val state: String? = null,
@@ -81,7 +76,6 @@ data class ShelterSearchParams(
     val zip: String? = null
 )
 
-@Serializable
 data class UserShelterDto(
     val userId: Int,
     val name: String,
@@ -105,7 +99,6 @@ data class UserShelterDto(
     val createdAt: Long
 )
 
-@Serializable
 data class CreateUserShelterRequest(
     val name: String,
     val country: String,
@@ -127,7 +120,6 @@ data class CreateUserShelterRequest(
     val description: String? = null
 )
 
-@Serializable
 data class UpdateUserShelterRequest(
     val name: String? = null,
     val country: String? = null,

@@ -3,17 +3,17 @@ package com.adoptu.di
 import com.adoptu.adapters.db.repositories.*
 import com.adoptu.adapters.notification.SesEmailAdapter
 import com.adoptu.adapters.storage.S3ImageStorageAdapter
+import com.adoptu.config.AppConfig
 import com.adoptu.ports.*
 import com.adoptu.services.*
 import com.adoptu.services.auth.WebAuthnService
 import com.adoptu.services.validation.*
-import io.ktor.server.config.*
 import org.koin.dsl.module
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-fun appModule(config: ApplicationConfig) = module {
+fun appModule(config: AppConfig) = module {
     single { config }
     single<Clock> { Clock.System }
     single { WebAuthnService(get(), get(), get(), get(), get(), config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com", config.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost", config.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption", getOrigins(config)) }
@@ -49,7 +49,7 @@ fun appModule(config: ApplicationConfig) = module {
     single { AuthValidationService() }
 }
 
-private fun getOrigins(config: ApplicationConfig): List<String> {
+private fun getOrigins(config: AppConfig): List<String> {
     val originsList = config.propertyOrNull("webauthn.origins")?.getList()
     if (!originsList.isNullOrEmpty()) {
         return originsList
@@ -57,7 +57,7 @@ private fun getOrigins(config: ApplicationConfig): List<String> {
     return listOf("http://localhost:80")
 }
 
-internal fun createImageStorageAdapter(config: ApplicationConfig): ImageStoragePort {
+internal fun createImageStorageAdapter(config: AppConfig): ImageStoragePort {
     val env = config.propertyOrNull("env")?.getString() ?: "prod"
     val prefix = "storage.$env"
 

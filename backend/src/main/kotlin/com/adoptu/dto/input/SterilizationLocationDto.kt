@@ -1,8 +1,6 @@
 package com.adoptu.dto.input
 
-import kotlinx.serialization.Serializable
 
-@Serializable
 data class SterilizationLocationDto(
     val id: Int,
     val userId: Int? = null,
@@ -21,7 +19,6 @@ data class SterilizationLocationDto(
     val updatedAt: Long
 )
 
-@Serializable
 data class CreateSterilizationLocationRequest(
     val name: String,
     val country: String,
@@ -36,7 +33,6 @@ data class CreateSterilizationLocationRequest(
     val description: String? = null
 )
 
-@Serializable
 data class UpdateSterilizationLocationRequest(
     val name: String? = null,
     val country: String? = null,
@@ -51,32 +47,27 @@ data class UpdateSterilizationLocationRequest(
     val description: String? = null
 )
 
-@Serializable
 data class SterilizationLocationSearchParams(
     val country: String? = null,
     val state: String? = null,
     val city: String? = null
 )
 
-@Serializable
 data class SterilizationLocationsByLocation(
     val country: String,
     val states: List<SterilizationLocationsByState>
 )
 
-@Serializable
 data class SterilizationLocationsByState(
     val state: String?,
     val cities: List<SterilizationLocationsByCity>
 )
 
-@Serializable
 data class SterilizationLocationsByCity(
     val city: String,
     val locations: List<SterilizationLocationDto>
 )
 
-@Serializable
 data class UserSterilizationLocationDto(
     val userId: Int,
     val name: String,
@@ -93,7 +84,6 @@ data class UserSterilizationLocationDto(
     val createdAt: Long
 )
 
-@Serializable
 data class CreateUserSterilizationLocationRequest(
     val name: String,
     val country: String,
@@ -108,7 +98,6 @@ data class CreateUserSterilizationLocationRequest(
     val description: String? = null
 )
 
-@Serializable
 data class UpdateUserSterilizationLocationRequest(
     val name: String? = null,
     val country: String? = null,

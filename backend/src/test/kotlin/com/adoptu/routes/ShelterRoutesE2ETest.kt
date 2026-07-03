@@ -1,27 +1,16 @@
 package com.adoptu.routes
 
 import com.adoptu.adapters.db.AnimalShelters
-import com.adoptu.adapters.db.repositories.ShelterRepository
 import com.adoptu.dto.input.CreateShelterRequest
 import com.adoptu.dto.input.UpdateShelterRequest
 import com.adoptu.mocks.TestDatabase
-import com.adoptu.plugins.configureSerialization
-import com.adoptu.ports.ShelterRepositoryPort
-import com.adoptu.services.ShelterService
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.config.*
-import io.ktor.server.routing.*
-import io.ktor.server.testing.*
-import kotlinx.serialization.json.Json
+import com.adoptu.testsupport.TestHttp
+import com.adoptu.testsupport.TestServer
+import com.adoptu.web.JsonSupport
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.koin.dsl.module
-import org.koin.ktor.plugin.Koin
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Clock
@@ -36,34 +25,6 @@ class ShelterRoutesE2ETest {
     fun setup() {
         TestDatabase.initH2()
         TestDatabase.clearAllData()
-    }
-
-    private fun TestApplicationBuilder.setupApp() {
-        val config = MapApplicationConfig(
-            "env" to "test",
-            "ktor.deployment.port" to "80"
-        )
-
-        val testModules = module {
-            single<kotlin.time.Clock> { kotlin.time.Clock.System }
-            single<ShelterRepositoryPort> { ShelterRepository(get()) }
-            single { ShelterService(get()) }
-        }
-
-        environment {
-            this.config = config
-        }
-
-        application {
-            install(Koin) {
-                modules(testModules)
-            }
-            configureSerialization()
-            routing {
-                shelterRoutes()
-                adminShelterRoutes()
-            }
-        }
     }
 
     private fun createShelterInDb(
@@ -95,20 +56,24 @@ class ShelterRoutesE2ETest {
 
     @Test
     fun `GET shelters returns 400 when country is missing`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/shelters")
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("Country is required"))
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/shelters")
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Country is required"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET shelters returns 400 when country is blank`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/shelters?country=")
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/shelters?country=")
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -117,13 +82,15 @@ class ShelterRoutesE2ETest {
         createShelterInDb(name = "Shelter A", country = "United States")
         createShelterInDb(name = "Shelter B", country = "Canada")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/shelters?country=United%20States")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/shelters?country=United%20States")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Shelter A"))
             assertTrue(!body.contains("Shelter B"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -132,13 +99,15 @@ class ShelterRoutesE2ETest {
         createShelterInDb(name = "Shelter A", country = "United States", state = "CA", city = "LA", zip = "90001")
         createShelterInDb(name = "Shelter B", country = "United States", state = "NY", city = "NYC", zip = "10001")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/shelters?country=United%20States&state=CA&city=LA&zip=90001")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/shelters?country=United%20States&state=CA&city=LA&zip=90001")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Shelter A"))
             assertTrue(!body.contains("Shelter B"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -149,13 +118,15 @@ class ShelterRoutesE2ETest {
         createShelterInDb(name = "Shelter A", country = "United States")
         createShelterInDb(name = "Shelter B", country = "Canada")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/shelters/countries")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/shelters/countries")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("United States"))
             assertTrue(body.contains("Canada"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -166,13 +137,15 @@ class ShelterRoutesE2ETest {
         createShelterInDb(name = "Shelter A", country = "United States", state = "CA")
         createShelterInDb(name = "Shelter B", country = "United States", state = "NY")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/shelters/countries/United%20States/states")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/shelters/countries/United%20States/states")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("CA"))
             assertTrue(body.contains("NY"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -182,31 +155,37 @@ class ShelterRoutesE2ETest {
     fun `GET shelter by id returns shelter when it exists`() {
         val id = createShelterInDb(name = "Shelter A")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/shelters/$id")
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("Shelter A"))
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/shelters/$id")
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("Shelter A"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET shelter by id returns 404 when not found`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/shelters/999")
-            assertEquals(HttpStatusCode.NotFound, response.status)
-            assertTrue(response.bodyAsText().contains("Shelter not found"))
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/shelters/999")
+            assertEquals(404, response.statusCode())
+            assertTrue(response.body().contains("Shelter not found"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET shelter by id returns 400 for invalid id`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/shelters/abc")
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("Invalid ID"))
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/shelters/abc")
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Invalid ID"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -216,11 +195,13 @@ class ShelterRoutesE2ETest {
     fun `GET admin shelters returns empty list when country is missing`() {
         createShelterInDb(name = "Shelter A", country = "United States")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/admin/shelters")
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals("[]", response.bodyAsText())
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/shelters")
+            assertEquals(200, response.statusCode())
+            assertEquals("[]", response.body())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -229,13 +210,15 @@ class ShelterRoutesE2ETest {
         createShelterInDb(name = "Shelter A", country = "United States")
         createShelterInDb(name = "Shelter B", country = "Canada")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/admin/shelters?country=United%20States")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/shelters?country=United%20States")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Shelter A"))
             assertTrue(!body.contains("Shelter B"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -245,29 +228,35 @@ class ShelterRoutesE2ETest {
     fun `GET admin shelter by id returns shelter when it exists`() {
         val id = createShelterInDb(name = "Shelter A")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/admin/shelters/$id")
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("Shelter A"))
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/shelters/$id")
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("Shelter A"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET admin shelter by id returns 404 when not found`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/admin/shelters/999")
-            assertEquals(HttpStatusCode.NotFound, response.status)
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/shelters/999")
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET admin shelter by id returns 400 for invalid id`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/admin/shelters/abc")
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/shelters/abc")
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -275,9 +264,8 @@ class ShelterRoutesE2ETest {
 
     @Test
     fun `POST admin shelters creates shelter`() {
-        testApplication {
-            setupApp()
-
+        val handle = TestServer.start(initDatabase = false)
+        try {
             val request = CreateShelterRequest(
                 name = "New Shelter",
                 country = "United States",
@@ -285,21 +273,22 @@ class ShelterRoutesE2ETest {
                 address = "123 Main St"
             )
 
-            val response = client.post("/api/admin/shelters") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateShelterRequest.serializer(), request))
-            }
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/admin/shelters",
+                JsonSupport.objectMapper.writeValueAsString(request)
+            )
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("New Shelter"))
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("New Shelter"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST admin shelters returns 400 for blank name`() {
-        testApplication {
-            setupApp()
-
+        val handle = TestServer.start(initDatabase = false)
+        try {
             val request = CreateShelterRequest(
                 name = "",
                 country = "United States",
@@ -307,13 +296,15 @@ class ShelterRoutesE2ETest {
                 address = "123 Main St"
             )
 
-            val response = client.post("/api/admin/shelters") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateShelterRequest.serializer(), request))
-            }
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/admin/shelters",
+                JsonSupport.objectMapper.writeValueAsString(request)
+            )
 
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("Name is required"))
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Name is required"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -323,66 +314,71 @@ class ShelterRoutesE2ETest {
     fun `PUT admin shelter updates shelter when it exists`() {
         val id = createShelterInDb(name = "Old Name")
 
-        testApplication {
-            setupApp()
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/admin/shelters/$id",
+                JsonSupport.objectMapper.writeValueAsString(
+                    UpdateShelterRequest(
+                        name = "New Name",
+                        country = "Canada",
+                        state = "ON",
+                        city = "Toronto",
+                        neighborhood = "Downtown",
+                        address = "456 Other St",
+                        zip = "M5V 2T6",
+                        phone = "555-1234",
+                        email = "shelter@example.com",
+                        website = "https://example.com",
+                        fiscalId = "FID123",
+                        bankName = "Test Bank",
+                        accountHolderName = "Account Holder",
+                        accountNumber = "1234567890",
+                        iban = "IBAN123",
+                        swiftBic = "SWIFT123",
+                        currency = "CAD",
+                        description = "Updated description"
+                    )
+                )
+            )
 
-            val response = client.put("/api/admin/shelters/$id") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdateShelterRequest.serializer(), UpdateShelterRequest(
-                    name = "New Name",
-                    country = "Canada",
-                    state = "ON",
-                    city = "Toronto",
-                    neighborhood = "Downtown",
-                    address = "456 Other St",
-                    zip = "M5V 2T6",
-                    phone = "555-1234",
-                    email = "shelter@example.com",
-                    website = "https://example.com",
-                    fiscalId = "FID123",
-                    bankName = "Test Bank",
-                    accountHolderName = "Account Holder",
-                    accountNumber = "1234567890",
-                    iban = "IBAN123",
-                    swiftBic = "SWIFT123",
-                    currency = "CAD",
-                    description = "Updated description"
-                )))
-            }
-
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("New Name"))
             assertTrue(body.contains("Canada"))
             assertTrue(body.contains("Toronto"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT admin shelter returns 404 when not found`() {
-        testApplication {
-            setupApp()
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/admin/shelters/999",
+                JsonSupport.objectMapper.writeValueAsString(UpdateShelterRequest(name = "New Name"))
+            )
 
-            val response = client.put("/api/admin/shelters/999") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdateShelterRequest.serializer(), UpdateShelterRequest(name = "New Name")))
-            }
-
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT admin shelter returns 400 for invalid id`() {
-        testApplication {
-            setupApp()
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/admin/shelters/abc",
+                JsonSupport.objectMapper.writeValueAsString(UpdateShelterRequest(name = "New Name"))
+            )
 
-            val response = client.put("/api/admin/shelters/abc") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdateShelterRequest.serializer(), UpdateShelterRequest(name = "New Name")))
-            }
-
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -392,34 +388,39 @@ class ShelterRoutesE2ETest {
     fun `DELETE admin shelter deletes shelter when it exists`() {
         val id = createShelterInDb(name = "To Delete")
 
-        testApplication {
-            setupApp()
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.delete("${handle.baseUrl}/api/admin/shelters/$id")
 
-            val response = client.delete("/api/admin/shelters/$id")
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("\"success\": true"))
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("\"success\": true"))
-
-            val followUp = client.get("/api/admin/shelters/$id")
-            assertEquals(HttpStatusCode.NotFound, followUp.status)
+            val followUp = TestHttp.get("${handle.baseUrl}/api/admin/shelters/$id")
+            assertEquals(404, followUp.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `DELETE admin shelter returns 404 when not found`() {
-        testApplication {
-            setupApp()
-            val response = client.delete("/api/admin/shelters/999")
-            assertEquals(HttpStatusCode.NotFound, response.status)
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.delete("${handle.baseUrl}/api/admin/shelters/999")
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `DELETE admin shelter returns 400 for invalid id`() {
-        testApplication {
-            setupApp()
-            val response = client.delete("/api/admin/shelters/abc")
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+        val handle = TestServer.start(initDatabase = false)
+        try {
+            val response = TestHttp.delete("${handle.baseUrl}/api/admin/shelters/abc")
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 }

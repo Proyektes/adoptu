@@ -1,7 +1,7 @@
 package com.adoptu.adapters.notification
 
+import com.adoptu.config.AppConfig
 import com.adoptu.ports.NotificationPort
-import io.ktor.server.config.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.apache.commons.mail.DefaultAuthenticator
@@ -15,7 +15,7 @@ import java.net.URI
 
 private val logger = LoggerFactory.getLogger("SesEmailAdapter")
 
-class SesEmailAdapter(config: ApplicationConfig) : NotificationPort {
+class SesEmailAdapter(config: AppConfig) : NotificationPort {
 
     private val env = config.propertyOrNull("env")?.getString() ?: "prod"
     private val isDev = env.lowercase() == "dev"

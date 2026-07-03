@@ -80,7 +80,6 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-03T18:11:30.627Z"
-      "last_seen": "2026-07-03T16:56:27.533Z"
     },
     {
       "id": "bug-016",
@@ -379,6 +378,54 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-03T11:37:00.000Z"
+    },
+    {
+      "id": "bug-035",
+      "timestamp": "2026-07-03T16:20:00.000Z",
+      "error_message": "org.koin.core.error.NoDefinitionFoundException: No definition found for type 'com.adoptu.config.AppConfig' - then every subsequent test in the class fails with KoinApplicationAlreadyStartedException",
+      "file": "backend/src/test/kotlin/com/adoptu/testsupport/TestServer.kt",
+      "root_cause": "During the Ktor-to-Helidon migration, TestServer.start() (the shared test harness replacing Ktor's testApplication{}) always mounts the FULL production route tree via configureRouting(), including authRoutes(), which resolves `val config by Deps.inject<AppConfig>()` EAGERLY at route-registration time (not lazily per-request) to compute a default admin email. Most ported *RoutesE2ETest.kt files pass a narrow custom Koin module (mirroring their original Ktor test's minimal module, which only bound what that one route group needed) that never included an AppConfig binding - fine under Ktor's own per-application-scoped Koin instance, but this project's TestServer always brings in authRoutes() regardless of which route the test is actually exercising, so AppConfig became a transitive requirement of every single test. Compounding this: when the WebServer.builder()...start() call threw (as a result of the above), TestServer.start() had already called startKoin() successfully, but the exception meant no TestServerHandle was ever returned - so the test's own try/finally { handle.stop() } never ran, stopKoin() never fired, and Koin was left globally 'started' for every subsequent test in the same JVM fork.",
+      "fix": "In TestServer.start(): (1) always append a `module { single { config } }` fallback binding after any caller-supplied custom modules, guaranteeing AppConfig is resolvable regardless of what the test's own module provides. (2) Wrap the DatabaseFactory.init()/CryptoService.initialize()/WebServer.builder()...start() sequence in try/catch, calling stopKoin() before rethrowing on any failure, so one test's setup failure can't cascade into every subsequent test in the class failing with an unrelated KoinApplicationAlreadyStartedException that masks the real error. Dropped test failures project-wide from 233/1084 to 19/1084 in one fix.",
+      "tags": ["helidon", "koin", "testing", "migration", "cascading-failure"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T16:20:00.000Z"
+    },
+    {
+      "id": "bug-036",
+      "timestamp": "2026-07-03T16:35:00.000Z",
+      "error_message": "AssertionFailedError: expected: <[]> but was: <[ ]> (empty JSON array/object assertions); expected: <\"userId\": 1> but actual body had \"userId\" : 1 (space before colon too)",
+      "file": "backend/src/main/kotlin/com/adoptu/web/JsonSupport.kt",
+      "root_cause": "Jackson's DefaultPrettyPrinter (enabled via SerializationFeature.INDENT_OUTPUT, to match the pretty-printed JSON responses the app had under Ktor/kotlinx.serialization) differs from kotlinx.serialization's own prettyPrint in two specific ways: (1) it renders empty arrays/objects as \"[ ]\"/\"{ }\" with an internal space, where kotlinx.serialization renders \"[]\"/\"{}\"; (2) its default object field/value separator is \" : \" (space on BOTH sides of the colon), where kotlinx.serialization (and standard JSON style) uses \": \" (space after only). Neither difference is a functional bug - valid JSON either way - but ~10 ported test assertions did literal substring checks against the old kotlinx.serialization-shaped output.",
+      "fix": "Registered a custom `DefaultPrettyPrinter` subclass (constructed with `Separators.createDefaultInstance().withObjectFieldValueSpacing(Separators.Spacing.AFTER)` to fix the colon spacing) that overrides `writeEndArray`/`writeEndObject` to skip Jackson's default empty-container space when the value/entry count is 0. Registered via `objectMapper.setDefaultPrettyPrinter(...)`. Only affects formatting of empty containers and field-value spacing - non-empty container indentation is untouched.",
+      "tags": ["helidon", "jackson", "json", "testing", "migration"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T16:35:00.000Z"
+    },
+    {
+      "id": "bug-037",
+      "timestamp": "2026-07-03T16:38:00.000Z",
+      "error_message": "AssertionFailedError: expected: <200> but was: <500> / expected: <400> but was: <500> on requests sending an empty-string request body (e.g. TestHttp.postForm(url, \"\", cookie) or an empty PUT form body)",
+      "file": "backend/src/main/kotlin/com/adoptu/web/RequestExtensions.kt",
+      "root_cause": "ServerRequest.receiveText() called `content().as(String::class.java)` unconditionally. When a request has an explicit zero-length body (Content-Length: 0, sent deliberately by tests to simulate a missing form field), Helidon's ReadableEntity considers there to be no entity to read (`hasEntity()` is false), and calling `.as(String::class.java)` on it throws rather than returning an empty string - the exception then hit the generic Throwable catch-all error handler in Application.kt and surfaced as an unrelated-looking 500, instead of the intended graceful \"missing field\" 400/200 validation-error response.",
+      "fix": "receiveText() now checks `content().hasEntity()` first and returns \"\" when there's no entity, matching Ktor's `call.receiveText()` behavior (which always returns a string, empty or not, never throwing for a missing/empty body).",
+      "tags": ["helidon", "http", "edge-case", "migration"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T16:38:00.000Z"
+    },
+    {
+      "id": "bug-038",
+      "timestamp": "2026-07-03T15:55:00.000Z",
+      "error_message": "GET /this-route-does-not-exist returned 500 instead of 404",
+      "file": "backend/src/main/kotlin/com/adoptu/Application.kt",
+      "root_cause": "configureRouting() registered a single catch-all `routing.error(Throwable::class.java) { ... }` handler mapping every unhandled exception to 500. Helidon signals \"no route matched\" by throwing `io.helidon.http.NotFoundException` internally, which - being a Throwable - was caught by that same catch-all and turned into a 500 instead of Helidon's intended 404.",
+      "fix": "Registered a more specific `routing.error(NotFoundException::class.java) { _, res, _ -> res.status(Status.NOT_FOUND_404).send() }` handler before the generic Throwable one (Helidon dispatches to the most specific matching registered error handler, not strictly registration order, but registering specific-before-generic is the documented/conventional style and was verified working).",
+      "tags": ["helidon", "routing", "migration"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T15:55:00.000Z"
     }
   ]
 }

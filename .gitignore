@@ -66,3 +66,4 @@ node_modules/
 
 # OpenWolf design QC screenshots (temporary, not for VCS)
 .wolf/designqc-captures/
+.tokensave
