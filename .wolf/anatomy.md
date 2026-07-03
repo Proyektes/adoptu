@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-03T18:50:47.731Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-03T20:57:07.606Z
 > Files: 906 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
@@ -1124,8 +1124,8 @@
 
 ## .claude/worktrees/graalvm-native-image/.wolf/
 
-- `anatomy.md` — anatomy.md (~20371 tok)
-- `buglog.json` — Declares so (~17460 tok)
+- `anatomy.md` — anatomy.md (~21873 tok)
+- `buglog.json` — Declares putPromise (~13192 tok)
 - `cerebrum.md` — Cerebrum (~12093 tok)
 - `memory.md` — Memory (~33272 tok)
 

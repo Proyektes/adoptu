@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-06-21T17:54:59.933Z",
   "lifetime": {
-    "total_tokens_estimated": 7978428,
-    "total_reads": 5982,
-    "total_writes": 4541,
-    "total_sessions": 116,
-    "anatomy_hits": 1243,
+    "total_tokens_estimated": 8016739,
+    "total_reads": 5984,
+    "total_writes": 4543,
+    "total_sessions": 118,
+    "anatomy_hits": 1245,
     "anatomy_misses": 4707,
     "repeated_reads_blocked": 1901,
-    "estimated_savings_vs_bare_cli": 6757900
+    "estimated_savings_vs_bare_cli": 6758300
   },
   "sessions": [
     {
@@ -62806,6 +62806,45 @@
         "output_tokens_estimated": 199,
         "reads_count": 2,
         "writes_count": 1,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-07-03-1452",
+      "started": "2026-07-03T20:52:14.194Z",
+      "ended": "2026-07-03T20:59:06.799Z",
+      "reads": [
+        {
+          "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/graalvm-native-image/.wolf/anatomy.md",
+          "tokens_estimated": 20371,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/graalvm-native-image/.wolf/buglog.json",
+          "tokens_estimated": 17460,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/graalvm-native-image/.wolf/anatomy.md",
+          "tokens_estimated": 446,
+          "action": "edit"
+        },
+        {
+          "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/graalvm-native-image/.wolf/buglog.json",
+          "tokens_estimated": 34,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 37831,
+        "output_tokens_estimated": 480,
+        "reads_count": 2,
+        "writes_count": 2,
         "repeated_reads_blocked": 0,
         "anatomy_lookups": 2
       }

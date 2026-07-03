@@ -297,6 +297,5 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
         }
         footer()
         commonScripts(navParams.isLoggedIn)
-        script(src = "/static/js/common.js") {}
     }
 }

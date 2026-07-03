@@ -1542,3 +1542,21 @@
 | 14:20 | Session end: 1 writes across 1 files (memory.md) | 1 reads | ~640 tok |
 | 14:23 | Session end: 1 writes across 1 files (memory.md) | 2 reads | ~1081 tok |
 | 14:35 | Session end: 1 writes across 1 files (memory.md) | 2 reads | ~1081 tok |
+| 12:12 | Extended e2e-verify.spec.ts to 65 tests (13 suites): password/email/name change, country persistence, search filters, image upload, i18n, language switch, detail accuracy | frontend/src/tests/e2e-verify.spec.ts | all 65 passing | ~large |
+| 12:12 | Added localStorage-backed country persistence across all 5 search pages | LocationSearchFilters.kt, index.js | done | — |
+| 12:12 | Fixed 6 real bugs found by running the suite live: stale session displayName/email, duplicate common.js causing double-submit, profile country field dropped entirely, pet status seed-data crash, temporal-homes missing city/zip search wiring, pet-currency dropdown missing 16 currencies | AuthRoutes.kt, ProfilePage.kt (x2), ApiClient.kt, test_data.sql, temporal-home-search.js, MyPetsPage.kt | verified via live test run | — |
+| 12:12 | Fixed Country.kt i18n key typos (finnland/uraguay) and added full Portuguese country-name translations (112 keys) | Country.kt, I18n.kt | verified via i18n test | — |
+| 13:05 | Ported e2e-verify-expand work onto adoptu (which had migrated index.js/temporal-home-search.js to Kotlin/JS already): re-implemented country-persistence in IndexPage.kt, city/zip wiring in TemporalHomePage.kt; backend fixes merged cleanly | IndexPage.kt, TemporalHomePage.kt, merge of worktree-e2e-verify-expand | all 65 tests pass on adoptu | — |
+
+## Session: 2026-07-03 14:48
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-03 14:52
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:56 | Edited .claude/worktrees/graalvm-native-image/.wolf/anatomy.md | 18→13 lines | ~416 |
+| 14:57 | Edited .claude/worktrees/graalvm-native-image/.wolf/buglog.json | 7→6 lines | ~34 |
+| 14:59 | Session end: 2 writes across 2 files (anatomy.md, buglog.json) | 2 reads | ~38311 tok |

@@ -55,8 +55,8 @@ object ApiClientModule {
 
     fun deletePet(id: String): Promise<dynamic> = apiFetch("/api/pets/$id", js("({method: 'DELETE'})"))
 
-    fun updateProfile(displayName: String): Promise<dynamic> {
-        val body = js("({displayName: displayName})")
+    fun updateProfile(displayName: String, country: String? = null): Promise<dynamic> {
+        val body = js("({displayName: displayName, country: country})")
         return apiFetch("/api/users/profile", js("({method: 'PUT', body: JSON.stringify(body)})"))
     }
 
