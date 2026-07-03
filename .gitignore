@@ -2,6 +2,9 @@
 .gradle/
 build/
 
+# Local benchmark output (scripts/benchmark.sh)
+scripts/benchmark-results/
+
 # IDE
 .idea/
 *.iml

@@ -49,13 +49,19 @@ if [ -z "$JAR" ]; then
     exit 1
 fi
 
-echo "==> Starting container: --cpus=0.5 --memory=1024m --network host (matches ECS Fargate task sizing)"
+echo "==> Starting container: --cpus=0.5 --memory=1024m (matches ECS Fargate task sizing)"
 cleanup
+# Bridge network + published port + host.docker.internal, not --network host: on Docker
+# Desktop (macOS/Windows), --network host attaches to the VM's network namespace, not the
+# real host's — it cannot reach a Postgres bound to the real host's 127.0.0.1. This works
+# identically on native Linux Docker too, given --add-host for host-gateway.
 docker run -d --name "$CONTAINER_NAME" \
     --cpus=0.5 --memory=1024m \
-    --network host \
+    -p "${PORT}:${PORT}" \
+    --add-host=host.docker.internal:host-gateway \
     -e ADOPTU_ENV=prod \
     -e ADOPTU_PORT="$PORT" \
+    -e ADOPTU_DB_URL=host.docker.internal:5432 \
     -v "$JAR:/app.jar:ro" \
     amazoncorretto:25-alpine-jdk \
     java -jar /app.jar >/dev/null
@@ -93,8 +99,15 @@ elif command -v wrk >/dev/null 2>&1; then
 elif command -v ab >/dev/null 2>&1; then
     # ab has no time-based mode; approximate with a large fixed request count.
     ab -n $((CONCURRENCY * DURATION * 5)) -c "$CONCURRENCY" "$URL" | tee -a "$OUT_FILE"
+elif docker image inspect williamyeh/wrk >/dev/null 2>&1 || docker pull williamyeh/wrk >/dev/null 2>&1; then
+    # No local load generator installed — use a containerized wrk instead of the crude
+    # curl+xargs fallback below. Targets host.docker.internal since this container is
+    # separate from the app's, same reasoning as the app container's own DB connection.
+    DOCKER_URL="http://host.docker.internal:${PORT}${ENDPOINT}"
+    docker run --rm --add-host=host.docker.internal:host-gateway williamyeh/wrk \
+        -t"$CONCURRENCY" -c"$CONCURRENCY" -d"${DURATION}s" --latency "$DOCKER_URL" | tee -a "$OUT_FILE"
 else
-    echo "No hey/wrk/ab found — falling back to a plain curl+xargs loop (rough numbers only)." | tee -a "$OUT_FILE"
+    echo "No hey/wrk/ab/docker-wrk found — falling back to a plain curl+xargs loop (rough numbers only)." | tee -a "$OUT_FILE"
     echo "Install 'hey' (https://github.com/rakyll/hey) for real percentile reporting." | tee -a "$OUT_FILE"
     START=$(date +%s)
     END=$((START + DURATION))
