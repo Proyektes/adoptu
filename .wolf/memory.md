@@ -1688,3 +1688,5 @@
 | 17:00 | Verified shadowJar builds and runs correctly end-to-end (curl against live process) against real Postgres; confirmed Dockerfile needs no changes (jdeps re-derives modules dynamically) | (verification only) | Production packaging validated | ~3000 |
 | 17:05 | Updated .wolf bookkeeping (fixed pre-existing buglog.json JSON corruption again, added bug-035..038, cerebrum.md Key Learnings + Decision Log, anatomy.md) | .wolf/buglog.json, cerebrum.md, anatomy.md, memory.md | Session documented | ~8000 |
 | 17:45 | Edited .gitignore | 7→4 lines | ~23 |
+| 17:46 | Session end: 94 writes across 53 files (anatomy.md, buglog.json, 20260703T211336Z_graalvm-native-home-retest.txt, 20260703T211336Z_graalvm-native-pets-retest.txt, cerebrum.md) | 83 reads | ~311724 tok |
+| 17:47 | Session end: 94 writes across 53 files (anatomy.md, buglog.json, 20260703T211336Z_graalvm-native-home-retest.txt, 20260703T211336Z_graalvm-native-pets-retest.txt, cerebrum.md) | 83 reads | ~311724 tok |
