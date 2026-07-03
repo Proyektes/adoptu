@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-02T22:23:23.990Z
-> Files: 857 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-03T17:35:17.420Z
+> Files: 892 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -495,6 +495,44 @@
 - `SterilizationLocationsPage.kt` — init, search, render, locationCard, init (~2634 tok)
 - `TemporalHomePage.kt` — init, search, displayResults, init, loadRequests (~1344 tok)
 
+## .claude/worktrees/e2e-verify-expand/.claude/skills/
+
+- `e2e-verify.md` — E2E Verification Skill (~593 tok)
+
+## .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/dto/input/
+
+- `PetDto.kt` — Data class: Gender (~1025 tok)
+
+## .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/dto/output/
+
+- `AuthResponses.kt` — Data class: AuthMeResponse (~439 tok)
+
+## .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/pages/
+
+- `LocationSearchFilters.kt` — DIV (~1089 tok)
+- `ProfilePage.kt` — HTML (~4809 tok)
+
+## .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/routes/
+
+- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~6925 tok)
+
+## .claude/worktrees/e2e-verify-expand/backend/src/main/resources/static/js/
+
+- `index.js` — emoji: updateCountryHint, loadPets, initCountry (~1215 tok)
+- `temporal-home-search.js` — params: executedFunction (~664 tok)
+
+## .claude/worktrees/e2e-verify-expand/frontend/src/jsMain/kotlin/com/adoptu/frontend/
+
+- `ApiClient.kt` — apiFetch, me, logout, getPets, getPet (~1668 tok)
+
+## .claude/worktrees/e2e-verify-expand/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
+
+- `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~9647 tok)
+
+## .claude/worktrees/e2e-verify-expand/frontend/src/tests/
+
+- `e2e-verify.spec.ts` — Adoptu — End-to-End Verification Suite (~12818 tok)
+
 ## .claude/worktrees/elegant-coalescing-kurzweil/
 
 - `docker-compose.yml` — Docker Compose services (~118 tok)
@@ -520,6 +558,10 @@
 ## .claude/worktrees/filter-country-hint/frontend/src/jsMain/kotlin/com/adoptu/frontend/
 
 - `I18n.kt` (~17510 tok)
+
+## .claude/worktrees/fix-country-i18n-typo/backend/src/main/kotlin/com/adoptu/common/
+
+- `Country.kt` — Country: fromDisplayName, normalize (~1532 tok)
 
 ## .claude/worktrees/fix-fido-cancel-error/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
 
@@ -1064,6 +1106,22 @@
 
 - `Shared.kt` — HTML, A, BODY, DIV, NAV (~3184 tok)
 
+## .claude/worktrees/graalvm-native-image/
+
+- `settings.gradle.kts` (~105 tok)
+
+## .claude/worktrees/graalvm-native-image/backend/
+
+- `build.gradle.kts` (~2694 tok)
+
+## .claude/worktrees/graalvm-native-image/backend/src/main/kotlin/com/adoptu/
+
+- `ApplicationNative.kt` — main (~148 tok)
+
+## .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/
+
+- `native-image.properties` (~65 tok)
+
 ## .claude/worktrees/idempotent-juggling-orbit/backend/src/main/kotlin/com/adoptu/pages/
 
 - `LocationSearchFilters.kt` — DIV (~699 tok)
@@ -1091,6 +1149,55 @@
 ## .claude/worktrees/imperative-roaming-starfish/backend/src/main/resources/
 
 - `logback.xml` (~230 tok)
+
+## .claude/worktrees/implement-perf-lessons/
+
+- `.gitignore` — Git ignore rules (~200 tok)
+
+## .claude/worktrees/implement-perf-lessons/.wolf/
+
+- `anatomy.md` — anatomy.md (~18890 tok)
+- `buglog.json` (~1317 tok)
+- `cerebrum.md` — Cerebrum (~11509 tok)
+- `memory.md` — Memory (~27107 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/
+
+- `build.gradle.kts` (~2384 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/adapters/db/
+
+- `DatabaseFactory.kt` — init, createDefaultAdmin (~1427 tok)
+- `DbDispatcher.kt` — Shared, bounded dispatcher for repository DB calls. (~705 tok)
+- `PoolSizing.kt` — Single source of truth for how many DB-bound worker threads/connections this (~365 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/adapters/db/repositories/
+
+- `PetRepository.kt` — PetRepositoryImpl: buildPetDto, rowToPetDto, getPetImages, getImagesForPetIds (~4766 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/routes/
+
+- `PetsRoutes.kt` — Route (~3731 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/
+
+- `EmailChangeService.kt` — EmailChangeService: requestEmailChange, verifyEmailChange, generateToken, getLocalizedEmailChangeCon (~1867 tok)
+- `MagicLinkService.kt` — Data class: MagicLinkService (~2743 tok)
+- `PasswordService.kt` — PasswordService: hasPassword, extractPassword, setPassword, changePassword (~3122 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/auth/
+
+- `WebAuthnService.kt` — Data class: WebAuthnService (~5649 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/src/test/kotlin/com/adoptu/services/
+
+- `MagicLinkServiceTest.kt` — MagicLinkServiceTest: setup, createTestUser, createMagicLinkToken, createExpiredMagicLinkToken (~3125 tok)
+- `PasswordServiceTest.kt` — PasswordServiceTest: setup, encryptPassword, createTestUser, createPasswordResetToken (~3208 tok)
+- `WebAuthnServiceTest.kt` — WebAuthnServiceTest: setup, userService, encryptPassword, createTestUser (~2952 tok)
+
+## .claude/worktrees/implement-perf-lessons/scripts/
+
+- `benchmark.sh` — Load-tests the backend under the SAME resource ceiling as production (ECS Fargate), (~1530 tok)
 
 ## .claude/worktrees/layout-fix/backend/src/main/resources/static/css/
 
