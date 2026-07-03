@@ -96,6 +96,24 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-02T03:16:51.741Z"
+    },
+    {
+      "id": "bug-007",
+      "timestamp": "2026-07-03T10:50:00.000Z",
+      "error_message": "com.zaxxer.hikari.pool.HikariPool$PoolInitializationException / PSQLException in DatabaseFactoryInitIT after adding HikariCP pooling",
+      "file": "backend/src/main/kotlin/com/adoptu/adapters/db/DatabaseFactory.kt",
+      "root_cause": "DatabaseFactory.init() can be called more than once in the same JVM (DatabaseFactoryInitIT calls it once per @Test, PER_CLASS lifecycle, against a fresh Testcontainers database each time). The first HikariCP integration built a new HikariDataSource on every init() call without closing the previous one, leaking a full pool's worth of live connections each time. By the 4th/5th/7th call in the same test class, cumulative open connections exhausted the Postgres testcontainer's connection limit, causing new pool construction to fail (Hikari validates a connection eagerly at construction, unlike the old unpooled Database.connect() which connected lazily on first transaction{} use).",
+      "fix": "Added dataSource?.close() at the top of init(), before constructing the new HikariDataSource, so a re-entrant call always tears down the previous pool first.",
+      "tags": [
+        "hikaricp",
+        "connection-pool",
+        "resource-leak",
+        "kt",
+        "testcontainers"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:50:00.000Z"
     }
   ]
 }

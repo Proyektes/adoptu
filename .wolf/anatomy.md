@@ -14,6 +14,10 @@
 
 - `migrate_country.sql` (~554 tok)
 
+## scripts/
+
+- `benchmark.sh` — Load-tests the backend in Docker under `--cpus=0.5 --memory=1024m` (matches ECS Fargate, same profile that produced the validated 18.2 RPS baseline in cerebrum.md). Prefers `hey`, falls back to `wrk`/`ab`/plain curl+xargs. Usage: `scripts/benchmark.sh <label> [endpoint] [duration_s] [concurrency]`; results land in `scripts/benchmark-results/`. Change one thing per run. (~650 tok)
+
 ## ../../.claude/plans/
 
 - `enumerated-yawning-cloud.md` — Country enum as single source of truth (~1699 tok)
@@ -1462,7 +1466,9 @@
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/ (canonical)
 
-- `DbDispatcher.kt` — Shared bounded `dbDispatcher = Dispatchers.IO.limitedParallelism(4)`, reused by all 8 repositories' `withContext(...) { transaction {...} }` calls; bounded to avoid unbounded-Dispatchers.IO thread-thrashing under a cgroup-capped container (~150 tok)
+- `DbDispatcher.kt` — Shared `dbDispatcher`, now a dedicated daemon-thread `Executor.asCoroutineDispatcher()` (was `Dispatchers.IO.limitedParallelism(4)`) sized via `PoolSizing.computeSize()`, reused by all repository/service `withContext(dbDispatcher) { transaction {...} }` calls (~300 tok)
+- `PoolSizing.kt` — Single source of truth for DB pool/dispatcher size: `cores * 4` floored at 4; used by both DbDispatcher and DatabaseFactory's Hikari `maximumPoolSize` so they stay coupled (~150 tok)
+- `DatabaseFactory.kt` — `init()`: now opens a pooled `HikariDataSource` (was raw unpooled `Database.connect(url,...)`), closes any previous pool first (init can re-run in the same JVM, e.g. per-test in IT suites), sets Postgres prepared-statement caching properties; `createDefaultAdmin` unchanged (~950 tok)
 - `Models.kt` — Exposed table defs; `country` columns on AnimalShelters, SterilizationLocations, UserShelters, UserSterilizationLocations, TemporalHomes, Photographers now use `enumerationByName("country", 100, Country::class)` instead of free-text varchar (~3300 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/repositories/

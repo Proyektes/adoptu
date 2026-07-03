@@ -122,7 +122,7 @@ class MagicLinkServiceTest {
     }
 
     @Test
-    fun `verifyAndConsumeMagicLink returns user info for valid token`() {
+    fun `verifyAndConsumeMagicLink returns user info for valid token`() = kotlinx.coroutines.runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val token = createMagicLinkToken(userId)
 
@@ -135,7 +135,7 @@ class MagicLinkServiceTest {
     }
 
     @Test
-    fun `verifyAndConsumeMagicLink marks token as used`() {
+    fun `verifyAndConsumeMagicLink marks token as used`() = kotlinx.coroutines.runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val token = createMagicLinkToken(userId)
 
@@ -148,16 +148,17 @@ class MagicLinkServiceTest {
                 ?.get(MagicLinkTokens.usedAt)
         }
         assertNotNull(usedAt)
+        Unit
     }
 
     @Test
-    fun `verifyAndConsumeMagicLink returns null for invalid token`() {
+    fun `verifyAndConsumeMagicLink returns null for invalid token`() = kotlinx.coroutines.runBlocking {
         val result = magicLinkService.verifyAndConsumeMagicLink("invalid-token-123")
         assertNull(result)
     }
 
     @Test
-    fun `verifyAndConsumeMagicLink returns null for expired token`() {
+    fun `verifyAndConsumeMagicLink returns null for expired token`() = kotlinx.coroutines.runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val token = createExpiredMagicLinkToken(userId)
 
@@ -166,7 +167,7 @@ class MagicLinkServiceTest {
     }
 
     @Test
-    fun `verifyAndConsumeMagicLink deletes expired token`() {
+    fun `verifyAndConsumeMagicLink deletes expired token`() = kotlinx.coroutines.runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val token = createExpiredMagicLinkToken(userId)
 
@@ -181,7 +182,7 @@ class MagicLinkServiceTest {
     }
 
     @Test
-    fun `verifyAndConsumeMagicLink returns null for already used token`() {
+    fun `verifyAndConsumeMagicLink returns null for already used token`() = kotlinx.coroutines.runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val token = createMagicLinkToken(userId, usedAt = clock.now().toEpochMilliseconds())
 
@@ -190,10 +191,10 @@ class MagicLinkServiceTest {
     }
 
     @Test
-    fun `verifyAndConsumeMagicLink returns null for non-existent user`() {
+    fun `verifyAndConsumeMagicLink returns null for non-existent user`() = kotlinx.coroutines.runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val token = createMagicLinkToken(userId)
-        
+
         transaction {
             MagicLinkTokens.deleteWhere { MagicLinkTokens.userId eq userId }
             Users.deleteWhere { Users.id eq userId }
