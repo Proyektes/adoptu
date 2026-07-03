@@ -1549,3 +1549,15 @@
 | 14:20 | Session end: 1 writes across 1 files (memory.md) | 1 reads | ~640 tok |
 | 14:23 | Session end: 1 writes across 1 files (memory.md) | 2 reads | ~1081 tok |
 | 14:35 | Session end: 1 writes across 1 files (memory.md) | 2 reads | ~1081 tok |
+
+## Session: 2026-07-03 15:02 (retest against merged adoptu branch)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:02 | Merged local adoptu branch (6 commits: HikariCP pooling, dedicated DB dispatcher, N+1 fix, benchmark.sh) into worktree | .wolf/anatomy.md, .wolf/buglog.json | 1 conflict resolved, 1 JSON corruption fixed, merge commit b95d1a0 | ~3500 |
+| 15:03 | First native-image rebuild attempt | scripts/build-native-image.sh | Failed: Gradle journal-1 lock contention | ~500 |
+| 15:06 | Retried with isolated GRADLE_USER_HOME | scripts/build-native-image.sh | Failed: orphaned container from prior kill held project .gradle lock | ~500 |
+| 15:08 | Diagnosed and stopped orphaned docker container (naughty_ramanujan), logged bug-091 | .wolf/buglog.json | Fixed, JSON valid (53 entries) | ~800 |
+| 15:11 | Native-image rebuild succeeded (5m47s) | backend/build/native/nativeCompile/adoptu-backend | 136MB binary, HikariCP confirmed native-image compatible | ~400 |
+| 15:13 | Load test under 0.5 CPU/1024MB ECS-equivalent constraint | scripts/benchmark-results/20260703T211336Z_graalvm-native-{home,pets}-retest.txt | home 143.47 RPS (~flat), /pets 136.38 RPS (up from 127.79), zero errors, mem ~11-14% | ~1200 |
+| 15:16 | Updated cerebrum.md (retest decision note, orphaned-container Do-Not-Repeat entry) | .wolf/cerebrum.md | Documented | ~900 |

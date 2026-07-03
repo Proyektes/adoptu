@@ -873,6 +873,25 @@
       "related_bugs": ["bug-089"],
       "occurrences": 1,
       "last_seen": "2026-07-03T18:24:00.000Z"
+    },
+    {
+      "id": "bug-091",
+      "timestamp": "2026-07-03T21:01:00.000Z",
+      "error_message": "Gradle could not start your build: Timeout waiting to lock journal cache (/root/.gradle/caches/journal-1). It is currently in use by another process. Retrying with an isolated GRADLE_USER_HOME then hit a second, different lock: Timeout waiting to lock file hash cache (/workspace/.gradle/9.6.1/fileHashes) owned by a PID inside another container.",
+      "file": "scripts/build-native-image.sh",
+      "root_cause": "Two distinct lock sources. (1) build-native-image.sh's default GRADLE_USER_HOME falls back to the host's shared ~/.gradle, which host-level IDE/other-session Gradle daemons also use - contention is possible there. (2) The bigger gotcha: killing the host-side `bash scripts/build-native-image.sh` wrapper process (e.g. via `kill <pid>` on a backgrounded/nohup run) does NOT stop the `docker run` container it started - `docker run` in this setup doesn't reliably forward SIGTERM to become a container stop, so the container (and the Gradle/native-image process inside it) kept running orphaned in the background. That orphaned container held a lock on /workspace/.gradle (the project-local .gradle dir, bind-mounted from the git worktree - shared across ALL container invocations regardless of GRADLE_USER_HOME, since GRADLE_USER_HOME only changes the *global* cache location, not the per-project .gradle/ dir Gradle also creates) and caused the next retry to fail identically.",
+      "fix": "Before retrying a killed/interrupted native-image build, always check `docker ps -a` for a lingering container using ghcr.io/graalvm/native-image-community and `docker stop <id>` it (it self-removes via --rm) - do not assume killing the host wrapper process stopped the container. Separately, pass an isolated GRADLE_USER_HOME (e.g. a job-scratch directory) to avoid contention with host-level Gradle daemons: `GRADLE_USER_HOME=/path/to/scratch/gradle-home bash scripts/build-native-image.sh`. Note this does NOT protect the project-local /workspace/.gradle bind mount - only stopping orphaned containers does.",
+      "tags": [
+        "gradle",
+        "docker",
+        "native-image",
+        "concurrency",
+        "worktree",
+        "orphaned-container"
+      ],
+      "related_bugs": ["bug-090"],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T21:01:00.000Z"
     }
   ]
 }
