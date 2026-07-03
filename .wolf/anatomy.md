@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-03T17:35:17.420Z
-> Files: 892 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-03T18:50:47.731Z
+> Files: 906 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -18,10 +18,6 @@
 ## ../../.claude/jobs/95b8a41d/tmp/
 
 - `migrate_country.sql` (~554 tok)
-
-## scripts/
-
-- `benchmark.sh` — Load-tests the backend in Docker under `--cpus=0.5 --memory=1024m` (matches ECS Fargate, same profile that produced the validated 18.2 RPS baseline in cerebrum.md). Prefers `hey`, falls back to `wrk`/`ab`/plain curl+xargs. Usage: `scripts/benchmark.sh <label> [endpoint] [duration_s] [concurrency]`; results land in `scripts/benchmark-results/`. Change one thing per run. (~650 tok)
 
 ## ../../.claude/plans/
 
@@ -503,6 +499,16 @@
 
 - `e2e-verify.md` — E2E Verification Skill (~593 tok)
 
+## .claude/worktrees/e2e-verify-expand/.wolf/
+
+- `buglog.json` — Declares constant (~2533 tok)
+- `cerebrum.md` — Cerebrum (~10900 tok)
+- `memory.md` — Memory (~26210 tok)
+
+## .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/common/
+
+- `Country.kt` — Country: fromDisplayName, normalize (~1532 tok)
+
 ## .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/dto/input/
 
 - `PetDto.kt` — Data class: Gender (~1025 tok)
@@ -514,6 +520,7 @@
 ## .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/pages/
 
 - `LocationSearchFilters.kt` — DIV (~1089 tok)
+- `MyPetsPage.kt` — HTML (~2581 tok)
 - `ProfilePage.kt` — HTML (~4809 tok)
 
 ## .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/routes/
@@ -528,6 +535,7 @@
 ## .claude/worktrees/e2e-verify-expand/frontend/src/jsMain/kotlin/com/adoptu/frontend/
 
 - `ApiClient.kt` — apiFetch, me, logout, getPets, getPet (~1668 tok)
+- `I18n.kt` (~20865 tok)
 
 ## .claude/worktrees/e2e-verify-expand/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
 
@@ -535,7 +543,7 @@
 
 ## .claude/worktrees/e2e-verify-expand/frontend/src/tests/
 
-- `e2e-verify.spec.ts` — Adoptu — End-to-End Verification Suite (~12818 tok)
+- `e2e-verify.spec.ts` — Adoptu — End-to-End Verification Suite (~12989 tok)
 
 ## .claude/worktrees/elegant-coalescing-kurzweil/
 
@@ -1114,9 +1122,16 @@
 
 - `settings.gradle.kts` (~105 tok)
 
+## .claude/worktrees/graalvm-native-image/.wolf/
+
+- `anatomy.md` — anatomy.md (~20371 tok)
+- `buglog.json` — Declares so (~17460 tok)
+- `cerebrum.md` — Cerebrum (~12093 tok)
+- `memory.md` — Memory (~33272 tok)
+
 ## .claude/worktrees/graalvm-native-image/backend/
 
-- `build.gradle.kts` (~2694 tok)
+- `build.gradle.kts` (~2709 tok)
 
 ## .claude/worktrees/graalvm-native-image/backend/src/main/kotlin/com/adoptu/
 
@@ -1124,7 +1139,11 @@
 
 ## .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/
 
-- `native-image.properties` (~65 tok)
+- `native-image.properties` (~368 tok)
+
+## .claude/worktrees/graalvm-native-image/scripts/
+
+- `build-native-image.sh` — Builds the GraalVM native-image executable for the backend using the (~273 tok)
 
 ## .claude/worktrees/idempotent-juggling-orbit/backend/src/main/kotlin/com/adoptu/pages/
 
@@ -1699,10 +1718,10 @@
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/ (canonical)
 
-- `DbDispatcher.kt` — Shared `dbDispatcher`, now a dedicated daemon-thread `Executor.asCoroutineDispatcher()` (was `Dispatchers.IO.limitedParallelism(4)`) sized via `PoolSizing.computeSize()`, reused by all repository/service `withContext(dbDispatcher) { transaction {...} }` calls (~300 tok)
-- `PoolSizing.kt` — Single source of truth for DB pool/dispatcher size: `cores * 4` floored at 4; used by both DbDispatcher and DatabaseFactory's Hikari `maximumPoolSize` so they stay coupled (~150 tok)
 - `DatabaseFactory.kt` — `init()`: now opens a pooled `HikariDataSource` (was raw unpooled `Database.connect(url,...)`), closes any previous pool first (init can re-run in the same JVM, e.g. per-test in IT suites), sets Postgres prepared-statement caching properties; `createDefaultAdmin` unchanged (~950 tok)
+- `DbDispatcher.kt` — Shared `dbDispatcher`, now a dedicated daemon-thread `Executor.asCoroutineDispatcher()` (was `Dispatchers.IO.limitedParallelism(4)`) sized via `PoolSizing.computeSize()`, reused by all repository/service `withContext(dbDispatcher) { transaction {...} }` calls (~300 tok)
 - `Models.kt` — Exposed table defs; `country` columns on AnimalShelters, SterilizationLocations, UserShelters, UserSterilizationLocations, TemporalHomes, Photographers now use `enumerationByName("country", 100, Country::class)` instead of free-text varchar (~3300 tok)
+- `PoolSizing.kt` — Single source of truth for DB pool/dispatcher size: `cores * 4` floored at 4; used by both DbDispatcher and DatabaseFactory's Hikari `maximumPoolSize` so they stay coupled (~150 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/repositories/
 
@@ -1791,3 +1810,7 @@
 - `terraform.tfvars.example` — sample values matching the live account (~60 tok)
 - `variables.tf` — all configurable inputs: region/profile, domain, container image/port, RDS sizing, db_app_password (sensitive, no default) (~700 tok)
 - `versions.tf` — OpenTofu/AWS+archive provider version pins, backend notes (local by default) (~170 tok)
+
+## scripts/
+
+- `benchmark.sh` — Load-tests the backend in Docker under `--cpus=0.5 --memory=1024m` (matches ECS Fargate, same profile that produced the validated 18.2 RPS baseline in cerebrum.md). Prefers `hey`, falls back to `wrk`/`ab`/plain curl+xargs. Usage: `scripts/benchmark.sh <label> [endpoint] [duration_s] [concurrency]`; results land in `scripts/benchmark-results/`. Change one thing per run. (~650 tok)

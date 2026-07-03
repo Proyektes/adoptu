@@ -1481,3 +1481,64 @@
 | 11:08 | Added dockerized-wrk fallback tier (williamyeh/wrk image) to benchmark.sh since no hey/wrk/ab installed locally | scripts/benchmark.sh | real percentile output obtained | ~1500 |
 | 11:10 | Ran isolated A/B benchmark: old Dispatchers.IO.limitedParallelism(4) vs new dedicated-Executor dispatcher, 2 runs each, GET /api/pets?country=Mexico, --cpus=0.5 --memory=1024m | DbDispatcher.kt (temp revert+restore, verified clean vs HEAD after) | old: 6.42/7.71 RPS; new: 5.52/6.52 RPS — old edges out new in both pairs, but ranges overlap and within-config variance (~18%) is comparable to the between-config gap; inconclusive at this sample size, documented honestly in cerebrum.md | ~6000 |
 | 11:22 | Extended A/B to 6 rounds (3 alternating pairs, 40s each) for more confidence; user separately clarified the "300 RPS" comparison point was a GraalVM native-image build on the same 0.5vCPU/1024MB profile, not comparable to our plain-JVM numbers — confirmed via web search that Ktor Netty (adoptu's engine) isn't GraalVM-native-image-compatible (CIO only); user confirmed a separate agent owns that track, scope stays JVM-only here | DbDispatcher.kt (temp swaps, restored + verified clean vs HEAD), cerebrum.md | old: 7.03/8.40/10.35 RPS (mean 8.59); new: 6.43/6.66/14.22 RPS (mean 9.10, much higher variance, round 3 reverses direction) — no confident winner; kept new dispatcher since it's not shown worse and is structurally simpler. Final :backend:compileKotlin + :backend:test re-verified clean (UP-TO-DATE) after all the file-swapping | ~12000 |
+| 11:36 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~26 |
+| 11:37 | Edited .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/common/Country.kt | inline fix | ~12 |
+| 11:37 | Edited .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/common/Country.kt | inline fix | ~12 |
+| 11:37 | Session end: 16 writes across 7 files (build.gradle.kts, native-image.properties, cerebrum.md, memory.md, e2e-verify.spec.ts) | 9 reads | ~46052 tok |
+| 11:39 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~35 |
+| 11:39 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | expanded (+112 lines) | ~1140 |
+| 11:40 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~186 |
+| 11:44 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~113 |
+| 11:45 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~22 |
+| 11:46 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | 20→22 lines | ~293 |
+| 11:47 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~40 |
+| 11:47 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | added error handling | ~199 |
+| 11:48 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | added optional chaining | ~173 |
+| 11:49 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~45 |
+| 11:50 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | added 1 condition(s) | ~192 |
+| 11:51 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~27 |
+| 11:53 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~25 |
+| 11:55 | Edited .claude/worktrees/graalvm-native-image/backend/build.gradle.kts | 2→5 lines | ~24 |
+| 11:57 | Edited .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/pages/MyPetsPage.kt | expanded (+16 lines) | ~387 |
+| 11:58 | Edited .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/pages/MyPetsPage.kt | inline fix | ~17 |
+| 11:58 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | 7→3 lines | ~59 |
+| 11:59 | Session end: 33 writes across 9 files (build.gradle.kts, native-image.properties, cerebrum.md, memory.md, e2e-verify.spec.ts) | 13 reads | ~58721 tok |
+| 12:04 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | 2→3 lines | ~91 |
+| 12:05 | Session end: 34 writes across 9 files (build.gradle.kts, native-image.properties, cerebrum.md, memory.md, e2e-verify.spec.ts) | 13 reads | ~58664 tok |
+| 12:07 | Session end: 34 writes across 9 files (build.gradle.kts, native-image.properties, cerebrum.md, memory.md, e2e-verify.spec.ts) | 13 reads | ~58846 tok |
+| 12:10 | Edited .claude/worktrees/e2e-verify-expand/.wolf/buglog.json | expanded (+72 lines) | ~1651 |
+| 12:11 | Edited .claude/worktrees/e2e-verify-expand/.wolf/cerebrum.md | added nullish coalescing | ~1117 |
+| 12:12 | Edited .claude/worktrees/e2e-verify-expand/.wolf/cerebrum.md | 1→3 lines | ~358 |
+| 12:12 | Edited .claude/worktrees/e2e-verify-expand/.wolf/memory.md | modified tests() | ~303 |
+| 12:12 | Session end: 38 writes across 10 files (build.gradle.kts, native-image.properties, cerebrum.md, memory.md, e2e-verify.spec.ts) | 15 reads | ~73002 tok |
+| 12:14 | Session end: 38 writes across 10 files (build.gradle.kts, native-image.properties, cerebrum.md, memory.md, e2e-verify.spec.ts) | 15 reads | ~73002 tok |
+
+## Session: 2026-07-03 12:17
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:19 | Created .claude/worktrees/graalvm-native-image/scripts/build-native-image.sh | — | ~273 |
+| 12:19 | Session end: 1 writes across 1 files (build-native-image.sh) | 0 reads | ~293 tok |
+| 12:20 | Edited .claude/worktrees/graalvm-native-image/.wolf/cerebrum.md | 2→4 lines | ~1117 |
+| 12:20 | Edited .claude/worktrees/graalvm-native-image/.wolf/cerebrum.md | 3→4 lines | ~387 |
+| 12:21 | Session end: 3 writes across 2 files (build-native-image.sh, cerebrum.md) | 1 reads | ~13660 tok |
+| 12:21 | Edited .claude/worktrees/graalvm-native-image/.wolf/buglog.json | 4→6 lines | ~38 |
+| 12:21 | Edited .claude/worktrees/graalvm-native-image/.wolf/buglog.json | expanded (+37 lines) | ~1027 |
+| 12:22 | Edited .claude/worktrees/graalvm-native-image/.wolf/memory.md | expanded (+7 lines) | ~420 |
+| 12:23 | Edited .claude/worktrees/graalvm-native-image/.wolf/anatomy.md | expanded (+13 lines) | ~337 |
+| 12:24 | Session end: 7 writes across 5 files (build-native-image.sh, cerebrum.md, buglog.json, memory.md, anatomy.md) | 4 reads | ~32000 tok |
+| 12:25 | Session end: 7 writes across 5 files (build-native-image.sh, cerebrum.md, buglog.json, memory.md, anatomy.md) | 4 reads | ~32000 tok |
+| 12:33 | Session end: 7 writes across 5 files (build-native-image.sh, cerebrum.md, buglog.json, memory.md, anatomy.md) | 4 reads | ~32000 tok |
+| 12:34 | Session end: 7 writes across 5 files (build-native-image.sh, cerebrum.md, buglog.json, memory.md, anatomy.md) | 4 reads | ~32000 tok |
+
+## Session: 2026-07-03 12:37
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:50 | Edited .claude/worktrees/graalvm-native-image/.wolf/memory.md | modified pets() | ~186 |
+| 12:51 | Session end: 1 writes across 1 files (memory.md) | 0 reads | ~199 tok |
+| 12:51 | Session end: 1 writes across 1 files (memory.md) | 0 reads | ~199 tok |
+| 13:19 | Session end: 1 writes across 1 files (memory.md) | 0 reads | ~199 tok |
+| 14:20 | Session end: 1 writes across 1 files (memory.md) | 1 reads | ~640 tok |
+| 14:23 | Session end: 1 writes across 1 files (memory.md) | 2 reads | ~1081 tok |
+| 14:35 | Session end: 1 writes across 1 files (memory.md) | 2 reads | ~1081 tok |

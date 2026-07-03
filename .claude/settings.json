@@ -12,6 +12,7 @@
         ]
       }
     ],
+
     "PreToolUse": [
       {
         "matcher": "Read",
@@ -68,5 +69,8 @@
         ]
       }
     ]
+  },
+  "worktree": {
+    "bgIsolation": "none"
   }
 }

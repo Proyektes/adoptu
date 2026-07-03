@@ -3,9 +3,9 @@
   "bugs": [
     {
       "id": "bug-001",
-      "timestamp": "2026-07-02T23:28:07.548Z",
+      "timestamp": "2026-07-03T17:37:35.055Z",
       "error_message": "Incorrect value in code",
-      "file": ".claude/worktrees/fix-country-i18n-typo/backend/src/main/kotlin/com/adoptu/common/Country.kt",
+      "file": ".claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/common/Country.kt",
       "root_cause": "Had \"country.finnland\"",
       "fix": "Changed to \"country.finland\"",
       "tags": [
@@ -15,95 +15,47 @@
       ],
       "related_bugs": [],
       "occurrences": 2,
-      "last_seen": "2026-07-02T23:28:15.447Z"
+      "last_seen": "2026-07-03T17:37:40.845Z"
     },
     {
       "id": "bug-002",
-      "timestamp": "2026-07-03T16:11:59.987Z",
+      "timestamp": "2026-07-03T17:47:26.386Z",
       "error_message": "Missing error handling in unknown",
-      "file": ".claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/pages/LocationSearchFilters.kt",
+      "file": ".claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts",
       "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
-      "fix": "Added try/catch block | Also: // Restore the last country picked on any search page (Shelt; // Sterilization/TemporalHome all share this component), so ",
+      "fix": "Added try/catch block | Also: const putPromise = page.waitForResponse(r => /\\/api\\/pets\\/\\; const putRes = await putPromise;",
       "tags": [
         "auto-detected",
         "error-handling",
-        "kt"
+        "ts"
       ],
       "related_bugs": [],
       "occurrences": 2,
-      "last_seen": "2026-07-03T16:12:05.239Z"
+      "last_seen": "2026-07-03T17:48:20.921Z"
     },
     {
       "id": "bug-003",
-      "timestamp": "2026-07-03T16:12:15.245Z",
-      "error_message": "Significant refactor of ",
-      "file": ".claude/worktrees/e2e-verify-expand/backend/src/main/resources/static/js/index.js",
-      "root_cause": "4 lines replaced/restructured",
-      "fix": "Rewrote 20→35 lines (4 removed)",
+      "timestamp": "2026-07-03T17:58:01.999Z",
+      "error_message": "Incorrect value in code",
+      "file": ".claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/pages/MyPetsPage.kt",
+      "root_cause": "Had \"Bs PYG\"",
+      "fix": "Changed to \"Bs BOB\"",
       "tags": [
         "auto-detected",
-        "refactor",
-        "js"
+        "wrong-value",
+        "kt"
       ],
       "related_bugs": [],
       "occurrences": 1,
-      "last_seen": "2026-07-03T16:12:15.245Z"
+      "last_seen": "2026-07-03T17:58:01.999Z"
     },
     {
       "id": "bug-004",
-      "timestamp": "2026-07-03T16:15:20.324Z",
-      "error_message": "Null/undefined access in ",
-      "file": ".claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts",
-      "root_cause": "Property access on potentially null/undefined value",
-      "fix": "Added null safety (optional chaining or null check) | Also: test('display name and country changes persist to the DB aft; await page.locator('#country').selectOption({ value: 'Colomb | Also: test('rescuer can add a new pet, with an image saved to stor; const petName = `E2E Test Dog ${Date.now() % 100000}`; | Also: test('pet detail page shows accurate data matching the API r; // Prefer a pet with the most optional fields populated, for",
-      "tags": [
-        "auto-detected",
-        "null-safety",
-        "ts"
-      ],
-      "related_bugs": [],
-      "occurrences": 4,
-      "last_seen": "2026-07-03T16:20:32.398Z"
-    },
-    {
-      "id": "bug-005",
-      "timestamp": "2026-07-03T16:16:00.203Z",
-      "error_message": "Missing error handling in unknown",
-      "file": ".claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts",
-      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
-      "fix": "Added try/catch block",
-      "tags": [
-        "auto-detected",
-        "error-handling",
-        "ts"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T16:16:00.203Z"
-    },
-    {
-      "id": "bug-006",
-      "timestamp": "2026-07-03T16:17:18.841Z",
-      "error_message": "Missing await",
-      "file": ".claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts",
-      "root_cause": "Async call without await — returned Promise instead of value",
-      "fix": "Added await to async call",
-      "tags": [
-        "auto-detected",
-        "async-fix",
-        "ts"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T16:17:18.841Z"
-    },
-    {
-      "id": "bug-007",
-      "timestamp": "2026-07-03T16:19:28.716Z",
+      "timestamp": "2026-07-03T17:58:15.892Z",
       "error_message": "Significant refactor of ",
       "file": ".claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts",
       "root_cause": "4 lines replaced/restructured",
-      "fix": "Rewrote 30→42 lines (4 removed)",
+      "fix": "Rewrote 7→3 lines (4 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -111,125 +63,13 @@
       ],
       "related_bugs": [],
       "occurrences": 1,
-      "last_seen": "2026-07-03T16:19:28.716Z"
+      "last_seen": "2026-07-03T17:58:15.892Z"
     },
     {
-      "id": "bug-008",
-      "timestamp": "2026-07-03T16:23:12.527Z",
-      "error_message": "Significant refactor of ",
-      "file": ".claude/worktrees/e2e-verify-expand/.claude/skills/e2e-verify.md",
-      "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 7→40 lines (2 removed)",
-      "tags": [
-        "auto-detected",
-        "refactor",
-        "md"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T16:23:12.527Z"
-    },
-    {
-      "id": "bug-009",
-      "timestamp": "2026-07-03T16:28:12.507Z",
-      "error_message": "Significant refactor of ",
-      "file": ".claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/adapters/db/DbDispatcher.kt",
-      "root_cause": "17 lines replaced/restructured",
-      "fix": "Rewrote 27→46 lines (17 removed)",
-      "tags": [
-        "auto-detected",
-        "refactor",
-        "kt"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T16:28:12.507Z"
-    },
-    {
-      "id": "bug-010",
-      "timestamp": "2026-07-03T16:28:51.866Z",
-      "error_message": "Incorrect value in code",
-      "file": ".claude/worktrees/implement-perf-lessons/backend/build.gradle.kts",
-      "root_cause": "Had \"org.checkerframework:checker-qual:4.2.0\"",
-      "fix": "Changed to \"com.zaxxer:HikariCP:5.1.0\"",
-      "tags": [
-        "auto-detected",
-        "wrong-value",
-        "kts"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T16:28:51.866Z"
-    },
-    {
-      "id": "bug-011",
-      "timestamp": "2026-07-03T16:32:54.131Z",
-      "error_message": "Wrong reference: runBlocking should be withContext",
-      "file": ".claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/auth/WebAuthnService.kt",
-      "root_cause": "Used \"runBlocking\" instead of \"withContext\"",
-      "fix": "Changed runBlocking → withContext",
-      "tags": [
-        "auto-detected",
-        "wrong-reference",
-        "kt"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T16:32:54.131Z"
-    },
-    {
-      "id": "bug-012",
-      "timestamp": "2026-07-03T16:36:24.751Z",
-      "error_message": "Significant refactor of ",
-      "file": ".claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/adapters/db/repositories/PetRepository.kt",
-      "root_cause": "6 lines replaced/restructured",
-      "fix": "Rewrote 91→119 lines (6 removed)",
-      "tags": [
-        "auto-detected",
-        "refactor",
-        "kt"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T16:36:24.751Z"
-    },
-    {
-      "id": "bug-013",
-      "timestamp": "2026-07-03T16:46:40.741Z",
-      "error_message": "Significant refactor of ",
-      "file": ".claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts",
-      "root_cause": "9 lines replaced/restructured",
-      "fix": "Rewrote 31→19 lines (9 removed)",
-      "tags": [
-        "auto-detected",
-        "refactor",
-        "ts"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T16:46:40.742Z"
-    },
-    {
-      "id": "bug-014",
-      "timestamp": "2026-07-03T16:50:22.601Z",
+      "id": "bug-005",
+      "timestamp": "2026-07-03T18:11:30.627Z",
       "error_message": "Null/undefined access in ",
-      "file": ".claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/adapters/db/DatabaseFactory.kt",
-      "root_cause": "Property access on potentially null/undefined value",
-      "fix": "Added null safety (optional chaining or null check)",
-      "tags": [
-        "auto-detected",
-        "null-safety",
-        "kt"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T16:50:22.601Z"
-    },
-    {
-      "id": "bug-015",
-      "timestamp": "2026-07-03T16:56:27.533Z",
-      "error_message": "Null/undefined access in ",
-      "file": ".claude/worktrees/implement-perf-lessons/.wolf/cerebrum.md",
+      "file": ".claude/worktrees/e2e-verify-expand/.wolf/cerebrum.md",
       "root_cause": "Property access on potentially null/undefined value",
       "fix": "Added null safety (optional chaining or null check)",
       "tags": [
@@ -239,234 +79,7 @@
       ],
       "related_bugs": [],
       "occurrences": 1,
-      "last_seen": "2026-07-03T16:56:27.533Z"
-    },
-    {
-      "id": "bug-016",
-      "timestamp": "2026-07-03T16:57:05.111Z",
-      "error_message": "Null/undefined access in ",
-      "file": ".claude/worktrees/implement-perf-lessons/.wolf/buglog.json",
-      "root_cause": "Property access on potentially null/undefined value",
-      "fix": "Added null safety (optional chaining or null check)",
-      "tags": [
-        "auto-detected",
-        "null-safety",
-        "json"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T16:57:05.111Z"
-    },
-    {
-      "id": "bug-017",
-      "timestamp": "2026-07-03T16:57:50.977Z",
-      "error_message": "Incorrect value in code",
-      "file": ".claude/worktrees/implement-perf-lessons/.wolf/anatomy.md",
-      "root_cause": "Had `dbDispatcher = Dispatchers.IO.limitedParallelism(",
-      "fix": "Changed to `dbDispatcher`",
-      "tags": [
-        "auto-detected",
-        "wrong-value",
-        "md"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T16:57:50.977Z"
-    },
-    {
-      "id": "bug-018",
-      "timestamp": "2026-07-03T16:58:01.662Z",
-      "error_message": "Null/undefined access in ",
-      "file": ".claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts",
-      "root_cause": "Property access on potentially null/undefined value",
-      "fix": "Added null safety (optional chaining or null check)",
-      "tags": [
-        "auto-detected",
-        "null-safety",
-        "ts"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T16:58:01.662Z"
-    },
-    {
-      "id": "bug-019",
-      "timestamp": "2026-07-03T16:58:58.402Z",
-      "error_message": "Missing error handling in unknown",
-      "file": ".claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts",
-      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
-      "fix": "Added try/catch block",
-      "tags": [
-        "auto-detected",
-        "error-handling",
-        "ts"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T16:58:58.402Z"
-    },
-    {
-      "id": "bug-020",
-      "timestamp": "2026-07-03T16:59:08.469Z",
-      "error_message": "Wrong operator: ?? should be !==",
-      "file": ".claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts",
-      "root_cause": "Used \"??\" instead of \"!==\"",
-      "fix": "Changed operator ?? → !==",
-      "tags": [
-        "auto-detected",
-        "operator-fix",
-        "ts"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T16:59:08.469Z"
-    },
-    {
-      "id": "bug-021",
-      "timestamp": "2026-07-03T17:02:00.039Z",
-      "error_message": "Significant refactor of ",
-      "file": ".claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts",
-      "root_cause": "6 lines replaced/restructured",
-      "fix": "Rewrote 15→9 lines (6 removed)",
-      "tags": [
-        "auto-detected",
-        "refactor",
-        "ts"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T17:02:00.039Z"
-    },
-    {
-      "id": "bug-022",
-      "timestamp": "2026-07-03T17:06:21.418Z",
-      "error_message": "Significant refactor of ",
-      "file": ".claude/worktrees/implement-perf-lessons/scripts/benchmark.sh",
-      "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 8→14 lines (2 removed)",
-      "tags": [
-        "auto-detected",
-        "refactor",
-        "sh"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T17:06:21.418Z"
-    },
-    {
-      "id": "bug-023",
-      "timestamp": "2026-07-03T17:11:44.628Z",
-      "error_message": "Null/undefined access in ",
-      "file": ".claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts",
-      "root_cause": "Property access on potentially null/undefined value",
-      "fix": "Added null safety (optional chaining or null check)",
-      "tags": [
-        "auto-detected",
-        "null-safety",
-        "ts"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T17:11:44.628Z"
-    },
-    {
-      "id": "bug-024",
-      "timestamp": "2026-07-03T17:12:04.882Z",
-      "error_message": "Incorrect value in code",
-      "file": ".claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts",
-      "root_cause": "Had 'count:'",
-      "fix": "Changed to 'body:'",
-      "tags": [
-        "auto-detected",
-        "wrong-value",
-        "ts"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T17:12:04.882Z"
-    },
-    {
-      "id": "bug-025",
-      "timestamp": "2026-07-03T17:13:25.464Z",
-      "error_message": "Significant refactor of ",
-      "file": ".claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts",
-      "root_cause": "3 lines replaced/restructured",
-      "fix": "Rewrote 8→5 lines (3 removed)",
-      "tags": [
-        "auto-detected",
-        "refactor",
-        "ts"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T17:13:25.464Z"
-    },
-    {
-      "id": "bug-026",
-      "timestamp": "2026-07-03T17:14:53.682Z",
-      "error_message": "Significant refactor of ",
-      "file": ".claude/worktrees/graalvm-native-image/backend/src/main/kotlin/com/adoptu/ApplicationNative.kt",
-      "root_cause": "8 lines replaced/restructured",
-      "fix": "Rewrote 9→3 lines (8 removed)",
-      "tags": [
-        "auto-detected",
-        "refactor",
-        "kt"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T17:14:53.682Z"
-    },
-    {
-      "id": "bug-027",
-      "timestamp": "2026-07-03T17:23:15.905Z",
-      "error_message": "Significant refactor of ",
-      "file": ".claude/worktrees/graalvm-native-image/backend/build.gradle.kts",
-      "root_cause": "3 lines replaced/restructured",
-      "fix": "Rewrote 6→3 lines (3 removed)",
-      "tags": [
-        "auto-detected",
-        "refactor",
-        "kts"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T17:23:15.905Z"
-    },
-    {
-      "id": "bug-028",
-      "timestamp": "2026-07-03T17:26:54.447Z",
-      "error_message": "Incorrect value in code",
-      "file": ".claude/worktrees/implement-perf-lessons/.wolf/cerebrum.md",
-      "root_cause": "Had `Dispatchers.IO.limitedParallelism(4)`",
-      "fix": "Changed to `--cpus=0.5 --memory=1024m`",
-      "tags": [
-        "auto-detected",
-        "wrong-value",
-        "md"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T17:26:54.447Z"
-      "last_seen": "2026-07-02T03:16:51.741Z"
-    },
-    {
-      "id": "bug-007",
-      "timestamp": "2026-07-03T10:50:00.000Z",
-      "error_message": "com.zaxxer.hikari.pool.HikariPool$PoolInitializationException / PSQLException in DatabaseFactoryInitIT after adding HikariCP pooling",
-      "file": "backend/src/main/kotlin/com/adoptu/adapters/db/DatabaseFactory.kt",
-      "root_cause": "DatabaseFactory.init() can be called more than once in the same JVM (DatabaseFactoryInitIT calls it once per @Test, PER_CLASS lifecycle, against a fresh Testcontainers database each time). The first HikariCP integration built a new HikariDataSource on every init() call without closing the previous one, leaking a full pool's worth of live connections each time. By the 4th/5th/7th call in the same test class, cumulative open connections exhausted the Postgres testcontainer's connection limit, causing new pool construction to fail (Hikari validates a connection eagerly at construction, unlike the old unpooled Database.connect() which connected lazily on first transaction{} use).",
-      "fix": "Added dataSource?.close() at the top of init(), before constructing the new HikariDataSource, so a re-entrant call always tears down the previous pool first.",
-      "tags": [
-        "hikaricp",
-        "connection-pool",
-        "resource-leak",
-        "kt",
-        "testcontainers"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T10:50:00.000Z"
+      "last_seen": "2026-07-03T18:11:30.627Z"
     }
   ]
 }
