@@ -52,21 +52,36 @@ if (sexFilter) {
     };
 }
 if (countrySelect) {
-    countrySelect.onchange = () => loadPets();
+    countrySelect.onchange = () => {
+        if (countrySelect.value) {
+            try { localStorage.setItem('adoptuSelectedCountry', countrySelect.value); } catch (e) {}
+        }
+        loadPets();
+    };
 }
 
-// Default the country dropdown to the logged-in user's saved profile country, if any.
-// No IP geolocation - if the user isn't logged in or has no saved country, the dropdown
-// stays unselected and loadPets() shows the "select a country" prompt until they pick one.
+// Default the country dropdown, in priority order:
+//   1. The country last selected on any search page (Shelters/Photographers/
+//      Sterilization/TemporalHome/Pets all share the same localStorage key),
+//      so switching pages doesn't force re-selecting the same country.
+//   2. The logged-in user's saved profile country, if any.
+// No IP geolocation - if neither is available, the dropdown stays unselected
+// and loadPets() shows the "select a country" prompt until the user picks one.
 (async function initCountry() {
     if (countrySelect) {
-        try {
-            const user = await api.me();
-            if (user && user.authenticated !== false && user.country) {
-                countrySelect.value = user.country;
+        let saved = null;
+        try { saved = localStorage.getItem('adoptuSelectedCountry'); } catch (e) {}
+        if (saved) {
+            countrySelect.value = saved;
+        } else {
+            try {
+                const user = await api.me();
+                if (user && user.authenticated !== false && user.country) {
+                    countrySelect.value = user.country;
+                }
+            } catch (e) {
+                // Not logged in or lookup failed - leave the dropdown unselected.
             }
-        } catch (e) {
-            // Not logged in or lookup failed - leave the dropdown unselected.
         }
     }
     loadPets();

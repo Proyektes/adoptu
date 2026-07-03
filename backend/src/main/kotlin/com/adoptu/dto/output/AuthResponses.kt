@@ -9,6 +9,7 @@ data class AuthMeResponse(
     val email: String? = null,
     val displayName: String? = null,
     val language: String = "en",
+    val country: String? = null,
     val activeRoles: List<String> = emptyList(),
     val lastAcceptedPrivacyPolicy: Long? = null,
     val lastAcceptedTermsAndConditions: Long? = null,

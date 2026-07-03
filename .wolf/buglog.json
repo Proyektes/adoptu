@@ -96,6 +96,78 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-02T03:16:51.741Z"
+    },
+    {
+      "id": "bug-007",
+      "timestamp": "2026-07-03T10:45:00.000Z",
+      "error_message": "Profile page shows stale displayName/email after saving and reloading",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt",
+      "root_cause": "GET /api/auth/me's userAuthenticationSuccess() read displayName/email from the session/cookie object (set at login time) instead of the freshly-fetched UserDto, even though the fresh DTO was already in scope.",
+      "fix": "Changed AuthMeResponse.displayName/email to read from `user.displayName`/`user.email ?: user.username` instead of `session.displayName`/`session.email`.",
+      "tags": ["session-staleness", "profile", "kt"],
+      "related_bugs": ["bug-008", "bug-009"],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:45:00.000Z"
+    },
+    {
+      "id": "bug-008",
+      "timestamp": "2026-07-03T11:00:00.000Z",
+      "error_message": "Profile save silently drops the country field; every save fires the PUT twice",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/ApiClient.kt",
+      "root_cause": "Two bugs: (1) ProfilePage.kt (backend) included common.js twice (once via commonScripts(), once explicitly), so the Kotlin/JS profile-save handler registered twice and fired twice per click. (2) The live save path is the Kotlin/JS ProfilePageModule (a hand-written profile.js/api.js pair exists but is dead code, never loaded on this page) whose ApiClientModule.updateProfile(displayName) never accepted a country parameter at all.",
+      "fix": "Removed the duplicate script(src=\"/static/js/common.js\") in ProfilePage.kt. Added `country` param to ApiClientModule.updateProfile() and wired ProfilePageModule.saveProfile()/updateProfileUI() to read/send/display #country. Also added `country` to AuthMeResponse so the field populates from a fresh DB read (see bug-007).",
+      "tags": ["profile", "country", "kt", "duplicate-script"],
+      "related_bugs": ["bug-007"],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:00:00.000Z"
+    },
+    {
+      "id": "bug-009",
+      "timestamp": "2026-07-03T11:07:00.000Z",
+      "error_message": "GET /api/pets/mine 500s: No enum constant com.adoptu.dto.input.Status.PENDING",
+      "file": "scripts/test_data.sql",
+      "root_cause": "Seed data set 6 pets to status='PENDING', a value the Status enum (AVAILABLE/ADOPTED/DISABLED) never defined. Any rescuer owning one of those pets got a hard 500 on /my-pets.",
+      "fix": "Changed the 6 seeded pets' status from PENDING to AVAILABLE in test_data.sql (left Status enum unchanged, per user direction — the enum should not model \"pending\" as a pet status).",
+      "tags": ["seed-data", "pets", "enum", "sql"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:07:00.000Z"
+    },
+    {
+      "id": "bug-010",
+      "timestamp": "2026-07-03T11:30:00.000Z",
+      "error_message": "Temporal Homes city/zip/neighborhood search filters don't trigger a live search",
+      "file": "backend/src/main/resources/static/js/temporal-home-search.js",
+      "root_cause": "DOMContentLoaded handler only wired a debounced input listener for #search-state; unlike shelters.js/photographers.js/sterilization.js, it never wired #search-city/#search-zip/#search-neighborhood.",
+      "fix": "Added the same debounce(window.searchTemporalHomes, 500) input listeners for city/zip/neighborhood, matching the other 3 location-search pages.",
+      "tags": ["search", "temporal-home", "js"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:30:00.000Z"
+    },
+    {
+      "id": "bug-011",
+      "timestamp": "2026-07-03T11:55:00.000Z",
+      "error_message": "Editing a pet priced in MXN/ARS/CLP/COP/PEN (or any non-USD/EUR/GBP/CAD/AUD currency) 400s: Failed to convert request body to class UpdatePetRequest",
+      "file": "backend/src/main/kotlin/com/adoptu/pages/MyPetsPage.kt",
+      "root_cause": "The pet edit/add form's #currency <select> only listed 5 currencies. fillForm() correctly set select.value = pet.currency, but for a pet priced in e.g. MXN there was no matching <option>, so the browser silently left the select at \"\" (empty string), which failed Currency? enum deserialization on submit.",
+      "fix": "Added all 21 currencies from the Currency enum (MXN, ARS, CLP, COP, BRL, PEN, UYU, PYG, BOB, VES, CRC, GTQ, HNL, NIO, DOP, PAB) as options. Note: ProfilePage.kt's #photographerCurrency select has the identical 5-currency gap and was NOT fixed (out of scope for this session).",
+      "tags": ["pets", "currency", "kt", "form-validation"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:55:00.000Z"
+    },
+    {
+      "id": "bug-012",
+      "timestamp": "2026-07-03T11:37:00.000Z",
+      "error_message": "Finland/Uruguay untranslated in all languages; Portuguese country names entirely untranslated",
+      "file": "backend/src/main/kotlin/com/adoptu/common/Country.kt",
+      "root_cause": "Country.kt's FINLAND/URUGUAY entries used misspelled i18n keys (\"country.finnland\", \"country.uraguay\") not matching any language's translation map (this typo was reportedly fixed in a past session but was not present in this branch). Separately, frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt's portugueseTranslations block had zero \"country.*\" entries at all.",
+      "fix": "Fixed the two key spellings in Country.kt. Added all ~112 country-name translations to the Portuguese block in I18n.kt.",
+      "tags": ["i18n", "country", "kt", "typo", "translation-gap"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:37:00.000Z"
     }
   ]
 }

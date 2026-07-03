@@ -30,6 +30,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (stateInput) {
         stateInput.addEventListener('input', debounce(window.searchTemporalHomes, 500));
     }
+    const cityInput = document.getElementById('search-city');
+    if (cityInput) {
+        cityInput.addEventListener('input', debounce(window.searchTemporalHomes, 500));
+    }
+    const zipInput = document.getElementById('search-zip');
+    if (zipInput) {
+        zipInput.addEventListener('input', debounce(window.searchTemporalHomes, 500));
+    }
+    const neighborhoodInput = document.getElementById('search-neighborhood');
+    if (neighborhoodInput) {
+        neighborhoodInput.addEventListener('input', debounce(window.searchTemporalHomes, 500));
+    }
 });
 
 window.debounce = function(func, wait) {

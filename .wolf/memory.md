@@ -1073,3 +1073,7 @@
 | 21:19 | Created .claude/worktrees/migrate-legacy-js-to-kotlin/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminPage.kt | — | ~1801 |
 | 21:19 | Created .claude/worktrees/migrate-legacy-js-to-kotlin/frontend/src/jsMain/kotlin/com/adoptu/frontend/Main.kt | — | ~1096 |
 | 21:19 | Session end: 36 writes across 26 files (style.scss, _layout.scss, .gitignore, buglog.json, Country.kt) | 59 reads | ~77592 tok |
+| 12:12 | Extended e2e-verify.spec.ts to 65 tests (13 suites): password/email/name change, country persistence, search filters, image upload, i18n, language switch, detail accuracy | frontend/src/tests/e2e-verify.spec.ts | all 65 passing | ~large |
+| 12:12 | Added localStorage-backed country persistence across all 5 search pages | LocationSearchFilters.kt, index.js | done | — |
+| 12:12 | Fixed 6 real bugs found by running the suite live: stale session displayName/email, duplicate common.js causing double-submit, profile country field dropped entirely, pet status seed-data crash, temporal-homes missing city/zip search wiring, pet-currency dropdown missing 16 currencies | AuthRoutes.kt, ProfilePage.kt (x2), ApiClient.kt, test_data.sql, temporal-home-search.js, MyPetsPage.kt | verified via live test run | — |
+| 12:12 | Fixed Country.kt i18n key typos (finnland/uraguay) and added full Portuguese country-name translations (112 keys) | Country.kt, I18n.kt | verified via i18n test | — |
