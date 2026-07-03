@@ -402,6 +402,28 @@ class UIRoutesE2ETest {
     }
 
     @Test
+    fun `GET temporal-home by numeric id returns 200`() {
+        testApplication {
+            setupApp()
+            val client = newClient()
+            assertEquals(HttpStatusCode.OK, client.get("/temporal-home/${temporalHomeId}").status)
+            client.loginAs(rescuerId)
+            assertEquals(HttpStatusCode.OK, client.get("/temporal-home/${temporalHomeId}").status)
+        }
+    }
+
+    @Test
+    fun `GET temporal-home with non-numeric id redirects to temporal-homes`() {
+        testApplication {
+            setupApp()
+            val client = newClient()
+            val response = client.get("/temporal-home/not-a-number")
+            assertEquals(HttpStatusCode.Found, response.status)
+            assertEquals("/temporal-homes", response.headers[HttpHeaders.Location])
+        }
+    }
+
+    @Test
     fun `GET temporal-homes returns 200 unauthenticated and authenticated`() {
         testApplication {
             setupApp()

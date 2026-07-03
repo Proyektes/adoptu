@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-02T03:19:28.456Z
-> Files: 804 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-02T22:23:23.990Z
+> Files: 857 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -10,6 +10,11 @@
 - `nginx-cdn-sim.conf` (~267 tok)
 - `stats_sampler.sh` — Samples docker stats for a container every 1s until killed. (~118 tok)
 
+## ../../.claude/jobs/3616329a/tmp/petsui/
+
+- `check.mjs` — Declares dir (~865 tok)
+- `index.html` — Declares dict (~847 tok)
+
 ## ../../.claude/jobs/95b8a41d/tmp/
 
 - `migrate_country.sql` (~554 tok)
@@ -17,6 +22,11 @@
 ## ../../.claude/plans/
 
 - `enumerated-yawning-cloud.md` — Country enum as single source of truth (~1699 tok)
+
+## ../../.claude/projects/-home-laf-Proyektes-adoptu/memory/
+
+- `feedback_background_job_merge_restriction.md` (~405 tok)
+- `MEMORY.md` (~131 tok)
 
 ## ./
 
@@ -399,7 +409,7 @@
 
 ## .claude/worktrees/country-detect/.wolf/
 
-- `anatomy.md` — anatomy.md (~18171 tok)
+- `anatomy.md` — anatomy.md (~19416 tok)
 - `cerebrum.md` — Cerebrum (~9898 tok)
 
 ## .claude/worktrees/country-detect/backend/src/main/kotlin/com/adoptu/common/
@@ -417,7 +427,7 @@
 ## .claude/worktrees/country-detect/backend/src/main/resources/static/js/
 
 - `api.js` — Declares api (~2546 tok)
-- `index.js` — emoji: updateCountryHint, loadPets, initCountry (~1192 tok)
+- `index.js` — emoji: updateCountryHint, showEmptyState, hideEmptyState + 6 more (~1997 tok)
 
 ## .claude/worktrees/country-detect/infra/
 
@@ -464,6 +474,26 @@
 ## .claude/worktrees/country-hint-fix-v2/backend/src/main/kotlin/com/adoptu/pages/
 
 - `LocationSearchFilters.kt` — DIV (~927 tok)
+
+## .claude/worktrees/country-selector-default-persist/backend/src/main/kotlin/com/adoptu/dto/output/
+
+- `AuthResponses.kt` — Data class: AuthMeResponse (~439 tok)
+
+## .claude/worktrees/country-selector-default-persist/backend/src/main/kotlin/com/adoptu/routes/
+
+- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~6922 tok)
+
+## .claude/worktrees/country-selector-default-persist/frontend/src/jsMain/kotlin/com/adoptu/frontend/
+
+- `Common.kt` — NodeList, onCountryChange, initI18n, initDropdowns, checkProfileCompletion (~1464 tok)
+
+## .claude/worktrees/country-selector-default-persist/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
+
+- `IndexPage.kt` — init, loadPets, updateCountryHint, showEmptyState, hideEmptyState (~2200 tok)
+- `PhotographersPage.kt` — init, search, load, render, createRequestModal (~1706 tok)
+- `SheltersPage.kt` — init, search, renderShelters (~1292 tok)
+- `SterilizationLocationsPage.kt` — init, search, render, locationCard, init (~2634 tok)
+- `TemporalHomePage.kt` — init, search, displayResults, init, loadRequests (~1344 tok)
 
 ## .claude/worktrees/elegant-coalescing-kurzweil/
 
@@ -924,10 +954,60 @@
 
 - `I18n.kt` (~17715 tok)
 
+## .claude/worktrees/fix-photographers-i18n/.wolf/
+
+- `cerebrum.md` — Cerebrum (~9950 tok)
+
+## .claude/worktrees/fix-photographers-i18n/frontend/src/jsMain/kotlin/com/adoptu/frontend/
+
+- `I18n.kt` (~20376 tok)
+
 ## .claude/worktrees/fix-sterilization-js-syntax/backend/src/main/resources/static/js/
 
 - `sterilization-locations.js` — escapeHtml: loadCountries, loadLocations, showForm + 3 more (~1318 tok)
 - `sterilization.js` — country: executedFunction (~957 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/.wolf/
+
+- `cerebrum.md` — Cerebrum (~10713 tok)
+- `memory.md` — Memory (~30223 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/backend/src/main/kotlin/com/adoptu/pages/
+
+- `TemporalHomePage.kt` — HTML, HTML, HTML (~639 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/backend/src/main/kotlin/com/adoptu/routes/
+
+- `TemporalHomeRoutes.kt` — Route (~2579 tok)
+- `UIRoutes.kt` — Data class: NavParams (~2523 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/backend/src/main/scss/
+
+- `temporal-home.scss` — Styles: 12 rules (~627 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/backend/src/test/kotlin/com/adoptu/routes/
+
+- `TemporalHomeRoutesE2ETest.kt` — E2E tests for [temporalHomeRoutes]. (~7352 tok)
+- `UIRoutesE2ETest.kt` — End-to-end tests for [uiRoutes]: mounts the real route tree in a Ktor (~6074 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/
+
+- `ApiClient.kt` — apiFetch, me, logout, getPets, getPet (~2447 tok)
+- `I18n.kt` (~20914 tok)
+- `Main.kt` — main (~1138 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
+
+- `TemporalHomePage.kt` — init, search, displayResults, init, render (~2408 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details/backend/src/main/kotlin/com/adoptu/pages/
+
+- `TemporalHomePage.kt` — HTML, HTML, HTML (~639 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details/backend/src/main/kotlin/com/adoptu/routes/
+
+- `TemporalHomeRoutes.kt` — Route (~2579 tok)
+- `UIRoutes.kt` — Data class: NavParams (~2523 tok)
 
 ## .claude/worktrees/fix-test-task/
 
@@ -1041,29 +1121,75 @@
 
 - `CryptoService.kt` — getOaepParameterSpec, initialize, generateKeyPair, getPublicKey, encrypt (~1031 tok)
 
+## .claude/worktrees/migrate-legacy-js-to-kotlin/backend/src/main/kotlin/com/adoptu/dto/input/
+
+- `PetDto.kt` — Data class: Gender (~1027 tok)
+
+## .claude/worktrees/migrate-legacy-js-to-kotlin/backend/src/main/kotlin/com/adoptu/pages/
+
+- `AdminPage.kt` — HTML (~797 tok)
+- `AdminSheltersPage.kt` — HTML (~1719 tok)
+- `ForgotPasswordPage.kt` — HTML, HTML, HTML, HTML (~994 tok)
+- `IndexPage.kt` — HTML (~632 tok)
+- `MyPetsPage.kt` — HTML (~2296 tok)
+- `PetDetailPage.kt` — HTML (~165 tok)
+- `PetFoodPage.kt` — Data class: FoodCategory (~2063 tok)
+- `PetsPage.kt` — HTML (~632 tok)
+- `PhotographersPage.kt` — HTML (~346 tok)
+- `Shared.kt` — HTML, A, BODY, DIV, NAV (~2005 tok)
+- `SheltersPage.kt` — HTML (~367 tok)
+- `SterilizationLocationsPage.kt` — HTML, HTML (~1559 tok)
+- `TemporalHomePage.kt` — HTML, HTML (~486 tok)
+
+## .claude/worktrees/migrate-legacy-js-to-kotlin/backend/src/test/kotlin/com/adoptu/pages/
+
+- `SharedPageElementsTest.kt` — Covers small page-builder helpers that aren't reached through any HTTP route in production (~519 tok)
+
 ## .claude/worktrees/migrate-legacy-js-to-kotlin/frontend/src/jsMain/kotlin/com/adoptu/frontend/
 
 - `ApiClient.kt` — apiFetch, me, logout, getPets, getPet (~2346 tok)
-- `Common.kt` — onCountryChange, initI18n, initDropdowns, checkProfileCompletion, escapeHtml (~1072 tok)
+- `Common.kt` — NodeList, onCountryChange, initI18n, initDropdowns, checkProfileCompletion (~1110 tok)
 - `Main.kt` — main (~1096 tok)
 
 ## .claude/worktrees/migrate-legacy-js-to-kotlin/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
 
 - `AdminPage.kt` — init, switchTab, loadUsers, renderUsers, showBanModal (~1801 tok)
-- `AdminSheltersPage.kt` — init, loadShelters, renderShelters, showMessage, getFormData (~2948 tok)
+- `AdminSheltersPage.kt` — init, loadShelters, renderShelters, showMessage, getFormData (~2981 tok)
 - `AuthFlowPages.kt` — init, submit, init, tokenFromUrl, submit (~2010 tok)
-- `IndexPage.kt` — init, loadPets, updateCountryHint, renderPets (~1370 tok)
-- `MyPetsPage.kt` — init, clampNonNegative, load, onPetsLoaded, renderPetCard (~5788 tok)
+- `IndexPage.kt` — init, loadPets, updateCountryHint, showEmptyState, hideEmptyState (~2240 tok)
+- `MyPetsPage.kt` — init, clampNonNegative, load, onPetsLoaded, renderPetCard (~5802 tok)
 - `PetDetailPage.kt` — init, render, renderImages (~2131 tok)
-- `PetFoodPage.kt` — Data class: FoodItem (~1880 tok)
-- `PhotographersPage.kt` — init, search, load, render, createRequestModal (~1669 tok)
-- `SheltersPage.kt` — init, search, renderShelters (~1260 tok)
-- `SterilizationLocationsPage.kt` — init, search, render, locationCard, init (~2562 tok)
-- `TemporalHomePage.kt` — init, search, displayResults, init, loadRequests (~1300 tok)
+- `PetFoodPage.kt` — Data class: FoodItem (~1890 tok)
+- `PhotographersPage.kt` — init, search, load, render, createRequestModal (~1680 tok)
+- `SheltersPage.kt` — init, search, renderShelters (~1266 tok)
+- `SterilizationLocationsPage.kt` — init, search, render, locationCard, init (~2608 tok)
+- `TemporalHomePage.kt` — init, search, displayResults, init, loadRequests (~1318 tok)
+
+## .claude/worktrees/migrate-legacy-js-to-kotlin/frontend/src/tests/
+
+- `e2e-verify.spec.ts` — Adoptu — End-to-End Verification Suite (~9262 tok)
 
 ## .claude/worktrees/mutable-enchanting-moler/scripts/
 
 - `test_data.sql` — ============================================================================= (~22562 tok)
+
+## .claude/worktrees/pets-listing-ux/backend/src/main/kotlin/com/adoptu/pages/
+
+- `IndexPage.kt` — HTML (~726 tok)
+- `PetsPage.kt` — HTML (~726 tok)
+
+## .claude/worktrees/pets-listing-ux/backend/src/main/resources/static/js/
+
+- `index.js` — emoji: updateCountryHint, showEmptyState, hideEmptyState + 6 more (~1841 tok)
+
+## .claude/worktrees/pets-listing-ux/backend/src/main/scss/
+
+- `_location-search-form.scss` — Styles: 2 rules (~587 tok)
+- `style.scss` — Styles: 48 rules (~2756 tok)
+
+## .claude/worktrees/pets-listing-ux/frontend/src/jsMain/kotlin/com/adoptu/frontend/
+
+- `I18n.kt` (~20221 tok)
 
 ## .claude/worktrees/profile-completion-guard/
 
@@ -1531,6 +1657,7 @@
 
 ## infra/ (OpenTofu - AWS deployment)
 
+- `_layout.scss` — Header/logo/nav/footer/dropdowns. `.logo` now normal flex flow (was `position:absolute`, causing the image to overflow past the fixed 70px header and the wordmark to drift into the nav-right area on mobile). Added `@media (max-width:640px)` (shrink logo/donate) and `@media (max-width:400px)` (hide wordmark, icon-only) so header items never overlap/overflow on phones (~2000 tok)
 - `cloudfront.tf` — 3 distributions: static/dynamic image origins (S3+OAC), app origin is `backend.<domain>` directly (custom origin, `http-only`/8080 — verified to match the live distribution's actual config exactly, NOT an ALB). `backend.<domain>` is internal-only — distinct from the public `api.<domain>` alias, which still goes through this same distribution (~450 tok)
 - `data.tf` — read-only lookups: Route53 zone, ACM cert (us-east-1, CloudFront), ECR repo, default VPC, DB subnet group, rds-monitoring-role (~300 tok)
 - `dns_updater.tf` — EventBridge rule (`ECS Task State Change`, `lastStatus=RUNNING`, filtered to the `adoptu` cluster) -> Lambda that looks up the new task's IPv6 (ecs:DescribeTasks -> ec2:DescribeNetworkInterfaces) and UPSERTs `backend.<domain>`. Fully automatic — no manual DNS step, ever. Source at `lambda/dns_updater/index.py`, zipped via `data.archive_file` (~550 tok)
@@ -1547,6 +1674,7 @@
 - `secrets.tf` — Secrets Manager: generated RDS master password, `var.db_app_password` (the live `adoptu` Postgres role's password — must be supplied, not generated) (~200 tok)
 - `security_groups.tf` — ECS task SG (port 8080 open to ::/0 — no CloudFront IPv6 managed prefix list exists, matches live), RDS SG (from ECS task only). **No ALB/load-balancer SG — user explicitly rejected one twice, see [[feedback-no-load-balancer]] in global memory** (~250 tok)
 - `ses.tf` — comment-only; SES domain identity already verified live, intentionally not managed here (~80 tok)
+- `style.scss` — now `@use`s `location-search-form` (was missing, so `.location-search-country select` — the home-page country dropdown — rendered as an unstyled native white control on any page loading only `style.css`, e.g. IndexPage) (~2500 tok)
 - `terraform.tfvars.example` — sample values matching the live account (~60 tok)
 - `variables.tf` — all configurable inputs: region/profile, domain, container image/port, RDS sizing, db_app_password (sensitive, no default) (~700 tok)
 - `versions.tf` — OpenTofu/AWS+archive provider version pins, backend notes (local by default) (~170 tok)

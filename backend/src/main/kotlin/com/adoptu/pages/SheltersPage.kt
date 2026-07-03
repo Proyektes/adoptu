@@ -29,6 +29,5 @@ fun HTML.sheltersPage(navParams: NavParams = NavParams()) {
         }
         footer()
         commonScripts(navParams.isLoggedIn)
-        script(src = "/static/js/shelters.js") {}
     }
 }

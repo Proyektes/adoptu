@@ -60,3 +60,6 @@ node_modules/
 
 # Claude Code worktrees (temporary, not for VCS)
 .claude/worktrees/
+
+# OpenWolf design QC screenshots (temporary, not for VCS)
+.wolf/designqc-captures/

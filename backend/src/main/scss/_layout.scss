@@ -3,10 +3,11 @@
 header {
     background: var(--card-bg);
     color: white;
-    padding: 1rem 2rem;
+    padding: 0.75rem 1.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
     position: fixed;
     top: 0;
     left: 0;
@@ -19,13 +20,14 @@ header {
         text-decoration: none;
         margin: 0 0.5rem;
     }
-    
+
     nav {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        width: 100%;
-        margin-left: 2rem;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        flex: 1;
+        min-width: 0;
     }
 }
 
@@ -40,6 +42,35 @@ header {
     align-items: center;
     gap: 1rem;
     margin-left: auto;
+}
+
+@media (max-width: 640px) {
+    header {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .logo span {
+        font-size: 1.1rem;
+    }
+
+    .logo img {
+        height: 36px;
+    }
+
+    .nav-right {
+        gap: 0.5rem;
+    }
+
+    #nav-donate {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .logo span {
+        display: none;
+    }
 }
 
 #nav-donate {
@@ -158,28 +189,21 @@ header {
 }
 
 .logo {
-    position: absolute;
-    top: 10px;
-    left: 20px;
     display: flex;
     align-items: center;
-    height: calc(70px * 1.2);
+    gap: 0.6rem;
+    height: 44px;
+    flex-shrink: 0;
     white-space: nowrap;
+    margin: 0;
 
     img {
-        min-width: 10vw;
-        max-width: 20vw;
         width: auto;
         height: 100%;
     }
 
     span {
-        position: absolute;
-        left: 100%;
-        top: 30%;
-        transform: translateY(-50%);
-        margin-left: 0.75rem;
-        font-size: 2rem;
+        font-size: 1.5rem;
         font-weight: bold;
     }
 }

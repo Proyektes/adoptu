@@ -69,6 +69,5 @@ fun HTML.adminPage(navParams: NavParams = NavParams()) {
         }
         footer()
         commonScripts(navParams.isLoggedIn)
-        script(src = "/static/js/admin.js") {}
     }
 }

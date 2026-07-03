@@ -30,7 +30,6 @@ fun HTML.sterilizationLocationsPage(navParams: NavParams = NavParams()) {
         }
         footer()
         commonScripts(navParams.isLoggedIn)
-        script(src = "/static/js/sterilization.js") {}
     }
 }
 
@@ -123,6 +122,5 @@ fun HTML.adminSterilizationLocationsPage(navParams: NavParams = NavParams()) {
         }
         footer()
         commonScripts(navParams.isLoggedIn)
-        script(src = "/static/js/sterilization-locations.js") {}
     }
 }

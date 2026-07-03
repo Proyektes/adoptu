@@ -1,6 +1,7 @@
 @use 'variables' as *;
 @use 'base';
 @use 'layout';
+@use 'location-search-form';
 
 form {
     max-width: 500px;
@@ -161,6 +162,44 @@ form {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.pets-empty-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+    padding: 4rem 1.5rem;
+    margin-bottom: 2rem;
+    background: var(--card-bg);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    color: var(--text);
+
+    .pets-empty-icon {
+        color: var(--primary-light);
+        margin-bottom: 0.5rem;
+    }
+
+    h3 {
+        margin: 0;
+    }
+
+    p {
+        margin: 0;
+        max-width: 32rem;
+        color: #9ca3af;
+    }
+}
+
+.pets-sentinel {
+    text-align: center;
+    padding: 1.5rem 0;
+    font-size: 0.85rem;
+    color: #9ca3af;
+    min-height: 1px;
 }
 
 .pet-card {
@@ -420,12 +459,22 @@ form {
     padding: 0.25rem 0.5rem;
 }
 
+#pets-filters {
+    margin-top: 1.5rem;
+    animation: pets-filters-in 0.2s ease-out;
+}
+
+@keyframes pets-filters-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 .filter-buttons {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    
+    margin-bottom: 1rem;
+
     .filter-btn, .filter-type, .filter-sex {
         padding: 0.5rem 1rem;
         background: var(--card-bg);

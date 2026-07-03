@@ -218,47 +218,47 @@ ON CONFLICT (user_id, role) DO NOTHING;
 -- PHOTOGRAPHERS
 -- -------------------------
 INSERT INTO photographers (user_id, photographer_fee, photographer_currency, country, state) VALUES
-  (27, 250.00, 'MXN', 'México',    'CDMX'),
-  (28, 300.00, 'MXN', 'México',    'Jalisco'),
-  (29, 180.00, 'ARS', 'Argentina', 'Buenos Aires'),
-  (30, 200.00, 'CLP', 'Chile',     'Región Metropolitana'),
-  (31, 150.00, 'COP', 'Colombia',  'Antioquia'),
-  (48, 220.00, 'MXN', 'México',    'Nuevo León')
+  (27, 250.00, 'MXN', 'MEXICO',    'CDMX'),
+  (28, 300.00, 'MXN', 'MEXICO',    'Jalisco'),
+  (29, 180.00, 'ARS', 'ARGENTINA', 'Buenos Aires'),
+  (30, 200.00, 'CLP', 'CHILE',     'Región Metropolitana'),
+  (31, 150.00, 'COP', 'COLOMBIA',  'Antioquia'),
+  (48, 220.00, 'MXN', 'MEXICO',    'Nuevo León')
 ON CONFLICT (user_id) DO NOTHING;
 
 -- -------------------------
 -- TEMPORAL HOMES
 -- -------------------------
 INSERT INTO temporal_homes (user_id, alias, country, state, city, zip, neighborhood, created_at) VALUES
-  (32, 'Casa Elena',     'México',    'CDMX',              'Ciudad de México', '06600', 'Roma Norte',      1704412800000),
-  (33, 'Hogar Tomás',    'México',    'Jalisco',            'Guadalajara',      '44100', 'Centro',          1707177600000),
-  (34, 'Refugio Lucía',  'Argentina', 'Buenos Aires',       'Buenos Aires',     '1000',  'Palermo',         1709856000000),
-  (35, 'Patio Martín',   'Argentina', 'Córdoba',            'Córdoba',          '5000',  'General Paz',     1712534400000),
-  (36, 'Casa Rosa',      'Chile',     'Región Metropolitana','Santiago',         '7500000','Providencia',   1715126400000),
-  (37, 'Hogar Félix',    'Colombia',  'Antioquia',          'Medellín',         '050001','El Poblado',      1717804800000),
-  (38, 'Casa Catalina',  'México',    'Nuevo León',         'Monterrey',        '64000', 'San Pedro',       1720396800000),
-  (39, 'Hogar Hugo',     'México',    'Puebla',             'Puebla',           '72000', 'Centro Histórico',1723075200000),
-  (49, 'Casa Ernesto',   'México',    'CDMX',              'Ciudad de México', '11800', 'Polanco',          1715299200000)
+  (32, 'Casa Elena',     'MEXICO',    'CDMX',              'Ciudad de México', '06600', 'Roma Norte',      1704412800000),
+  (33, 'Hogar Tomás',    'MEXICO',    'Jalisco',            'Guadalajara',      '44100', 'Centro',          1707177600000),
+  (34, 'Refugio Lucía',  'ARGENTINA', 'Buenos Aires',       'Buenos Aires',     '1000',  'Palermo',         1709856000000),
+  (35, 'Patio Martín',   'ARGENTINA', 'Córdoba',            'Córdoba',          '5000',  'General Paz',     1712534400000),
+  (36, 'Casa Rosa',      'CHILE',     'Región Metropolitana','Santiago',         '7500000','Providencia',   1715126400000),
+  (37, 'Hogar Félix',    'COLOMBIA',  'Antioquia',          'Medellín',         '050001','El Poblado',      1717804800000),
+  (38, 'Casa Catalina',  'MEXICO',    'Nuevo León',         'Monterrey',        '64000', 'San Pedro',       1720396800000),
+  (39, 'Hogar Hugo',     'MEXICO',    'Puebla',             'Puebla',           '72000', 'Centro Histórico',1723075200000),
+  (49, 'Casa Ernesto',   'MEXICO',    'CDMX',              'Ciudad de México', '11800', 'Polanco',          1715299200000)
 ON CONFLICT (user_id) DO NOTHING;
 
 -- -------------------------
 -- USER SHELTERS
 -- -------------------------
 INSERT INTO user_shelters (user_id, name, country, state, city, neighborhood, address, zip, phone, email, website, description, currency, created_at, updated_at) VALUES
-  (40, 'Amigos Peludos',  'México',    'CDMX',              'Ciudad de México', 'Coyoacán',    'Calle Miguel Ángel de Quevedo 123', '04000', '+52 55 1234 5678', 'amigos@amigospeludos.mx',    'https://amigospeludos.mx',    'Refugio dedicado al rescate y adopción de perros y gatos en CDMX.',   'MXN', 1704499200000, 1704499200000),
-  (41, 'Refugio Esperanza','México',   'Jalisco',            'Guadalajara',      'Zapopan',     'Av. Vallarta 567',                  '45010', '+52 33 9876 5432', 'info@esperanzarefugio.mx',    'https://esperanzarefugio.mx', 'Refugio con más de 10 años de experiencia en Jalisco.',                'MXN', 1707264000000, 1707264000000),
-  (42, 'Patitas Felices',  'Argentina','Buenos Aires',       'Buenos Aires',     'Villa Urquiza','Av. Triunvirato 1890',             '1431',  '+54 11 4444 3333', 'patitas@patitasfelices.ar',   NULL,                          'Centro de adopción responsable en Buenos Aires.',                      'ARS', 1709942400000, 1709942400000),
-  (43, 'Huellitas del Sur','Chile',    'Región Metropolitana','Santiago',         'La Florida',  'Calle La Serena 234',              '8240000','+56 2 2345 6789', 'huellas@huellitasdelsur.cl',  NULL,                          'Refugio en el sur de Santiago con 200+ animales rescatados.',          'CLP', 1712620800000, 1712620800000),
-  (44, 'Nueva Vida Animal','Colombia', 'Antioquia',          'Medellín',         'Laureles',    'Cra. 70 # 44-50',                  '050001','+57 4 567 8901',   'info@nuevavida.co',           'https://nuevavida.co',        'Fundación comprometida con el bienestar animal en Colombia.',          'COP', 1715212800000, 1715212800000)
+  (40, 'Amigos Peludos',  'MEXICO',    'CDMX',              'Ciudad de México', 'Coyoacán',    'Calle Miguel Ángel de Quevedo 123', '04000', '+52 55 1234 5678', 'amigos@amigospeludos.mx',    'https://amigospeludos.mx',    'Refugio dedicado al rescate y adopción de perros y gatos en CDMX.',   'MXN', 1704499200000, 1704499200000),
+  (41, 'Refugio Esperanza','MEXICO',   'Jalisco',            'Guadalajara',      'Zapopan',     'Av. Vallarta 567',                  '45010', '+52 33 9876 5432', 'info@esperanzarefugio.mx',    'https://esperanzarefugio.mx', 'Refugio con más de 10 años de experiencia en Jalisco.',                'MXN', 1707264000000, 1707264000000),
+  (42, 'Patitas Felices',  'ARGENTINA','Buenos Aires',       'Buenos Aires',     'Villa Urquiza','Av. Triunvirato 1890',             '1431',  '+54 11 4444 3333', 'patitas@patitasfelices.ar',   NULL,                          'Centro de adopción responsable en Buenos Aires.',                      'ARS', 1709942400000, 1709942400000),
+  (43, 'Huellitas del Sur','CHILE',    'Región Metropolitana','Santiago',         'La Florida',  'Calle La Serena 234',              '8240000','+56 2 2345 6789', 'huellas@huellitasdelsur.cl',  NULL,                          'Refugio en el sur de Santiago con 200+ animales rescatados.',          'CLP', 1712620800000, 1712620800000),
+  (44, 'Nueva Vida Animal','COLOMBIA', 'Antioquia',          'Medellín',         'Laureles',    'Cra. 70 # 44-50',                  '050001','+57 4 567 8901',   'info@nuevavida.co',           'https://nuevavida.co',        'Fundación comprometida con el bienestar animal en Colombia.',          'COP', 1715212800000, 1715212800000)
 ON CONFLICT (user_id) DO NOTHING;
 
 -- -------------------------
 -- USER STERILIZATION LOCATIONS
 -- -------------------------
 INSERT INTO user_sterilization_locations (user_id, name, country, state, city, neighborhood, address, zip, phone, email, website, description, created_at, updated_at) VALUES
-  (45, 'Clínica Esteriliza Ya', 'México',    'CDMX',              'Ciudad de México', 'Tlalpan',    'Insurgentes Sur 4512',    '14000', '+52 55 5555 1111', 'esteriliza@ya.mx',         NULL,                        'Esterilizaciones a bajo costo todos los sábados.',           1704585600000, 1704585600000),
-  (46, 'Clínica Bienestar',     'México',    'Jalisco',            'Guadalajara',      'Tetlán',     'Av. 8 de Julio 1500',     '44820', '+52 33 3333 2222', 'clinica@bienestarjal.mx',  'https://bienestarjal.mx',   'Servicio veterinario con programa de esterilización masiva.', 1707350400000, 1707350400000),
-  (47, 'Clínica Sana Mascota',  'Argentina', 'Buenos Aires',       'Buenos Aires',     'Belgrano',   'Av. Cabildo 980',         '1426',  '+54 11 5555 6666', 'sanamascota@gmail.com',    NULL,                        'Clínica veterinaria con esterilizaciones gratuitas un día al mes.', 1710028800000, 1710028800000)
+  (45, 'Clínica Esteriliza Ya', 'MEXICO',    'CDMX',              'Ciudad de México', 'Tlalpan',    'Insurgentes Sur 4512',    '14000', '+52 55 5555 1111', 'esteriliza@ya.mx',         NULL,                        'Esterilizaciones a bajo costo todos los sábados.',           1704585600000, 1704585600000),
+  (46, 'Clínica Bienestar',     'MEXICO',    'Jalisco',            'Guadalajara',      'Tetlán',     'Av. 8 de Julio 1500',     '44820', '+52 33 3333 2222', 'clinica@bienestarjal.mx',  'https://bienestarjal.mx',   'Servicio veterinario con programa de esterilización masiva.', 1707350400000, 1707350400000),
+  (47, 'Clínica Sana Mascota',  'ARGENTINA', 'Buenos Aires',       'Buenos Aires',     'Belgrano',   'Av. Cabildo 980',         '1426',  '+54 11 5555 6666', 'sanamascota@gmail.com',    NULL,                        'Clínica veterinaria con esterilizaciones gratuitas un día al mes.', 1710028800000, 1710028800000)
 ON CONFLICT (user_id) DO NOTHING;
 
 -- -------------------------

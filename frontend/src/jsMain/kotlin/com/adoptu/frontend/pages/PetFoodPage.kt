@@ -1,10 +1,11 @@
-package com.adoptu.pages
+package com.adoptu.frontend.pages
 
-import com.adoptu.routes.NavParams
-import kotlinx.html.*
+import com.adoptu.frontend.forEachElement
+import kotlinx.browser.document
+import org.w3c.dom.HTMLElement
 
-data class FoodCategory(val type: String, val title: String, val items: List<FoodItem>)
-data class FoodItem(val name: String, val detail: String, val description: String)
+private data class FoodItem(val name: String, val detail: String, val description: String)
+private data class FoodCategory(val type: String, val title: String, val items: List<FoodItem>)
 
 private val foodData: Map<String, List<FoodCategory>> = mapOf(
     "DOG" to listOf(
@@ -109,55 +110,36 @@ private val foodData: Map<String, List<FoodCategory>> = mapOf(
     )
 )
 
-fun HTML.petFoodPage(navParams: NavParams = NavParams()) {
-    commonHead("Pet Food Guide - Adopt-U")
-    body {
-        header {
-            a("/") { commonLogo() }
-            nav { commonNav(navParams.isLoggedIn, navParams.isAdmin, navParams.isRescuerOrAdmin, navParams.isTemporalHomeOrAdmin) }
+@JsExport
+@JsName("PetFoodPage")
+object PetFoodPageModule {
+    fun init() {
+        document.querySelectorAll(".pet-type-btn").forEachElement { node ->
+            val btn = node.unsafeCast<HTMLElement>()
+            btn.addEventListener("click", {
+                document.querySelectorAll(".pet-type-btn").forEachElement { b -> b.unsafeCast<HTMLElement>().classList.remove("active") }
+                btn.classList.add("active")
+                val type = btn.asDynamic().dataset.type.toString()
+                showFoodInfo(type)
+            })
         }
-        main {
-            h1 { attributes["data-i18n"] = "petFoodGuide"; +"Pet Food Guide" }
-            p { attributes["data-i18n"] = "petFoodDescription"; +"Learn which foods are safe, harmful, or toxic for your pets" }
-            
-            div(classes = "pet-type-selector") {
-                listOf("DOG" to "Dog", "CAT" to "Cat", "BIRD" to "Bird", "FISH" to "Fish", "RABBIT" to "Rabbit").forEach { (type, emoji) ->
-                    button(classes = "pet-type-btn${if (type == "DOG") " active" else ""}", type = ButtonType.button) { 
-                        attributes["data-type"] = type
-                        +emoji
-                    }
-                }
+        showFoodInfo("DOG")
+    }
+
+    private fun showFoodInfo(petType: String) {
+        val data = foodData[petType] ?: return
+        val container = document.getElementById("food-info") ?: return
+        val sb = StringBuilder()
+        data.forEach { cat ->
+            sb.append("<div class=\"food-category\"><h3>${cat.title}</h3><ul class=\"food-list\">")
+            cat.items.forEach { item ->
+                sb.append("<li><strong>${item.name}</strong>")
+                if (item.detail.isNotEmpty()) sb.append(" <span class=\"food-detail\">(${item.detail})</span>")
+                if (item.description.isNotEmpty()) sb.append("<p class=\"food-desc\">${item.description}</p>")
+                sb.append("</li>")
             }
-            
-            h2 { 
-                id = "selected-pet-type"
-                attributes["data-i18n"] = "selectedPetInfo"
-                +"Dog Food Information"
-            }
-            
-            div { 
-                id = "food-info"
-                classes = setOf("food-grid") 
-            }
-            
-            div(classes = "food-legend") {
-                div(classes = "legend-item") {
-                    span(classes = "legend-color safe"); +"Safe"
-                }
-                div(classes = "legend-item") {
-                    span(classes = "legend-color harmful"); +"Harmful"
-                }
-                div(classes = "legend-item") {
-                    span(classes = "legend-color toxic"); +"Toxic"
-                }
-            }
-            
-            p(classes = "vet-disclaimer") {
-                attributes["data-i18n"] = "vetDisclaimer"
-                +"This information is for reference only. Always consult your veterinarian before introducing new foods to your pet's diet."
-            }
+            sb.append("</ul></div>")
         }
-        footer()
-        commonScripts(navParams.isLoggedIn)
+        container.innerHTML = sb.toString()
     }
 }
