@@ -39,6 +39,7 @@ object ProfilePageModule {
         (document.getElementById("email") as? HTMLInputElement)?.value = user.email ?: ""
         (document.getElementById("displayName") as? HTMLInputElement)?.value = user.displayName ?: ""
         (document.getElementById("language") as? HTMLSelectElement)?.value = user.language ?: "en"
+        (document.getElementById("country") as? HTMLSelectElement)?.value = user.country ?: ""
 
         currentRoles = (user.activeRoles as? Array<*>)?.map { it.toString() } ?: emptyList()
 
@@ -199,6 +200,7 @@ object ProfilePageModule {
         val msg = document.getElementById("message") as? HTMLElement ?: return
         val displayName = (document.getElementById("displayName") as? HTMLInputElement)?.value ?: ""
         val language = (document.getElementById("language") as? HTMLSelectElement)?.value ?: "en"
+        val country = (document.getElementById("country") as? HTMLSelectElement)?.value?.ifEmpty { null }
 
         clearFieldErrors()
 
@@ -216,7 +218,7 @@ object ProfilePageModule {
 
         showMessage(msg, "", I18n.t("saving"))
 
-        ApiClientModule.updateProfile(displayName).then<Unit> {
+        ApiClientModule.updateProfile(displayName, country).then<Unit> {
             ApiClientModule.updateLanguage(language)
             undefined
         }.then<Unit> {

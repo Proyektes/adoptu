@@ -481,9 +481,10 @@ private suspend fun userAuthenticationSuccess(
         AuthMeResponse(
             authenticated = true,
             id = session.userId,
-            email = session.email,
-            displayName = session.displayName,
+            email = user.email ?: user.username,
+            displayName = user.displayName,
             language = user.language,
+            country = user.country,
             activeRoles = activeRolesList,
             lastAcceptedPrivacyPolicy = user.lastAcceptedPrivacyPolicy,
             lastAcceptedTermsAndConditions = user.lastAcceptedTermsAndConditions,

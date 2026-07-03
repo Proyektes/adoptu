@@ -16,7 +16,9 @@ object TemporalHomeSearchPageModule {
         window.asDynamic().searchTemporalHomes = { search() }
         document.getElementById("search-btn")?.addEventListener("click", { search() })
         val debounced = CommonModule.debounce(500) { search() }
-        document.getElementById("search-state")?.addEventListener("input", { debounced() })
+        listOf("search-state", "search-city", "search-zip", "search-neighborhood").forEach { id ->
+            document.getElementById(id)?.addEventListener("input", { debounced() })
+        }
     }
 
     private fun search() {

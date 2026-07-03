@@ -77,6 +77,22 @@ fun HTML.myPetsPage(navParams: NavParams = NavParams()) {
                             option { value = "GBP"; +"£ GBP" }
                             option { value = "CAD"; +"$ CAD" }
                             option { value = "AUD"; +"$ AUD" }
+                            option { value = "MXN"; +"$ MXN" }
+                            option { value = "ARS"; +"$ ARS" }
+                            option { value = "CLP"; +"$ CLP" }
+                            option { value = "COP"; +"$ COP" }
+                            option { value = "BRL"; +"R$ BRL" }
+                            option { value = "PEN"; +"S/ PEN" }
+                            option { value = "UYU"; +"$ UYU" }
+                            option { value = "PYG"; +"₲ PYG" }
+                            option { value = "BOB"; +"Bs BOB" }
+                            option { value = "VES"; +"Bs VES" }
+                            option { value = "CRC"; +"₡ CRC" }
+                            option { value = "GTQ"; +"Q GTQ" }
+                            option { value = "HNL"; +"L HNL" }
+                            option { value = "NIO"; +"C\$ NIO" }
+                            option { value = "DOP"; +"RD\$ DOP" }
+                            option { value = "PAB"; +"B/. PAB" }
                         }
                     }
                     div { classes = setOf("checkbox-group")
