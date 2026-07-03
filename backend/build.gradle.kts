@@ -1,9 +1,13 @@
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.jvm.toolchain.JvmVendorSpec
+
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
     application
     id("com.gradleup.shadow") version "9.4.3"
     id("org.jetbrains.kotlinx.kover")
+    id("org.graalvm.buildtools.native") version "1.1.3"
 }
 
 group = "com.adoptu"
@@ -30,6 +34,10 @@ dependencies {
     // runtime / implementation
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    // Ktor's Netty engine is not supported under GraalVM native-image; the native-image
+    // entry point (ApplicationNative.kt) uses CIO instead. Netty stays the production
+    // engine for the regular JVM/jlink deployment - this is additive, not a swap.
+    implementation("io.ktor:ktor-server-cio:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("io.ktor:ktor-server-sessions:$ktorVersion")
@@ -100,6 +108,26 @@ dependencies {
 
 application {
     mainClass.set("com.adoptu.ApplicationKt")
+}
+
+graalvmNative {
+    binaries {
+        named("main") {
+            imageName.set("adoptu-backend")
+            // Separate entry point from the production main() - same Application.module(),
+            // CIO engine instead of Netty (Netty isn't supported under native-image).
+            mainClass.set("com.adoptu.ApplicationNativeKt")
+            javaLauncher.set(
+                javaToolchains.launcherFor {
+                    languageVersion.set(JavaLanguageVersion.of(25))
+                    vendor.set(JvmVendorSpec.matching("GraalVM"))
+                }
+            )
+            buildArgs.add("--no-fallback")
+            buildArgs.add("-H:+ReportExceptionStackTraces")
+            quickBuild.set(true)
+        }
+    }
 }
 
 tasks.withType<Test> {
