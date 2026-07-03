@@ -1305,3 +1305,10 @@
 | 17:03 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
 | 17:03 | Session end: 34 writes across 18 files (cerebrum.md, AuthResponses.kt, AuthRoutes.kt, Common.kt, IndexPage.kt) | 48 reads | ~38040 tok |
 | 16:22 | Fixed "View Details" in temporal home search: added missing `/temporal-home/{id}` UI route + `GET /api/temporal-homes/{id}`, new detail page module, fixed card link using nonexistent `home.id` (should be `home.userId`), redesigned search-result cards | TemporalHomeRoutes.kt, UIRoutes.kt, pages/TemporalHomePage.kt (backend+frontend), ApiClient.kt, I18n.kt, Main.kt, temporal-home.scss | All backend/frontend builds + full test suite + Kover 95% gate pass; verified visually via Playwright | ~45k |
+
+## Session: 2026-07-03 11:04 (worktree-graalvm-native-image)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 18:25 | Built GraalVM native-image support: CIO-based native entry point (Netty unsupported), org.graalvm.buildtools.native plugin, native-image.properties with ~30 logback build-time-init classes discovered via real build errors, agent-traced reachability-metadata.json | ApplicationNative.kt, backend/build.gradle.kts, settings.gradle.kts, native-image.properties, reachability-metadata.json, scripts/build-native-image.sh | Native binary (134MB) built successfully via Docker+Gradle two-phase build; smoke-tested against live Postgres - all routes (home, static, pets/shelters/photographers/temporal-home/admin pages, password login+crypto path) return correct responses, ~1.3s startup vs ~4s JVM | ~180k |
+| 18:26 | Fixed pre-existing buglog.json merge corruption (missing `},` between bug-066 and bug-088) found while appending new entries | .wolf/buglog.json | Valid JSON restored, 69 entries | ~2k |

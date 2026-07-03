@@ -1111,6 +1111,8 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-02T22:05:44.697Z"
+    },
+    {
       "id": "bug-088",
       "timestamp": "2026-07-02T22:22:00.000Z",
       "error_message": "View Details in temporal home is not working and has bad design",
@@ -1128,6 +1130,43 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-02T22:22:00.000Z"
+    },
+    {
+      "id": "bug-089",
+      "timestamp": "2026-07-03T18:23:00.000Z",
+      "error_message": "GraalVM native-image build failed repeatedly with com.oracle.graal.pointsto.constraints.UnsupportedFeatureException: An object of type 'ch.qos.logback.classic.Logger' (then LoggerContext, Level, ConfigurationModel, ... 15+ classes total) was found in the image heap ... marked for initialization at image run time",
+      "file": "backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties, backend/build.gradle.kts, backend/src/main/kotlin/com/adoptu/ApplicationNative.kt",
+      "root_cause": "AWS SDK's netty-nio-client pulls in Netty transitively even though the app doesn't use Netty's engine at runtime for the native-image entry point (CIO instead). Netty ships its own native-image.properties marking many of its own classes (e.g. ChannelHandlerMask) build-time-initialized; those classes hold static SLF4J logger fields resolving to the app's real, fully-configured root LoggerContext (with the actual ConsoleAppender[STDOUT] attached), so native-image tried to bake that whole live object graph into the image heap and rejected it one unreachable-for-build-time class at a time. Trying --initialize-at-run-time=io.netty.channel.ChannelHandlerMask to stop the reachability at the source did not work. Also: --initialize-at-build-time=<package> is NOT recursive in this GraalVM version - only the exact package or FQCN works, not an ancestor package. A multi-line Args=...\\ continuation in native-image.properties silently drops the continuation instead of erroring.",
+      "fix": "Enumerated every logback class in the chain explicitly (single-line Args=) via --initialize-at-build-time in native-image.properties. Separately, building via Gradle's :backend:nativeCompile (plugin-managed classpath) vs. a raw `native-image -cp shadowJar.jar` both need this list, but are NOT equivalent - shadowJar's uber-jar merging changed which library's conflicting native-image.properties directive won for one class (SimpleTimeBasedGuard), so the Gradle path is the validated one, not the shadowJar one. See scripts/build-native-image.sh and cerebrum.md Key Learnings for the full config.",
+      "tags": [
+        "graalvm",
+        "native-image",
+        "logback",
+        "netty",
+        "gradle",
+        "backend"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T18:23:00.000Z"
+    },
+    {
+      "id": "bug-090",
+      "timestamp": "2026-07-03T18:24:00.000Z",
+      "error_message": "native-image build killed with exit 137 (SIGKILL) running out of memory inside the ghcr.io/graalvm/native-image-community:25 Docker container",
+      "file": "scripts/build-native-image.sh",
+      "root_cause": "A single `./gradlew :backend:jar :backend:nativeCompile --no-daemon` invocation keeps the Kotlin-compile JVM's heap allocated concurrently with native-image's own build-time JVM (which claims ~80% of container memory itself), exceeding the container's 7-8GB memory budget.",
+      "fix": "Split into two separate --no-daemon Gradle invocations (:backend:jar, then :backend:nativeCompile) so the first JVM fully exits and releases its memory before native-image starts.",
+      "tags": [
+        "graalvm",
+        "native-image",
+        "gradle",
+        "docker",
+        "oom"
+      ],
+      "related_bugs": ["bug-089"],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T18:24:00.000Z"
     }
   ]
 }

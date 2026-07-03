@@ -111,6 +111,9 @@ application {
 }
 
 graalvmNative {
+    metadataRepository {
+        enabled.set(true)
+    }
     binaries {
         named("main") {
             imageName.set("adoptu-backend")

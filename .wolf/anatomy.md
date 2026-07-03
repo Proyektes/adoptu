@@ -1678,3 +1678,16 @@
 - `terraform.tfvars.example` — sample values matching the live account (~60 tok)
 - `variables.tf` — all configurable inputs: region/profile, domain, container image/port, RDS sizing, db_app_password (sensitive, no default) (~700 tok)
 - `versions.tf` — OpenTofu/AWS+archive provider version pins, backend notes (local by default) (~170 tok)
+
+## backend/src/main/kotlin/com/adoptu/ (graalvm-native-image worktree)
+
+- `ApplicationNative.kt` — GraalVM native-image entry point: same Application.module() as production, Ktor CIO engine instead of Netty (unsupported under native-image) (~150 tok)
+
+## backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/ (graalvm-native-image worktree)
+
+- `native-image.properties` — resource includes for static/js/css assets + ~30 logback classes requiring --initialize-at-build-time (Netty's own build-time-init classes transitively reach the app's live LoggerContext) (~300 tok)
+- `reachability-metadata.json` — agent-traced reflection/resource config from hitting real routes (pages, static assets, password-login/crypto path) against live Postgres with -agentlib:native-image-agent (~2000 tok)
+
+## scripts/ (graalvm-native-image worktree)
+
+- `build-native-image.sh` — builds the native binary via ghcr.io/graalvm/native-image-community Docker image; runs :backend:jar and :backend:nativeCompile as two separate Gradle invocations to avoid an OOM (native-image's own JVM competing with the Kotlin-compile JVM for container memory) (~150 tok)
