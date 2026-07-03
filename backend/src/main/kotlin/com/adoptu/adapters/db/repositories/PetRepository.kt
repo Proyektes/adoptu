@@ -29,9 +29,8 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
 
-    private fun rowToPetDto(row: ResultRow): PetDto {
+    private fun buildPetDto(row: ResultRow, images: List<PetImageDto>): PetDto {
         val petId = row[Pets.id]
-        val images = getPetImages(petId)
         return PetDto(
             id = petId,
             rescuerId = row[Pets.rescuerId],
@@ -69,6 +68,8 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
         )
     }
 
+    private fun rowToPetDto(row: ResultRow): PetDto = buildPetDto(row, getPetImages(row[Pets.id]))
+
     private fun getPetImages(petId: Int): List<PetImageDto> = transaction {
         PetImages.selectAll()
             .where { PetImages.petId eq petId }
@@ -81,6 +82,31 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
                     sortOrder = row[PetImages.sortOrder]
                 )
             }
+    }
+
+    // Batches images for a whole listing page in a single query instead of one nested
+    // transaction{} per pet (was: N+1 — every rowToPetDto() call re-queried pet_images).
+    // See .wolf/cerebrum.md 2026-06-30: PetRepository.getAll was flagged as executing this
+    // pattern sequentially for every row in a listing.
+    private fun getImagesForPetIds(petIds: List<Int>): Map<Int, List<PetImageDto>> {
+        if (petIds.isEmpty()) return emptyMap()
+        return PetImages.selectAll()
+            .where { PetImages.petId inList petIds }
+            .orderBy(PetImages.sortOrder, SortOrder.ASC)
+            .map { row ->
+                row[PetImages.petId] to PetImageDto(
+                    id = row[PetImages.id],
+                    imageUrl = row[PetImages.imageUrl],
+                    isPrimary = row[PetImages.isPrimary],
+                    sortOrder = row[PetImages.sortOrder]
+                )
+            }
+            .groupBy({ it.first }, { it.second })
+    }
+
+    private fun rowsToPetDtos(rows: List<ResultRow>): List<PetDto> {
+        val imagesByPetId = getImagesForPetIds(rows.map { it[Pets.id] })
+        return rows.map { row -> buildPetDto(row, imagesByPetId[row[Pets.id]] ?: emptyList()) }
     }
 
     override suspend fun getAll(type: String?, showPromotedOnly: Boolean, country: String): List<PetDto> = withContext(dbDispatcher) {
@@ -106,18 +132,20 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
                 .where { UserActiveRoles.role eq UserRole.RESCUER.name }
                 .map { it[UserActiveRoles.userId] }
 
-            Pets.selectAll()
+            val rows = Pets.selectAll()
                 .where { finalCondition and (Pets.rescuerId inList rescuerIds) }
                 .orderBy(Pets.createdAt, SortOrder.DESC)
-                .map(::rowToPetDto)
+                .toList()
+            rowsToPetDtos(rows)
         }
     }
 
     override suspend fun getAllUnfiltered(): List<PetDto> = withContext(dbDispatcher) {
         transaction {
-            Pets.selectAll()
+            val rows = Pets.selectAll()
                 .orderBy(Pets.createdAt, SortOrder.DESC)
-                .map(::rowToPetDto)
+                .toList()
+            rowsToPetDtos(rows)
         }
     }
 

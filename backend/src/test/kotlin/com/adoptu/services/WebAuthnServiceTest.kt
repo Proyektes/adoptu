@@ -67,25 +67,25 @@ class WebAuthnServiceTest {
     private fun userService(): UserService = UserService(userRepository)
 
     @Test
-    fun `hasPasskey returns false when user has no credentials`() {
+    fun `hasPasskey returns false when user has no credentials`() = runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         assertFalse(webAuthnService.hasPasskey(userId))
     }
 
     @Test
-    fun `hasPasskey returns true when user has credentials`() {
+    fun `hasPasskey returns true when user has credentials`() = runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         createTestCredential(userId)
         assertTrue(webAuthnService.hasPasskey(userId))
     }
 
     @Test
-    fun `hasPasskey returns false for non-existent user`() {
+    fun `hasPasskey returns false for non-existent user`() = runBlocking {
         assertFalse(webAuthnService.hasPasskey(99999))
     }
 
     @Test
-    fun `registerWithPassword creates new user with password`() {
+    fun `registerWithPassword creates new user with password`() = runBlocking {
         val email = "newuser@example.com"
         val displayName = "New User"
         val roles = setOf(UserRole.ADOPTER)
@@ -106,7 +106,7 @@ class WebAuthnServiceTest {
     }
 
     @Test
-    fun `registerWithPassword assigns roles to new user`() {
+    fun `registerWithPassword assigns roles to new user`() = runBlocking {
         val email = "roles@example.com"
         val displayName = "Role User"
         val roles = setOf(UserRole.ADOPTER, UserRole.RESCUER)
@@ -142,7 +142,7 @@ class WebAuthnServiceTest {
     }
 
     @Test
-    fun `registerWithPassword fails with invalid password`() {
+    fun `registerWithPassword fails with invalid password`() = runBlocking {
         val email = "invalid@example.com"
         val displayName = "Invalid User"
         val roles = setOf(UserRole.ADOPTER)
@@ -153,7 +153,7 @@ class WebAuthnServiceTest {
     }
 
     @Test
-    fun `registerWithPassword returns null for tampered encrypted data`() {
+    fun `registerWithPassword returns null for tampered encrypted data`() = runBlocking {
         val email = "tampered@example.com"
         val displayName = "Tampered User"
         val roles = setOf(UserRole.ADOPTER)
@@ -163,7 +163,7 @@ class WebAuthnServiceTest {
     }
 
     @Test
-    fun `registerWithPassword grants ADMIN role for admin email`() {
+    fun `registerWithPassword grants ADMIN role for admin email`() = runBlocking {
         val email = "admin@test.com"
         val displayName = "Admin User"
         val roles = setOf(UserRole.ADOPTER)
@@ -212,7 +212,7 @@ class WebAuthnServiceTest {
     }
 
     @Test
-    fun `registerAdditionalPasskey returns false when no challenge stored`() {
+    fun `registerAdditionalPasskey returns false when no challenge stored`() = runBlocking {
         val userId = createTestUser("nopasskey@example.com", "No Passkey User")
 
         val result = webAuthnService.registerAdditionalPasskey(userId, "invalid-response")
@@ -220,7 +220,7 @@ class WebAuthnServiceTest {
     }
 
     @Test
-    fun `registerAdditionalPasskey returns false for invalid registration response`() {
+    fun `registerAdditionalPasskey returns false for invalid registration response`() = runBlocking {
         val userId = createTestUser("invalid@example.com", "Invalid User")
         webAuthnService.generateRegistrationOptionsForUser(userId, "invalid@example.com", "Invalid User")
 

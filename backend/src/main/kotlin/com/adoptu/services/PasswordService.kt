@@ -2,12 +2,13 @@ package com.adoptu.services
 
 import com.adoptu.adapters.db.PasswordResetTokens
 import com.adoptu.adapters.db.UserPasswords
+import com.adoptu.adapters.db.dbDispatcher
 import com.adoptu.ports.UserRepositoryPort
 import com.adoptu.services.crypto.CryptoService
 import com.password4j.Argon2Function
 import com.password4j.Password
 import com.password4j.types.Argon2
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.greaterEq
@@ -32,8 +33,8 @@ class PasswordService(
     private val passwordResetExpirationMs = 15 * 60 * 1000L
     private val maxResetEmailsPerDay = 3
 
-    fun hasPassword(userId: Int): Boolean {
-        return transaction {
+    suspend fun hasPassword(userId: Int): Boolean = withContext(dbDispatcher) {
+        transaction {
             UserPasswords.selectAll()
                 .where { UserPasswords.userId eq userId }
                 .firstOrNull() != null
@@ -46,7 +47,7 @@ class PasswordService(
         return if (colonIdx >= 0) decrypted.substring(colonIdx + 1) else decrypted
     }
 
-    fun setPassword(userId: Int, encryptedPassword: String): Boolean {
+    suspend fun setPassword(userId: Int, encryptedPassword: String): Boolean {
         val decrypted = CryptoService.decrypt(encryptedPassword)
         if (decrypted == null) return false
         val password = extractPassword(decrypted)
@@ -54,7 +55,7 @@ class PasswordService(
         return setPasswordHash(userId, hashPassword(password))
     }
 
-    fun changePassword(userId: Int, currentEncryptedPassword: String, newEncryptedPassword: String): Boolean {
+    suspend fun changePassword(userId: Int, currentEncryptedPassword: String, newEncryptedPassword: String): Boolean {
         val currentDecrypted = CryptoService.decrypt(currentEncryptedPassword) ?: return false
         val newDecrypted = CryptoService.decrypt(newEncryptedPassword) ?: return false
         val currentPassword = extractPassword(currentDecrypted)
@@ -74,7 +75,7 @@ class PasswordService(
         return setPasswordHash(userId, hashPassword(newPassword))
     }
 
-    fun verifyPassword(userId: Int, encryptedPassword: String): Boolean {
+    suspend fun verifyPassword(userId: Int, encryptedPassword: String): Boolean {
         val decrypted = CryptoService.decrypt(encryptedPassword) ?: return false
         val password = extractPassword(decrypted)
         val storedHash = getPasswordHash(userId) ?: return false
@@ -92,34 +93,36 @@ class PasswordService(
         return Password.check(password, hash).with(argon2)
     }
 
-    private fun setPasswordHash(userId: Int, hash: String): Boolean {
+    private suspend fun setPasswordHash(userId: Int, hash: String): Boolean {
         val now = clock.now().toEpochMilliseconds()
-        return transaction {
-            val existing = UserPasswords.selectAll().where { UserPasswords.userId eq userId }.firstOrNull()
-            if (existing != null) {
-                val updated = UserPasswords.update({ UserPasswords.userId eq userId }) {
-                    it[UserPasswords.passwordHash] = hash
-                    it[UserPasswords.updatedAt] = now
-                }
-                updated > 0
-            } else {
-                try {
-                    UserPasswords.insert {
-                        it[UserPasswords.userId] = userId
+        return withContext(dbDispatcher) {
+            transaction {
+                val existing = UserPasswords.selectAll().where { UserPasswords.userId eq userId }.firstOrNull()
+                if (existing != null) {
+                    val updated = UserPasswords.update({ UserPasswords.userId eq userId }) {
                         it[UserPasswords.passwordHash] = hash
-                        it[UserPasswords.createdAt] = now
                         it[UserPasswords.updatedAt] = now
                     }
-                    true
-                } catch (e: Exception) {
-                    false
+                    updated > 0
+                } else {
+                    try {
+                        UserPasswords.insert {
+                            it[UserPasswords.userId] = userId
+                            it[UserPasswords.passwordHash] = hash
+                            it[UserPasswords.createdAt] = now
+                            it[UserPasswords.updatedAt] = now
+                        }
+                        true
+                    } catch (e: Exception) {
+                        false
+                    }
                 }
             }
         }
     }
 
-    private fun getPasswordHash(userId: Int): String? {
-        return transaction {
+    private suspend fun getPasswordHash(userId: Int): String? = withContext(dbDispatcher) {
+        transaction {
             UserPasswords.selectAll()
                 .where { UserPasswords.userId eq userId }
                 .firstOrNull()
@@ -140,11 +143,13 @@ class PasswordService(
     suspend fun requestPasswordReset(email: String, language: String): Result<Boolean> {
         val user = userRepository.getByEmail(email) ?: return Result.success(true)
         
-        val resetAttemptsToday = transaction {
-            val startOfDay = getStartOfDayMillis()
-            PasswordResetTokens.selectAll()
-                .where { (PasswordResetTokens.userId eq user.id) and (PasswordResetTokens.createdAt greaterEq startOfDay) }
-                .count()
+        val resetAttemptsToday = withContext(dbDispatcher) {
+            transaction {
+                val startOfDay = getStartOfDayMillis()
+                PasswordResetTokens.selectAll()
+                    .where { (PasswordResetTokens.userId eq user.id) and (PasswordResetTokens.createdAt greaterEq startOfDay) }
+                    .count()
+            }
         }
         
         if (resetAttemptsToday >= maxResetEmailsPerDay) {
@@ -154,30 +159,32 @@ class PasswordService(
         val token = generateToken()
         val expiresAt = clock.now().toEpochMilliseconds() + passwordResetExpirationMs
 
-        transaction {
-            try {
-                PasswordResetTokens.insert {
-                    it[PasswordResetTokens.userId] = user.id
-                    it[PasswordResetTokens.token] = token
-                    it[PasswordResetTokens.expiresAt] = expiresAt
-                    it[PasswordResetTokens.createdAt] = clock.now().toEpochMilliseconds()
+        withContext(dbDispatcher) {
+            transaction {
+                try {
+                    PasswordResetTokens.insert {
+                        it[PasswordResetTokens.userId] = user.id
+                        it[PasswordResetTokens.token] = token
+                        it[PasswordResetTokens.expiresAt] = expiresAt
+                        it[PasswordResetTokens.createdAt] = clock.now().toEpochMilliseconds()
+                    }
+                } catch (e: Exception) {
+                    return@transaction
                 }
-            } catch (e: Exception) {
-                return@transaction
             }
         }
 
         val resetUrl = "$baseUrl/reset-password?token=$token"
         val (subject, body) = getLocalizedResetContent(language, user.displayName, resetUrl)
 
-        val sent = runBlocking { notificationPort.sendEmail(email, subject, body) }
+        val sent = notificationPort.sendEmail(email, subject, body)
         return Result.success(sent)
     }
 
-    fun resetPassword(token: String, encryptedNewPassword: String): Boolean {
+    suspend fun resetPassword(token: String, encryptedNewPassword: String): Boolean {
         val userId = verifyResetToken(token) ?: return false
         val newPassword = CryptoService.decrypt(encryptedNewPassword) ?: return false
-        
+
         if (!isPasswordValid(newPassword)) {
             return false
         }
@@ -187,15 +194,17 @@ class PasswordService(
             return false
         }
 
-        transaction {
-            PasswordResetTokens.deleteWhere { PasswordResetTokens.userId eq userId }
+        withContext(dbDispatcher) {
+            transaction {
+                PasswordResetTokens.deleteWhere { PasswordResetTokens.userId eq userId }
+            }
         }
 
         return true
     }
 
-    private fun verifyResetToken(token: String): Int? {
-        return transaction {
+    private suspend fun verifyResetToken(token: String): Int? = withContext(dbDispatcher) {
+        transaction {
             val now = clock.now().toEpochMilliseconds()
             val tokenRow = PasswordResetTokens
                 .selectAll()

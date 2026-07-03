@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-02T22:23:23.990Z
-> Files: 857 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-03T18:50:47.731Z
+> Files: 906 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -495,6 +495,56 @@
 - `SterilizationLocationsPage.kt` — init, search, render, locationCard, init (~2634 tok)
 - `TemporalHomePage.kt` — init, search, displayResults, init, loadRequests (~1344 tok)
 
+## .claude/worktrees/e2e-verify-expand/.claude/skills/
+
+- `e2e-verify.md` — E2E Verification Skill (~593 tok)
+
+## .claude/worktrees/e2e-verify-expand/.wolf/
+
+- `buglog.json` — Declares constant (~2533 tok)
+- `cerebrum.md` — Cerebrum (~10900 tok)
+- `memory.md` — Memory (~26210 tok)
+
+## .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/common/
+
+- `Country.kt` — Country: fromDisplayName, normalize (~1532 tok)
+
+## .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/dto/input/
+
+- `PetDto.kt` — Data class: Gender (~1025 tok)
+
+## .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/dto/output/
+
+- `AuthResponses.kt` — Data class: AuthMeResponse (~439 tok)
+
+## .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/pages/
+
+- `LocationSearchFilters.kt` — DIV (~1089 tok)
+- `MyPetsPage.kt` — HTML (~2581 tok)
+- `ProfilePage.kt` — HTML (~4809 tok)
+
+## .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/routes/
+
+- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~6925 tok)
+
+## .claude/worktrees/e2e-verify-expand/backend/src/main/resources/static/js/
+
+- `index.js` — emoji: updateCountryHint, loadPets, initCountry (~1215 tok)
+- `temporal-home-search.js` — params: executedFunction (~664 tok)
+
+## .claude/worktrees/e2e-verify-expand/frontend/src/jsMain/kotlin/com/adoptu/frontend/
+
+- `ApiClient.kt` — apiFetch, me, logout, getPets, getPet (~1668 tok)
+- `I18n.kt` (~20865 tok)
+
+## .claude/worktrees/e2e-verify-expand/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
+
+- `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~9647 tok)
+
+## .claude/worktrees/e2e-verify-expand/frontend/src/tests/
+
+- `e2e-verify.spec.ts` — Adoptu — End-to-End Verification Suite (~12989 tok)
+
 ## .claude/worktrees/elegant-coalescing-kurzweil/
 
 - `docker-compose.yml` — Docker Compose services (~118 tok)
@@ -520,6 +570,10 @@
 ## .claude/worktrees/filter-country-hint/frontend/src/jsMain/kotlin/com/adoptu/frontend/
 
 - `I18n.kt` (~17510 tok)
+
+## .claude/worktrees/fix-country-i18n-typo/backend/src/main/kotlin/com/adoptu/common/
+
+- `Country.kt` — Country: fromDisplayName, normalize (~1532 tok)
 
 ## .claude/worktrees/fix-fido-cancel-error/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
 
@@ -1064,6 +1118,33 @@
 
 - `Shared.kt` — HTML, A, BODY, DIV, NAV (~3184 tok)
 
+## .claude/worktrees/graalvm-native-image/
+
+- `settings.gradle.kts` (~105 tok)
+
+## .claude/worktrees/graalvm-native-image/.wolf/
+
+- `anatomy.md` — anatomy.md (~20371 tok)
+- `buglog.json` — Declares so (~17460 tok)
+- `cerebrum.md` — Cerebrum (~12093 tok)
+- `memory.md` — Memory (~33272 tok)
+
+## .claude/worktrees/graalvm-native-image/backend/
+
+- `build.gradle.kts` (~2709 tok)
+
+## .claude/worktrees/graalvm-native-image/backend/src/main/kotlin/com/adoptu/
+
+- `ApplicationNative.kt` — main (~148 tok)
+
+## .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/
+
+- `native-image.properties` (~368 tok)
+
+## .claude/worktrees/graalvm-native-image/scripts/
+
+- `build-native-image.sh` — Builds the GraalVM native-image executable for the backend using the (~273 tok)
+
 ## .claude/worktrees/idempotent-juggling-orbit/backend/src/main/kotlin/com/adoptu/pages/
 
 - `LocationSearchFilters.kt` — DIV (~699 tok)
@@ -1091,6 +1172,55 @@
 ## .claude/worktrees/imperative-roaming-starfish/backend/src/main/resources/
 
 - `logback.xml` (~230 tok)
+
+## .claude/worktrees/implement-perf-lessons/
+
+- `.gitignore` — Git ignore rules (~200 tok)
+
+## .claude/worktrees/implement-perf-lessons/.wolf/
+
+- `anatomy.md` — anatomy.md (~18890 tok)
+- `buglog.json` (~1317 tok)
+- `cerebrum.md` — Cerebrum (~11509 tok)
+- `memory.md` — Memory (~27107 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/
+
+- `build.gradle.kts` (~2384 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/adapters/db/
+
+- `DatabaseFactory.kt` — init, createDefaultAdmin (~1427 tok)
+- `DbDispatcher.kt` — Shared, bounded dispatcher for repository DB calls. (~705 tok)
+- `PoolSizing.kt` — Single source of truth for how many DB-bound worker threads/connections this (~365 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/adapters/db/repositories/
+
+- `PetRepository.kt` — PetRepositoryImpl: buildPetDto, rowToPetDto, getPetImages, getImagesForPetIds (~4766 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/routes/
+
+- `PetsRoutes.kt` — Route (~3731 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/
+
+- `EmailChangeService.kt` — EmailChangeService: requestEmailChange, verifyEmailChange, generateToken, getLocalizedEmailChangeCon (~1867 tok)
+- `MagicLinkService.kt` — Data class: MagicLinkService (~2743 tok)
+- `PasswordService.kt` — PasswordService: hasPassword, extractPassword, setPassword, changePassword (~3122 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/auth/
+
+- `WebAuthnService.kt` — Data class: WebAuthnService (~5649 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/src/test/kotlin/com/adoptu/services/
+
+- `MagicLinkServiceTest.kt` — MagicLinkServiceTest: setup, createTestUser, createMagicLinkToken, createExpiredMagicLinkToken (~3125 tok)
+- `PasswordServiceTest.kt` — PasswordServiceTest: setup, encryptPassword, createTestUser, createPasswordResetToken (~3208 tok)
+- `WebAuthnServiceTest.kt` — WebAuthnServiceTest: setup, userService, encryptPassword, createTestUser (~2952 tok)
+
+## .claude/worktrees/implement-perf-lessons/scripts/
+
+- `benchmark.sh` — Load-tests the backend under the SAME resource ceiling as production (ECS Fargate), (~1530 tok)
 
 ## .claude/worktrees/layout-fix/backend/src/main/resources/static/css/
 
@@ -1588,8 +1718,10 @@
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/ (canonical)
 
-- `DbDispatcher.kt` — Shared bounded `dbDispatcher = Dispatchers.IO.limitedParallelism(4)`, reused by all 8 repositories' `withContext(...) { transaction {...} }` calls; bounded to avoid unbounded-Dispatchers.IO thread-thrashing under a cgroup-capped container (~150 tok)
+- `DatabaseFactory.kt` — `init()`: now opens a pooled `HikariDataSource` (was raw unpooled `Database.connect(url,...)`), closes any previous pool first (init can re-run in the same JVM, e.g. per-test in IT suites), sets Postgres prepared-statement caching properties; `createDefaultAdmin` unchanged (~950 tok)
+- `DbDispatcher.kt` — Shared `dbDispatcher`, now a dedicated daemon-thread `Executor.asCoroutineDispatcher()` (was `Dispatchers.IO.limitedParallelism(4)`) sized via `PoolSizing.computeSize()`, reused by all repository/service `withContext(dbDispatcher) { transaction {...} }` calls (~300 tok)
 - `Models.kt` — Exposed table defs; `country` columns on AnimalShelters, SterilizationLocations, UserShelters, UserSterilizationLocations, TemporalHomes, Photographers now use `enumerationByName("country", 100, Country::class)` instead of free-text varchar (~3300 tok)
+- `PoolSizing.kt` — Single source of truth for DB pool/dispatcher size: `cores * 4` floored at 4; used by both DbDispatcher and DatabaseFactory's Hikari `maximumPoolSize` so they stay coupled (~150 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/repositories/
 
@@ -1691,3 +1823,4 @@
 ## scripts/ (graalvm-native-image worktree)
 
 - `build-native-image.sh` — builds the native binary via ghcr.io/graalvm/native-image-community Docker image; runs :backend:jar and :backend:nativeCompile as two separate Gradle invocations to avoid an OOM (native-image's own JVM competing with the Kotlin-compile JVM for container memory) (~150 tok)
+- `benchmark.sh` — Load-tests the backend in Docker under `--cpus=0.5 --memory=1024m` (matches ECS Fargate, same profile that produced the validated 18.2 RPS baseline in cerebrum.md). Prefers `hey`, falls back to `wrk`/`ab`/plain curl+xargs. Usage: `scripts/benchmark.sh <label> [endpoint] [duration_s] [concurrency]`; results land in `scripts/benchmark-results/`. Change one thing per run. (~650 tok)

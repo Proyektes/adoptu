@@ -2,9 +2,10 @@ package com.adoptu.services
 
 import com.adoptu.adapters.db.EmailChangeTokens
 import com.adoptu.adapters.db.Users
+import com.adoptu.adapters.db.dbDispatcher
 import com.adoptu.ports.NotificationPort
 import com.adoptu.ports.UserRepositoryPort
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -38,32 +39,36 @@ class EmailChangeService(
             return Result.failure(Exception("New email is the same as current email"))
         }
 
-        transaction {
-            EmailChangeTokens.deleteWhere { EmailChangeTokens.userId eq userId }
+        withContext(dbDispatcher) {
+            transaction {
+                EmailChangeTokens.deleteWhere { EmailChangeTokens.userId eq userId }
+            }
         }
 
         val token = generateToken()
         val expiresAt = clock.now().toEpochMilliseconds() + emailChangeExpirationMs
 
-        transaction {
-            try {
-                EmailChangeTokens.insert {
-                    it[EmailChangeTokens.userId] = userId
-                    it[EmailChangeTokens.newEmail] = newEmail
-                    it[EmailChangeTokens.token] = token
-                    it[EmailChangeTokens.expiresAt] = expiresAt
-                    it[EmailChangeTokens.createdAt] = clock.now().toEpochMilliseconds()
+        withContext(dbDispatcher) {
+            transaction {
+                try {
+                    EmailChangeTokens.insert {
+                        it[EmailChangeTokens.userId] = userId
+                        it[EmailChangeTokens.newEmail] = newEmail
+                        it[EmailChangeTokens.token] = token
+                        it[EmailChangeTokens.expiresAt] = expiresAt
+                        it[EmailChangeTokens.createdAt] = clock.now().toEpochMilliseconds()
+                    }
+                } catch (e: Exception) {
+                    return@transaction
                 }
-            } catch (e: Exception) {
-                return@transaction
             }
         }
 
         val changeUrl = "$baseUrl/verify-email-change?token=$token"
         val (subject, body) = getLocalizedEmailChangeContent(language, user.displayName, changeUrl, newEmail)
 
-        val sent = runBlocking { notificationPort.sendEmail(newEmail, subject, body) }
-        
+        val sent = notificationPort.sendEmail(newEmail, subject, body)
+
         val oldEmailSubject = "Email change requested - Adopt-U"
         val oldEmailBody = """
             Hello ${user.displayName},
@@ -76,13 +81,13 @@ class EmailChangeService(
             
             This change will not take effect until the new email is verified.
         """.trimIndent()
-        runBlocking { notificationPort.sendEmail(user.username, oldEmailSubject, oldEmailBody) }
+        notificationPort.sendEmail(user.username, oldEmailSubject, oldEmailBody)
 
         return Result.success(sent)
     }
 
-    fun verifyEmailChange(token: String): Boolean {
-        return transaction {
+    suspend fun verifyEmailChange(token: String): Boolean = withContext(dbDispatcher) {
+        transaction {
             val now = clock.now().toEpochMilliseconds()
             val tokenRow = EmailChangeTokens
                 .selectAll()

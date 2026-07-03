@@ -1313,3 +1313,239 @@
 | 18:25 | Built GraalVM native-image support: CIO-based native entry point (Netty unsupported), org.graalvm.buildtools.native plugin, native-image.properties with ~30 logback build-time-init classes discovered via real build errors, agent-traced reachability-metadata.json | ApplicationNative.kt, backend/build.gradle.kts, settings.gradle.kts, native-image.properties, reachability-metadata.json, scripts/build-native-image.sh | Native binary (134MB) built successfully via Docker+Gradle two-phase build; smoke-tested against live Postgres - all routes (home, static, pets/shelters/photographers/temporal-home/admin pages, password login+crypto path) return correct responses, ~1.3s startup vs ~4s JVM | ~180k |
 | 18:26 | Fixed pre-existing buglog.json merge corruption (missing `},` between bug-066 and bug-088) found while appending new entries | .wolf/buglog.json | Valid JSON restored, 69 entries | ~2k |
 | 18:51 | Rebuilt native binary from latest adoptu HEAD (e503b29, unchanged - no new commits since prior merge), load-tested under --cpus=0.5 --memory=1024m (ECS Fargate equivalent) via containerized wrk against `/` and `/pets` | scripts/build-native-image.sh, scripts/benchmark-results/*.txt | GET /: 143.1 RPS, p50 102ms/p99 555ms, ~11.7% of 1GiB mem. GET /pets (DB-backed): 127.8 RPS, p50 104ms/p99 738ms, ~10.9% of 1GiB mem. Zero errors across 8188 total requests; idle memory ~62-86MiB | ~15k |
+## Session: 2026-07-02 17:20
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-02 17:20
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 17:23 | designqc: captured 4 screenshots (100KB, ~10000 tok) | /temporal-homes, /temporal-home/32 | ready for eval | ~0 |
+| 17:28 | Edited .claude/worktrees/fix-country-i18n-typo/backend/src/main/kotlin/com/adoptu/common/Country.kt | inline fix | ~12 |
+| 17:28 | Edited .claude/worktrees/fix-country-i18n-typo/backend/src/main/kotlin/com/adoptu/common/Country.kt | inline fix | ~12 |
+| 17:33 | Session end: 2 writes across 1 files (Country.kt) | 5 reads | ~1556 tok |
+
+## Session: 2026-07-02 17:42
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-03 10:04
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-03 10:06
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 10:11 | Edited .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/pages/LocationSearchFilters.kt | added error handling | ~175 |
+| 10:12 | Edited .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/pages/LocationSearchFilters.kt | added error handling | ~157 |
+| 10:12 | Edited .claude/worktrees/e2e-verify-expand/backend/src/main/resources/static/js/index.js | added 2 condition(s) | ~386 |
+| 10:15 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | added optional chaining | ~382 |
+| 10:16 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | added error handling | ~1065 |
+
+## Session: 2026-07-03 10:17
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 10:17 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | added 1 condition(s) | ~855 |
+| 10:17 | Session end: 1 writes across 1 files (e2e-verify.spec.ts) | 1 reads | ~11811 tok |
+| 10:18 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | added optional chaining | ~1266 |
+| 10:19 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | added optional chaining | ~907 |
+| 10:19 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | expanded (+12 lines) | ~568 |
+| 10:20 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | added nullish coalescing | ~513 |
+| 10:23 | Edited .claude/worktrees/e2e-verify-expand/.claude/skills/e2e-verify.md | expanded (+33 lines) | ~480 |
+| 10:27 | Created .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/adapters/db/PoolSizing.kt | — | ~365 |
+| 10:28 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/adapters/db/DbDispatcher.kt | expanded (+19 lines) | ~705 |
+| 10:28 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/adapters/db/DatabaseFactory.kt | added 2 import(s) | ~228 |
+| 10:28 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/adapters/db/DatabaseFactory.kt | modified getOrElse() | ~497 |
+| 10:28 | Edited .claude/worktrees/implement-perf-lessons/backend/build.gradle.kts | 2→3 lines | ~47 |
+| 10:30 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/MagicLinkService.kt | added 1 import(s) | ~103 |
+| 10:30 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/MagicLinkService.kt | inline fix | ~32 |
+| 10:30 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/MagicLinkService.kt | modified withContext() | ~125 |
+| 10:30 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/MagicLinkService.kt | modified withContext() | ~198 |
+| 10:30 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/MagicLinkService.kt | inline fix | ~18 |
+| 10:31 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/MagicLinkService.kt | modified verifyMagicLink() | ~606 |
+| 10:31 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/PasswordService.kt | added 1 import(s) | ~110 |
+| 10:31 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/PasswordService.kt | modified hasPassword() | ~68 |
+| 10:31 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/PasswordService.kt | modified setPassword() | ~396 |
+| 10:31 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/PasswordService.kt | modified setPasswordHash() | ~394 |
+| 10:31 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/PasswordService.kt | modified withContext() | ~99 |
+| 10:32 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/PasswordService.kt | modified withContext() | ~542 |
+| 10:32 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/EmailChangeService.kt | added 1 import(s) | ~77 |
+| 10:32 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/EmailChangeService.kt | modified withContext() | ~312 |
+| 10:32 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/EmailChangeService.kt | modified verifyEmailChange() | ~282 |
+| 10:32 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/auth/WebAuthnService.kt | added 1 import(s) | ~57 |
+| 10:32 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/auth/WebAuthnService.kt | 2→2 lines | ~22 |
+| 10:33 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/auth/WebAuthnService.kt | modified registerWithPassword() | ~562 |
+| 10:33 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/auth/WebAuthnService.kt | modified registerAdditionalPasskey() | ~520 |
+| 10:33 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/auth/WebAuthnService.kt | modified verifyAndRegister() | ~1010 |
+| 10:33 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/auth/WebAuthnService.kt | modified verifyAndAuthenticate() | ~190 |
+| 10:33 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/auth/WebAuthnService.kt | modified withContext() | ~270 |
+| 10:34 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/auth/WebAuthnService.kt | modified verifyPassword() | ~43 |
+| 10:34 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/auth/WebAuthnService.kt | modified resetPassword() | ~156 |
+| 10:34 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/routes/PetsRoutes.kt | inline fix | ~28 |
+| 10:34 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/routes/PetsRoutes.kt | 11→11 lines | ~120 |
+| 10:34 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/routes/PetsRoutes.kt | 3→2 lines | ~18 |
+| 10:36 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/adapters/db/repositories/PetRepository.kt | added 1 condition(s) | ~1380 |
+| 10:37 | Created .claude/worktrees/implement-perf-lessons/scripts/benchmark.sh | — | ~1245 |
+| 10:40 | Edited .claude/worktrees/implement-perf-lessons/backend/src/test/kotlin/com/adoptu/services/MagicLinkServiceTest.kt | 81→82 lines | ~808 |
+| 10:40 | Edited .claude/worktrees/implement-perf-lessons/backend/src/test/kotlin/com/adoptu/services/PasswordServiceTest.kt | 115→115 lines | ~1273 |
+| 10:41 | Edited .claude/worktrees/implement-perf-lessons/backend/src/test/kotlin/com/adoptu/services/PasswordServiceTest.kt | 9→9 lines | ~103 |
+| 10:41 | Edited .claude/worktrees/implement-perf-lessons/backend/src/test/kotlin/com/adoptu/services/PasswordServiceTest.kt | 3→3 lines | ~37 |
+| 10:41 | Edited .claude/worktrees/implement-perf-lessons/backend/src/test/kotlin/com/adoptu/services/WebAuthnServiceTest.kt | 21→21 lines | ~203 |
+| 10:41 | Edited .claude/worktrees/implement-perf-lessons/backend/src/test/kotlin/com/adoptu/services/WebAuthnServiceTest.kt | 3→3 lines | ~34 |
+| 10:41 | Edited .claude/worktrees/implement-perf-lessons/backend/src/test/kotlin/com/adoptu/services/WebAuthnServiceTest.kt | 3→3 lines | ~35 |
+| 10:41 | Edited .claude/worktrees/implement-perf-lessons/backend/src/test/kotlin/com/adoptu/services/WebAuthnServiceTest.kt | 3→3 lines | ~38 |
+| 10:41 | Edited .claude/worktrees/implement-perf-lessons/backend/src/test/kotlin/com/adoptu/services/WebAuthnServiceTest.kt | 3→3 lines | ~35 |
+| 10:41 | Edited .claude/worktrees/implement-perf-lessons/backend/src/test/kotlin/com/adoptu/services/WebAuthnServiceTest.kt | 16→16 lines | ~196 |
+| 10:42 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | modified log() | ~268 |
+| 10:42 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | 6→5 lines | ~60 |
+| 10:43 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | added 1 condition(s) | ~250 |
+| 10:46 | Edited .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt | 7→7 lines | ~66 |
+| 10:46 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | reduced (-12 lines) | ~244 |
+| 10:50 | Edited .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/adapters/db/DatabaseFactory.kt | added optional chaining | ~282 |
+| 10:55 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | added 1 condition(s) | ~210 |
+| 10:55 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | inline fix | ~42 |
+| 10:56 | Edited .claude/worktrees/implement-perf-lessons/.wolf/cerebrum.md | added optional chaining | ~694 |
+| 10:56 | Edited .claude/worktrees/implement-perf-lessons/.wolf/cerebrum.md | modified withContext() | ~1024 |
+| 10:57 | Edited .claude/worktrees/implement-perf-lessons/.wolf/buglog.json | added optional chaining | ~467 |
+| 10:57 | Edited .claude/worktrees/implement-perf-lessons/.wolf/memory.md | expanded (+8 lines) | ~731 |
+| 10:57 | Edited .claude/worktrees/implement-perf-lessons/.wolf/anatomy.md | modified withContext() | ~204 |
+| 10:58 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | added optional chaining | ~85 |
+| 10:58 | Edited .claude/worktrees/implement-perf-lessons/.wolf/anatomy.md | 2→3 lines | ~147 |
+| 10:58 | Edited .claude/worktrees/implement-perf-lessons/.wolf/anatomy.md | 3→7 lines | ~130 |
+| 10:58 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | added error handling | ~75 |
+| 10:59 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | modified eval() | ~72 |
+| 11:01 | Session end: 68 writes across 21 files (e2e-verify.spec.ts, e2e-verify.md, PoolSizing.kt, DbDispatcher.kt, DatabaseFactory.kt) | 37 reads | ~91798 tok |
+| 11:01 | Edited .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/pages/ProfilePage.kt | 5→4 lines | ~19 |
+| 11:01 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/jsMain/kotlin/com/adoptu/frontend/ApiClient.kt | modified updateProfile() | ~71 |
+| 11:01 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/ProfilePage.kt | 2→3 lines | ~82 |
+| 11:01 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/ProfilePage.kt | inline fix | ~20 |
+| 11:02 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | reduced (-6 lines) | ~111 |
+| 11:04 | Edited .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/dto/output/AuthResponses.kt | 3→4 lines | ~41 |
+| 11:04 | Edited .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt | 3→4 lines | ~45 |
+| 11:04 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/ProfilePage.kt | 3→4 lines | ~103 |
+
+## Session: 2026-07-03 11:04
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:06 | Edited .claude/worktrees/implement-perf-lessons/scripts/benchmark.sh | expanded (+6 lines) | ~194 |
+| 11:08 | Edited .claude/worktrees/implement-perf-lessons/scripts/benchmark.sh | expanded (+7 lines) | ~323 |
+| 11:11 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | added nullish coalescing | ~178 |
+| 11:12 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | 2→2 lines | ~52 |
+| 11:13 | Edited .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/dto/input/PetDto.kt | 3→3 lines | ~17 |
+| 11:13 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | 8→5 lines | ~49 |
+| 11:13 | Edited .claude/worktrees/graalvm-native-image/settings.gradle.kts | expanded (+7 lines) | ~94 |
+| 11:13 | Edited .claude/worktrees/graalvm-native-image/backend/build.gradle.kts | 7→11 lines | ~86 |
+| 11:13 | Edited .claude/worktrees/implement-perf-lessons/.gitignore | 3→6 lines | ~27 |
+| 11:13 | Edited .claude/worktrees/graalvm-native-image/backend/build.gradle.kts | 1→6 lines | ~119 |
+| 11:13 | Edited .claude/worktrees/graalvm-native-image/backend/build.gradle.kts | 6→5 lines | ~101 |
+| 11:14 | Edited .claude/worktrees/implement-perf-lessons/.wolf/cerebrum.md | 1→3 lines | ~751 |
+| 11:14 | Edited .claude/worktrees/graalvm-native-image/backend/build.gradle.kts | modified named() | ~284 |
+| 11:14 | Edited .claude/worktrees/implement-perf-lessons/.wolf/memory.md | 1→4 lines | ~302 |
+| 11:14 | Edited .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/dto/input/PetDto.kt | 3→3 lines | ~15 |
+| 11:14 | Created .claude/worktrees/graalvm-native-image/backend/src/main/kotlin/com/adoptu/ApplicationNative.kt | — | ~213 |
+| 11:14 | Session end: 16 writes across 9 files (benchmark.sh, e2e-verify.spec.ts, PetDto.kt, settings.gradle.kts, build.gradle.kts) | 8 reads | ~47276 tok |
+| 11:14 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/kotlin/com/adoptu/ApplicationNative.kt | modified point() | ~58 |
+
+## Session: 2026-07-03 11:15
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:23 | Edited .claude/worktrees/graalvm-native-image/backend/build.gradle.kts | 6→3 lines | ~36 |
+| 11:25 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | 1→3 lines | ~88 |
+| 11:25 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | 3→3 lines | ~37 |
+| 11:26 | Edited .claude/worktrees/implement-perf-lessons/.wolf/cerebrum.md | modified dispatcher() | ~635 |
+| 11:26 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~27 |
+| 11:27 | Edited .claude/worktrees/implement-perf-lessons/.wolf/memory.md | 1→2 lines | ~364 |
+| 11:27 | Session end: 6 writes across 4 files (build.gradle.kts, native-image.properties, cerebrum.md, memory.md) | 4 reads | ~30507 tok |
+| 11:28 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | 2→3 lines | ~87 |
+| 11:28 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~13 |
+| 11:30 | Session end: 8 writes across 5 files (build.gradle.kts, native-image.properties, cerebrum.md, memory.md, e2e-verify.spec.ts) | 6 reads | ~43371 tok |
+| 11:30 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | 2→1 lines | ~52 |
+| 11:31 | Edited .claude/worktrees/e2e-verify-expand/backend/src/main/resources/static/js/temporal-home-search.js | added 3 condition(s) | ~213 |
+| 11:32 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~30 |
+| 11:32 | Session end: 11 writes across 6 files (build.gradle.kts, native-image.properties, cerebrum.md, memory.md, e2e-verify.spec.ts) | 8 reads | ~44191 tok |
+| 11:33 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~38 |
+| 11:34 | Session end: 12 writes across 6 files (build.gradle.kts, native-image.properties, cerebrum.md, memory.md, e2e-verify.spec.ts) | 8 reads | ~44231 tok |
+| 11:35 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~64 |
+| 11:35 | Session end: 13 writes across 6 files (build.gradle.kts, native-image.properties, cerebrum.md, memory.md, e2e-verify.spec.ts) | 8 reads | ~44300 tok |
+| 10:42 | Fixed compileTestKotlin breakage from suspend-conversion (PasswordService/MagicLinkService/WebAuthnService); wrapped affected @Test bodies in runBlocking, added trailing Unit where needed | MagicLinkServiceTest.kt, PasswordServiceTest.kt, WebAuthnServiceTest.kt | BUILD SUCCESSFUL, 50/50 tests passed, 0 skipped | ~9000 |
+| 10:17 | Added HikariCP-backed connection pool (was raw unpooled Database.connect); core-aware+floor PoolSizing shared by Hikari maximumPoolSize and DbDispatcher | DatabaseFactory.kt, PoolSizing.kt (new), build.gradle.kts | compiles, pool logs confirmed in test run | ~4000 |
+| 10:20 | Replaced Dispatchers.IO.limitedParallelism(4) with a dedicated daemon-thread Executor for DB work, size coupled to Hikari pool via PoolSizing | DbDispatcher.kt | compiles | ~2000 |
+| 10:30 | Audited every repository/service for blocking transaction{} calls made directly from suspend route handlers without a dispatcher wrap; converted PasswordService/EmailChangeService/MagicLinkService/WebAuthnService methods to suspend + withContext(dbDispatcher), removed now-redundant runBlocking wrappers (including 2 in PetsRoutes.kt route handlers) | PasswordService.kt, EmailChangeService.kt, MagicLinkService.kt, WebAuthnService.kt, PetsRoutes.kt | compiles, all tests pass after subagent fix | ~15000 |
+| 10:40 | Fixed N+1 in PetRepositoryImpl.getAll/getAllUnfiltered — getPetImages was called once per pet (nested transaction per row); now batch-fetches images for all returned pet IDs in one query | PetRepository.kt | compiles, tests pass | ~3000 |
+| 10:41 | Evaluated raw-JDBC escape hatch for getById and hand-rolled JSON encoding for hot DTOs; declined both — getById wrapping overhead is negligible for a single-row PK lookup, getAll's listing has variable filters (poor fixed-shape fit), and no profiling data exists to justify calling any endpoint "hot" for the JSON optimization | — (decision only, documented in cerebrum.md) | — | ~1500 |
+| 10:44 | Added cgroup-aware benchmark script (Docker --cpus=0.5 --memory=1024m, matching the profile that produced the validated 18.2 RPS number); not run end-to-end in this session (no live Postgres wired in sandbox) | scripts/benchmark.sh (new) | syntax-checked only, not executed | ~2500 |
+| 10:50 | Found and fixed a real leak: DatabaseFactory.init() can run more than once per JVM (DatabaseFactoryInitIT, one call per @Test); new HikariDataSource wasn't closing the previous one, exhausting Postgres's connection limit by the 4th/5th/7th call | DatabaseFactory.kt | :backend:integrationTest 7/7 passed after fix | ~3000 |
+| 10:52 | Full verification: :backend:test, :backend:integrationTest, :backend:koverVerify (95% gate) all green | — | BUILD SUCCESSFUL x3 | ~2000 |
+| 11:04 | Ran scripts/benchmark.sh; found it broken on Docker Desktop (--network host doesn't reach real host's 127.0.0.1 Postgres); fixed via -p port mapping + host.docker.internal + --add-host host-gateway | scripts/benchmark.sh | fixed, verified via docker+nc connectivity test | ~4000 |
+| 11:08 | Added dockerized-wrk fallback tier (williamyeh/wrk image) to benchmark.sh since no hey/wrk/ab installed locally | scripts/benchmark.sh | real percentile output obtained | ~1500 |
+| 11:10 | Ran isolated A/B benchmark: old Dispatchers.IO.limitedParallelism(4) vs new dedicated-Executor dispatcher, 2 runs each, GET /api/pets?country=Mexico, --cpus=0.5 --memory=1024m | DbDispatcher.kt (temp revert+restore, verified clean vs HEAD after) | old: 6.42/7.71 RPS; new: 5.52/6.52 RPS — old edges out new in both pairs, but ranges overlap and within-config variance (~18%) is comparable to the between-config gap; inconclusive at this sample size, documented honestly in cerebrum.md | ~6000 |
+| 11:22 | Extended A/B to 6 rounds (3 alternating pairs, 40s each) for more confidence; user separately clarified the "300 RPS" comparison point was a GraalVM native-image build on the same 0.5vCPU/1024MB profile, not comparable to our plain-JVM numbers — confirmed via web search that Ktor Netty (adoptu's engine) isn't GraalVM-native-image-compatible (CIO only); user confirmed a separate agent owns that track, scope stays JVM-only here | DbDispatcher.kt (temp swaps, restored + verified clean vs HEAD), cerebrum.md | old: 7.03/8.40/10.35 RPS (mean 8.59); new: 6.43/6.66/14.22 RPS (mean 9.10, much higher variance, round 3 reverses direction) — no confident winner; kept new dispatcher since it's not shown worse and is structurally simpler. Final :backend:compileKotlin + :backend:test re-verified clean (UP-TO-DATE) after all the file-swapping | ~12000 |
+| 11:36 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~26 |
+| 11:37 | Edited .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/common/Country.kt | inline fix | ~12 |
+| 11:37 | Edited .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/common/Country.kt | inline fix | ~12 |
+| 11:37 | Session end: 16 writes across 7 files (build.gradle.kts, native-image.properties, cerebrum.md, memory.md, e2e-verify.spec.ts) | 9 reads | ~46052 tok |
+| 11:39 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~35 |
+| 11:39 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | expanded (+112 lines) | ~1140 |
+| 11:40 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~186 |
+| 11:44 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~113 |
+| 11:45 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~22 |
+| 11:46 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | 20→22 lines | ~293 |
+| 11:47 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~40 |
+| 11:47 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | added error handling | ~199 |
+| 11:48 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | added optional chaining | ~173 |
+| 11:49 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~45 |
+| 11:50 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | added 1 condition(s) | ~192 |
+| 11:51 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~27 |
+| 11:53 | Edited .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/native-image.properties | inline fix | ~25 |
+| 11:55 | Edited .claude/worktrees/graalvm-native-image/backend/build.gradle.kts | 2→5 lines | ~24 |
+| 11:57 | Edited .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/pages/MyPetsPage.kt | expanded (+16 lines) | ~387 |
+| 11:58 | Edited .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/pages/MyPetsPage.kt | inline fix | ~17 |
+| 11:58 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | 7→3 lines | ~59 |
+| 11:59 | Session end: 33 writes across 9 files (build.gradle.kts, native-image.properties, cerebrum.md, memory.md, e2e-verify.spec.ts) | 13 reads | ~58721 tok |
+| 12:04 | Edited .claude/worktrees/e2e-verify-expand/frontend/src/tests/e2e-verify.spec.ts | 2→3 lines | ~91 |
+| 12:05 | Session end: 34 writes across 9 files (build.gradle.kts, native-image.properties, cerebrum.md, memory.md, e2e-verify.spec.ts) | 13 reads | ~58664 tok |
+| 12:07 | Session end: 34 writes across 9 files (build.gradle.kts, native-image.properties, cerebrum.md, memory.md, e2e-verify.spec.ts) | 13 reads | ~58846 tok |
+| 12:10 | Edited .claude/worktrees/e2e-verify-expand/.wolf/buglog.json | expanded (+72 lines) | ~1651 |
+| 12:11 | Edited .claude/worktrees/e2e-verify-expand/.wolf/cerebrum.md | added nullish coalescing | ~1117 |
+| 12:12 | Edited .claude/worktrees/e2e-verify-expand/.wolf/cerebrum.md | 1→3 lines | ~358 |
+| 12:12 | Edited .claude/worktrees/e2e-verify-expand/.wolf/memory.md | modified tests() | ~303 |
+| 12:12 | Session end: 38 writes across 10 files (build.gradle.kts, native-image.properties, cerebrum.md, memory.md, e2e-verify.spec.ts) | 15 reads | ~73002 tok |
+| 12:14 | Session end: 38 writes across 10 files (build.gradle.kts, native-image.properties, cerebrum.md, memory.md, e2e-verify.spec.ts) | 15 reads | ~73002 tok |
+
+## Session: 2026-07-03 12:17
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:19 | Created .claude/worktrees/graalvm-native-image/scripts/build-native-image.sh | — | ~273 |
+| 12:19 | Session end: 1 writes across 1 files (build-native-image.sh) | 0 reads | ~293 tok |
+| 12:20 | Edited .claude/worktrees/graalvm-native-image/.wolf/cerebrum.md | 2→4 lines | ~1117 |
+| 12:20 | Edited .claude/worktrees/graalvm-native-image/.wolf/cerebrum.md | 3→4 lines | ~387 |
+| 12:21 | Session end: 3 writes across 2 files (build-native-image.sh, cerebrum.md) | 1 reads | ~13660 tok |
+| 12:21 | Edited .claude/worktrees/graalvm-native-image/.wolf/buglog.json | 4→6 lines | ~38 |
+| 12:21 | Edited .claude/worktrees/graalvm-native-image/.wolf/buglog.json | expanded (+37 lines) | ~1027 |
+| 12:22 | Edited .claude/worktrees/graalvm-native-image/.wolf/memory.md | expanded (+7 lines) | ~420 |
+| 12:23 | Edited .claude/worktrees/graalvm-native-image/.wolf/anatomy.md | expanded (+13 lines) | ~337 |
+| 12:24 | Session end: 7 writes across 5 files (build-native-image.sh, cerebrum.md, buglog.json, memory.md, anatomy.md) | 4 reads | ~32000 tok |
+| 12:25 | Session end: 7 writes across 5 files (build-native-image.sh, cerebrum.md, buglog.json, memory.md, anatomy.md) | 4 reads | ~32000 tok |
+| 12:33 | Session end: 7 writes across 5 files (build-native-image.sh, cerebrum.md, buglog.json, memory.md, anatomy.md) | 4 reads | ~32000 tok |
+| 12:34 | Session end: 7 writes across 5 files (build-native-image.sh, cerebrum.md, buglog.json, memory.md, anatomy.md) | 4 reads | ~32000 tok |
+
+## Session: 2026-07-03 12:37
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:50 | Edited .claude/worktrees/graalvm-native-image/.wolf/memory.md | modified pets() | ~186 |
+| 12:51 | Session end: 1 writes across 1 files (memory.md) | 0 reads | ~199 tok |
+| 12:51 | Session end: 1 writes across 1 files (memory.md) | 0 reads | ~199 tok |
+| 13:19 | Session end: 1 writes across 1 files (memory.md) | 0 reads | ~199 tok |
+| 14:20 | Session end: 1 writes across 1 files (memory.md) | 1 reads | ~640 tok |
+| 14:23 | Session end: 1 writes across 1 files (memory.md) | 2 reads | ~1081 tok |
+| 14:35 | Session end: 1 writes across 1 files (memory.md) | 2 reads | ~1081 tok |

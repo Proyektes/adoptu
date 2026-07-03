@@ -49,6 +49,7 @@ dependencies {
     implementation("com.webauthn4j:webauthn4j-core:0.31.7.RELEASE")
 
     implementation("org.postgresql:postgresql:$postgresVersion")
+    implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.checkerframework:checker-qual:4.2.0")
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")

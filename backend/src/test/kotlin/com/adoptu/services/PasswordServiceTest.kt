@@ -38,13 +38,13 @@ class PasswordServiceTest {
     }
 
     @Test
-    fun `hasPassword returns false when no password set`() {
+    fun `hasPassword returns false when no password set`() = runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         assertFalse(passwordService.hasPassword(userId))
     }
 
     @Test
-    fun `setPassword stores hashed password`() {
+    fun `setPassword stores hashed password`() = runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val encryptedPassword = encryptPassword("SecurePassword123!")
 
@@ -54,7 +54,7 @@ class PasswordServiceTest {
     }
 
     @Test
-    fun `setPassword rejects invalid password - too short`() {
+    fun `setPassword rejects invalid password - too short`() = runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val encryptedPassword = encryptPassword("Short1!")
 
@@ -64,7 +64,7 @@ class PasswordServiceTest {
     }
 
     @Test
-    fun `setPassword rejects invalid password - too long`() {
+    fun `setPassword rejects invalid password - too long`() = runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val encryptedPassword = encryptPassword("a".repeat(129))
 
@@ -74,7 +74,7 @@ class PasswordServiceTest {
     }
 
     @Test
-    fun `setPassword rejects tampered encrypted data`() {
+    fun `setPassword rejects tampered encrypted data`() = runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val encryptedPassword = "tampered-encrypted-data"
 
@@ -84,7 +84,7 @@ class PasswordServiceTest {
     }
 
     @Test
-    fun `verifyPassword returns true for correct password`() {
+    fun `verifyPassword returns true for correct password`() = runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val password = "SecurePassword123!"
         val encryptedPassword = encryptPassword(password)
@@ -95,7 +95,7 @@ class PasswordServiceTest {
     }
 
     @Test
-    fun `verifyPassword returns false for wrong password`() {
+    fun `verifyPassword returns false for wrong password`() = runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val encryptedCorrect = encryptPassword("CorrectPassword123!")
         val encryptedWrong = encryptPassword("WrongPassword123!")
@@ -106,7 +106,7 @@ class PasswordServiceTest {
     }
 
     @Test
-    fun `verifyPassword returns false when no password set`() {
+    fun `verifyPassword returns false when no password set`() = runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val encryptedPassword = encryptPassword("SomePassword123!")
 
@@ -115,7 +115,7 @@ class PasswordServiceTest {
     }
 
     @Test
-    fun `changePassword updates password successfully`() {
+    fun `changePassword updates password successfully`() = runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val oldPassword = encryptPassword("OldPassword123!")
         val newPassword = encryptPassword("NewPassword123!")
@@ -128,7 +128,7 @@ class PasswordServiceTest {
     }
 
     @Test
-    fun `changePassword fails with wrong current password`() {
+    fun `changePassword fails with wrong current password`() = runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val oldPassword = encryptPassword("OldPassword123!")
         val newPassword = encryptPassword("NewPassword123!")
@@ -142,7 +142,7 @@ class PasswordServiceTest {
     }
 
     @Test
-    fun `changePassword fails when new password too short`() {
+    fun `changePassword fails when new password too short`() = runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val oldPassword = encryptPassword("OldPassword123!")
         val newPassword = encryptPassword("Short1!")
@@ -209,7 +209,7 @@ class PasswordServiceTest {
     }
 
     @Test
-    fun `resetPassword fails with invalid token`() {
+    fun `resetPassword fails with invalid token`() = runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val newPassword = encryptPassword("NewResetPassword123!")
 
@@ -245,7 +245,7 @@ class PasswordServiceTest {
     }
 
     @Test
-    fun `password hashing uses Argon2id`() {
+    fun `password hashing uses Argon2id`() = runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val encryptedPassword = encryptPassword("TestPassword123!")
 
