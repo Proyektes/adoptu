@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-03T20:57:07.606Z
-> Files: 906 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-03T22:15:33.435Z
+> Files: 936 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -1125,8 +1125,8 @@
 ## .claude/worktrees/graalvm-native-image/.wolf/
 
 - `anatomy.md` — anatomy.md (~21873 tok)
-- `buglog.json` — Declares putPromise (~13192 tok)
-- `cerebrum.md` — Cerebrum (~12093 tok)
+- `buglog.json` — Declares putPromise (~13876 tok)
+- `cerebrum.md` — Cerebrum (~14431 tok)
 - `memory.md` — Memory (~33272 tok)
 
 ## .claude/worktrees/graalvm-native-image/backend/
@@ -1144,6 +1144,75 @@
 ## .claude/worktrees/graalvm-native-image/scripts/
 
 - `build-native-image.sh` — Builds the GraalVM native-image executable for the backend using the (~273 tok)
+
+## .claude/worktrees/graalvm-native-image/scripts/benchmark-results/
+
+- `20260703T211336Z_graalvm-native-home-retest.txt` (~410 tok)
+- `20260703T211336Z_graalvm-native-pets-retest.txt` (~378 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/
+
+- `build.gradle.kts` (~2220 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/
+
+- `Application.kt` — main, configureRouting (~770 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/adapters/db/
+
+- `DatabaseFactory.kt` — init, createDefaultAdmin (~1424 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/adapters/notification/
+
+- `SesEmailAdapter.kt` — SesEmailAdapter: sendEmail, sendEmailViaSmtp, sendEmailViaSes, sendPhotographerRequest (~2156 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/config/
+
+- `AppConfig.kt` — Drop-in replacement for Ktor's `io.ktor.server.config.ApplicationConfig` (same (~341 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/di/
+
+- `AppModule.kt` — appModule, getOrigins, createImageStorageAdapter (~1109 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/routes/
+
+- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~6722 tok)
+- `PetsRoutes.kt` — HttpRules (~3723 tok)
+- `PhotographerRoutes.kt` — HttpRules, validateUser (~2267 tok)
+- `ShelterRoutes.kt` — HttpRules, HttpRules (~1219 tok)
+- `SterilizationLocationRoutes.kt` — HttpRules, HttpRules (~1338 tok)
+- `TemporalHomeRoutes.kt` — HttpRules (~2688 tok)
+- `UIRoutes.kt` — Data class: NavParams (~2378 tok)
+- `UserShelterRoutes.kt` — HttpRules (~728 tok)
+- `UsersRoutes.kt` — Data class: UpdateProfileRequest (~3552 tok)
+- `UserSterilizationLocationRoutes.kt` — HttpRules (~782 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/web/
+
+- `AccessLogFilter.kt` — Replaces Ktor's `install(CallLogging) { ... }` (plugins/Logging.kt). (~261 tok)
+- `Deps.kt` — Replaces Ktor's `org.koin.ktor.ext.inject` (which resolved via the Application's attached (~122 tok)
+- `Html.kt` — Replaces Ktor's `call.respondHtml { ... }` (ktor-server-html-builder). (~157 tok)
+- `JsonSupport.kt` — Replaces the Ktor ContentNegotiation/kotlinx.serialization plugin (plugins/Serialization.kt) (~286 tok)
+- `RequestExtensions.kt` — Path template parameter, e.g. `req.pathParam("id")` for a route registered as `"/pets/{id}"`. (~654 tok)
+- `Responses.kt` — Sends [result].data as JSON on success, or the matching error status otherwise. (~516 tok)
+- `Sessions.kt` — Replaces Ktor's `install(Sessions) { cookie<SessionUser>(...) }` (plugins/Sessions.kt). (~756 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/adapters/db/
+
+- `DatabaseFactoryInitIT.kt` — DatabaseFactoryInitIT: startContainer, stopContainer, createConfig (~1983 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/plugins/
+
+- `RoutingTest.kt` — Exercises the real production route wiring in configureRouting() -- every other E2E test (~435 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/services/auth/
+
+- `SessionUserTest.kt` — Data class: SessionUserTest (~520 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/testsupport/
+
+- `TestHttp.kt` — Thin java.net.http.HttpClient helpers replacing Ktor's test HttpClient, for use against a (~1172 tok)
+- `TestServer.kt` — Replaces Ktor's `testApplication { ... }` / `embeddedServer(Netty, ...)` test bootstrapping. (~1064 tok)
 
 ## .claude/worktrees/idempotent-juggling-orbit/backend/src/main/kotlin/com/adoptu/pages/
 
