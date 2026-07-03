@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-03T22:22:27.585Z
-> Files: 939 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-03T23:38:09.340Z
+> Files: 957 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -31,7 +31,7 @@
 ## ./
 
 - `.dockerignore` — Docker ignore rules (~22 tok)
-- `.gitignore` — Git ignore rules (~180 tok)
+- `.gitignore` — Git ignore rules (~243 tok)
 - `AGENTS.md` — Adopt-U - Agent Guidelines (~1284 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~2307 tok)
 - `buildspec.yml` — CodeBuild spec: logs into ECR, builds/tags/pushes the image, emits imagedefinitions.json for ECS deploy (~520 tok)
@@ -1150,6 +1150,12 @@
 - `20260703T211336Z_graalvm-native-home-retest.txt` (~410 tok)
 - `20260703T211336Z_graalvm-native-pets-retest.txt` (~378 tok)
 
+## .claude/worktrees/helidon-nima-migration/.wolf/
+
+- `anatomy.md` — anatomy.md (~22897 tok)
+- `buglog.json` — Declares putPromise (~6694 tok)
+- `cerebrum.md` — Cerebrum (~15780 tok)
+
 ## .claude/worktrees/helidon-nima-migration/backend/
 
 - `build.gradle.kts` (~2220 tok)
@@ -1192,14 +1198,23 @@
 - `AccessLogFilter.kt` — Replaces Ktor's `install(CallLogging) { ... }` (plugins/Logging.kt). (~261 tok)
 - `Deps.kt` — Replaces Ktor's `org.koin.ktor.ext.inject` (which resolved via the Application's attached (~122 tok)
 - `Html.kt` — Replaces Ktor's `call.respondHtml { ... }` (ktor-server-html-builder). (~157 tok)
-- `JsonSupport.kt` — Replaces the Ktor ContentNegotiation/kotlinx.serialization plugin (plugins/Serialization.kt) (~286 tok)
-- `RequestExtensions.kt` — Path template parameter, e.g. `req.pathParam("id")` for a route registered as `"/pets/{id}"`. (~654 tok)
+- `JsonSupport.kt` — Jackson's DefaultPrettyPrinter differs from kotlinx.serialization's prettyPrint - what every (~650 tok)
+- `RequestExtensions.kt` — Path template parameter, e.g. `req.pathParam("id")` for a route registered as `"/pets/{id}"`. (~673 tok)
 - `Responses.kt` — Sends [result].data as JSON on success, or the matching error status otherwise. (~516 tok)
 - `Sessions.kt` — Replaces Ktor's `install(Sessions) { cookie<SessionUser>(...) }` (plugins/Sessions.kt). (~756 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/
+
+- `ApplicationContainerTest.kt` — ApplicationContainerTest: testAppConfig (~818 tok)
+- `ApplicationIntegrationTest.kt` — ApplicationIntegrationTest: createTestConfig, initDatabase, setUpAll, setUp (~3018 tok)
 
 ## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/adapters/db/
 
 - `DatabaseFactoryInitIT.kt` — DatabaseFactoryInitIT: startContainer, stopContainer, createConfig (~1983 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/e2e/
+
+- `BaseE2ETest.kt` — BaseE2ETest: getBaseUrl, setupServer, startTestServer, setupBrowser (~865 tok)
 
 ## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/plugins/
 
@@ -1207,17 +1222,29 @@
 
 ## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/
 
+- `ApplicationTestcontainersIT.kt` — ApplicationTestcontainersIT: createConfigOverrides, initDatabase, startTestServer, setUp (~2374 tok)
+- `AuthRoutesE2ETest.kt` — Covers endpoints/branches in AuthRoutes.kt not already exercised by (~13460 tok)
+- `EmailVerificationRoutesE2ETest.kt` — EmailVerificationRoutesE2ETest: setup, testModules, startTestServer, createVerifiedUser (~1699 tok)
+- `PasswordRegistrationRoutesE2ETest.kt` — PasswordRegistrationRoutesE2ETest: setup, testModules, startServer, encryptPassword (~2804 tok)
+- `PetsRoutesE2ETest.kt` — PetsRoutesE2ETest: setup, createTestUsers, startTestServer, generateTestImageBytes (~16362 tok)
+- `PhotographerRoutesE2ETest.kt` — E2E tests for [photographerRoutes]. (~7394 tok)
 - `ShelterRoutesE2ETest.kt` — ShelterRoutesE2ETest: setup, createShelterInDb (~3971 tok)
+- `SheltersRoutesE2ETest.kt` — Ported from the old Ktor test-application + Testcontainers (Postgres/LocalStack) harness to (~4276 tok)
+- `SterilizationLocationRoutesE2ETest.kt` — SterilizationLocationRoutesE2ETest: setup, testModules, startServer, createLocationInDb (~4742 tok)
 - `TemporalHomeRoutesE2ETest.kt` — E2E tests for [temporalHomeRoutes]. (~6909 tok)
+- `UIRoutesE2ETest.kt` — End-to-end tests for [uiRoutes]: starts a real Helidon Nima [TestServer] mounting the full (~6247 tok)
+- `UserShelterRoutesE2ETest.kt` — UserShelterRoutesE2ETest: setup, createTestUsers, startServer, createShelterInDb (~3676 tok)
+- `UsersRoutesE2ETest.kt` — Verbatim port of the old Ktor test's inline `module { ... }` block of mocked adapters. (~10985 tok)
+- `UserSterilizationLocationRoutesE2ETest.kt` — UserSterilizationLocationRoutesE2ETest: setup, createTestUsers, createLocationInDb (~4221 tok)
 
 ## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/services/auth/
 
-- `SessionUserTest.kt` — Data class: SessionUserTest (~520 tok)
+- `SessionUserTest.kt` — Data class: SessionUserTest (~510 tok)
 
 ## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/testsupport/
 
 - `TestHttp.kt` — Thin java.net.http.HttpClient helpers replacing Ktor's test HttpClient, for use against a (~1172 tok)
-- `TestServer.kt` — Replaces Ktor's `testApplication { ... }` / `embeddedServer(Netty, ...)` test bootstrapping. (~1064 tok)
+- `TestServer.kt` — Replaces Ktor's `testApplication { ... }` / `embeddedServer(Netty, ...)` test bootstrapping. (~1334 tok)
 
 ## .claude/worktrees/idempotent-juggling-orbit/backend/src/main/kotlin/com/adoptu/pages/
 

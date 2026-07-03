@@ -18,7 +18,7 @@
       "first_read": "2026-07-03T21:16:44.432Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/Application.kt": {
-      "count": 4,
+      "count": 5,
       "tokens": 770,
       "first_read": "2026-07-03T21:24:01.733Z"
     },
@@ -53,12 +53,12 @@
       "first_read": "2026-07-03T21:24:37.754Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt": {
-      "count": 9,
+      "count": 10,
       "tokens": 2378,
       "first_read": "2026-07-03T21:25:11.497Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt": {
-      "count": 11,
+      "count": 13,
       "tokens": 6722,
       "first_read": "2026-07-03T21:25:17.586Z"
     },
@@ -68,7 +68,7 @@
       "first_read": "2026-07-03T21:25:39.552Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/di/AppModule.kt": {
-      "count": 4,
+      "count": 7,
       "tokens": 1109,
       "first_read": "2026-07-03T21:26:33.262Z"
     },
@@ -138,7 +138,7 @@
       "first_read": "2026-07-03T21:40:18.020Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/web/RequestExtensions.kt": {
-      "count": 8,
+      "count": 9,
       "tokens": 654,
       "first_read": "2026-07-03T21:48:06.045Z"
     },
@@ -188,32 +188,32 @@
       "first_read": "2026-07-03T21:50:59.733Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/web/JsonSupport.kt": {
-      "count": 2,
-      "tokens": 286,
+      "count": 4,
+      "tokens": 589,
       "first_read": "2026-07-03T21:59:44.123Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/plugins/RoutingTest.kt": {
-      "count": 14,
+      "count": 16,
       "tokens": 435,
       "first_read": "2026-07-03T22:04:32.278Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/e2e/BaseE2ETest.kt": {
-      "count": 1,
+      "count": 2,
       "tokens": 0,
       "first_read": "2026-07-03T22:04:44.774Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/config/AppConfig.kt": {
-      "count": 3,
+      "count": 4,
       "tokens": 341,
       "first_read": "2026-07-03T22:05:44.742Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/PetsRoutesE2ETest.kt": {
-      "count": 4,
-      "tokens": 16534,
+      "count": 5,
+      "tokens": 16362,
       "first_read": "2026-07-03T22:06:48.702Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/testsupport/TestServer.kt": {
-      "count": 14,
+      "count": 17,
       "tokens": 1064,
       "first_read": "2026-07-03T22:07:20.396Z"
     },
@@ -223,8 +223,8 @@
       "first_read": "2026-07-03T22:07:35.556Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/services/auth/SessionUserTest.kt": {
-      "count": 1,
-      "tokens": 0,
+      "count": 2,
+      "tokens": 520,
       "first_read": "2026-07-03T22:11:52.266Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/di/AppModuleTest.kt": {
@@ -253,7 +253,7 @@
       "first_read": "2026-07-03T22:18:42.907Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/testsupport/TestHttp.kt": {
-      "count": 13,
+      "count": 14,
       "tokens": 1172,
       "first_read": "2026-07-03T22:18:44.454Z"
     },
@@ -283,13 +283,13 @@
       "first_read": "2026-07-03T22:19:38.166Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/dto/output/AuthResponses.kt": {
-      "count": 1,
+      "count": 2,
       "tokens": 0,
       "first_read": "2026-07-03T22:19:48.948Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/PhotographerRoutesE2ETest.kt": {
-      "count": 2,
-      "tokens": 0,
+      "count": 4,
+      "tokens": 7394,
       "first_read": "2026-07-03T22:20:03.821Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/EmailVerificationRoutesE2ETest.kt": {
@@ -298,8 +298,8 @@
       "first_read": "2026-07-03T22:20:05.626Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/TemporalHomeRoutesE2ETest.kt": {
-      "count": 1,
-      "tokens": 0,
+      "count": 3,
+      "tokens": 6909,
       "first_read": "2026-07-03T22:20:14.654Z"
     },
     "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/IndexPage.kt": {
@@ -313,8 +313,8 @@
       "first_read": "2026-07-03T22:20:36.485Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/ShelterRoutesE2ETest.kt": {
-      "count": 1,
-      "tokens": 0,
+      "count": 4,
+      "tokens": 3971,
       "first_read": "2026-07-03T22:20:48.921Z"
     },
     "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/TemporalHomePage.kt": {
@@ -358,19 +358,64 @@
       "first_read": "2026-07-03T22:21:27.746Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/ApplicationIntegrationTest.kt": {
-      "count": 1,
+      "count": 2,
       "tokens": 0,
       "first_read": "2026-07-03T22:21:48.013Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/ApplicationContainerTest.kt": {
-      "count": 1,
+      "count": 2,
       "tokens": 0,
       "first_read": "2026-07-03T22:22:05.903Z"
     },
     "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/ApplicationTestcontainersIT.kt": {
-      "count": 1,
+      "count": 2,
       "tokens": 0,
       "first_read": "2026-07-03T22:22:16.626Z"
+    },
+    "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserSterilizationLocationRepository.kt": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-07-03T22:22:47.759Z"
+    },
+    "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/services/UserSterilizationLocationService.kt": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-07-03T22:22:48.180Z"
+    },
+    "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/dto/input/UserDto.kt": {
+      "count": 1,
+      "tokens": 1119,
+      "first_read": "2026-07-03T22:23:17.940Z"
+    },
+    "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/e2e/FrontendE2ETest.kt": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-07-03T22:23:35.178Z"
+    },
+    "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/Dockerfile": {
+      "count": 1,
+      "tokens": 520,
+      "first_read": "2026-07-03T22:49:56.143Z"
+    },
+    "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/.wolf/buglog.json": {
+      "count": 4,
+      "tokens": 4741,
+      "first_read": "2026-07-03T22:52:10.092Z"
+    },
+    "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/.wolf/cerebrum.md": {
+      "count": 3,
+      "tokens": 15080,
+      "first_read": "2026-07-03T22:54:11.341Z"
+    },
+    "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/.wolf/anatomy.md": {
+      "count": 3,
+      "tokens": 22813,
+      "first_read": "2026-07-03T22:55:37.494Z"
+    },
+    "/home/laf/Proyektes/adoptu/.gitignore": {
+      "count": 1,
+      "tokens": 180,
+      "first_read": "2026-07-03T23:38:04.689Z"
     }
   },
   "files_written": [
@@ -739,6 +784,198 @@
       "action": "create",
       "tokens": 7403,
       "at": "2026-07-03T22:22:27.610Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/PhotographerRoutesE2ETest.kt",
+      "action": "create",
+      "tokens": 7922,
+      "at": "2026-07-03T22:22:41.517Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/SterilizationLocationRoutesE2ETest.kt",
+      "action": "create",
+      "tokens": 5081,
+      "at": "2026-07-03T22:22:42.026Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/PetsRoutesE2ETest.kt",
+      "action": "create",
+      "tokens": 17551,
+      "at": "2026-07-03T22:23:14.596Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/SheltersRoutesE2ETest.kt",
+      "action": "create",
+      "tokens": 4581,
+      "at": "2026-07-03T22:23:15.446Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/PetsRoutesE2ETest.kt",
+      "action": "edit",
+      "tokens": 23,
+      "at": "2026-07-03T22:23:39.263Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/SheltersRoutesE2ETest.kt",
+      "action": "edit",
+      "tokens": 161,
+      "at": "2026-07-03T22:23:41.298Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/UserSterilizationLocationRoutesE2ETest.kt",
+      "action": "create",
+      "tokens": 4522,
+      "at": "2026-07-03T22:23:47.637Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/UserShelterRoutesE2ETest.kt",
+      "action": "create",
+      "tokens": 3938,
+      "at": "2026-07-03T22:24:07.256Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/e2e/BaseE2ETest.kt",
+      "action": "create",
+      "tokens": 927,
+      "at": "2026-07-03T22:24:11.814Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/AuthRoutesE2ETest.kt",
+      "action": "create",
+      "tokens": 14422,
+      "at": "2026-07-03T22:24:35.726Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/UIRoutesE2ETest.kt",
+      "action": "create",
+      "tokens": 6693,
+      "at": "2026-07-03T22:24:47.735Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/EmailVerificationRoutesE2ETest.kt",
+      "action": "create",
+      "tokens": 1821,
+      "at": "2026-07-03T22:25:15.721Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/ApplicationIntegrationTest.kt",
+      "action": "create",
+      "tokens": 3233,
+      "at": "2026-07-03T22:25:59.436Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/ApplicationContainerTest.kt",
+      "action": "create",
+      "tokens": 876,
+      "at": "2026-07-03T22:26:07.076Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/UsersRoutesE2ETest.kt",
+      "action": "create",
+      "tokens": 11770,
+      "at": "2026-07-03T22:26:12.467Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/ApplicationTestcontainersIT.kt",
+      "action": "create",
+      "tokens": 2544,
+      "at": "2026-07-03T22:26:26.899Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/PasswordRegistrationRoutesE2ETest.kt",
+      "action": "create",
+      "tokens": 3004,
+      "at": "2026-07-03T22:28:12.483Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/testsupport/TestServer.kt",
+      "action": "edit",
+      "tokens": 40,
+      "at": "2026-07-03T22:35:36.977Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/testsupport/TestServer.kt",
+      "action": "edit",
+      "tokens": 512,
+      "at": "2026-07-03T22:35:49.969Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/web/JsonSupport.kt",
+      "action": "edit",
+      "tokens": 564,
+      "at": "2026-07-03T22:41:14.900Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/web/RequestExtensions.kt",
+      "action": "edit",
+      "tokens": 42,
+      "at": "2026-07-03T22:42:00.503Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/web/JsonSupport.kt",
+      "action": "edit",
+      "tokens": 63,
+      "at": "2026-07-03T22:43:17.410Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/web/JsonSupport.kt",
+      "action": "edit",
+      "tokens": 204,
+      "at": "2026-07-03T22:43:50.432Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/services/auth/SessionUserTest.kt",
+      "action": "edit",
+      "tokens": 15,
+      "at": "2026-07-03T22:47:01.376Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/.wolf/buglog.json",
+      "action": "edit",
+      "tokens": 22,
+      "at": "2026-07-03T22:52:20.178Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/.wolf/buglog.json",
+      "action": "edit",
+      "tokens": 2003,
+      "at": "2026-07-03T22:53:45.253Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/.wolf/cerebrum.md",
+      "action": "edit",
+      "tokens": 1024,
+      "at": "2026-07-03T22:54:46.914Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/.wolf/cerebrum.md",
+      "action": "edit",
+      "tokens": 850,
+      "at": "2026-07-03T22:55:19.831Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/.wolf/anatomy.md",
+      "action": "edit",
+      "tokens": 1024,
+      "at": "2026-07-03T22:56:02.735Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/.wolf/anatomy.md",
+      "action": "edit",
+      "tokens": 535,
+      "at": "2026-07-03T22:56:34.610Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.claude/worktrees/helidon-nima-migration/.wolf/anatomy.md",
+      "action": "edit",
+      "tokens": 125,
+      "at": "2026-07-03T22:57:03.213Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/.gitignore",
+      "action": "edit",
+      "tokens": 46,
+      "at": "2026-07-03T23:38:09.358Z"
     }
   ],
   "edit_counts": {
@@ -752,10 +989,10 @@
     ".claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/di/AppModule.kt": 3,
     ".claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/adapters/db/DatabaseFactory.kt": 3,
     ".claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/adapters/notification/SesEmailAdapter.kt": 2,
-    ".claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/web/JsonSupport.kt": 3,
+    ".claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/web/JsonSupport.kt": 6,
     ".claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/web/Responses.kt": 1,
     ".claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/web/Sessions.kt": 1,
-    ".claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/web/RequestExtensions.kt": 1,
+    ".claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/web/RequestExtensions.kt": 2,
     ".claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/web/Html.kt": 3,
     ".claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/web/AccessLogFilter.kt": 1,
     ".claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/web/Deps.kt": 1,
@@ -770,19 +1007,38 @@
     ".claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/routes/TemporalHomeRoutes.kt": 1,
     ".claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/routes/UserSterilizationLocationRoutes.kt": 1,
     ".claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/routes/UsersRoutes.kt": 1,
-    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/testsupport/TestServer.kt": 2,
+    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/testsupport/TestServer.kt": 4,
     ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/testsupport/TestHttp.kt": 1,
     ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/plugins/RoutingTest.kt": 1,
-    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/services/auth/SessionUserTest.kt": 2,
+    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/services/auth/SessionUserTest.kt": 3,
     ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/adapters/db/DatabaseFactoryInitIT.kt": 2,
     "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/TemporalHomePage.kt": 1,
     "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/IndexPage.kt": 1,
     ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/ShelterRoutesE2ETest.kt": 1,
-    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/TemporalHomeRoutesE2ETest.kt": 1
+    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/TemporalHomeRoutesE2ETest.kt": 1,
+    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/PhotographerRoutesE2ETest.kt": 1,
+    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/SterilizationLocationRoutesE2ETest.kt": 1,
+    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/PetsRoutesE2ETest.kt": 2,
+    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/SheltersRoutesE2ETest.kt": 2,
+    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/UserSterilizationLocationRoutesE2ETest.kt": 1,
+    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/UserShelterRoutesE2ETest.kt": 1,
+    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/e2e/BaseE2ETest.kt": 1,
+    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/AuthRoutesE2ETest.kt": 1,
+    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/UIRoutesE2ETest.kt": 1,
+    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/EmailVerificationRoutesE2ETest.kt": 1,
+    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/ApplicationIntegrationTest.kt": 1,
+    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/ApplicationContainerTest.kt": 1,
+    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/UsersRoutesE2ETest.kt": 1,
+    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/ApplicationTestcontainersIT.kt": 1,
+    ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/PasswordRegistrationRoutesE2ETest.kt": 1,
+    ".claude/worktrees/helidon-nima-migration/.wolf/buglog.json": 2,
+    ".claude/worktrees/helidon-nima-migration/.wolf/cerebrum.md": 2,
+    ".claude/worktrees/helidon-nima-migration/.wolf/anatomy.md": 3,
+    ".gitignore": 1
   },
-  "anatomy_hits": 19,
-  "anatomy_misses": 55,
-  "repeated_reads_warned": 127,
+  "anatomy_hits": 22,
+  "anatomy_misses": 61,
+  "repeated_reads_warned": 165,
   "cerebrum_warnings": 0,
-  "stop_count": 9
+  "stop_count": 26
 }

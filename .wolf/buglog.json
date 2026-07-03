@@ -160,6 +160,102 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-03T22:21:30.599Z"
+    },
+    {
+      "id": "bug-011",
+      "timestamp": "2026-07-03T22:35:49.973Z",
+      "error_message": "Missing error handling in unknown",
+      "file": ".claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/testsupport/TestServer.kt",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T22:35:49.973Z"
+    },
+    {
+      "id": "bug-012",
+      "timestamp": "2026-07-03T22:43:50.435Z",
+      "error_message": "Significant refactor of ",
+      "file": ".claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/web/JsonSupport.kt",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 8→11 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T22:43:50.435Z"
+    },
+    {
+      "id": "bug-013",
+      "timestamp": "2026-07-03T22:53:45.255Z",
+      "error_message": "Missing error handling in unknown",
+      "file": ".claude/worktrees/helidon-nima-migration/.wolf/buglog.json",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "json"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T22:53:45.255Z"
+    },
+    {
+      "id": "bug-014",
+      "timestamp": "2026-07-03T22:55:19.833Z",
+      "error_message": "Null/undefined access in ",
+      "file": ".claude/worktrees/helidon-nima-migration/.wolf/cerebrum.md",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T22:55:19.833Z"
+    },
+    {
+      "id": "bug-015",
+      "timestamp": "2026-07-03T22:56:02.737Z",
+      "error_message": "Null/undefined access in ",
+      "file": ".claude/worktrees/helidon-nima-migration/.wolf/anatomy.md",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T22:56:02.737Z"
+    },
+    {
+      "id": "bug-016",
+      "timestamp": "2026-07-03T22:57:03.217Z",
+      "error_message": "Incorrect value in code",
+      "file": ".claude/worktrees/helidon-nima-migration/.wolf/anatomy.md",
+      "root_cause": "Had `PetsRoutesE2ETest.kt`",
+      "fix": "Changed to `*RoutesE2ETest.kt`",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T22:57:03.217Z"
     }
   ]
 }
