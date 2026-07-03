@@ -1622,3 +1622,7 @@
 | 16:13 | Edited .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/adapters/db/DatabaseFactoryInitIT.kt | 3→3 lines | ~30 |
 | 16:13 | Edited .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/adapters/db/DatabaseFactoryInitIT.kt | modified createConfig() | ~191 |
 | 16:15 | Edited .claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/Application.kt | modified error() | ~83 |
+| 16:21 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/TemporalHomePage.kt | modified initCountrySelect() | ~78 |
+| 16:21 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/IndexPage.kt | removed 29 lines | ~40 |
+| 16:22 | Created .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/ShelterRoutesE2ETest.kt | — | ~3971 |
+| 16:22 | Created .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/TemporalHomeRoutesE2ETest.kt | — | ~6909 |

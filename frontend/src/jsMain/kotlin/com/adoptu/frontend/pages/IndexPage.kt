@@ -1,6 +1,7 @@
 package com.adoptu.frontend.pages
 
 import com.adoptu.frontend.ApiClientModule
+import com.adoptu.frontend.CommonModule
 import com.adoptu.frontend.I18n
 import com.adoptu.frontend.forEachElement
 import kotlinx.browser.document
@@ -53,29 +54,9 @@ object IndexPageModule {
             loadPets()
         })
 
-        countrySelect?.addEventListener("change", {
-            if (countrySelect.value.isNotEmpty()) {
-                try { window.localStorage.setItem("adoptuSelectedCountry", countrySelect.value) } catch (e: dynamic) {}
-            }
-            loadPets()
-        })
+        countrySelect?.addEventListener("change", { loadPets() })
 
-        // Default the country dropdown, in priority order:
-        //   1. The country last selected on any search page (Shelters/Photographers/
-        //      Sterilization/TemporalHome/Pets all share the same localStorage key),
-        //      so switching pages doesn't force re-selecting the same country.
-        //   2. The logged-in user's saved profile country, if any.
-        val savedCountry = try { window.localStorage.getItem("adoptuSelectedCountry") } catch (e: dynamic) { null }
-        if (countrySelect != null && !savedCountry.isNullOrEmpty()) {
-            countrySelect.value = savedCountry
-            loadPets()
-        } else {
-            ApiClientModule.me().then<Unit> { user ->
-                if (countrySelect != null && user.authenticated != false && user.country != null) {
-                    countrySelect.value = user.country.toString()
-                }
-            }.catch { }.then<Unit> { loadPets() }
-        }
+        CommonModule.initCountrySelect("pets-country").then<Unit> { loadPets() }
     }
 
     fun loadPets(): Promise<Unit> {

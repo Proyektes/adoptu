@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-03T22:15:33.435Z
-> Files: 936 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-03T22:22:27.585Z
+> Files: 939 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -1205,6 +1205,11 @@
 
 - `RoutingTest.kt` — Exercises the real production route wiring in configureRouting() -- every other E2E test (~435 tok)
 
+## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/
+
+- `ShelterRoutesE2ETest.kt` — ShelterRoutesE2ETest: setup, createShelterInDb (~3971 tok)
+- `TemporalHomeRoutesE2ETest.kt` — E2E tests for [temporalHomeRoutes]. (~6909 tok)
+
 ## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/services/auth/
 
 - `SessionUserTest.kt` — Data class: SessionUserTest (~520 tok)
@@ -1854,7 +1859,8 @@
 
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
 
-- `IndexPage.kt` — init, loadPets, renderPets (~180 tok)
+- `IndexPage.kt` — init, loadPets, updateCountryHint, showEmptyState, hideEmptyState (~2200 tok)
+- `TemporalHomePage.kt` — init, search, displayResults, init, render (~2461 tok)
 
 ## infra/ (OpenTofu - AWS deployment)
 
