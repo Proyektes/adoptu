@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-03T23:49:52.258Z
-> Files: 971 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-04T17:19:36.319Z
+> Files: 972 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -1816,6 +1816,10 @@
 ## backend/ (canonical)
 
 - `build.gradle.kts` — Backend Gradle module: Ktor/Exposed/AWS SDK deps, application plugin, com.gradleup.shadow 9.4.3 (fat jar -> *-all.jar), jvmToolchain(25) (~750 tok)
+
+## backend/src/main/kotlin/com/adoptu/
+
+- `Application.kt` — main, configureRouting (~883 tok)
 
 ## backend/src/main/kotlin/com/adoptu/ (graalvm-native-image worktree)
 

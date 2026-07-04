@@ -3,11 +3,11 @@
   "created_at": "2026-06-21T17:54:59.933Z",
   "lifetime": {
     "total_tokens_estimated": 13339470,
-    "total_reads": 7547,
+    "total_reads": 7553,
     "total_writes": 6128,
     "total_sessions": 119,
     "anatomy_hits": 1661,
-    "anatomy_misses": 5854,
+    "anatomy_misses": 5860,
     "repeated_reads_blocked": 4934,
     "estimated_savings_vs_bare_cli": 14686422
   },
@@ -80592,6 +80592,58 @@
         "writes_count": 94,
         "repeated_reads_blocked": 165,
         "anatomy_lookups": 22
+      }
+    },
+    {
+      "id": "session-2026-07-03-1752",
+      "started": "2026-07-03T23:52:37.717Z",
+      "ended": "2026-07-04T03:52:53.100Z",
+      "reads": [
+        {
+          "file": "/home/laf/Proyektes/adoptu/01-home-pets-page.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/laf/Proyektes/adoptu/02-pets-mexico.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/laf/Proyektes/adoptu/03-pet-detail-marte.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/laf/Proyektes/adoptu/04-admin-profile.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/laf/Proyektes/adoptu/05-admin-panel.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/laf/Proyektes/adoptu/06-admin-unauth-probe.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 0,
+        "reads_count": 6,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
       }
     }
   ],

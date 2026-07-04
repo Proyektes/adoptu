@@ -60,6 +60,13 @@ internal fun configureRouting(routing: HttpRouting.Builder) {
     routing.error(io.helidon.http.NotFoundException::class.java) { _, res, _ ->
         res.status(Status.NOT_FOUND_404).send()
     }
+    routing.error(io.helidon.http.HttpException::class.java) { _, res, ex ->
+        // Helidon's static content handler uses this to short-circuit conditional
+        // requests (e.g. If-None-Match -> 304) - it carries its own intended status
+        // and headers and must not fall through to the generic 500 handler below.
+        ex.headers().forEach { res.header(it) }
+        res.status(ex.status()).send()
+    }
     routing.error(Throwable::class.java) { _, res, cause ->
         logger.error("Unhandled exception", cause)
         res.status(Status.INTERNAL_SERVER_ERROR_500).send()
