@@ -73,100 +73,864 @@
       "type": "ch.qos.logback.core.spi.ContextAware"
     },
     {
-      "type": "com.adoptu.ApplicationKt",
+      "type": "com.adoptu.dto.input.AdoptionRequestDto",
       "methods": [
         {
-          "name": "module",
+          "name": "getAdopterId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCreatedAt",
+          "parameterTypes": []
+        },
+        {
+          "name": "getId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getMessage",
+          "parameterTypes": []
+        },
+        {
+          "name": "getPetId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getStatus",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.adoptu.dto.input.CreateAdoptionRequestRequest",
+      "methods": [
+        {
+          "name": "<init>",
           "parameterTypes": [
-            "io.ktor.server.application.Application"
+            "java.lang.String"
           ]
         }
       ]
     },
     {
+      "type": "com.adoptu.dto.input.Currency"
+    },
+    {
+      "type": "com.adoptu.dto.input.Gender"
+    },
+    {
+      "type": "com.adoptu.dto.input.PetDto",
+      "methods": [
+        {
+          "name": "getAdoptionFee",
+          "parameterTypes": []
+        },
+        {
+          "name": "getAgeMonths",
+          "parameterTypes": []
+        },
+        {
+          "name": "getAgeYears",
+          "parameterTypes": []
+        },
+        {
+          "name": "getBreed",
+          "parameterTypes": []
+        },
+        {
+          "name": "getColor",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCountry",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCreatedAt",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCurrency",
+          "parameterTypes": []
+        },
+        {
+          "name": "getDescription",
+          "parameterTypes": []
+        },
+        {
+          "name": "getEnergyLevel",
+          "parameterTypes": []
+        },
+        {
+          "name": "getId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getImages",
+          "parameterTypes": []
+        },
+        {
+          "name": "getMicrochipId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getName",
+          "parameterTypes": []
+        },
+        {
+          "name": "getRescueDate",
+          "parameterTypes": []
+        },
+        {
+          "name": "getRescueLocation",
+          "parameterTypes": []
+        },
+        {
+          "name": "getRescuerId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getSex",
+          "parameterTypes": []
+        },
+        {
+          "name": "getSize",
+          "parameterTypes": []
+        },
+        {
+          "name": "getSpecialNeeds",
+          "parameterTypes": []
+        },
+        {
+          "name": "getStatus",
+          "parameterTypes": []
+        },
+        {
+          "name": "getTemperament",
+          "parameterTypes": []
+        },
+        {
+          "name": "getType",
+          "parameterTypes": []
+        },
+        {
+          "name": "getVaccinations",
+          "parameterTypes": []
+        },
+        {
+          "name": "getWeight",
+          "parameterTypes": []
+        },
+        {
+          "name": "isGoodWithCats",
+          "parameterTypes": []
+        },
+        {
+          "name": "isGoodWithDogs",
+          "parameterTypes": []
+        },
+        {
+          "name": "isGoodWithKids",
+          "parameterTypes": []
+        },
+        {
+          "name": "isHouseTrained",
+          "parameterTypes": []
+        },
+        {
+          "name": "isMicrochipped",
+          "parameterTypes": []
+        },
+        {
+          "name": "isPromoted",
+          "parameterTypes": []
+        },
+        {
+          "name": "isSterilized",
+          "parameterTypes": []
+        },
+        {
+          "name": "isUrgent",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.adoptu.dto.input.PetImageDto"
+    },
+    {
+      "type": "com.adoptu.dto.input.PhotographerDto",
+      "methods": [
+        {
+          "name": "getCountry",
+          "parameterTypes": []
+        },
+        {
+          "name": "getDisplayName",
+          "parameterTypes": []
+        },
+        {
+          "name": "getPhotographerCurrency",
+          "parameterTypes": []
+        },
+        {
+          "name": "getPhotographerFee",
+          "parameterTypes": []
+        },
+        {
+          "name": "getState",
+          "parameterTypes": []
+        },
+        {
+          "name": "getUserId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getUsername",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.adoptu.dto.input.ShelterDto",
+      "methods": [
+        {
+          "name": "getAccountHolderName",
+          "parameterTypes": []
+        },
+        {
+          "name": "getAccountNumber",
+          "parameterTypes": []
+        },
+        {
+          "name": "getAddress",
+          "parameterTypes": []
+        },
+        {
+          "name": "getBankName",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCity",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCountry",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCreatedAt",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCurrency",
+          "parameterTypes": []
+        },
+        {
+          "name": "getDescription",
+          "parameterTypes": []
+        },
+        {
+          "name": "getEmail",
+          "parameterTypes": []
+        },
+        {
+          "name": "getFiscalId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getIban",
+          "parameterTypes": []
+        },
+        {
+          "name": "getId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getName",
+          "parameterTypes": []
+        },
+        {
+          "name": "getNeighborhood",
+          "parameterTypes": []
+        },
+        {
+          "name": "getPhone",
+          "parameterTypes": []
+        },
+        {
+          "name": "getState",
+          "parameterTypes": []
+        },
+        {
+          "name": "getSwiftBic",
+          "parameterTypes": []
+        },
+        {
+          "name": "getUpdatedAt",
+          "parameterTypes": []
+        },
+        {
+          "name": "getUserId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getWebsite",
+          "parameterTypes": []
+        },
+        {
+          "name": "getZip",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.adoptu.dto.input.Status"
+    },
+    {
+      "type": "com.adoptu.dto.input.SterilizationLocationDto",
+      "methods": [
+        {
+          "name": "getAddress",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCity",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCountry",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCreatedAt",
+          "parameterTypes": []
+        },
+        {
+          "name": "getDescription",
+          "parameterTypes": []
+        },
+        {
+          "name": "getEmail",
+          "parameterTypes": []
+        },
+        {
+          "name": "getId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getName",
+          "parameterTypes": []
+        },
+        {
+          "name": "getNeighborhood",
+          "parameterTypes": []
+        },
+        {
+          "name": "getPhone",
+          "parameterTypes": []
+        },
+        {
+          "name": "getState",
+          "parameterTypes": []
+        },
+        {
+          "name": "getUpdatedAt",
+          "parameterTypes": []
+        },
+        {
+          "name": "getUserId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getWebsite",
+          "parameterTypes": []
+        },
+        {
+          "name": "getZip",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.adoptu.dto.input.TemporalHomeDto",
+      "methods": [
+        {
+          "name": "getAlias",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCity",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCountry",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCreatedAt",
+          "parameterTypes": []
+        },
+        {
+          "name": "getNeighborhood",
+          "parameterTypes": []
+        },
+        {
+          "name": "getState",
+          "parameterTypes": []
+        },
+        {
+          "name": "getUserId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getZip",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.adoptu.dto.input.UserDto",
+      "methods": [
+        {
+          "name": "getActiveRoles",
+          "parameterTypes": []
+        },
+        {
+          "name": "getBanReason",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCountry",
+          "parameterTypes": []
+        },
+        {
+          "name": "getDisplayName",
+          "parameterTypes": []
+        },
+        {
+          "name": "getEmail",
+          "parameterTypes": []
+        },
+        {
+          "name": "getId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getLanguage",
+          "parameterTypes": []
+        },
+        {
+          "name": "getLastAcceptedPrivacyPolicy",
+          "parameterTypes": []
+        },
+        {
+          "name": "getLastAcceptedTermsAndConditions",
+          "parameterTypes": []
+        },
+        {
+          "name": "getPhotographerCountry",
+          "parameterTypes": []
+        },
+        {
+          "name": "getPhotographerCurrency",
+          "parameterTypes": []
+        },
+        {
+          "name": "getPhotographerFee",
+          "parameterTypes": []
+        },
+        {
+          "name": "getPhotographerState",
+          "parameterTypes": []
+        },
+        {
+          "name": "getUsername",
+          "parameterTypes": []
+        },
+        {
+          "name": "isBanned",
+          "parameterTypes": []
+        },
+        {
+          "name": "isEmailVerified",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.adoptu.dto.input.UserRole"
+    },
+    {
+      "type": "com.adoptu.dto.input.UserShelterDto",
+      "methods": [
+        {
+          "name": "getAccountHolderName",
+          "parameterTypes": []
+        },
+        {
+          "name": "getAccountNumber",
+          "parameterTypes": []
+        },
+        {
+          "name": "getAddress",
+          "parameterTypes": []
+        },
+        {
+          "name": "getBankName",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCity",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCountry",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCreatedAt",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCurrency",
+          "parameterTypes": []
+        },
+        {
+          "name": "getDescription",
+          "parameterTypes": []
+        },
+        {
+          "name": "getEmail",
+          "parameterTypes": []
+        },
+        {
+          "name": "getFiscalId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getIban",
+          "parameterTypes": []
+        },
+        {
+          "name": "getName",
+          "parameterTypes": []
+        },
+        {
+          "name": "getNeighborhood",
+          "parameterTypes": []
+        },
+        {
+          "name": "getPhone",
+          "parameterTypes": []
+        },
+        {
+          "name": "getState",
+          "parameterTypes": []
+        },
+        {
+          "name": "getSwiftBic",
+          "parameterTypes": []
+        },
+        {
+          "name": "getUserId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getWebsite",
+          "parameterTypes": []
+        },
+        {
+          "name": "getZip",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.adoptu.dto.input.UserSterilizationLocationDto",
+      "methods": [
+        {
+          "name": "getAddress",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCity",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCountry",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCreatedAt",
+          "parameterTypes": []
+        },
+        {
+          "name": "getDescription",
+          "parameterTypes": []
+        },
+        {
+          "name": "getEmail",
+          "parameterTypes": []
+        },
+        {
+          "name": "getName",
+          "parameterTypes": []
+        },
+        {
+          "name": "getNeighborhood",
+          "parameterTypes": []
+        },
+        {
+          "name": "getPhone",
+          "parameterTypes": []
+        },
+        {
+          "name": "getState",
+          "parameterTypes": []
+        },
+        {
+          "name": "getUserId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getWebsite",
+          "parameterTypes": []
+        },
+        {
+          "name": "getZip",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.adoptu.dto.output.AuthMeResponse",
+      "methods": [
+        {
+          "name": "getActiveRoles",
+          "parameterTypes": []
+        },
+        {
+          "name": "getAuthenticated",
+          "parameterTypes": []
+        },
+        {
+          "name": "getBanReason",
+          "parameterTypes": []
+        },
+        {
+          "name": "getCountry",
+          "parameterTypes": []
+        },
+        {
+          "name": "getDisplayName",
+          "parameterTypes": []
+        },
+        {
+          "name": "getEmail",
+          "parameterTypes": []
+        },
+        {
+          "name": "getEmailVerified",
+          "parameterTypes": []
+        },
+        {
+          "name": "getId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getLanguage",
+          "parameterTypes": []
+        },
+        {
+          "name": "getLastAcceptedPrivacyPolicy",
+          "parameterTypes": []
+        },
+        {
+          "name": "getLastAcceptedTermsAndConditions",
+          "parameterTypes": []
+        },
+        {
+          "name": "getPhotographerCountry",
+          "parameterTypes": []
+        },
+        {
+          "name": "getPhotographerCurrency",
+          "parameterTypes": []
+        },
+        {
+          "name": "getPhotographerFee",
+          "parameterTypes": []
+        },
+        {
+          "name": "getPhotographerState",
+          "parameterTypes": []
+        },
+        {
+          "name": "isBanned",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.adoptu.dto.output.RegistrationResponse",
+      "methods": [
+        {
+          "name": "getEmailVerificationSent",
+          "parameterTypes": []
+        },
+        {
+          "name": "getMessage",
+          "parameterTypes": []
+        },
+        {
+          "name": "getSuccess",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
       "type": "com.adoptu.dto.output.SuccessWithErrorResponse",
-      "fields": [
-        {
-          "name": "Companion"
-        }
-      ]
-    },
-    {
-      "type": "com.adoptu.dto.output.SuccessWithErrorResponse$Companion",
       "methods": [
         {
-          "name": "serializer",
+          "name": "getEmail",
+          "parameterTypes": []
+        },
+        {
+          "name": "getError",
+          "parameterTypes": []
+        },
+        {
+          "name": "getNeedsProfileCompletion",
+          "parameterTypes": []
+        },
+        {
+          "name": "getSuccess",
           "parameterTypes": []
         }
       ]
     },
     {
-      "type": "com.adoptu.plugins.ErrorResponse",
-      "fields": [
-        {
-          "name": "Companion"
-        }
-      ]
-    },
-    {
-      "type": "com.adoptu.plugins.ErrorResponse$Companion",
+      "type": "com.adoptu.routes.ChangePasswordRequest",
       "methods": [
         {
-          "name": "serializer",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "com.adoptu.routes.EncryptedLoginRequest",
-      "fields": [
-        {
-          "name": "Companion"
-        }
-      ]
-    },
-    {
-      "type": "com.adoptu.routes.EncryptedLoginRequest$Companion",
-      "methods": [
-        {
-          "name": "serializer",
-          "parameterTypes": []
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String"
+          ]
         }
       ]
     },
     {
       "type": "com.adoptu.routes.PasswordLoginRequest",
-      "fields": [
+      "methods": [
         {
-          "name": "Companion"
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String"
+          ]
         }
       ]
     },
     {
-      "type": "com.adoptu.routes.PasswordLoginRequest$Companion",
+      "type": "com.adoptu.routes.RequestEmailChangeRequest",
       "methods": [
         {
-          "name": "serializer",
-          "parameterTypes": []
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.adoptu.routes.UpdateLanguageRequest",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.adoptu.routes.UpdateProfileRequest",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String"
+          ]
         }
       ]
     },
     {
       "type": "com.adoptu.services.auth.SessionUser",
-      "fields": [
+      "methods": [
         {
-          "name": "Companion"
+          "name": "<init>",
+          "parameterTypes": [
+            "int",
+            "java.lang.String",
+            "java.lang.String"
+          ]
+        },
+        {
+          "name": "getDisplayName",
+          "parameterTypes": []
+        },
+        {
+          "name": "getEmail",
+          "parameterTypes": []
+        },
+        {
+          "name": "getUserId",
+          "parameterTypes": []
         }
       ]
     },
     {
-      "type": "com.adoptu.services.auth.SessionUser$Companion",
+      "type": "com.adoptu.web.ErrorResponse",
       "methods": [
         {
-          "name": "serializer",
+          "name": "getError",
           "parameterTypes": []
         }
       ]
+    },
+    {
+      "type": "com.adoptu.web.SuccessResponse",
+      "methods": [
+        {
+          "name": "getSuccess",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.fasterxml.jackson.databind.deser.Deserializers[]"
+    },
+    {
+      "type": "com.fasterxml.jackson.databind.deser.KeyDeserializers[]"
+    },
+    {
+      "type": "com.fasterxml.jackson.databind.deser.ValueInstantiators[]"
+    },
+    {
+      "type": "com.fasterxml.jackson.databind.ext.Java7SupportImpl",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.fasterxml.jackson.databind.ser.Serializers[]"
     },
     {
       "type": "com.sun.crypto.provider.AESCipher$General",
@@ -333,117 +1097,380 @@
       ]
     },
     {
-      "type": "io.ktor.http.ContentType"
-    },
-    {
-      "type": "io.ktor.http.HttpStatusCode"
-    },
-    {
-      "type": "io.ktor.http.Parameters",
+      "type": "com.zaxxer.hikari.HikariConfig",
       "fields": [
         {
-          "name": "Companion"
+          "name": "catalog"
+        },
+        {
+          "name": "connectionInitSql"
+        },
+        {
+          "name": "connectionTestQuery"
+        },
+        {
+          "name": "connectionTimeout"
+        },
+        {
+          "name": "dataSource"
+        },
+        {
+          "name": "dataSourceClassName"
+        },
+        {
+          "name": "dataSourceJndiName"
+        },
+        {
+          "name": "dataSourceProperties"
+        },
+        {
+          "name": "driverClassName"
+        },
+        {
+          "name": "exceptionOverrideClassName"
+        },
+        {
+          "name": "healthCheckProperties"
+        },
+        {
+          "name": "healthCheckRegistry"
+        },
+        {
+          "name": "idleTimeout"
+        },
+        {
+          "name": "initializationFailTimeout"
+        },
+        {
+          "name": "isAllowPoolSuspension"
+        },
+        {
+          "name": "isAutoCommit"
+        },
+        {
+          "name": "isIsolateInternalQueries"
+        },
+        {
+          "name": "isReadOnly"
+        },
+        {
+          "name": "isRegisterMbeans"
+        },
+        {
+          "name": "jdbcUrl"
+        },
+        {
+          "name": "keepaliveTime"
+        },
+        {
+          "name": "leakDetectionThreshold"
+        },
+        {
+          "name": "maxLifetime"
+        },
+        {
+          "name": "maxPoolSize"
+        },
+        {
+          "name": "metricRegistry"
+        },
+        {
+          "name": "metricsTrackerFactory"
+        },
+        {
+          "name": "minIdle"
+        },
+        {
+          "name": "password"
+        },
+        {
+          "name": "poolName"
+        },
+        {
+          "name": "scheduledExecutor"
+        },
+        {
+          "name": "schema"
+        },
+        {
+          "name": "sealed"
+        },
+        {
+          "name": "threadFactory"
+        },
+        {
+          "name": "transactionIsolationName"
+        },
+        {
+          "name": "unitTest"
+        },
+        {
+          "name": "username"
+        },
+        {
+          "name": "validationTimeout"
         }
       ]
     },
     {
-      "type": "io.ktor.http.Parameters$Companion"
+      "type": "com.zaxxer.hikari.pool.PoolBase"
     },
     {
-      "type": "io.ktor.http.content.OutgoingContent"
+      "type": "com.zaxxer.hikari.pool.PoolEntry"
     },
     {
-      "type": "io.ktor.http.content.OutgoingContent$ReadChannelContent"
+      "type": "com.zaxxer.hikari.util.ConcurrentBag$IConcurrentBagEntry[]"
     },
     {
-      "type": "io.ktor.http.content.TextContent"
+      "type": "double"
     },
     {
-      "type": "io.ktor.http.content.Version"
+      "type": "io.helidon.common.LazyValueImpl",
+      "fields": [
+        {
+          "name": "loaded"
+        },
+        {
+          "name": "theLock"
+        }
+      ]
     },
     {
-      "type": "io.ktor.network.selector.InterestSuspensionsMap"
+      "type": "io.helidon.common.concurrency.limits.AimdLimitProvider"
     },
     {
-      "type": "io.ktor.network.selector.LockFreeMPSCQueue"
+      "type": "io.helidon.common.concurrency.limits.FixedLimitProvider"
     },
     {
-      "type": "io.ktor.network.selector.LockFreeMPSCQueueCore"
+      "type": "io.helidon.common.concurrency.limits.ThroughputLimitProvider"
     },
     {
-      "type": "io.ktor.network.selector.SelectInterest[]"
+      "type": "io.helidon.common.config.ConfigFactory__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
     },
     {
-      "type": "io.ktor.network.selector.SelectableBase"
+      "type": "io.helidon.common.mapper.DefaultMapperProvider__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
     },
     {
-      "type": "io.ktor.network.sockets.SocketBase"
+      "type": "io.helidon.common.mapper.DefaultResolverService__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
     },
     {
-      "type": "io.ktor.serialization.kotlinx.json.KotlinxSerializationJsonExtensionProvider"
+      "type": "io.helidon.common.mapper.MappersFactory__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
     },
     {
-      "type": "io.ktor.server.application.Application"
+      "type": "io.helidon.common.mapper.spi.MapperProvider"
     },
     {
-      "type": "io.ktor.server.application.PluginInstance"
+      "type": "io.helidon.config.ConfigProvider__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
     },
     {
-      "type": "io.ktor.server.config.HoconConfigLoader"
+      "type": "io.helidon.config.ConfigurationValueFactory__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
     },
     {
-      "type": "io.ktor.server.engine.BaseApplicationResponse"
+      "type": "io.helidon.config.EnumMapperProvider"
     },
     {
-      "type": "io.ktor.server.http.content.CompressedFileType"
+      "type": "io.helidon.config.MetaConfigFactory__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
     },
     {
-      "type": "io.ktor.server.plugins.MutableOriginConnectionPoint"
+      "type": "io.helidon.config.PropertiesConfigParser"
     },
     {
-      "type": "io.ktor.server.plugins.calllogging.KtorMDCProvider"
+      "type": "io.helidon.config.spi.ConfigFilter"
     },
     {
-      "type": "io.ktor.server.plugins.di.PluginModuleParametersInjector"
+      "type": "io.helidon.config.spi.ConfigParser"
     },
     {
-      "type": "io.ktor.server.request.DoubleReceivePreventionToken"
+      "type": "io.helidon.config.spi.ConfigSourceProvider"
     },
     {
-      "type": "io.ktor.server.routing.RoutingCall"
+      "type": "io.helidon.http.Headers__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
     },
     {
-      "type": "io.ktor.server.routing.RoutingRoot"
+      "type": "io.helidon.http.HttpPrologue__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
     },
     {
-      "type": "io.ktor.server.sessions.SessionProvider"
+      "type": "io.helidon.http.ServerRequestHeaders__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
     },
     {
-      "type": "io.ktor.server.sessions.StatefulSession"
+      "type": "io.helidon.http.media.jackson.JacksonMediaSupportProvider"
     },
     {
-      "type": "io.ktor.util.Attributes"
+      "type": "io.helidon.metrics.api.MeterRegistryFactory__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
     },
     {
-      "type": "io.ktor.util.collections.CopyOnWriteHashMap"
+      "type": "io.helidon.metrics.api.MetricsFactoryFactory__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
     },
     {
-      "type": "io.ktor.util.internal.LockFreeLinkedListNode"
+      "type": "io.helidon.service.registry.EventManagerImpl__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
     },
     {
-      "type": "io.ktor.util.reflect.TypeInfo"
+      "type": "io.helidon.service.registry.InterceptionMetadata__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
     },
     {
-      "type": "io.ktor.utils.io.ByteChannel"
+      "type": "io.helidon.service.registry.PerRequestScopeHandler__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
     },
     {
-      "type": "io.ktor.utils.io.ByteReadChannel"
+      "type": "io.helidon.service.registry.Scopes__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
     },
     {
-      "type": "io.ktor.utils.io.pool.DefaultPool"
+      "type": "io.helidon.service.registry.ServiceRegistry__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
     },
     {
-      "type": "java.io.File"
+      "type": "io.helidon.webserver.LoomServer__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
+    },
+    {
+      "type": "io.helidon.webserver.RequestScopeFeatureProvider__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
+    },
+    {
+      "type": "io.helidon.webserver.WebServerService__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
+    },
+    {
+      "type": "io.helidon.webserver.WebServerStarterService__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
+    },
+    {
+      "type": "io.helidon.webserver.http.HttpEntryPointsImpl__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
+    },
+    {
+      "type": "io.helidon.webserver.http.ServerRequest__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
+    },
+    {
+      "type": "io.helidon.webserver.http.ServerResponse__ServiceDescriptor",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
+    },
+    {
+      "type": "io.helidon.webserver.http1.Http1ConnectionProvider"
+    },
+    {
+      "type": "io.helidon.webserver.http1.Http1ProtocolConfigProvider"
+    },
+    {
+      "type": "io.helidon.webserver.spi.ServerFeatureProvider"
+    },
+    {
+      "type": "io.helidon.webserver.staticcontent.StaticContentFeatureProvider"
+    },
+    {
+      "type": "java.io.ObjectInputStream"
     },
     {
       "type": "java.io.Serializable"
@@ -464,6 +1491,14 @@
       "type": "java.lang.Class",
       "methods": [
         {
+          "name": "getRecordComponents",
+          "parameterTypes": []
+        },
+        {
+          "name": "isRecord",
+          "parameterTypes": []
+        },
+        {
           "name": "isSealed",
           "parameterTypes": []
         }
@@ -471,6 +1506,46 @@
     },
     {
       "type": "java.lang.ClassValue"
+    },
+    {
+      "type": "java.lang.Comparable"
+    },
+    {
+      "type": "java.lang.Deprecated",
+      "methods": [
+        {
+          "name": "forRemoval",
+          "parameterTypes": []
+        },
+        {
+          "name": "since",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Double"
+    },
+    {
+      "type": "java.lang.Enum"
+    },
+    {
+      "type": "java.lang.Enum$EnumDesc"
+    },
+    {
+      "type": "java.lang.FunctionalInterface"
+    },
+    {
+      "type": "java.lang.Integer"
+    },
+    {
+      "type": "java.lang.Iterable"
+    },
+    {
+      "type": "java.lang.Long"
+    },
+    {
+      "type": "java.lang.Number"
     },
     {
       "type": "java.lang.Object"
@@ -493,9 +1568,6 @@
       "type": "java.lang.String"
     },
     {
-      "type": "java.lang.String[]"
-    },
-    {
       "type": "java.lang.System",
       "methods": [
         {
@@ -505,7 +1577,55 @@
       ]
     },
     {
-      "type": "java.net.StandardSocketOptions"
+      "type": "java.lang.annotation.Documented"
+    },
+    {
+      "type": "java.lang.annotation.Retention",
+      "methods": [
+        {
+          "name": "value",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "java.lang.annotation.Target",
+      "methods": [
+        {
+          "name": "value",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "java.lang.constant.Constable"
+    },
+    {
+      "type": "java.lang.constant.ConstantDesc"
+    },
+    {
+      "type": "java.lang.constant.DynamicConstantDesc"
+    },
+    {
+      "type": "java.lang.reflect.Executable",
+      "methods": [
+        {
+          "name": "getParameters",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "java.lang.reflect.Method"
+    },
+    {
+      "type": "java.lang.reflect.Parameter",
+      "methods": [
+        {
+          "name": "getName",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "java.net.UnixDomainSocketAddress"
@@ -534,16 +1654,103 @@
       "type": "java.security.interfaces.RSAPublicKey"
     },
     {
+      "type": "java.sql.Statement[]"
+    },
+    {
+      "type": "java.util.AbstractCollection"
+    },
+    {
+      "type": "java.util.AbstractMap"
+    },
+    {
+      "type": "java.util.AbstractSet"
+    },
+    {
+      "type": "java.util.Collection"
+    },
+    {
+      "type": "java.util.Collections$SingletonMap"
+    },
+    {
+      "type": "java.util.Collections$SingletonSet"
+    },
+    {
+      "type": "java.util.Comparator"
+    },
+    {
+      "type": "java.util.Iterator"
+    },
+    {
+      "type": "java.util.List"
+    },
+    {
+      "type": "java.util.Map"
+    },
+    {
+      "type": "java.util.Optional"
+    },
+    {
+      "type": "java.util.RandomAccess"
+    },
+    {
+      "type": "java.util.SequencedCollection"
+    },
+    {
+      "type": "java.util.Set"
+    },
+    {
+      "type": "java.util.Spliterator"
+    },
+    {
+      "type": "java.util.concurrent.ScheduledThreadPoolExecutor"
+    },
+    {
+      "type": "java.util.function.Consumer"
+    },
+    {
+      "type": "java.util.function.IntFunction"
+    },
+    {
+      "type": "java.util.function.Predicate"
+    },
+    {
+      "type": "java.util.function.UnaryOperator"
+    },
+    {
+      "type": "java.util.stream.Stream"
+    },
+    {
+      "type": "jdk.internal.ValueBased"
+    },
+    {
+      "type": "jdk.internal.jrtfs.JrtFileSystemProvider"
+    },
+    {
       "type": "kotlin.Any"
     },
     {
       "type": "kotlin.Array"
     },
     {
-      "type": "kotlin.Cloneable"
+      "type": "kotlin.Boolean"
     },
     {
-      "type": "kotlin.Function0"
+      "type": "kotlin.Comparable"
+    },
+    {
+      "type": "kotlin.Deprecated"
+    },
+    {
+      "type": "kotlin.Double"
+    },
+    {
+      "type": "kotlin.Enum"
+    },
+    {
+      "type": "kotlin.IgnorableReturnValue"
+    },
+    {
+      "type": "kotlin.Int"
     },
     {
       "type": "kotlin.Long"
@@ -586,6 +1793,9 @@
       ]
     },
     {
+      "type": "kotlin.Nothing"
+    },
+    {
       "type": "kotlin.SafePublicationLazyImpl"
     },
     {
@@ -595,13 +1805,67 @@
       "type": "kotlin.Unit"
     },
     {
+      "type": "kotlin.annotation.AnnotationTarget"
+    },
+    {
+      "type": "kotlin.annotation.MustBeDocumented"
+    },
+    {
+      "type": "kotlin.annotation.Target",
+      "methods": [
+        {
+          "name": "allowedTargets",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "kotlin.collections.Collection"
+    },
+    {
+      "type": "kotlin.collections.EmptyList"
+    },
+    {
+      "type": "kotlin.collections.Iterable"
+    },
+    {
+      "type": "kotlin.collections.Iterator"
+    },
+    {
       "type": "kotlin.collections.List"
     },
     {
-      "type": "kotlin.collections.Map"
+      "type": "kotlin.collections.ListIterator"
+    },
+    {
+      "type": "kotlin.collections.MutableCollection"
+    },
+    {
+      "type": "kotlin.collections.MutableIterable"
+    },
+    {
+      "type": "kotlin.collections.MutableIterator"
+    },
+    {
+      "type": "kotlin.collections.MutableList"
+    },
+    {
+      "type": "kotlin.collections.MutableListIterator"
+    },
+    {
+      "type": "kotlin.collections.RandomAccess"
+    },
+    {
+      "type": "kotlin.collections.Set"
+    },
+    {
+      "type": "kotlin.io.Serializable"
     },
     {
       "type": "kotlin.jvm.internal.DefaultConstructorMarker"
+    },
+    {
+      "type": "kotlin.jvm.internal.markers.KMappedMarker"
     },
     {
       "type": "kotlin.reflect.jvm.internal.ReflectionFactoryImpl",
@@ -625,13 +1889,45 @@
       "type": "kotlin.reflect.jvm.internal.impl.load.java.JavaIncompatibilityRulesOverridabilityCondition"
     },
     {
-      "type": "kotlinx.coroutines.CancellableContinuationImpl"
+      "type": "kotlin.reflect.jvm.internal.impl.resolve.scopes.DescriptorKindFilter",
+      "fields": [
+        {
+          "name": "ALL"
+        },
+        {
+          "name": "CALLABLES"
+        },
+        {
+          "name": "CLASSIFIERS"
+        },
+        {
+          "name": "Companion"
+        },
+        {
+          "name": "FUNCTIONS"
+        },
+        {
+          "name": "NON_SINGLETON_CLASSIFIERS"
+        },
+        {
+          "name": "PACKAGES"
+        },
+        {
+          "name": "SINGLETON_CLASSIFIERS"
+        },
+        {
+          "name": "TYPE_ALIASES"
+        },
+        {
+          "name": "VALUES"
+        },
+        {
+          "name": "VARIABLES"
+        }
+      ]
     },
     {
-      "type": "kotlinx.coroutines.CancelledContinuation"
-    },
-    {
-      "type": "kotlinx.coroutines.CompletedExceptionally"
+      "type": "kotlin.reflect.jvm.internal.impl.serialization.deserialization.builtins.BuiltInsLoaderImpl"
     },
     {
       "type": "kotlinx.coroutines.DispatchedCoroutine"
@@ -640,19 +1936,7 @@
       "type": "kotlinx.coroutines.EventLoopImplBase"
     },
     {
-      "type": "kotlinx.coroutines.InvokeOnCancelling"
-    },
-    {
       "type": "kotlinx.coroutines.JobSupport"
-    },
-    {
-      "type": "kotlinx.coroutines.JobSupport$Finishing"
-    },
-    {
-      "type": "kotlinx.coroutines.channels.BufferedChannel"
-    },
-    {
-      "type": "kotlinx.coroutines.internal.ConcurrentLinkedListNode"
     },
     {
       "type": "kotlinx.coroutines.internal.DispatchedContinuation"
@@ -670,12 +1954,6 @@
       "type": "kotlinx.coroutines.internal.LockFreeTaskQueueCore"
     },
     {
-      "type": "kotlinx.coroutines.internal.Segment"
-    },
-    {
-      "type": "kotlinx.coroutines.internal.ThreadSafeHeap"
-    },
-    {
       "type": "kotlinx.coroutines.scheduling.CoroutineScheduler"
     },
     {
@@ -685,49 +1963,10 @@
       "type": "kotlinx.coroutines.scheduling.WorkQueue"
     },
     {
-      "type": "org.fusesource.jansi.internal.CLibrary",
-      "jniAccessible": true,
-      "fields": [
-        {
-          "name": "HAVE_ISATTY"
-        },
-        {
-          "name": "HAVE_TTYNAME"
-        },
-        {
-          "name": "TCSADRAIN"
-        },
-        {
-          "name": "TCSAFLUSH"
-        },
-        {
-          "name": "TCSANOW"
-        },
-        {
-          "name": "TIOCGETD"
-        },
-        {
-          "name": "TIOCGWINSZ"
-        },
-        {
-          "name": "TIOCSETD"
-        },
-        {
-          "name": "TIOCSWINSZ"
-        }
-      ]
-    },
-    {
       "type": "org.jetbrains.exposed.v1.dao.EntityLifecycleInterceptor"
     },
     {
       "type": "org.jetbrains.exposed.v1.jdbc.ExposedConnectionImpl"
-    },
-    {
-      "type": "org.koin.core.Koin"
-    },
-    {
-      "type": "org.koin.core.scope.Scope"
     },
     {
       "type": "org.postgresql.Driver",
@@ -1099,20 +2338,81 @@
     },
     {
       "type": "tools.jackson.databind.ser.Serializers[]"
+    },
+    {
+      "type": {
+        "proxy": [
+          "java.sql.Connection"
+        ]
+      }
     }
   ],
   "resources": [
     {
+      "glob": "/psw4j.properties"
+    },
+    {
+      "glob": "META-INF/MANIFEST.MF"
+    },
+    {
+      "glob": "META-INF/helidon/feature-metadata.properties"
+    },
+    {
+      "glob": "META-INF/helidon/manifest"
+    },
+    {
       "glob": "META-INF/services/ch.qos.logback.classic.spi.Configurator"
     },
     {
-      "glob": "META-INF/services/io.ktor.serialization.kotlinx.KotlinxSerializationExtensionProvider"
+      "glob": "META-INF/services/io.helidon.common.concurrency.limits.spi.LimitProvider"
     },
     {
-      "glob": "META-INF/services/io.ktor.server.application.ModuleParametersInjector"
+      "glob": "META-INF/services/io.helidon.common.mapper.spi.MapperProvider"
     },
     {
-      "glob": "META-INF/services/io.ktor.server.config.ConfigLoader"
+      "glob": "META-INF/services/io.helidon.common.media.type.spi.MediaTypeDetector"
+    },
+    {
+      "glob": "META-INF/services/io.helidon.common.resumable.ResumableSupport"
+    },
+    {
+      "glob": "META-INF/services/io.helidon.common.tls.spi.TlsManagerProvider"
+    },
+    {
+      "glob": "META-INF/services/io.helidon.config.spi.ConfigFilter"
+    },
+    {
+      "glob": "META-INF/services/io.helidon.config.spi.ConfigMapperProvider"
+    },
+    {
+      "glob": "META-INF/services/io.helidon.config.spi.ConfigParser"
+    },
+    {
+      "glob": "META-INF/services/io.helidon.config.spi.ConfigSourceProvider"
+    },
+    {
+      "glob": "META-INF/services/io.helidon.http.encoding.spi.ContentEncodingProvider"
+    },
+    {
+      "glob": "META-INF/services/io.helidon.http.media.spi.MediaSupportProvider"
+    },
+    {
+      "glob": "META-INF/services/io.helidon.logging.common.spi.LoggingProvider"
+    },
+    {
+      "glob": "META-INF/services/io.helidon.webserver.http.spi.SinkProvider"
+    },
+    {
+      "glob": "META-INF/services/io.helidon.webserver.http1.spi.Http1UpgradeProvider"
+    },
+    {
+      "glob": "META-INF/services/io.helidon.webserver.spi.ProtocolConfigProvider"
+    },
+    {
+      "glob": "META-INF/services/io.helidon.webserver.spi.ServerConnectionSelectorProvider"
+    },
+    {
+      "glob": "META-INF/services/io.helidon.webserver.spi.ServerFeatureProvider"
     },
     {
       "glob": "META-INF/services/java.net.spi.InetAddressResolverProvider"
@@ -1124,10 +2424,16 @@
       "glob": "META-INF/services/java.nio.channels.spi.SelectorProvider"
     },
     {
+      "glob": "META-INF/services/java.nio.file.spi.FileSystemProvider"
+    },
+    {
       "glob": "META-INF/services/java.sql.Driver"
     },
     {
       "glob": "META-INF/services/javax.xml.parsers.SAXParserFactory"
+    },
+    {
+      "glob": "META-INF/services/kotlin.reflect.jvm.internal.impl.builtins.BuiltInsLoader"
     },
     {
       "glob": "META-INF/services/kotlin.reflect.jvm.internal.impl.km.internal.extensions.MetadataExtensions"
@@ -1154,16 +2460,46 @@
       "glob": "application.conf"
     },
     {
+      "glob": "application.json"
+    },
+    {
+      "glob": "application.properties"
+    },
+    {
       "glob": "ch/qos/logback/classic/logback-classic-version.properties"
     },
     {
       "glob": "ch/qos/logback/core/logback-core-version.properties"
     },
     {
+      "glob": "io/helidon/common/media/type/default-media-types.properties"
+    },
+    {
+      "glob": "kotlin/annotation/annotation.kotlin_builtins"
+    },
+    {
       "glob": "kotlin/collections/collections.kotlin_builtins"
     },
     {
+      "glob": "kotlin/concurrent/atomics/atomics.kotlin_builtins"
+    },
+    {
+      "glob": "kotlin/coroutines/coroutines.kotlin_builtins"
+    },
+    {
+      "glob": "kotlin/internal/internal.kotlin_builtins"
+    },
+    {
+      "glob": "kotlin/io/io.kotlin_builtins"
+    },
+    {
       "glob": "kotlin/kotlin.kotlin_builtins"
+    },
+    {
+      "glob": "kotlin/ranges/ranges.kotlin_builtins"
+    },
+    {
+      "glob": "kotlin/reflect/reflect.kotlin_builtins"
     },
     {
       "glob": "logback-test.xml"
@@ -1172,16 +2508,13 @@
       "glob": "logback.xml"
     },
     {
-      "glob": "org/fusesource/jansi/internal/native/Linux/x86_64/libjansi.so"
-    },
-    {
-      "glob": "org/fusesource/jansi/jansi.properties"
-    },
-    {
       "glob": "org/postgresql/driverconfig.properties"
     },
     {
       "glob": "org/publicsuffix/list/effective_tld_names.dat"
+    },
+    {
+      "glob": "psw4j.properties"
     },
     {
       "glob": "reference.conf"
@@ -1193,10 +2526,25 @@
       "glob": "software/amazon/awssdk/services/ses/execution.interceptors"
     },
     {
+      "glob": "static/css/mypets.css"
+    },
+    {
+      "glob": "static/css/pet-detail.css"
+    },
+    {
+      "glob": "static/css/photographers.css"
+    },
+    {
+      "glob": "static/css/shelters.css"
+    },
+    {
+      "glob": "static/css/sterilization.css"
+    },
+    {
       "glob": "static/css/style.css"
     },
     {
-      "glob": "static/favicon.ico"
+      "glob": "static/css/temporal-home.css"
     },
     {
       "glob": "static/js/common.js"
@@ -1220,6 +2568,17 @@
     {
       "module": "java.base",
       "glob": "sun/net/www/content-types.properties"
+    },
+    {
+      "module": "java.logging",
+      "glob": "sun/util/logging/resources/logging_en.properties"
+    },
+    {
+      "module": "java.logging",
+      "glob": "sun/util/logging/resources/logging_en_US.properties"
+    },
+    {
+      "bundle": "sun.util.logging.resources.logging"
     }
   ]
 }
