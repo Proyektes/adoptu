@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-04T17:38:40.507Z
-> Files: 973 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-04T18:01:13.878Z
+> Files: 977 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -1819,7 +1819,7 @@
 
 ## backend/src/main/kotlin/com/adoptu/
 
-- `Application.kt` — main, configureRouting (~883 tok)
+- `Application.kt` — main, configureRouting (~900 tok)
 
 ## backend/src/main/kotlin/com/adoptu/ (graalvm-native-image worktree)
 
@@ -1875,6 +1875,10 @@
 - `PetRepositoryPort.kt` — getAll, getAllUnfiltered, getById, create, update (~682 tok)
 - `UserRepositoryPort.kt` — getById, getByEmail, getAllUsers, getPhotographers, getRescuers (~614 tok)
 
+## backend/src/main/kotlin/com/adoptu/routes/
+
+- `CountryRoutes.kt` — HttpRules, regionFromLocale (~320 tok)
+
 ## backend/src/main/kotlin/com/adoptu/routes/ (ported Ktor Route DSL → Helidon HttpRules/Handler, helidon-nima-migration worktree)
 
 - `PetsRoutes.kt` — `fun HttpRules.petsRoutes()`, flattened from Ktor's nested `route("/api/pets"){}`; multipart image upload via `req.receiveMultipart()`; literal `/mine`/`/my-adoption-requests` deliberately registered before `/{id}` (Helidon matches routes in registration order, unlike Ktor's specificity-first tree — see Key Learnings) (~3615 tok)
@@ -1921,12 +1925,18 @@
 
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/
 
+- `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~2523 tok)
+- `Common.kt` — NodeList, onCountryChange, initI18n, initDropdowns, checkProfileCompletion (~1820 tok)
 - `I18n.kt` (~22656 tok)
 
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
 
-- `IndexPage.kt` — init, loadPets, updateCountryHint, showEmptyState, hideEmptyState (~2200 tok)
+- `IndexPage.kt` — init, loadPets, updateCountryHint, showEmptyState, hideEmptyState (~2198 tok)
 - `TemporalHomePage.kt` — init, search, displayResults, init, render (~2461 tok)
+
+## infra/
+
+- `cloudfront.tf` (~2999 tok)
 
 ## infra/ (OpenTofu - AWS deployment)
 

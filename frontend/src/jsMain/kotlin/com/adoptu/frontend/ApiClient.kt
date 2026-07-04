@@ -39,6 +39,11 @@ object ApiClientModule {
 
     fun logout(): Promise<dynamic> = apiFetch("/api/auth/logout", js("({method: 'POST'})"))
 
+    fun detectCountry(locale: String? = null): Promise<dynamic> {
+        val query = if (!locale.isNullOrEmpty()) "?locale=" + window.asDynamic().encodeURIComponent(locale) else ""
+        return apiFetch("/api/detect-country$query")
+    }
+
     fun getPets(type: String? = null, country: String? = null): Promise<dynamic> {
         val params = mutableListOf<String>()
         if (!type.isNullOrEmpty()) params.add("type=" + window.asDynamic().encodeURIComponent(type))

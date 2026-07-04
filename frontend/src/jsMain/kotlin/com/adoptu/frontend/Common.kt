@@ -106,9 +106,11 @@ object CommonModule {
 
     private const val COUNTRY_STORAGE_KEY = "adoptu.selectedCountry"
 
-    // Defaults a country <select> to the last country picked anywhere on the site (localStorage),
-    // falling back to the logged-in user's profile country on first use, and keeps both in sync
-    // as the user changes the selection so every other country selector reuses the same choice.
+    // Defaults a country <select>, in priority order: the last country picked anywhere on
+    // the site (localStorage), then the logged-in user's profile country, then CloudFront's
+    // IP-based geolocation header (via /api/detect-country) with the browser's own locale as
+    // a fallback for requests that bypass CloudFront (e.g. local dev). Keeps localStorage in
+    // sync as the user changes the selection so every other country selector reuses the choice.
     fun initCountrySelect(selectId: String, onApplied: () -> Unit = {}): Promise<Unit> {
         val select = document.getElementById(selectId) as? HTMLSelectElement ?: return Promise.resolve(Unit)
 
@@ -124,13 +126,34 @@ object CommonModule {
             return Promise.resolve(Unit)
         }
 
-        return ApiClientModule.me().then<Unit> { user ->
+        // onApplied() is the source of truth for "country determination is complete" -
+        // it fires exactly once, on every path, including total failure. Callers must not
+        // rely on the timing of the returned Promise itself: a Promise resolved from inside
+        // a conditional's non-Promise branch can resolve before a sibling branch's nested
+        // fetch actually completes, so this deliberately does not chain loadPets()-style
+        // follow-up work off the return value.
+        return ApiClientModule.me().then<Boolean> { user ->
             val country = user.country?.toString()
             if (user.authenticated != false && !country.isNullOrEmpty()) {
                 select.value = country
                 window.localStorage.setItem(COUNTRY_STORAGE_KEY, country)
-                onApplied()
+                true
+            } else {
+                false
             }
-        }.catch { }
+        }.catch<Boolean> { false }.then<Unit> { hasCountry ->
+            if (hasCountry) {
+                onApplied()
+            } else {
+                ApiClientModule.detectCountry(window.navigator.language).then<Unit> { detected ->
+                    val detectedCountry = detected.country?.toString()
+                    if (!detectedCountry.isNullOrEmpty()) {
+                        select.value = detectedCountry
+                        window.localStorage.setItem(COUNTRY_STORAGE_KEY, detectedCountry)
+                    }
+                    onApplied()
+                }.catch<Unit> { onApplied() }
+            }
+        }
     }
 }

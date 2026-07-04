@@ -56,7 +56,7 @@ object IndexPageModule {
 
         countrySelect?.addEventListener("change", { loadPets() })
 
-        CommonModule.initCountrySelect("pets-country").then<Unit> { loadPets() }
+        CommonModule.initCountrySelect("pets-country") { loadPets() }
     }
 
     fun loadPets(): Promise<Unit> {

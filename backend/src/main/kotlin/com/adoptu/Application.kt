@@ -7,6 +7,7 @@ import com.adoptu.routes.adminShelterRoutes
 import com.adoptu.routes.adminSterilizationLocationRoutes
 import com.adoptu.routes.adminUsersRoutes
 import com.adoptu.routes.authRoutes
+import com.adoptu.routes.countryRoutes
 import com.adoptu.routes.petsRoutes
 import com.adoptu.routes.photographerRoutes
 import com.adoptu.routes.shelterRoutes
@@ -77,6 +78,7 @@ internal fun configureRouting(routing: HttpRouting.Builder) {
 
     routing.uiRoutes()
     routing.authRoutes()
+    routing.countryRoutes()
     routing.petsRoutes()
     routing.usersRoutes()
     routing.adminUsersRoutes()

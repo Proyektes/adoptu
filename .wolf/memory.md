@@ -1731,3 +1731,14 @@
 | 15:52 | Fixed missing i18n translations for photographers request flow (9 keys × 5 langs) | I18n.kt, common.js, common.js.map, buglog.json, cerebrum.md | fixed, rebuilt, committed | ~9000 |
 | 11:38 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | 13→11 lines | ~136 |
 | 11:38 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | 3→2 lines | ~28 |
+| 11:44 | Edited backend/src/main/kotlin/com/adoptu/Application.kt | added 1 import(s) | ~30 |
+| 11:44 | Edited backend/src/main/kotlin/com/adoptu/Application.kt | 3→4 lines | ~27 |
+| 11:45 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/ApiClient.kt | added 1 condition(s) | ~89 |
+| 11:45 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/Common.kt | added 2 condition(s) | ~534 |
+| 11:46 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/Common.kt | isNotEmpty() → isEmpty() | ~239 |
+| 11:47 | Edited backend/src/main/kotlin/com/adoptu/routes/CountryRoutes.kt | added 1 import(s) | ~259 |
+| 11:48 | Edited infra/cloudfront.tf | expanded (+25 lines) | ~330 |
+| 11:49 | Edited infra/cloudfront.tf | 5→5 lines | ~64 |
+| 11:54 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/Common.kt | 11→13 lines | ~163 |
+| 12:00 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/Common.kt | modified if() | ~407 |
+| 12:01 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/IndexPage.kt | modified initCountrySelect() | ~38 |
