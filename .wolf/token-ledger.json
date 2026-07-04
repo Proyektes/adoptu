@@ -2,13 +2,13 @@
   "version": 1,
   "created_at": "2026-06-21T17:54:59.933Z",
   "lifetime": {
-    "total_tokens_estimated": 13339470,
-    "total_reads": 7553,
-    "total_writes": 6128,
-    "total_sessions": 119,
+    "total_tokens_estimated": 13339679,
+    "total_reads": 7564,
+    "total_writes": 6129,
+    "total_sessions": 121,
     "anatomy_hits": 1661,
-    "anatomy_misses": 5860,
-    "repeated_reads_blocked": 4934,
+    "anatomy_misses": 5871,
+    "repeated_reads_blocked": 4935,
     "estimated_savings_vs_bare_cli": 14686422
   },
   "sessions": [
@@ -80643,6 +80643,94 @@
         "reads_count": 6,
         "writes_count": 0,
         "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-07-03-1752",
+      "started": "2026-07-03T23:52:37.717Z",
+      "ended": "2026-07-04T17:23:42.574Z",
+      "reads": [
+        {
+          "file": "/home/laf/Proyektes/adoptu/01-home-pets-page.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/laf/Proyektes/adoptu/02-pets-mexico.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/laf/Proyektes/adoptu/03-pet-detail-marte.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/laf/Proyektes/adoptu/04-admin-profile.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/laf/Proyektes/adoptu/05-admin-panel.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/laf/Proyektes/adoptu/06-admin-unauth-probe.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/laf/Proyektes/adoptu/backend/src/main/resources/static/css/style.css",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/laf/Proyektes/adoptu/footer-fix-01-pet-detail.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/Application.kt",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/laf/Proyektes/adoptu/footer-fix-02-profile.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/home/laf/Proyektes/adoptu/footer-fix-02b-profile-recheck.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/Application.kt",
+          "tokens_estimated": 209,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 209,
+        "reads_count": 11,
+        "writes_count": 1,
+        "repeated_reads_blocked": 1,
         "anatomy_lookups": 0
       }
     }
