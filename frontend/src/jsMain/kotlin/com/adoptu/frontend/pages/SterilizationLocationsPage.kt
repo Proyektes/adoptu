@@ -10,6 +10,7 @@ import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.HTMLSelectElement
 import org.w3c.dom.HTMLTextAreaElement
 import org.w3c.dom.events.Event
+import kotlin.js.Promise
 
 @JsExport
 @JsName("SterilizationLocationsPage")
@@ -32,8 +33,20 @@ object SterilizationLocationsPageModule {
             container?.innerHTML = "<p>${I18n.t("pleaseSelectCountry")}</p>"
             return
         }
-        window.asDynamic().fetch("/api/sterilization-locations?" + params.toString()).then { res: dynamic ->
-            res.json().then { locations: dynamic -> render(locations, container) }
+        val query = params.toString()
+        // Merges the admin-curated catalog with self-registered provider profiles -
+        // they're two separate tables (SterilizationLocations vs
+        // UserSterilizationLocations) with the same shape, so results combine directly.
+        val adminFetch: Promise<dynamic> = window.asDynamic().fetch("/api/sterilization-locations?$query")
+            .then { res: dynamic -> res.json() }
+        val userFetch: Promise<dynamic> = window.asDynamic().fetch("/api/user-sterilization-locations?$query")
+            .then { res: dynamic -> res.json() }
+            .catch { js("([])") }
+        Promise.all(arrayOf(adminFetch, userFetch)).then<Unit> { results ->
+            val admin = results[0] as? Array<dynamic> ?: emptyArray()
+            val user = results[1] as? Array<dynamic> ?: emptyArray()
+            render(admin + user, container)
+            undefined
         }.catch { _: dynamic ->
             container?.innerHTML = "<p>${I18n.t("errorLoadingLocations")}</p>"
         }

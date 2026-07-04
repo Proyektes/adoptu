@@ -1,9 +1,11 @@
 package com.adoptu.adapters.db.repositories
 
+import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.UserShelters
 import com.adoptu.common.Country
 import com.adoptu.dto.input.CreateUserShelterRequest
 import com.adoptu.dto.input.UpdateUserShelterRequest
+import com.adoptu.dto.input.UserRole
 import com.adoptu.dto.input.UserShelterDto
 import com.adoptu.ports.UserShelterRepositoryPort
 import com.adoptu.adapters.db.dbDispatcher
@@ -11,6 +13,7 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -162,7 +165,17 @@ class UserShelterRepository(private val clock: Clock) : UserShelterRepositoryPor
     override suspend fun search(country: String, state: String?, city: String?, neighborhood: String?, zip: String?): List<UserShelterDto> = withContext(dbDispatcher) {
         transaction {
             val parsedCountry = Country.fromDisplayName(country) ?: return@transaction emptyList()
-            var conditions: Op<Boolean> = UserShelters.country eq parsedCountry
+
+            // Only publish shelters the owner has actually activated (which itself requires
+            // both the account email and, when different, the shelter's own contact email to
+            // be verified) - a saved-but-never-activated profile must not appear publicly.
+            val activeShelterUserIds = UserActiveRoles.selectAll()
+                .where { UserActiveRoles.role eq UserRole.SHELTER.name }
+                .map { it[UserActiveRoles.userId] }
+            if (activeShelterUserIds.isEmpty()) return@transaction emptyList()
+
+            var conditions: Op<Boolean> = (UserShelters.country eq parsedCountry) and
+                (UserShelters.userId inList activeShelterUserIds)
 
             if (!state.isNullOrBlank()) {
                 conditions = conditions.and(UserShelters.state eq state)

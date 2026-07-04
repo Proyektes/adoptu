@@ -1,9 +1,11 @@
 package com.adoptu.adapters.db.repositories
 
+import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.UserSterilizationLocations
 import com.adoptu.common.Country
 import com.adoptu.dto.input.CreateUserSterilizationLocationRequest
 import com.adoptu.dto.input.UpdateUserSterilizationLocationRequest
+import com.adoptu.dto.input.UserRole
 import com.adoptu.dto.input.UserSterilizationLocationDto
 import com.adoptu.ports.UserSterilizationLocationRepositoryPort
 import com.adoptu.adapters.db.dbDispatcher
@@ -11,6 +13,7 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -135,7 +138,17 @@ class UserSterilizationLocationRepository(private val clock: Clock) : UserSteril
     override suspend fun search(country: String, state: String?, city: String?, neighborhood: String?, zip: String?): List<UserSterilizationLocationDto> = withContext(dbDispatcher) {
         transaction {
             val parsedCountry = Country.fromDisplayName(country) ?: return@transaction emptyList()
-            var conditions: Op<Boolean> = UserSterilizationLocations.country eq parsedCountry
+
+            // Only publish locations the owner has actually activated (which itself requires
+            // both the account email and, when different, the location's own contact email to
+            // be verified) - a saved-but-never-activated profile must not appear publicly.
+            val activeUserIds = UserActiveRoles.selectAll()
+                .where { UserActiveRoles.role eq UserRole.STERILIZATION_SERVICE.name }
+                .map { it[UserActiveRoles.userId] }
+            if (activeUserIds.isEmpty()) return@transaction emptyList()
+
+            var conditions: Op<Boolean> = (UserSterilizationLocations.country eq parsedCountry) and
+                (UserSterilizationLocations.userId inList activeUserIds)
 
             if (!state.isNullOrBlank()) {
                 conditions = conditions.and(UserSterilizationLocations.state eq state)

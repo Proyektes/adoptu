@@ -110,6 +110,12 @@ class UserShelterRoutesE2ETest {
                 it[UserShelters.createdAt] = now
                 it[UserShelters.updatedAt] = now
             }
+            try {
+                UserActiveRoles.insert {
+                    it[UserActiveRoles.userId] = userId
+                    it[UserActiveRoles.role] = "SHELTER"
+                }
+            } catch (e: Exception) { }
         }
     }
 

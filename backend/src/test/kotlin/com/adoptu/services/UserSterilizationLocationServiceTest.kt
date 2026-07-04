@@ -1,5 +1,6 @@
 package com.adoptu.services
 
+import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.UserSterilizationLocations
 import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.repositories.UserRepository
@@ -455,6 +456,10 @@ class UserSterilizationLocationServiceTest {
                 it[UserSterilizationLocations.description] = description
                 it[UserSterilizationLocations.createdAt] = clock.now().toEpochMilliseconds()
                 it[UserSterilizationLocations.updatedAt] = clock.now().toEpochMilliseconds()
+            }
+            UserActiveRoles.insert {
+                it[UserActiveRoles.userId] = userId
+                it[UserActiveRoles.role] = "STERILIZATION_SERVICE"
             }
         }
     }

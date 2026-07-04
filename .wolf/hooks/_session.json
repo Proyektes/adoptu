@@ -48,13 +48,13 @@
       "first_read": "2026-07-04T19:23:52.575Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/routes/UserShelterRoutes.kt": {
-      "count": 1,
-      "tokens": 0,
+      "count": 2,
+      "tokens": 747,
       "first_read": "2026-07-04T19:24:24.227Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/routes/UserSterilizationLocationRoutes.kt": {
-      "count": 1,
-      "tokens": 0,
+      "count": 2,
+      "tokens": 801,
       "first_read": "2026-07-04T19:24:25.062Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/services/UserShelterService.kt": {
@@ -63,8 +63,8 @@
       "first_read": "2026-07-04T19:24:35.582Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserShelterRepository.kt": {
-      "count": 1,
-      "tokens": 0,
+      "count": 2,
+      "tokens": 2389,
       "first_read": "2026-07-04T19:24:36.293Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/ports/UserShelterRepositoryPort.kt": {
@@ -83,8 +83,8 @@
       "first_read": "2026-07-04T19:25:42.685Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserSterilizationLocationRepository.kt": {
-      "count": 1,
-      "tokens": 0,
+      "count": 3,
+      "tokens": 2235,
       "first_read": "2026-07-04T19:25:43.058Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/ForgotPasswordPage.kt": {
@@ -123,8 +123,8 @@
       "first_read": "2026-07-04T19:32:51.051Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/test/kotlin/com/adoptu/services/UserShelterServiceTest.kt": {
-      "count": 1,
-      "tokens": 0,
+      "count": 3,
+      "tokens": 4872,
       "first_read": "2026-07-04T19:33:15.129Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/test/kotlin/com/adoptu/mocks/MockNotificationAdapter.kt": {
@@ -138,8 +138,8 @@
       "first_read": "2026-07-04T19:33:56.444Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/test/kotlin/com/adoptu/routes/UserShelterRoutesE2ETest.kt": {
-      "count": 2,
-      "tokens": 3768,
+      "count": 4,
+      "tokens": 3814,
       "first_read": "2026-07-04T19:34:32.471Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/test/kotlin/com/adoptu/routes/UserSterilizationLocationRoutesE2ETest.kt": {
@@ -206,6 +206,21 @@
       "count": 1,
       "tokens": 2307,
       "first_read": "2026-07-04T20:19:00.105Z"
+    },
+    "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SheltersPage.kt": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-07-04T20:39:22.037Z"
+    },
+    "/home/laf/Proyektes/adoptu/backend/src/main/scss/sterilization.scss": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-07-04T20:40:39.004Z"
+    },
+    "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SterilizationLocationsPage.kt": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-07-04T20:42:56.269Z"
     }
   },
   "files_written": [
@@ -724,6 +739,108 @@
       "action": "edit",
       "tokens": 150,
       "at": "2026-07-04T19:54:40.437Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/scss/sterilization.scss",
+      "action": "edit",
+      "tokens": 42,
+      "at": "2026-07-04T20:41:12.713Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/routes/UserShelterRoutes.kt",
+      "action": "edit",
+      "tokens": 97,
+      "at": "2026-07-04T20:42:31.536Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/routes/UserSterilizationLocationRoutes.kt",
+      "action": "edit",
+      "tokens": 97,
+      "at": "2026-07-04T20:42:39.555Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SterilizationLocationsPage.kt",
+      "action": "edit",
+      "tokens": 28,
+      "at": "2026-07-04T20:43:20.345Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SterilizationLocationsPage.kt",
+      "action": "edit",
+      "tokens": 388,
+      "at": "2026-07-04T20:43:30.407Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SheltersPage.kt",
+      "action": "edit",
+      "tokens": 25,
+      "at": "2026-07-04T20:43:36.734Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SheltersPage.kt",
+      "action": "edit",
+      "tokens": 406,
+      "at": "2026-07-04T20:43:46.514Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserShelterRepository.kt",
+      "action": "edit",
+      "tokens": 173,
+      "at": "2026-07-04T20:49:26.022Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserShelterRepository.kt",
+      "action": "edit",
+      "tokens": 296,
+      "at": "2026-07-04T20:49:34.114Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserSterilizationLocationRepository.kt",
+      "action": "edit",
+      "tokens": 193,
+      "at": "2026-07-04T20:49:53.356Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserSterilizationLocationRepository.kt",
+      "action": "edit",
+      "tokens": 307,
+      "at": "2026-07-04T20:50:06.837Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/test/kotlin/com/adoptu/services/UserShelterServiceTest.kt",
+      "action": "edit",
+      "tokens": 36,
+      "at": "2026-07-04T20:50:41.155Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/test/kotlin/com/adoptu/services/UserShelterServiceTest.kt",
+      "action": "edit",
+      "tokens": 99,
+      "at": "2026-07-04T20:50:53.880Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/test/kotlin/com/adoptu/services/UserSterilizationLocationServiceTest.kt",
+      "action": "edit",
+      "tokens": 40,
+      "at": "2026-07-04T20:51:08.010Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/test/kotlin/com/adoptu/services/UserSterilizationLocationServiceTest.kt",
+      "action": "edit",
+      "tokens": 111,
+      "at": "2026-07-04T20:51:18.875Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/test/kotlin/com/adoptu/routes/UserShelterRoutesE2ETest.kt",
+      "action": "edit",
+      "tokens": 286,
+      "at": "2026-07-04T20:51:51.273Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/test/kotlin/com/adoptu/routes/UserSterilizationLocationRoutesE2ETest.kt",
+      "action": "edit",
+      "tokens": 114,
+      "at": "2026-07-04T20:52:13.685Z"
     }
   ],
   "edit_counts": {
@@ -737,12 +854,12 @@
     "backend/src/main/kotlin/com/adoptu/services/ProfileEmailVerificationService.kt": 4,
     "backend/src/main/kotlin/com/adoptu/ports/UserShelterRepositoryPort.kt": 1,
     "backend/src/main/kotlin/com/adoptu/ports/UserSterilizationLocationRepositoryPort.kt": 1,
-    "backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserShelterRepository.kt": 2,
-    "backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserSterilizationLocationRepository.kt": 2,
+    "backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserShelterRepository.kt": 4,
+    "backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserSterilizationLocationRepository.kt": 4,
     "backend/src/main/kotlin/com/adoptu/services/UserShelterService.kt": 3,
     "backend/src/main/kotlin/com/adoptu/services/UserSterilizationLocationService.kt": 3,
-    "backend/src/main/kotlin/com/adoptu/routes/UserShelterRoutes.kt": 2,
-    "backend/src/main/kotlin/com/adoptu/routes/UserSterilizationLocationRoutes.kt": 2,
+    "backend/src/main/kotlin/com/adoptu/routes/UserShelterRoutes.kt": 3,
+    "backend/src/main/kotlin/com/adoptu/routes/UserSterilizationLocationRoutes.kt": 3,
     "backend/src/main/kotlin/com/adoptu/di/AppModule.kt": 2,
     "backend/src/main/kotlin/com/adoptu/routes/UsersRoutes.kt": 11,
     "backend/src/main/kotlin/com/adoptu/routes/PhotographerRoutes.kt": 4,
@@ -750,10 +867,10 @@
     "backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt": 1,
     "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AuthFlowPages.kt": 1,
     "frontend/src/jsMain/kotlin/com/adoptu/frontend/Main.kt": 2,
-    "backend/src/test/kotlin/com/adoptu/services/UserShelterServiceTest.kt": 4,
-    "backend/src/test/kotlin/com/adoptu/services/UserSterilizationLocationServiceTest.kt": 4,
-    "backend/src/test/kotlin/com/adoptu/routes/UserShelterRoutesE2ETest.kt": 4,
-    "backend/src/test/kotlin/com/adoptu/routes/UserSterilizationLocationRoutesE2ETest.kt": 4,
+    "backend/src/test/kotlin/com/adoptu/services/UserShelterServiceTest.kt": 6,
+    "backend/src/test/kotlin/com/adoptu/services/UserSterilizationLocationServiceTest.kt": 6,
+    "backend/src/test/kotlin/com/adoptu/routes/UserShelterRoutesE2ETest.kt": 5,
+    "backend/src/test/kotlin/com/adoptu/routes/UserSterilizationLocationRoutesE2ETest.kt": 5,
     "backend/src/test/kotlin/com/adoptu/routes/UsersRoutesE2ETest.kt": 4,
     "backend/src/test/kotlin/com/adoptu/routes/PhotographerRoutesE2ETest.kt": 1,
     "backend/src/test/kotlin/com/adoptu/adapters/db/DatabaseFactoryTest.kt": 2,
@@ -762,11 +879,14 @@
     "backend/src/main/kotlin/com/adoptu/pages/ProfilePage.kt": 2,
     "backend/src/main/scss/_base.scss": 1,
     "backend/src/main/resources/static/css/style.css": 1,
-    "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/ProfilePage.kt": 2
+    "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/ProfilePage.kt": 2,
+    "backend/src/main/scss/sterilization.scss": 1,
+    "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SterilizationLocationsPage.kt": 2,
+    "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SheltersPage.kt": 2
   },
   "anatomy_hits": 8,
-  "anatomy_misses": 33,
-  "repeated_reads_warned": 24,
+  "anatomy_misses": 36,
+  "repeated_reads_warned": 33,
   "cerebrum_warnings": 0,
-  "stop_count": 4
+  "stop_count": 5
 }

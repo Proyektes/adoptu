@@ -1,5 +1,6 @@
 package com.adoptu.services
 
+import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.UserShelters
 import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.repositories.UserRepository
@@ -483,6 +484,10 @@ class UserShelterServiceTest {
                 it[UserShelters.description] = description
                 it[UserShelters.createdAt] = clock.now().toEpochMilliseconds()
                 it[UserShelters.updatedAt] = clock.now().toEpochMilliseconds()
+            }
+            UserActiveRoles.insert {
+                it[UserActiveRoles.userId] = userId
+                it[UserActiveRoles.role] = "SHELTER"
             }
         }
     }

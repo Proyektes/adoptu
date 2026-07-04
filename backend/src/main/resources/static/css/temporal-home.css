@@ -165,6 +165,18 @@ main {
   margin-top: 0.25rem;
 }
 
+.field-hint {
+  color: #966400;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+.field-hint:empty {
+  display: none;
+}
+.field-hint:not(:empty) {
+  display: block;
+}
+
 .checkbox-group {
   display: flex;
   flex-direction: column;

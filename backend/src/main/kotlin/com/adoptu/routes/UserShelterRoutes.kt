@@ -71,10 +71,11 @@ fun HttpRules.userShelterRoutes() {
         }
         val state = req.queryParam("state")
         val city = req.queryParam("city")
+        val neighborhood = req.queryParam("neighborhood")
         val zip = req.queryParam("zip")
 
         runBlocking {
-            val shelters = service.search(country, state, city, zip)
+            val shelters = service.search(country, state, city, neighborhood, zip)
             res.send(shelters)
         }
     })

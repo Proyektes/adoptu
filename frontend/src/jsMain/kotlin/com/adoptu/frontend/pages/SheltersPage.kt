@@ -6,6 +6,7 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.Event
+import kotlin.js.Promise
 
 @JsExport
 @JsName("SheltersPage")
@@ -37,11 +38,22 @@ object SheltersPageModule {
             return
         }
 
-        window.asDynamic().fetch("/api/shelters?" + params.toString()).then { res: dynamic ->
-            if (res.ok != true) {
-                throw js("new Error('Failed to load shelters')")
-            }
-            res.json().then { shelters: dynamic -> renderShelters(shelters, container) }
+        val query = params.toString()
+        // Merges the admin-curated catalog with self-registered shelter profiles -
+        // they're two separate tables (AnimalShelters vs UserShelters) with the
+        // same shape, so results combine directly.
+        val adminFetch: Promise<dynamic> = window.asDynamic().fetch("/api/shelters?$query").then { res: dynamic ->
+            if (res.ok != true) throw js("new Error('Failed to load shelters')")
+            res.json()
+        }
+        val userFetch: Promise<dynamic> = window.asDynamic().fetch("/api/user-shelters?$query")
+            .then { res: dynamic -> res.json() }
+            .catch { js("([])") }
+        Promise.all(arrayOf(adminFetch, userFetch)).then<Unit> { results ->
+            val admin = results[0] as? Array<dynamic> ?: emptyArray()
+            val user = results[1] as? Array<dynamic> ?: emptyArray()
+            renderShelters(admin + user, container)
+            undefined
         }.catch { _: dynamic ->
             errorDiv?.style?.display = "block"
             errorDiv?.textContent = I18n.t("errorLoadingShelters")

@@ -1903,3 +1903,21 @@
 | 13:58 | Session summary: non-rescuer registration now redirects to /profile (session set on register); publishing shelter/photographer/temporal-home/sterilization profiles now requires verified account email, plus shelter/sterilization contact-email verification (rejects emails owned by other accounts) via new ProfileEmailVerificationService + /verify-profile-email; profile page shows a pending-verification hint; fixed pre-existing bug where UserRepository.getById/getByEmail/getAllUsers never mapped isEmailVerified | RegisterPage.kt, AuthRoutes.kt, UsersRoutes.kt, PhotographerRoutes.kt, ProfileEmailVerificationService.kt, UserShelterService.kt, UserSterilizationLocationService.kt, UserRepository.kt, ProfilePage.kt (both) | all backend tests green (1084+ tests) | ~large |
 | 13:58 | Session end: 86 writes across 35 files (AuthRoutes.kt, RegisterPage.kt, Models.kt, DatabaseFactory.kt, TestDatabase.kt) | 40 reads | ~78499 tok |
 | 14:31 | Session end: 86 writes across 35 files (AuthRoutes.kt, RegisterPage.kt, Models.kt, DatabaseFactory.kt, TestDatabase.kt) | 41 reads | ~80984 tok |
+| 14:36 | Session end: 86 writes across 35 files (AuthRoutes.kt, RegisterPage.kt, Models.kt, DatabaseFactory.kt, TestDatabase.kt) | 41 reads | ~80984 tok |
+| 14:41 | Edited backend/src/main/scss/sterilization.scss | CSS: grid-template-columns, margin-top | ~39 |
+| 14:42 | Edited backend/src/main/kotlin/com/adoptu/routes/UserShelterRoutes.kt | 9→10 lines | ~90 |
+| 14:42 | Edited backend/src/main/kotlin/com/adoptu/routes/UserSterilizationLocationRoutes.kt | 9→10 lines | ~91 |
+| 14:43 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SterilizationLocationsPage.kt | added 1 import(s) | ~26 |
+| 14:43 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SterilizationLocationsPage.kt | modified search() | ~363 |
+| 14:43 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SheltersPage.kt | added 1 import(s) | ~24 |
+| 14:43 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SheltersPage.kt | modified if() | ~379 |
+| 14:49 | Edited backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserShelterRepository.kt | added 3 import(s) | ~161 |
+| 14:49 | Edited backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserShelterRepository.kt | added 1 condition(s) | ~277 |
+| 14:49 | Edited backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserSterilizationLocationRepository.kt | added 3 import(s) | ~180 |
+| 14:50 | Edited backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserSterilizationLocationRepository.kt | added 1 condition(s) | ~287 |
+| 14:50 | Edited backend/src/test/kotlin/com/adoptu/services/UserShelterServiceTest.kt | added 1 import(s) | ~34 |
+| 14:50 | Edited backend/src/test/kotlin/com/adoptu/services/UserShelterServiceTest.kt | 6→10 lines | ~92 |
+| 14:51 | Edited backend/src/test/kotlin/com/adoptu/services/UserSterilizationLocationServiceTest.kt | added 1 import(s) | ~37 |
+| 14:51 | Edited backend/src/test/kotlin/com/adoptu/services/UserSterilizationLocationServiceTest.kt | 6→10 lines | ~104 |
+| 14:51 | Edited backend/src/test/kotlin/com/adoptu/routes/UserShelterRoutesE2ETest.kt | added error handling | ~267 |
+| 14:52 | Edited backend/src/test/kotlin/com/adoptu/routes/UserSterilizationLocationRoutesE2ETest.kt | added error handling | ~107 |

@@ -107,6 +107,12 @@ class UserSterilizationLocationRoutesE2ETest {
                 it[UserSterilizationLocations.createdAt] = now
                 it[UserSterilizationLocations.updatedAt] = now
             }
+            try {
+                UserActiveRoles.insert {
+                    it[UserActiveRoles.userId] = userId
+                    it[UserActiveRoles.role] = "STERILIZATION_SERVICE"
+                }
+            } catch (e: Exception) { }
         }
     }
 

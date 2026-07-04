@@ -71,10 +71,11 @@ fun HttpRules.userSterilizationLocationRoutes() {
         }
         val state = req.queryParam("state")
         val city = req.queryParam("city")
+        val neighborhood = req.queryParam("neighborhood")
         val zip = req.queryParam("zip")
 
         runBlocking {
-            val locations = service.search(country, state, city, zip)
+            val locations = service.search(country, state, city, neighborhood, zip)
             res.send(locations)
         }
     })

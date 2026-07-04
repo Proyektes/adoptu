@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-04T19:54:40.418Z
-> Files: 1013 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-04T20:52:13.666Z
+> Files: 1016 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -1850,8 +1850,8 @@
 
 - `PetRepository.kt` — PetRepositoryImpl: rowToPetDto, getPetImages, getAll, getAllUnfiltered (~4397 tok)
 - `UserRepository.kt` — UserRepository: getActiveRolesForUser, getById, getByEmail, getAllUsers (~6321 tok)
-- `UserShelterRepository.kt` — UserShelterRepository: rowToDto, getByUserId, create, update (~2389 tok)
-- `UserSterilizationLocationRepository.kt` — UserSterilizationLocationRepository: rowToDto, getByUserId, create, update (~2202 tok)
+- `UserShelterRepository.kt` — UserShelterRepository: rowToDto, getByUserId, create, update (~2589 tok)
+- `UserSterilizationLocationRepository.kt` — UserSterilizationLocationRepository: rowToDto, getByUserId, create, update (~2404 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/repositories/ (canonical)
 
@@ -1898,9 +1898,9 @@
 - `CountryRoutes.kt` — HttpRules, regionFromLocale (~320 tok)
 - `PhotographerRoutes.kt` — HttpRules, validateUser (~2385 tok)
 - `UIRoutes.kt` — Data class: NavParams (~2431 tok)
-- `UserShelterRoutes.kt` — HttpRules (~747 tok)
+- `UserShelterRoutes.kt` — HttpRules (~767 tok)
 - `UsersRoutes.kt` — Data class: UpdateProfileRequest (~4298 tok)
-- `UserSterilizationLocationRoutes.kt` — HttpRules (~801 tok)
+- `UserSterilizationLocationRoutes.kt` — HttpRules (~820 tok)
 
 ## backend/src/main/kotlin/com/adoptu/routes/ (ported Ktor Route DSL → Helidon HttpRules/Handler, helidon-nima-migration worktree)
 
@@ -1945,6 +1945,7 @@
 ## backend/src/main/scss/
 
 - `_base.scss` — Styles: 15 rules, 8 vars (~1200 tok)
+- `sterilization.scss` — Styles: 6 rules (~192 tok)
 - `style.scss` — Styles: 50 rules (~2843 tok)
 
 ## backend/src/test/kotlin/com/adoptu/adapters/db/
@@ -1958,15 +1959,15 @@
 ## backend/src/test/kotlin/com/adoptu/routes/
 
 - `PhotographerRoutesE2ETest.kt` — E2E tests for [photographerRoutes]. (~7449 tok)
-- `UserShelterRoutesE2ETest.kt` — UserShelterRoutesE2ETest: setup, createTestUsers, startServer, createShelterInDb (~3814 tok)
+- `UserShelterRoutesE2ETest.kt` — UserShelterRoutesE2ETest: setup, createTestUsers, startServer, createShelterInDb (~3875 tok)
 - `UsersRoutesE2ETest.kt` — Verbatim port of the old Ktor test's inline `module { ... }` block of mocked adapters. (~11108 tok)
-- `UserSterilizationLocationRoutesE2ETest.kt` — UserSterilizationLocationRoutesE2ETest: setup, createTestUsers, createLocationInDb (~4359 tok)
+- `UserSterilizationLocationRoutesE2ETest.kt` — UserSterilizationLocationRoutesE2ETest: setup, createTestUsers, createLocationInDb (~4424 tok)
 
 ## backend/src/test/kotlin/com/adoptu/services/
 
 - `PetServiceTest.kt` — PetServiceTest: setup (~7228 tok)
-- `UserShelterServiceTest.kt` — UserShelterServiceTest: setup (~4859 tok)
-- `UserSterilizationLocationServiceTest.kt` — UserSterilizationLocationServiceTest: setup (~4764 tok)
+- `UserShelterServiceTest.kt` — UserShelterServiceTest: setup (~4913 tok)
+- `UserSterilizationLocationServiceTest.kt` — UserSterilizationLocationServiceTest: setup (~4822 tok)
 
 ## backend/src/test/kotlin/com/adoptu/testsupport/ (helidon-nima-migration worktree)
 
@@ -1986,6 +1987,8 @@
 - `IndexPage.kt` — init, loadPets, updateCountryHint, showEmptyState, hideEmptyState (~2198 tok)
 - `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~9997 tok)
 - `RegisterPage.kt` — init, setupMethodToggle, updateVisibility, ensureAtLeastOne, setupForm (~2970 tok)
+- `SheltersPage.kt` — init, search, renderShelters (~1474 tok)
+- `SterilizationLocationsPage.kt` — init, search, render, locationCard, init (~2832 tok)
 - `TemporalHomePage.kt` — init, search, displayResults, init, render (~2461 tok)
 
 ## infra/
