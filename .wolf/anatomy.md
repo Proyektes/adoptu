@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-04T17:19:36.319Z
-> Files: 972 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-04T17:38:40.507Z
+> Files: 973 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -1918,6 +1918,10 @@
 
 - `TestHttp.kt` — `java.net.http.HttpClient`-based replacement for Ktor's test `HttpClient`: `get/delete/post/postJson/postForm/put/putJson/putForm(url, cookie)` returning `HttpResponse<String>` (use `.statusCode()`/`.body()`), `loginAs(baseUrl, userId)` hitting the harness's built-in `/test/login/{userId}` route, and `buildMultipartBody(boundary, fields, files)` for multipart upload tests (~400 tok)
 - `TestServer.kt` — replaces Ktor's `testApplication{}`/`embeddedServer(Netty,...)`. `TestServer.start(configOverrides, modules, initDatabase, withTestLogin)` starts a real Helidon `WebServer` on a random port through the same `configureRouting` production path, against H2 (`MODE=PostgreSQL`). Always appends a `single { config }` Koin fallback so route files that eagerly resolve `AppConfig` (namely `authRoutes()`) don't crash when a test supplies its own narrow custom module (see bug-035); cleans up Koin via `stopKoin()` both on `TestServerHandle.stop()` and on any startup failure (~600 tok)
+
+## frontend/src/jsMain/kotlin/com/adoptu/frontend/
+
+- `I18n.kt` (~22656 tok)
 
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
 

@@ -339,6 +339,15 @@ private val englishTranslations = json(
         "accountNumber" to "Account Number",
         "currency" to "Currency",
         "errorLoadingShelters" to "Error loading shelters",
+        "pleaseSelectCountry" to "Please select a country",
+        "errorLoadingPhotographers" to "Error loading photographers",
+        "noPhotographersAvailable" to "No photographers available",
+        "requestPhotoSession" to "Request Photo Session",
+        "message" to "Message",
+        "sendRequest" to "Send Request",
+        "requestSentSuccessfully" to "Request sent successfully!",
+        "requestTo" to "Request to",
+        "enterMessage" to "Enter a message for {name}...",
     )
 
     private val spanishTranslations = json(
@@ -673,6 +682,15 @@ private val englishTranslations = json(
         "accountNumber" to "Número de cuenta",
         "currency" to "Moneda",
         "errorLoadingShelters" to "Error al cargar los refugios",
+        "pleaseSelectCountry" to "Por favor selecciona un país",
+        "errorLoadingPhotographers" to "Error al cargar los fotógrafos",
+        "noPhotographersAvailable" to "No hay fotógrafos disponibles",
+        "requestPhotoSession" to "Solicitar sesión de fotos",
+        "message" to "Mensaje",
+        "sendRequest" to "Enviar solicitud",
+        "requestSentSuccessfully" to "¡Solicitud enviada con éxito!",
+        "requestTo" to "Solicitar a",
+        "enterMessage" to "Escribe un mensaje para {name}...",
     )
 
     private val frenchTranslations = json(
@@ -1007,6 +1025,15 @@ private val englishTranslations = json(
         "accountNumber" to "Numéro de compte",
         "currency" to "Devise",
         "errorLoadingShelters" to "Erreur lors du chargement des refuges",
+        "pleaseSelectCountry" to "Veuillez sélectionner un pays",
+        "errorLoadingPhotographers" to "Erreur lors du chargement des photographes",
+        "noPhotographersAvailable" to "Aucun photographe disponible",
+        "requestPhotoSession" to "Demander une séance photo",
+        "message" to "Message",
+        "sendRequest" to "Envoyer la demande",
+        "requestSentSuccessfully" to "Demande envoyée avec succès !",
+        "requestTo" to "Demande à",
+        "enterMessage" to "Écrivez un message pour {name}...",
 )
 
 private val portugueseTranslations = json(
@@ -1341,6 +1368,15 @@ private val portugueseTranslations = json(
     "country.venezuela" to "Venezuela",
     "country.vietnam" to "Vietnã",
     "country.yemen" to "Iêmen",
+    "pleaseSelectCountry" to "Selecione um país",
+    "errorLoadingPhotographers" to "Erro ao carregar os fotógrafos",
+    "noPhotographersAvailable" to "Nenhum fotógrafo disponível",
+    "requestPhotoSession" to "Solicitar sessão de fotos",
+    "message" to "Mensagem",
+    "sendRequest" to "Enviar solicitação",
+    "requestSentSuccessfully" to "Solicitação enviada com sucesso!",
+    "requestTo" to "Solicitar a",
+    "enterMessage" to "Digite uma mensagem para {name}...",
 )
 
 private val chineseTranslations = json(
@@ -1675,6 +1711,15 @@ private val chineseTranslations = json(
     "accountNumber" to "账号",
     "currency" to "货币",
     "errorLoadingShelters" to "加载收容所时出错",
+    "pleaseSelectCountry" to "请选择一个国家",
+    "errorLoadingPhotographers" to "加载摄影师时出错",
+    "noPhotographersAvailable" to "暂无可用摄影师",
+    "requestPhotoSession" to "预约拍摄",
+    "message" to "留言",
+    "sendRequest" to "发送请求",
+    "requestSentSuccessfully" to "请求发送成功！",
+    "requestTo" to "请求对象",
+    "enterMessage" to "为{name}输入留言...",
 )
 
 @JsExport

@@ -1728,3 +1728,6 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 15:52 | Fixed missing i18n translations for photographers request flow (9 keys × 5 langs) | I18n.kt, common.js, common.js.map, buglog.json, cerebrum.md | fixed, rebuilt, committed | ~9000 |
+| 11:38 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | 13→11 lines | ~136 |
+| 11:38 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | 3→2 lines | ~28 |
