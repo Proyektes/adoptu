@@ -21,6 +21,7 @@ body {
   color: var(--text);
   min-height: 100vh;
   padding-top: 70px;
+  padding-bottom: 60px;
 }
 
 main {
@@ -71,7 +72,7 @@ main {
   font-weight: 500;
   color: var(--text);
 }
-.form-row input, .form-row select {
+.form-row input, .form-row select, .form-row textarea {
   width: 100%;
   padding: 0.5rem;
   border: 1px solid var(--border);
@@ -79,6 +80,12 @@ main {
   background: var(--bg);
   color: var(--text);
   box-sizing: border-box;
+}
+.form-row textarea {
+  font-family: inherit;
+  font-size: inherit;
+  resize: vertical;
+  min-height: 4.5rem;
 }
 .form-row input:disabled {
   color: lightgrey;
@@ -149,6 +156,13 @@ main {
 .message.success {
   background: #efe;
   color: #060;
+}
+
+.field-error {
+  color: #c00;
+  font-size: 0.85rem;
+  display: block;
+  margin-top: 0.25rem;
 }
 
 .checkbox-group {
@@ -401,6 +415,11 @@ footer {
   border-top: 1px solid var(--border);
   color: var(--text);
   font-size: 0.9rem;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
 }
 footer a {
   color: var(--accent);
@@ -616,7 +635,7 @@ footer span {
     align-items: stretch;
   }
   .location-search-form .location-search-country select,
-  .location-search-form .location-search-filters {
+.location-search-form .location-search-filters {
     width: 100%;
   }
   .location-search-form .location-search-filters {
@@ -659,3 +678,5 @@ footer span {
   margin-top: 1rem;
   width: 100%;
 }
+
+/*# sourceMappingURL=photographers.css.map */

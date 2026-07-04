@@ -76,6 +76,9 @@ class PhotographerRoutesE2ETest {
                 it[Users.username] = "rescuer@test.com"
                 it[Users.displayName] = "Test Rescuer"
                 it[Users.createdAt] = clock.now().toEpochMilliseconds()
+                // Verified so "POST profile activates photographer role" can publish -
+                // publishing now requires a verified account email.
+                it[Users.isEmailVerified] = true
             }
             UserActiveRoles.insert {
                 it[UserActiveRoles.userId] = 1

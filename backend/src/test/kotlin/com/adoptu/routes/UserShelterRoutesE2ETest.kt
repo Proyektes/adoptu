@@ -3,11 +3,16 @@ package com.adoptu.routes
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.UserShelters
 import com.adoptu.adapters.db.Users
+import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.adapters.db.repositories.UserShelterRepository
 import com.adoptu.dto.input.CreateUserShelterRequest
 import com.adoptu.dto.input.UpdateUserShelterRequest
+import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestDatabase
+import com.adoptu.ports.NotificationPort
+import com.adoptu.ports.UserRepositoryPort
 import com.adoptu.ports.UserShelterRepositoryPort
+import com.adoptu.services.ProfileEmailVerificationService
 import com.adoptu.services.UserShelterService
 import com.adoptu.testsupport.TestHttp
 import com.adoptu.testsupport.TestServer
@@ -30,8 +35,12 @@ class UserShelterRoutesE2ETest {
     private val testModules = listOf(
         module {
             single<Clock> { Clock.System }
+            single { MockNotificationAdapter() }
+            single<NotificationPort> { get<MockNotificationAdapter>() }
+            single<UserRepositoryPort> { UserRepository(get()) }
+            single { ProfileEmailVerificationService(get(), get(), get()) }
             single<UserShelterRepositoryPort> { UserShelterRepository(get()) }
-            single { UserShelterService(get()) }
+            single { UserShelterService(get(), get()) }
         }
     )
 

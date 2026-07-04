@@ -79,7 +79,7 @@ main {
         color: var(--text);
     }
 
-    input, select {
+    input, select, textarea {
         width: 100%;
         padding: 0.5rem;
         border: 1px solid var(--border);
@@ -87,6 +87,13 @@ main {
         background: var(--bg);
         color: var(--text);
         box-sizing: border-box;
+    }
+
+    textarea {
+        font-family: inherit;
+        font-size: inherit;
+        resize: vertical;
+        min-height: 4.5rem;
     }
 
     input:disabled {
@@ -165,6 +172,27 @@ main {
     &.success {
         background: #efe;
         color: #060;
+    }
+}
+
+.field-error {
+    color: #c00;
+    font-size: 0.85rem;
+    display: block;
+    margin-top: 0.25rem;
+}
+
+.field-hint {
+    color: #966400;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+
+    &:empty {
+        display: none;
+    }
+
+    &:not(:empty) {
+        display: block;
     }
 }
 

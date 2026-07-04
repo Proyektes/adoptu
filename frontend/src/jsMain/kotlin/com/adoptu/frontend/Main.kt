@@ -12,6 +12,7 @@ import com.adoptu.frontend.pages.MyPetsPageModule
 import com.adoptu.frontend.pages.PetDetailPageModule
 import com.adoptu.frontend.pages.PetFoodPageModule
 import com.adoptu.frontend.pages.PhotographersPageModule
+import com.adoptu.frontend.pages.ProfileEmailVerificationPageModule
 import com.adoptu.frontend.pages.ProfilePageModule
 import com.adoptu.frontend.pages.RegisterPageModule
 import com.adoptu.frontend.pages.ResetPasswordPageModule
@@ -61,6 +62,7 @@ fun main() {
                     path == "/reset-password" || path == "/reset-password/" -> ResetPasswordPageModule.init()
                     path == "/magic-link-login" || path == "/magic-link-login/" -> MagicLinkLoginPageModule.init()
                     path == "/verify-email-change" || path == "/verify-email-change/" -> EmailChangeVerificationPageModule.init()
+                    path == "/verify-profile-email" || path == "/verify-profile-email/" -> ProfileEmailVerificationPageModule.init()
                     else -> {}
                 }
             } catch (e: dynamic) {}

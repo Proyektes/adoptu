@@ -1742,3 +1742,164 @@
 | 11:54 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/Common.kt | 11→13 lines | ~163 |
 | 12:00 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/Common.kt | modified if() | ~407 |
 | 12:01 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/IndexPage.kt | modified initCountrySelect() | ~38 |
+| 12:13 | Session end: 13 writes across 7 files (I18n.kt, Application.kt, ApiClient.kt, Common.kt, CountryRoutes.kt) | 11 reads | ~30745 tok |
+| 12:18 | Session end: 13 writes across 7 files (I18n.kt, Application.kt, ApiClient.kt, Common.kt, CountryRoutes.kt) | 11 reads | ~30745 tok |
+| 12:20 | Session end: 13 writes across 7 files (I18n.kt, Application.kt, ApiClient.kt, Common.kt, CountryRoutes.kt) | 11 reads | ~30745 tok |
+| 12:22 | Session end: 13 writes across 7 files (I18n.kt, Application.kt, ApiClient.kt, Common.kt, CountryRoutes.kt) | 11 reads | ~30745 tok |
+
+## Session: 2026-07-04 12:23
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-04 12:25
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-04 12:27
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:29 | Edited backend/src/main/resources/static/css/sterilization.css | modified media() | ~56 |
+| 12:30 | Changed .location-list from single-column flex stack to 2-col CSS grid (1-col under 800px) so sterilization location cards show 2 per row | backend/src/main/resources/static/css/sterilization.css | done | ~600 |
+| 12:29 | Session end: 1 writes across 1 files (sterilization.css) | 2 reads | ~4878 tok |
+| 12:29 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | modified registerPassword() | ~117 |
+| 12:29 | Edited backend/src/main/scss/_base.scss | expanded (+7 lines) | ~106 |
+| 12:29 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | modified registerPassword() | ~84 |
+| 12:30 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | modified registerBoth() | ~76 |
+| 12:30 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | 4→4 lines | ~50 |
+| 12:30 | Edited backend/src/main/resources/static/css/sterilization.css | modified media() | ~56 |
+| 12:30 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | 4→4 lines | ~59 |
+
+## Session: 2026-07-04 12:30
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:35 | Fixed shelter-settings description textarea styling (`.form-row` selector missing `textarea`) | `.wolf/../backend/src/main/scss/_base.scss`, 7 compiled CSS files | Fixed, verified via compiled CSS + running server | ~15000 |
+
+## Session: 2026-07-04 12:32
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:34 | Edited backend/src/main/resources/static/css/style.css | CSS: font-size, display, margin-top | ~44 |
+| 12:34 | Created ../../.claude/jobs/e14108f5/tmp/shot.mjs | — | ~261 |
+| 12:34 | Edited backend/src/main/scss/_base.scss | CSS: font-size, display, margin-top | ~52 |
+| 12:35 | Edited ../../.claude/jobs/e14108f5/tmp/shot.mjs | 7→3 lines | ~35 |
+| 12:35 | Created .tmp_shot.mjs | — | ~205 |
+| 12:36 | Edited backend/src/main/kotlin/com/adoptu/pages/ProfilePage.kt | modified div() | ~118 |
+| 12:36 | Edited backend/src/main/scss/style.scss | expanded (+18 lines) | ~142 |
+| 12:36 | Verified 2-col grid live via headless Playwright (Mexico: 3 seeded locations) at 1280px and 375px; footer position:fixed regression spotted overlapping cards on mobile, flagged not fixed | backend/src/main/resources/static/css/sterilization.css | verified, unrelated bug flagged | ~2200 |
+| 12:36 | Session end: 7 writes across 6 files (style.css, shot.mjs, _base.scss, .tmp_shot.mjs, ProfilePage.kt) | 10 reads | ~6889 tok |
+| 12:37 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/ProfilePage.kt | 6→4 lines | ~36 |
+| 12:37 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/ProfilePage.kt | added optional chaining | ~243 |
+| 12:37 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/ProfilePage.kt | inline fix | ~25 |
+| 18:38 | Styled `.field-error` spans red (`color: #c00`) in _base.scss; recompiled 7 css files via vendored dart-sass so "Address is required" and other field validation messages now render in red across shelter/sterilization/photographer/temporal-home profile forms | backend/src/main/scss/_base.scss, 7 compiled css files | Fixed, verified via compiled CSS output | ~3k |
+| 12:38 | Session end: 10 writes across 6 files (style.css, shot.mjs, _base.scss, .tmp_shot.mjs, ProfilePage.kt) | 10 reads | ~17033 tok |
+| 12:38 | Fixed misleading "Error: verification email sent" message on duplicate registration attempts; removed hardcoded Error: prefix in RegisterPage.kt catch blocks (registerPasskey/registerPassword/registerBoth), rebuilt frontend + synced backend/build/resources, verified live via Playwright | frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | Fixed, verified in browser | ~55k |
+| 12:39 | Session end: 10 writes across 6 files (style.css, shot.mjs, _base.scss, .tmp_shot.mjs, ProfilePage.kt) | 10 reads | ~17033 tok |
+| 12:42 | Profile Save: on validation/API error, message now renders next to Save button (moved into new `.profile-header-actions` flex wrapper), auto-hides after 3s, and page scrolls (smooth) to the first non-empty `.field-error` (or the message itself as fallback) | backend/src/main/kotlin/com/adoptu/pages/ProfilePage.kt, backend/src/main/scss/style.scss, backend/src/main/resources/static/css/style.css, frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/ProfilePage.kt | Compiled clean (backend+frontend), webpack bundle rebuilt & verified via grep, live-served HTML/CSS checked via curl on ADOPTU_PORT=8090; browser-driven check blocked by Playwright MCP profile lock (another active session) | ~45k |
+| 12:44 | Session end: 10 writes across 6 files (style.css, shot.mjs, _base.scss, .tmp_shot.mjs, ProfilePage.kt) | 11 reads | ~19340 tok |
+| 12:54 | Session end: 10 writes across 6 files (style.css, shot.mjs, _base.scss, .tmp_shot.mjs, ProfilePage.kt) | 11 reads | ~19340 tok |
+| 12:55 | Session end: 10 writes across 6 files (style.css, shot.mjs, _base.scss, .tmp_shot.mjs, ProfilePage.kt) | 11 reads | ~19340 tok |
+| 12:55 | Session end: 10 writes across 6 files (style.css, shot.mjs, _base.scss, .tmp_shot.mjs, ProfilePage.kt) | 11 reads | ~19340 tok |
+| 12:56 | Session end: 10 writes across 6 files (style.css, shot.mjs, _base.scss, .tmp_shot.mjs, ProfilePage.kt) | 11 reads | ~19340 tok |
+
+## Session: 2026-07-04 12:57
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-04 12:58
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 13:19 | Edited backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt | added 1 condition(s) | ~78 |
+| 13:19 | Edited backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt | modified if() | ~112 |
+| 13:19 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | 5→5 lines | ~58 |
+| 13:19 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | 3→3 lines | ~30 |
+| 13:19 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | added optional chaining | ~175 |
+| 13:27 | Edited backend/src/main/kotlin/com/adoptu/adapters/db/Models.kt | modified Table() | ~540 |
+| 13:27 | Edited backend/src/main/kotlin/com/adoptu/adapters/db/Models.kt | modified Table() | ~219 |
+| 13:27 | Edited backend/src/main/kotlin/com/adoptu/adapters/db/DatabaseFactory.kt | 2→3 lines | ~26 |
+| 13:27 | Edited backend/src/test/kotlin/com/adoptu/mocks/TestDatabase.kt | 3→4 lines | ~47 |
+| 13:27 | Edited backend/src/test/kotlin/com/adoptu/mocks/TestDatabase.kt | 6→7 lines | ~70 |
+| 13:27 | Edited backend/src/test/kotlin/com/adoptu/mocks/TestDatabase.kt | 2→3 lines | ~46 |
+| 13:27 | Edited backend/src/main/kotlin/com/adoptu/dto/input/ShelterDto.kt | 13→14 lines | ~119 |
+| 13:28 | Edited backend/src/main/kotlin/com/adoptu/dto/input/SterilizationLocationDto.kt | 8→9 lines | ~67 |
+| 13:28 | Created backend/src/main/kotlin/com/adoptu/services/ProfileEmailVerificationService.kt | — | ~1732 |
+| 13:28 | Edited backend/src/main/kotlin/com/adoptu/ports/UserShelterRepositoryPort.kt | modified getByUserId() | ~135 |
+| 13:28 | Edited backend/src/main/kotlin/com/adoptu/ports/UserSterilizationLocationRepositoryPort.kt | modified getByUserId() | ~161 |
+| 13:28 | Edited backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserShelterRepository.kt | 3→4 lines | ~54 |
+| 13:29 | Edited backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserShelterRepository.kt | modified create() | ~1162 |
+| 13:29 | Edited backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserSterilizationLocationRepository.kt | 3→4 lines | ~68 |
+| 13:29 | Edited backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserSterilizationLocationRepository.kt | modified create() | ~1080 |
+| 13:30 | Edited backend/src/main/kotlin/com/adoptu/services/UserShelterService.kt | added optional chaining | ~692 |
+| 13:30 | Edited backend/src/main/kotlin/com/adoptu/services/UserSterilizationLocationService.kt | added optional chaining | ~657 |
+| 13:30 | Edited backend/src/main/kotlin/com/adoptu/routes/UserShelterRoutes.kt | 4→4 lines | ~59 |
+| 13:30 | Edited backend/src/main/kotlin/com/adoptu/routes/UserShelterRoutes.kt | 2→2 lines | ~45 |
+| 13:30 | Edited backend/src/main/kotlin/com/adoptu/routes/UserSterilizationLocationRoutes.kt | 4→4 lines | ~64 |
+| 13:30 | Edited backend/src/main/kotlin/com/adoptu/routes/UserSterilizationLocationRoutes.kt | 2→2 lines | ~49 |
+| 13:30 | Edited backend/src/main/kotlin/com/adoptu/di/AppModule.kt | 8→9 lines | ~226 |
+| 13:30 | Edited backend/src/main/kotlin/com/adoptu/routes/UsersRoutes.kt | added 2 import(s) | ~76 |
+| 13:31 | Edited backend/src/main/kotlin/com/adoptu/routes/UsersRoutes.kt | 4→5 lines | ~88 |
+| 13:31 | Edited backend/src/main/kotlin/com/adoptu/routes/UsersRoutes.kt | added 1 condition(s) | ~165 |
+| 13:31 | Edited backend/src/main/kotlin/com/adoptu/routes/UsersRoutes.kt | added 3 condition(s) | ~249 |
+| 13:31 | Edited backend/src/main/kotlin/com/adoptu/routes/UsersRoutes.kt | added 3 condition(s) | ~251 |
+| 13:31 | Edited backend/src/main/kotlin/com/adoptu/routes/UsersRoutes.kt | added 1 condition(s) | ~169 |
+| 13:31 | Edited backend/src/main/kotlin/com/adoptu/routes/PhotographerRoutes.kt | added 1 import(s) | ~52 |
+| 13:31 | Edited backend/src/main/kotlin/com/adoptu/routes/PhotographerRoutes.kt | 2→3 lines | ~51 |
+| 13:31 | Edited backend/src/main/kotlin/com/adoptu/routes/PhotographerRoutes.kt | added 1 condition(s) | ~159 |
+| 13:32 | Edited backend/src/main/kotlin/com/adoptu/routes/UsersRoutes.kt | added 2 condition(s) | ~266 |
+| 13:32 | Edited backend/src/main/kotlin/com/adoptu/pages/ForgotPasswordPage.kt | modified a() | ~335 |
+| 13:32 | Edited backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt | modified respondHtml() | ~106 |
+| 13:32 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AuthFlowPages.kt | added 2 condition(s) | ~371 |
+| 13:32 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/Main.kt | added 1 import(s) | ~47 |
+| 13:33 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/Main.kt | 2→3 lines | ~79 |
+| 13:33 | Edited backend/src/test/kotlin/com/adoptu/services/UserShelterServiceTest.kt | added 1 import(s) | ~32 |
+| 13:33 | Edited backend/src/test/kotlin/com/adoptu/services/UserShelterServiceTest.kt | 4→8 lines | ~110 |
+| 13:34 | Edited backend/src/test/kotlin/com/adoptu/services/UserSterilizationLocationServiceTest.kt | added 1 import(s) | ~32 |
+| 13:34 | Edited backend/src/test/kotlin/com/adoptu/services/UserSterilizationLocationServiceTest.kt | 4→8 lines | ~115 |
+| 13:34 | Edited backend/src/test/kotlin/com/adoptu/routes/UserShelterRoutesE2ETest.kt | added 3 import(s) | ~75 |
+| 13:35 | Edited backend/src/test/kotlin/com/adoptu/routes/UserShelterRoutesE2ETest.kt | 4→7 lines | ~101 |
+| 13:35 | Edited backend/src/test/kotlin/com/adoptu/routes/UserSterilizationLocationRoutesE2ETest.kt | added 3 import(s) | ~83 |
+| 13:35 | Edited backend/src/test/kotlin/com/adoptu/routes/UserSterilizationLocationRoutesE2ETest.kt | 4→7 lines | ~112 |
+| 13:36 | Edited backend/src/test/kotlin/com/adoptu/routes/UsersRoutesE2ETest.kt | added 1 import(s) | ~73 |
+| 13:36 | Edited backend/src/test/kotlin/com/adoptu/routes/UsersRoutesE2ETest.kt | 2→3 lines | ~55 |
+| 13:37 | Edited backend/src/test/kotlin/com/adoptu/routes/UsersRoutesE2ETest.kt | 6→10 lines | ~164 |
+| 13:37 | Edited backend/src/test/kotlin/com/adoptu/routes/PhotographerRoutesE2ETest.kt | 7→10 lines | ~139 |
+| 13:41 | Edited backend/src/main/kotlin/com/adoptu/routes/UsersRoutes.kt | isUserVerified() → getById() | ~183 |
+| 13:41 | Edited backend/src/main/kotlin/com/adoptu/routes/UsersRoutes.kt | isUserVerified() → getById() | ~187 |
+| 13:42 | Edited backend/src/main/kotlin/com/adoptu/routes/UsersRoutes.kt | isUserVerified() → getById() | ~256 |
+| 13:42 | Edited backend/src/main/kotlin/com/adoptu/routes/UsersRoutes.kt | isUserVerified() → getById() | ~258 |
+| 13:42 | Edited backend/src/main/kotlin/com/adoptu/routes/PhotographerRoutes.kt | added 1 condition(s) | ~123 |
+| 13:42 | Edited backend/src/test/kotlin/com/adoptu/adapters/db/DatabaseFactoryTest.kt | 3→4 lines | ~31 |
+| 13:42 | Edited backend/src/test/kotlin/com/adoptu/adapters/db/DatabaseFactoryTest.kt | 2→2 lines | ~28 |
+| 13:44 | Edited backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserRepository.kt | 5→6 lines | ~117 |
+| 13:51 | Edited backend/src/main/kotlin/com/adoptu/services/ProfileEmailVerificationService.kt | added 1 import(s) | ~87 |
+| 13:51 | Edited backend/src/main/kotlin/com/adoptu/services/ProfileEmailVerificationService.kt | modified ProfileEmailVerificationService() | ~63 |
+| 13:51 | Edited backend/src/main/kotlin/com/adoptu/services/ProfileEmailVerificationService.kt | added 1 condition(s) | ~111 |
+| 13:51 | Edited backend/src/main/kotlin/com/adoptu/services/UserShelterService.kt | 3→6 lines | ~90 |
+| 13:51 | Edited backend/src/main/kotlin/com/adoptu/services/UserShelterService.kt | added error handling | ~130 |
+| 13:51 | Edited backend/src/main/kotlin/com/adoptu/services/UserSterilizationLocationService.kt | 3→6 lines | ~94 |
+| 13:52 | Edited backend/src/main/kotlin/com/adoptu/services/UserSterilizationLocationService.kt | added error handling | ~132 |
+| 13:52 | Edited backend/src/main/kotlin/com/adoptu/di/AppModule.kt | inline fix | ~38 |
+| 13:52 | Edited backend/src/test/kotlin/com/adoptu/services/UserShelterServiceTest.kt | inline fix | ~36 |
+| 13:52 | Edited backend/src/test/kotlin/com/adoptu/services/UserShelterServiceTest.kt | added 1 import(s) | ~33 |
+| 13:52 | Edited backend/src/test/kotlin/com/adoptu/services/UserSterilizationLocationServiceTest.kt | added 1 import(s) | ~37 |
+| 13:52 | Edited backend/src/test/kotlin/com/adoptu/services/UserSterilizationLocationServiceTest.kt | inline fix | ~36 |
+| 13:52 | Edited backend/src/test/kotlin/com/adoptu/routes/UserShelterRoutesE2ETest.kt | 6→7 lines | ~118 |
+| 13:52 | Edited backend/src/test/kotlin/com/adoptu/routes/UserShelterRoutesE2ETest.kt | added 2 import(s) | ~120 |
+| 13:53 | Edited backend/src/test/kotlin/com/adoptu/routes/UserSterilizationLocationRoutesE2ETest.kt | added 2 import(s) | ~135 |
+| 13:53 | Edited backend/src/test/kotlin/com/adoptu/routes/UserSterilizationLocationRoutesE2ETest.kt | 6→7 lines | ~129 |
+| 13:53 | Edited backend/src/test/kotlin/com/adoptu/routes/UsersRoutesE2ETest.kt | inline fix | ~27 |
+| 13:53 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/ApiClient.kt | added error handling | ~123 |
+| 13:53 | Edited backend/src/main/kotlin/com/adoptu/pages/ProfilePage.kt | modified div() | ~83 |
+| 13:53 | Edited backend/src/main/kotlin/com/adoptu/pages/ProfilePage.kt | modified div() | ~88 |
+| 13:53 | Edited backend/src/main/scss/_base.scss | modified not() | ~76 |
+| 13:54 | Edited backend/src/main/resources/static/css/style.css | CSS: field-hint, field-hint | ~80 |
+| 13:54 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/ProfilePage.kt | added 1 condition(s) | ~252 |
+| 13:54 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/ProfilePage.kt | 7→8 lines | ~140 |
+| 13:58 | Session summary: non-rescuer registration now redirects to /profile (session set on register); publishing shelter/photographer/temporal-home/sterilization profiles now requires verified account email, plus shelter/sterilization contact-email verification (rejects emails owned by other accounts) via new ProfileEmailVerificationService + /verify-profile-email; profile page shows a pending-verification hint; fixed pre-existing bug where UserRepository.getById/getByEmail/getAllUsers never mapped isEmailVerified | RegisterPage.kt, AuthRoutes.kt, UsersRoutes.kt, PhotographerRoutes.kt, ProfileEmailVerificationService.kt, UserShelterService.kt, UserSterilizationLocationService.kt, UserRepository.kt, ProfilePage.kt (both) | all backend tests green (1084+ tests) | ~large |
+| 13:58 | Session end: 86 writes across 35 files (AuthRoutes.kt, RegisterPage.kt, Models.kt, DatabaseFactory.kt, TestDatabase.kt) | 40 reads | ~78499 tok |
+| 14:31 | Session end: 86 writes across 35 files (AuthRoutes.kt, RegisterPage.kt, Models.kt, DatabaseFactory.kt, TestDatabase.kt) | 41 reads | ~80984 tok |

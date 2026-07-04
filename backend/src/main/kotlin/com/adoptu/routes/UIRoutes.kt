@@ -187,6 +187,10 @@ fun HttpRules.uiRoutes() {
         val navParams = getNavParams(req.getSession())
         res.respondHtml(Status.OK_200) { emailChangeVerificationPage(navParams) }
     })
+    get("/verify-profile-email", Handler { req, res ->
+        val navParams = getNavParams(req.getSession())
+        res.respondHtml(Status.OK_200) { profileEmailVerificationPage(navParams) }
+    })
     get("/temporal-home/block/{temporalHomeId}", Handler { req, res ->
         val temporalHomeId = req.pathParam("temporalHomeId").toIntOrNull()
         val rescuerId = req.queryParam("rescuer")?.toIntOrNull()

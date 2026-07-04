@@ -24,7 +24,7 @@ fun HttpRules.userShelterRoutes() {
         runBlocking {
             val body = req.receiveJson<CreateUserShelterRequest>()
             try {
-                val shelter = service.create(session.userId, body)
+                val shelter = service.create(session.userId, session.email, session.displayName, body)
                 res.send(shelter)
             } catch (e: IllegalArgumentException) {
                 res.respondError(e.message ?: "Invalid request", 400)
@@ -52,7 +52,7 @@ fun HttpRules.userShelterRoutes() {
 
         runBlocking {
             val body = req.receiveJson<UpdateUserShelterRequest>()
-            res.respondData(service.update(session.userId, body))
+            res.respondData(service.update(session.userId, session.email, session.displayName, body))
         }
     })
 

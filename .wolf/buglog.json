@@ -48,6 +48,507 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-04T18:00:56.710Z"
+    },
+    {
+      "id": "bug-004",
+      "timestamp": "2026-07-04T18:29:07.453Z",
+      "error_message": "CSS fix: display",
+      "file": "backend/src/main/resources/static/css/sterilization.css",
+      "root_cause": "display: flex → grid",
+      "fix": "Changed display: flex → grid",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-04T18:30:25.584Z"
+    },
+    {
+      "id": "bug-005",
+      "timestamp": "2026-07-04T18:35:00.000Z",
+      "error_message": "Shelter settings description field is too small and doesn't match the visual style of the other fields",
+      "file": "backend/src/main/scss/_base.scss",
+      "root_cause": "Shared .form-row CSS rule in _base.scss only styled `input, select`, never `textarea` - the shelter-description/sterilization-description textareas fell back to unstyled browser defaults (no border-radius/background/color/border, wrong font, small default size) instead of matching sibling input fields.",
+      "fix": "Added `textarea` to the shared `.form-row input, select` selector and a dedicated `.form-row textarea` rule (font-family/font-size: inherit, resize: vertical, min-height: 4.5rem) in _base.scss, then recompiled the 7 top-level .scss files that import it (style, shelters, pet-food, temporal-home, sterilization, policy, photographers) via the vendored dart-sass binary.",
+      "tags": [
+        "css",
+        "scss",
+        "form-styling",
+        "shelter-settings",
+        "profile-page"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T18:35:00.000Z"
+    },
+    {
+      "id": "bug-006",
+      "timestamp": "2026-07-04T18:34:06.316Z",
+      "error_message": "CSS fix: color",
+      "file": "backend/src/main/resources/static/css/style.css",
+      "root_cause": "color: #060 → #c00",
+      "fix": "Changed color: #060 → #c00",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T18:34:06.316Z"
+    },
+    {
+      "id": "bug-007",
+      "timestamp": "2026-07-04T18:34:56.661Z",
+      "error_message": "CSS fix: color",
+      "file": "backend/src/main/scss/_base.scss",
+      "root_cause": "color: #060 → #c00",
+      "fix": "Changed color: #060 → #c00",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T18:34:56.661Z"
+    },
+    {
+      "id": "bug-008",
+      "timestamp": "2026-07-04T18:35:01.464Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../.claude/jobs/e14108f5/tmp/shot.mjs",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 7→3 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "mjs"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T18:35:01.464Z"
+    },
+    {
+      "id": "bug-009",
+      "timestamp": "2026-07-04T18:36:15.950Z",
+      "error_message": "CSS fix: display, justify-content",
+      "file": "backend/src/main/scss/style.scss",
+      "root_cause": "display: flex → none; justify-content: space-between → flex-end",
+      "fix": "Changed display: flex → none; justify-content: space-between → flex-end",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T18:36:15.950Z"
+    },
+    {
+      "id": "bug-010",
+      "timestamp": "2026-07-04T18:37:12.168Z",
+      "error_message": "Significant refactor of ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/ProfilePage.kt",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 6→4 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T18:37:12.168Z"
+    },
+    {
+      "id": "bug-011",
+      "timestamp": "2026-07-04T18:37:19.322Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/ProfilePage.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T18:37:19.323Z"
+    },
+    {
+      "id": "bug-012",
+      "timestamp": "2026-07-04T18:38:00.000Z",
+      "error_message": "POST /api/auth/registration-options 400 (Bad Request) at WebAuthn.kt:105",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt",
+      "root_cause": "Re-submitting the registration form with an email already in the system (e.g. testing multiple role/profile combos with the same test address) correctly returns HTTP 400 from AuthRoutes.kt with an informational message (\"email already registered\" or \"verification email sent. Check your inbox.\"). This is expected backend behavior, not a defect - but registerPasskey/registerPassword/registerBoth in RegisterPage.kt unconditionally prefixed every caught error with \"Error: \", so the informational message rendered as \"Error: verification email sent...\", making a normal duplicate-registration case look like a broken endpoint.",
+      "fix": "Removed the hardcoded \"Error: \" prefix from all three catch blocks in RegisterPage.kt (registerPasskey, registerPassword, registerBoth) so the backend's already-human-readable message is shown as-is. Verified live via Playwright: submitting the form twice with the same email now shows \"verification email sent. Check your inbox.\" instead of \"Error: verification email sent...\". Rebuilt via `:frontend:jsBrowserProductionWebpack` (which runs `copyJsToBackendResources`) and `:backend:processResources` to sync the compiled bundle into backend/build/resources/main.",
+      "tags": [
+        "webauthn",
+        "registration",
+        "ux",
+        "kt",
+        "frontend"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T18:38:00.000Z"
+    },
+    {
+      "id": "bug-013",
+      "timestamp": "2026-07-04T19:19:03.634Z",
+      "error_message": "Null/undefined access in ",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:19:03.634Z"
+    },
+    {
+      "id": "bug-014",
+      "timestamp": "2026-07-04T19:19:29.757Z",
+      "error_message": "Wrong reference: login should be postRegisterRedirect",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt",
+      "root_cause": "Used \"login\" instead of \"postRegisterRedirect\"",
+      "fix": "Changed login → postRegisterRedirect",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:19:29.757Z"
+    },
+    {
+      "id": "bug-015",
+      "timestamp": "2026-07-04T19:19:35.766Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:19:35.766Z"
+    },
+    {
+      "id": "bug-016",
+      "timestamp": "2026-07-04T19:27:45.942Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/test/kotlin/com/adoptu/mocks/TestDatabase.kt",
+      "root_cause": "Had \"DELETE FROM password_reset_tokens\"",
+      "fix": "Changed to \"DELETE FROM profile_email_verification_tokens\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:27:45.942Z"
+    },
+    {
+      "id": "bug-017",
+      "timestamp": "2026-07-04T19:30:02.267Z",
+      "error_message": "Null/undefined access in ",
+      "file": "backend/src/main/kotlin/com/adoptu/services/UserShelterService.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:30:02.267Z"
+    },
+    {
+      "id": "bug-018",
+      "timestamp": "2026-07-04T19:30:20.566Z",
+      "error_message": "Null/undefined access in ",
+      "file": "backend/src/main/kotlin/com/adoptu/services/UserSterilizationLocationService.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:30:20.566Z"
+    },
+    {
+      "id": "bug-019",
+      "timestamp": "2026-07-04T19:30:30.935Z",
+      "error_message": "Wrong reference: body should be session",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/UserShelterRoutes.kt",
+      "root_cause": "Used \"body\" instead of \"session\"",
+      "fix": "Changed body → session",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:30:30.935Z"
+    },
+    {
+      "id": "bug-020",
+      "timestamp": "2026-07-04T19:30:40.659Z",
+      "error_message": "Wrong reference: body should be session",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/UserSterilizationLocationRoutes.kt",
+      "root_cause": "Used \"body\" instead of \"session\"",
+      "fix": "Changed body → session",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:30:40.659Z"
+    },
+    {
+      "id": "bug-021",
+      "timestamp": "2026-07-04T19:32:56.683Z",
+      "error_message": "Wrong reference: ProfilePageModule should be ProfileEmailVerificationPageModule",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/Main.kt",
+      "root_cause": "Used \"ProfilePageModule\" instead of \"ProfileEmailVerificationPageModule\"",
+      "fix": "Changed ProfilePageModule → ProfileEmailVerificationPageModule",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-04T19:33:02.013Z"
+    },
+    {
+      "id": "bug-022",
+      "timestamp": "2026-07-04T19:42:31.618Z",
+      "error_message": "Wrong condition in logic",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/PhotographerRoutes.kt",
+      "root_cause": "Condition was: if (body.activate && !userService.isUserVerified(sessi)",
+      "fix": "Changed to: if (body.activate)",
+      "tags": [
+        "auto-detected",
+        "logic-fix",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:42:31.618Z"
+    },
+    {
+      "id": "bug-023",
+      "timestamp": "2026-07-04T19:42:54.503Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/test/kotlin/com/adoptu/adapters/db/DatabaseFactoryTest.kt",
+      "root_cause": "Had `DatabaseFactory has 19 tables`",
+      "fix": "Changed to `DatabaseFactory has 22 tables`",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:42:54.503Z"
+    },
+    {
+      "id": "bug-024",
+      "timestamp": "2026-07-04T19:51:29.476Z",
+      "error_message": "Null/undefined access in ",
+      "file": "backend/src/main/kotlin/com/adoptu/services/ProfileEmailVerificationService.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:51:29.476Z"
+    },
+    {
+      "id": "bug-025",
+      "timestamp": "2026-07-04T19:51:39.796Z",
+      "error_message": "Wrong return value",
+      "file": "backend/src/main/kotlin/com/adoptu/services/UserShelterService.kt",
+      "root_cause": "Was returning: (result as? ServiceResult.Success)?.data ?: throw ",
+      "fix": "Now returns: when (val result = update(userId, accountEmail, di",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:51:39.796Z"
+    },
+    {
+      "id": "bug-026",
+      "timestamp": "2026-07-04T19:51:45.395Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "backend/src/main/kotlin/com/adoptu/services/UserShelterService.kt",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:51:45.395Z"
+    },
+    {
+      "id": "bug-027",
+      "timestamp": "2026-07-04T19:51:56.371Z",
+      "error_message": "Wrong return value",
+      "file": "backend/src/main/kotlin/com/adoptu/services/UserSterilizationLocationService.kt",
+      "root_cause": "Was returning: (result as? ServiceResult.Success)?.data ?: throw ",
+      "fix": "Now returns: when (val result = update(userId, accountEmail, di",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:51:56.371Z"
+    },
+    {
+      "id": "bug-028",
+      "timestamp": "2026-07-04T19:52:02.188Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "backend/src/main/kotlin/com/adoptu/services/UserSterilizationLocationService.kt",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:52:02.188Z"
+    },
+    {
+      "id": "bug-029",
+      "timestamp": "2026-07-04T19:52:17.872Z",
+      "error_message": "Wrong reference: MockNotificationAdapter should be UserRepository",
+      "file": "backend/src/test/kotlin/com/adoptu/services/UserShelterServiceTest.kt",
+      "root_cause": "Used \"MockNotificationAdapter\" instead of \"UserRepository\"",
+      "fix": "Changed MockNotificationAdapter → UserRepository",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-04T19:52:23.985Z"
+    },
+    {
+      "id": "bug-030",
+      "timestamp": "2026-07-04T19:52:33.974Z",
+      "error_message": "Wrong reference: UserSterilizationLocationRepository should be UserRepository",
+      "file": "backend/src/test/kotlin/com/adoptu/services/UserSterilizationLocationServiceTest.kt",
+      "root_cause": "Used \"UserSterilizationLocationRepository\" instead of \"UserRepository\"",
+      "fix": "Changed UserSterilizationLocationRepository → UserRepository",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-04T19:52:39.860Z"
+    },
+    {
+      "id": "bug-031",
+      "timestamp": "2026-07-04T19:53:35.278Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/ApiClient.kt",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:53:35.278Z"
+    },
+    {
+      "id": "bug-032",
+      "timestamp": "2026-07-04T19:53:56.132Z",
+      "error_message": "CSS fix: color",
+      "file": "backend/src/main/scss/_base.scss",
+      "root_cause": "color: #c00 → #966400",
+      "fix": "Changed color: #c00 → #966400",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:53:56.132Z"
+    },
+    {
+      "id": "bug-033",
+      "timestamp": "2026-07-04T19:54:20.047Z",
+      "error_message": "CSS fix: color",
+      "file": "backend/src/main/resources/static/css/style.css",
+      "root_cause": "color: #c00 → #966400",
+      "fix": "Changed color: #c00 → #966400",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:54:20.047Z"
+    },
+    {
+      "id": "bug-034",
+      "timestamp": "2026-07-04T19:44:00.000Z",
+      "error_message": "New email-verification gate on profile publishing returned 403 for test users that had isEmailVerified=true in the DB; new '404 for nonexistent session user' activation tests also regressed to 403",
+      "file": "backend/src/main/kotlin/com/adoptu/adapters/db/repositories/UserRepository.kt",
+      "root_cause": "UserRepository.getById()/getByEmail()/getAllUsers() built UserDto without mapping user[Users.isEmailVerified], so isEmailVerified silently defaulted to false for every caller of getById/getByEmail/getAllUsers (the /api/auth/me endpoint was unaffected since it calls webAuthnService.isUserVerified() -> a separate direct-query repository method). Separately, the activation-gate check was written before the existing-user lookup, so a nonexistent session user hit the verification 403 instead of falling through to the existing 404.",
+      "fix": "Added isEmailVerified = user[Users.isEmailVerified] to all three UserDto(...) construction sites in UserRepository.kt. Reordered the publish-gate checks in UsersRoutes.kt/PhotographerRoutes.kt to fetch-and-404-check the user first via userService.getById(), then check existing.isEmailVerified, instead of calling the (previously broken) isUserVerified() convenience method before existence was confirmed.",
+      "tags": [
+        "email-verification",
+        "user-repository",
+        "dto-mapping",
+        "profile-publishing"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T19:44:00.000Z"
     }
   ]
 }

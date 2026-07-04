@@ -172,3 +172,32 @@ object EmailChangeVerificationPageModule {
         }
     }
 }
+
+@JsExport
+@JsName("ProfileEmailVerificationPage")
+object ProfileEmailVerificationPageModule {
+    fun init() {
+        val params = js("new URLSearchParams(window.location.search)")
+        val token = params.get("token") as? String
+        val msg = document.getElementById("message")
+        if (token == null) {
+            msg?.className = "message error"
+            msg?.textContent = "Invalid or missing token."
+            return
+        }
+        window.asDynamic().fetch("/api/users/verify-profile-email?token=" + window.asDynamic().encodeURIComponent(token)).then { res: dynamic ->
+            res.json().then { result: dynamic ->
+                if (result.success == true) {
+                    msg?.className = "message success"
+                    msg?.textContent = result.message?.toString() ?: "Email verified successfully!"
+                } else {
+                    msg?.className = "message error"
+                    msg?.textContent = result.message?.toString() ?: "Failed to verify email. The link may be invalid or expired."
+                }
+            }
+        }.catch { _: dynamic ->
+            msg?.className = "message error"
+            msg?.textContent = "Failed to verify email."
+        }
+    }
+}

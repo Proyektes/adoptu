@@ -34,6 +34,7 @@ class UserShelterRepository(private val clock: Clock) : UserShelterRepositoryPor
             zip = row[UserShelters.zip],
             phone = row[UserShelters.phone],
             email = row[UserShelters.email],
+            emailVerified = row[UserShelters.emailVerified],
             website = row[UserShelters.website],
             fiscalId = row[UserShelters.fiscalId],
             bankName = row[UserShelters.bankName],
@@ -56,7 +57,7 @@ class UserShelterRepository(private val clock: Clock) : UserShelterRepositoryPor
         }
     }
 
-    override suspend fun create(userId: Int, request: CreateUserShelterRequest): UserShelterDto {
+    override suspend fun create(userId: Int, request: CreateUserShelterRequest, emailVerified: Boolean): UserShelterDto {
         val now = clock.now().toEpochMilliseconds()
         val parsedCountry = Country.fromDisplayName(request.country)
             ?: throw IllegalArgumentException("Invalid country: ${request.country}")
@@ -73,6 +74,7 @@ class UserShelterRepository(private val clock: Clock) : UserShelterRepositoryPor
                     it[UserShelters.zip] = request.zip
                     it[UserShelters.phone] = request.phone
                     it[UserShelters.email] = request.email
+                    it[UserShelters.emailVerified] = emailVerified
                     it[UserShelters.website] = request.website
                     it[UserShelters.fiscalId] = request.fiscalId
                     it[UserShelters.bankName] = request.bankName
@@ -97,6 +99,7 @@ class UserShelterRepository(private val clock: Clock) : UserShelterRepositoryPor
                     zip = request.zip,
                     phone = request.phone,
                     email = request.email,
+                    emailVerified = emailVerified,
                     website = request.website,
                     fiscalId = request.fiscalId,
                     bankName = request.bankName,
@@ -112,7 +115,7 @@ class UserShelterRepository(private val clock: Clock) : UserShelterRepositoryPor
         }
     }
 
-    override suspend fun update(userId: Int, request: UpdateUserShelterRequest): UserShelterDto? {
+    override suspend fun update(userId: Int, request: UpdateUserShelterRequest, emailVerifiedOverride: Boolean?): UserShelterDto? {
         val now = clock.now().toEpochMilliseconds()
         return withContext(dbDispatcher) {
             transaction {
@@ -131,6 +134,7 @@ class UserShelterRepository(private val clock: Clock) : UserShelterRepositoryPor
                     request.zip?.let { row[UserShelters.zip] = it }
                     request.phone?.let { row[UserShelters.phone] = it }
                     request.email?.let { row[UserShelters.email] = it }
+                    emailVerifiedOverride?.let { row[UserShelters.emailVerified] = it }
                     request.website?.let { row[UserShelters.website] = it }
                     request.fiscalId?.let { row[UserShelters.fiscalId] = it }
                     request.bankName?.let { row[UserShelters.bankName] = it }

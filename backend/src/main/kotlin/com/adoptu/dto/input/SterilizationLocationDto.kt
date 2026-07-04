@@ -79,6 +79,7 @@ data class UserSterilizationLocationDto(
     val zip: String? = null,
     val phone: String? = null,
     val email: String? = null,
+    val emailVerified: Boolean = false,
     val website: String? = null,
     val description: String? = null,
     val createdAt: Long

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-04T18:01:13.878Z
-> Files: 977 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-04T19:54:40.418Z
+> Files: 1013 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -19,6 +19,10 @@
 
 - `migrate_country.sql` (~554 tok)
 
+## ../../.claude/jobs/e14108f5/tmp/
+
+- `shot.mjs` — Declares browser (~205 tok)
+
 ## ../../.claude/plans/
 
 - `enumerated-yawning-cloud.md` — Country enum as single source of truth (~1699 tok)
@@ -32,6 +36,7 @@
 
 - `.dockerignore` — Docker ignore rules (~22 tok)
 - `.gitignore` — Git ignore rules (~246 tok)
+- `.tmp_shot.mjs` — Declares browser (~205 tok)
 - `AGENTS.md` — Adopt-U - Agent Guidelines (~1284 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~2307 tok)
 - `buildspec.yml` — CodeBuild spec: logs into ECR, builds/tags/pushes the image, emits imagedefinitions.json for ECS deploy (~520 tok)
@@ -1831,7 +1836,8 @@
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/
 
-- `Models.kt` (~3434 tok)
+- `DatabaseFactory.kt` — init, createDefaultAdmin (~1434 tok)
+- `Models.kt` (~3667 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/ (canonical)
 
@@ -1843,7 +1849,9 @@
 ## backend/src/main/kotlin/com/adoptu/adapters/db/repositories/
 
 - `PetRepository.kt` — PetRepositoryImpl: rowToPetDto, getPetImages, getAll, getAllUnfiltered (~4397 tok)
-- `UserRepository.kt` — UserRepository: getActiveRolesForUser, getById, getByEmail, getAllUsers (~6264 tok)
+- `UserRepository.kt` — UserRepository: getActiveRolesForUser, getById, getByEmail, getAllUsers (~6321 tok)
+- `UserShelterRepository.kt` — UserShelterRepository: rowToDto, getByUserId, create, update (~2389 tok)
+- `UserSterilizationLocationRepository.kt` — UserSterilizationLocationRepository: rowToDto, getByUserId, create, update (~2202 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/repositories/ (canonical)
 
@@ -1856,15 +1864,22 @@
 
 - `AppConfig.kt` — drop-in replacement for Ktor's `ApplicationConfig` (same `propertyOrNull(path)?.getString()`/`property(path).getString()`/`.getList()` shape), backed by `com.typesafe.config.Config` directly. `AppConfig.load()` reads `application.conf` unchanged; `AppConfig.fromMap(Map<String,Any>)` is the test-only equivalent of Ktor's `MapApplicationConfig` (~200 tok)
 
+## backend/src/main/kotlin/com/adoptu/di/
+
+- `AppModule.kt` — appModule, getOrigins, createImageStorageAdapter (~1150 tok)
+
 ## backend/src/main/kotlin/com/adoptu/dto/input/
 
 - `PetDto.kt` — Data class: Gender (~1025 tok)
+- `ShelterDto.kt` — Data class: ShelterDto (~1093 tok)
+- `SterilizationLocationDto.kt` — Data class: SterilizationLocationDto (~803 tok)
 - `UserDto.kt` — Data class: UserRole (~1119 tok)
 
 ## backend/src/main/kotlin/com/adoptu/pages/
 
+- `ForgotPasswordPage.kt` — HTML, HTML, HTML, HTML, HTML (~1164 tok)
 - `PetsPage.kt` — HTML (~644 tok)
-- `ProfilePage.kt` — HTML (~4822 tok)
+- `ProfilePage.kt` — HTML (~4878 tok)
 
 ## backend/src/main/kotlin/com/adoptu/pages/ (canonical)
 
@@ -1874,10 +1889,18 @@
 
 - `PetRepositoryPort.kt` — getAll, getAllUnfiltered, getById, create, update (~682 tok)
 - `UserRepositoryPort.kt` — getById, getByEmail, getAllUsers, getPhotographers, getRescuers (~614 tok)
+- `UserShelterRepositoryPort.kt` — getByUserId, create, update, delete, search (~182 tok)
+- `UserSterilizationLocationRepositoryPort.kt` — getByUserId, create, update, delete, search (~219 tok)
 
 ## backend/src/main/kotlin/com/adoptu/routes/
 
+- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~6777 tok)
 - `CountryRoutes.kt` — HttpRules, regionFromLocale (~320 tok)
+- `PhotographerRoutes.kt` — HttpRules, validateUser (~2385 tok)
+- `UIRoutes.kt` — Data class: NavParams (~2431 tok)
+- `UserShelterRoutes.kt` — HttpRules (~747 tok)
+- `UsersRoutes.kt` — Data class: UpdateProfileRequest (~4298 tok)
+- `UserSterilizationLocationRoutes.kt` — HttpRules (~801 tok)
 
 ## backend/src/main/kotlin/com/adoptu/routes/ (ported Ktor Route DSL → Helidon HttpRules/Handler, helidon-nima-migration worktree)
 
@@ -1887,7 +1910,10 @@
 ## backend/src/main/kotlin/com/adoptu/services/
 
 - `PetService.kt` — PetService: getAll, getMine, getById, create (~3030 tok)
+- `ProfileEmailVerificationService.kt` — Shelter and sterilization-location profiles carry their own public "contact email", (~1823 tok)
 - `UserService.kt` — UserService: getById, getByEmail, getAllUsers, getRescuers (~892 tok)
+- `UserShelterService.kt` — UserShelterService: getByUserId, create, update, delete (~993 tok)
+- `UserSterilizationLocationService.kt` — UserSterilizationLocationService: getByUserId, create, update, delete (~976 tok)
 
 ## backend/src/main/kotlin/com/adoptu/web/ (helidon-nima-migration worktree — replaces the deleted `plugins/` package)
 
@@ -1904,6 +1930,11 @@
 - `native-image.properties` — resource includes for static/js/css assets + ~30 logback classes requiring --initialize-at-build-time (Netty's own build-time-init classes transitively reach the app's live LoggerContext) (~300 tok)
 - `reachability-metadata.json` — agent-traced reflection/resource config from hitting real routes (pages, static assets, password-login/crypto path) against live Postgres with -agentlib:native-image-agent (~2000 tok)
 
+## backend/src/main/resources/static/css/
+
+- `sterilization.css` — Styles: 90 rules, 8 vars (~3731 tok)
+- `style.css` — Styles: 93 rules, 8 vars (~6463 tok)
+
 ## backend/src/main/resources/static/js/
 
 - `api.js` — Declares api (~2504 tok)
@@ -1911,12 +1942,31 @@
 - `my-pets.js` — API routes: GET (2 endpoints) (~4244 tok)
 - `profile.js` — load: loadPhotographer, loadTemporalHome, loadShelter, loadSterilization (~9709 tok)
 
+## backend/src/main/scss/
+
+- `_base.scss` — Styles: 15 rules, 8 vars (~1200 tok)
+- `style.scss` — Styles: 50 rules (~2843 tok)
+
+## backend/src/test/kotlin/com/adoptu/adapters/db/
+
+- `DatabaseFactoryTest.kt` — Declares DatabaseFactoryTest (~3382 tok)
+
+## backend/src/test/kotlin/com/adoptu/mocks/
+
+- `TestDatabase.kt` — initH2, clearAllData (~976 tok)
+
 ## backend/src/test/kotlin/com/adoptu/routes/
 
+- `PhotographerRoutesE2ETest.kt` — E2E tests for [photographerRoutes]. (~7449 tok)
+- `UserShelterRoutesE2ETest.kt` — UserShelterRoutesE2ETest: setup, createTestUsers, startServer, createShelterInDb (~3814 tok)
+- `UsersRoutesE2ETest.kt` — Verbatim port of the old Ktor test's inline `module { ... }` block of mocked adapters. (~11108 tok)
+- `UserSterilizationLocationRoutesE2ETest.kt` — UserSterilizationLocationRoutesE2ETest: setup, createTestUsers, createLocationInDb (~4359 tok)
 
 ## backend/src/test/kotlin/com/adoptu/services/
 
 - `PetServiceTest.kt` — PetServiceTest: setup (~7228 tok)
+- `UserShelterServiceTest.kt` — UserShelterServiceTest: setup (~4859 tok)
+- `UserSterilizationLocationServiceTest.kt` — UserSterilizationLocationServiceTest: setup (~4764 tok)
 
 ## backend/src/test/kotlin/com/adoptu/testsupport/ (helidon-nima-migration worktree)
 
@@ -1925,13 +1975,17 @@
 
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/
 
-- `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~2523 tok)
+- `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~2600 tok)
 - `Common.kt` — NodeList, onCountryChange, initI18n, initDropdowns, checkProfileCompletion (~1820 tok)
 - `I18n.kt` (~22656 tok)
+- `Main.kt` — main (~1191 tok)
 
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
 
+- `AuthFlowPages.kt` — init, submit, init, tokenFromUrl, submit (~2350 tok)
 - `IndexPage.kt` — init, loadPets, updateCountryHint, showEmptyState, hideEmptyState (~2198 tok)
+- `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~9997 tok)
+- `RegisterPage.kt` — init, setupMethodToggle, updateVisibility, ensureAtLeastOne, setupForm (~2970 tok)
 - `TemporalHomePage.kt` — init, search, displayResults, init, render (~2461 tok)
 
 ## infra/

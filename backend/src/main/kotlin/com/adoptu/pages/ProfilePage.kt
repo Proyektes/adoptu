@@ -13,9 +13,11 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
         main {
             div(classes = "profile-header card-bg sticky-section") {
                 h1 { attributes["data-i18n"] = "profile"; +"Profile" }
-                button(classes = "btn", type = ButtonType.button) { id = "save-profile-btn"; attributes["data-i18n"] = "save"; +"Save" }
+                div(classes = "profile-header-actions") {
+                    div(classes = "message") { id = "message"; +"" }
+                    button(classes = "btn", type = ButtonType.button) { id = "save-profile-btn"; attributes["data-i18n"] = "save"; +"Save" }
+                }
             }
-            div(classes = "message") { id = "message"; +"" }
 
             div(classes = "card-bg profile-section") {
                 h2 { attributes["data-i18n"] = "accountSettings"; +"Account Settings" }
@@ -123,6 +125,7 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
                 div(classes = "form-row") {
                     label { htmlFor = "shelter-email"; attributes["data-i18n"] = "email"; +"Email" }
                     input(InputType.email) { id = "shelter-email" }
+                    span(classes = "field-hint") { id = "shelter-email-status" }
                 }
                 div(classes = "form-row") {
                     label { htmlFor = "shelter-website"; attributes["data-i18n"] = "website"; +"Website" }
@@ -175,6 +178,7 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
                 div(classes = "form-row") {
                     label { htmlFor = "sterilization-email"; attributes["data-i18n"] = "email"; +"Email" }
                     input(InputType.email) { id = "sterilization-email" }
+                    span(classes = "field-hint") { id = "sterilization-email-status" }
                 }
                 div(classes = "form-row") {
                     label { htmlFor = "sterilization-website"; attributes["data-i18n"] = "website"; +"Website" }

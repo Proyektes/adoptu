@@ -71,6 +71,22 @@ object EmailChangeTokens : Table("email_change_tokens") {
     override val primaryKey = PrimaryKey(id)
 }
 
+// Verifies the standalone "contact email" field on a self-service provider profile
+// (shelter, sterilization location) when it differs from the account's own login
+// email — that field is shown publicly, so it must be proven ownable before the
+// profile can be activated, same as the account email itself.
+object ProfileEmailVerificationTokens : Table("profile_email_verification_tokens") {
+    val id = integer("id").autoIncrement()
+    val userId = integer("user_id").references(Users.id)
+    val profileType = varchar("profile_type", 20)
+    val email = varchar("email", 255)
+    val token = varchar("token", 64)
+    val expiresAt = long("expires_at")
+    val createdAt = long("created_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
 object EmailVerificationAttempts : Table("email_verification_attempts") {
     val id = integer("id").autoIncrement()
     val userId = integer("user_id").references(Users.id)
@@ -274,6 +290,7 @@ object UserShelters : Table("user_shelters") {
     val zip = varchar("zip", 20).nullable()
     val phone = varchar("phone", 50).nullable()
     val email = varchar("email", 255).nullable()
+    val emailVerified = bool("email_verified").default(false)
     val website = varchar("website", 500).nullable()
     val fiscalId = varchar("fiscal_id", 100).nullable()
     val bankName = varchar("bank_name", 255).nullable()
@@ -299,6 +316,7 @@ object UserSterilizationLocations : Table("user_sterilization_locations") {
     val zip = varchar("zip", 20).nullable()
     val phone = varchar("phone", 50).nullable()
     val email = varchar("email", 255).nullable()
+    val emailVerified = bool("email_verified").default(false)
     val website = varchar("website", 500).nullable()
     val description = text("description").nullable()
     val createdAt = long("created_at")

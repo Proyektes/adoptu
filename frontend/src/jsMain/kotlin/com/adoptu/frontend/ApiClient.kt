@@ -21,7 +21,13 @@ fun apiFetch(path: String, init: dynamic = null): Promise<dynamic> {
             val r = res.unsafeCast<dynamic>()
             if (!r.ok) {
                 r.text().then { text ->
-                    throw js("new Error('Request failed: ' + text)")
+                    val message = try {
+                        JSON.parse<dynamic>(text.unsafeCast<String>()).error?.unsafeCast<String>()
+                            ?: "Request failed: $text"
+                    } catch (e: dynamic) {
+                        "Request failed: $text"
+                    }
+                    throw js("new Error(message)")
                 }
             } else {
                 r.json().then<dynamic> { json -> json }

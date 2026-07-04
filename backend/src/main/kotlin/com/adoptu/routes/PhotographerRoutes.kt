@@ -8,6 +8,7 @@ import com.adoptu.dto.input.UpdatePhotographyRequestRequest
 import com.adoptu.dto.input.UserDto
 import com.adoptu.services.PhotographerService
 import com.adoptu.services.ServiceResult
+import com.adoptu.services.UserService
 import com.adoptu.services.validation.PhotographersValidationService
 import com.adoptu.web.Deps
 import com.adoptu.web.getSession
@@ -29,6 +30,7 @@ import org.koin.core.component.inject
 fun HttpRules.photographerRoutes() {
     val photographerService by Deps.inject<PhotographerService>()
     val validationService by Deps.inject<PhotographersValidationService>()
+    val userService by Deps.inject<UserService>()
 
     fun validateUser(req: ServerRequest): ServiceResult<UserDto> = runBlocking {
         val sessionResult = validationService.validateSession(req.getSession())
@@ -62,6 +64,12 @@ fun HttpRules.photographerRoutes() {
             val session = (sessionResult as ServiceResult.Success).data
 
             val body = req.receiveJson<RoleActivationRequest>()
+            if (body.activate) {
+                val existing = userService.getById(session.userId) ?: return@runBlocking res.respondNotFound()
+                if (!existing.isEmailVerified) {
+                    return@runBlocking res.respondError("Please verify your account email before publishing this profile", 403)
+                }
+            }
             val user = if (body.activate) {
                 photographerService.activatePhotographerProfile(session.userId)
             } else {

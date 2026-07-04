@@ -24,7 +24,7 @@ fun HttpRules.userSterilizationLocationRoutes() {
         runBlocking {
             val body = req.receiveJson<CreateUserSterilizationLocationRequest>()
             try {
-                val location = service.create(session.userId, body)
+                val location = service.create(session.userId, session.email, session.displayName, body)
                 res.send(location)
             } catch (e: IllegalArgumentException) {
                 res.respondError(e.message ?: "Invalid request", 400)
@@ -52,7 +52,7 @@ fun HttpRules.userSterilizationLocationRoutes() {
 
         runBlocking {
             val body = req.receiveJson<UpdateUserSterilizationLocationRequest>()
-            res.respondData(service.update(session.userId, body))
+            res.respondData(service.update(session.userId, session.email, session.displayName, body))
         }
     })
 

@@ -102,3 +102,23 @@ fun HTML.emailChangeVerificationPage(navParams: NavParams = NavParams()) {
         commonScripts(navParams.isLoggedIn)
     }
 }
+
+fun HTML.profileEmailVerificationPage(navParams: NavParams = NavParams()) {
+    commonHead("Verify Contact Email - Adopt-U")
+    body {
+        header {
+            a("/") { commonLogo() }
+            nav { commonNav(navParams.isLoggedIn, navParams.isAdmin, navParams.isRescuerOrAdmin, navParams.isTemporalHomeOrAdmin) }
+        }
+        main {
+            div {
+                id = "auth-form"
+                classes = setOf("auth-form")
+                h1 { +"Verify Contact Email" }
+                p { id = "message"; +"Verifying..." }
+            }
+        }
+        footer()
+        commonScripts(navParams.isLoggedIn)
+    }
+}

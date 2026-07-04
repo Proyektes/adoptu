@@ -21,6 +21,7 @@ import com.adoptu.services.EmailChangeService
 import com.adoptu.services.PasswordService
 import com.adoptu.services.PetService
 import com.adoptu.services.PhotographerService
+import com.adoptu.services.ProfileEmailVerificationService
 import com.adoptu.services.UserService
 import com.adoptu.services.auth.WebAuthnService
 import com.adoptu.testsupport.TestHttp
@@ -76,6 +77,10 @@ class UsersRoutesE2ETest {
                     it[Users.username] = "adopter@test.com"
                     it[Users.displayName] = "Test Adopter"
                     it[Users.createdAt] = clock.now().toEpochMilliseconds()
+                    // Verified so the temporal-home/photographer/shelter/sterilization
+                    // "activates when authenticated" tests below can publish a profile -
+                    // publishing now requires a verified account email.
+                    it[Users.isEmailVerified] = true
                 } get Users.id
                 UserActiveRoles.insert {
                     it[UserActiveRoles.userId] = adopterId
@@ -136,6 +141,7 @@ class UsersRoutesE2ETest {
             single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
             single { PhotographerService(get(), get(), get(), get()) }
             single { UserService(get()) }
+            single { ProfileEmailVerificationService(get(), get(), get(), "http://localhost:80") }
             single { PetService(get(), get(), get(), get()) }
             single { PasswordService(get(), get(), get(), "http://localhost:80") }
             single { EmailChangeService(get(), get(), get(), "http://localhost:80") }

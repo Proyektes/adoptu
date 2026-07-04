@@ -95,6 +95,9 @@ fun HttpRules.authRoutes() {
             }
 
             val result = webAuthnService.verifyAndRegister(email, displayName, effectiveRoles, registrationResponse, language)
+            if (result != null) {
+                res.setSession(SessionUser(result.userId, email, displayName))
+            }
             processResult(res, result)
         }
     })
@@ -125,6 +128,7 @@ fun HttpRules.authRoutes() {
 
             val result = webAuthnService.registerWithPassword(email, displayName, effectiveRoles, encryptedPassword)
             if (result != null) {
+                res.setSession(SessionUser(result.userId, email, displayName))
                 res.send(RegistrationResponse(success = true, message = "Registration successful. Please check your email to verify your account.", emailVerificationSent = result.emailSent))
             } else {
                 res.respondError("Registration failed")

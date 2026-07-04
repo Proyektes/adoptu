@@ -34,6 +34,7 @@ class UserSterilizationLocationRepository(private val clock: Clock) : UserSteril
             zip = row[UserSterilizationLocations.zip],
             phone = row[UserSterilizationLocations.phone],
             email = row[UserSterilizationLocations.email],
+            emailVerified = row[UserSterilizationLocations.emailVerified],
             website = row[UserSterilizationLocations.website],
             description = row[UserSterilizationLocations.description],
             createdAt = row[UserSterilizationLocations.createdAt]
@@ -49,7 +50,7 @@ class UserSterilizationLocationRepository(private val clock: Clock) : UserSteril
         }
     }
 
-    override suspend fun create(userId: Int, request: CreateUserSterilizationLocationRequest): UserSterilizationLocationDto {
+    override suspend fun create(userId: Int, request: CreateUserSterilizationLocationRequest, emailVerified: Boolean): UserSterilizationLocationDto {
         val now = clock.now().toEpochMilliseconds()
         val parsedCountry = Country.fromDisplayName(request.country)
             ?: throw IllegalArgumentException("Invalid country: ${request.country}")
@@ -66,6 +67,7 @@ class UserSterilizationLocationRepository(private val clock: Clock) : UserSteril
                     it[UserSterilizationLocations.zip] = request.zip
                     it[UserSterilizationLocations.phone] = request.phone
                     it[UserSterilizationLocations.email] = request.email
+                    it[UserSterilizationLocations.emailVerified] = emailVerified
                     it[UserSterilizationLocations.website] = request.website
                     it[UserSterilizationLocations.description] = request.description
                     it[UserSterilizationLocations.createdAt] = now
@@ -83,6 +85,7 @@ class UserSterilizationLocationRepository(private val clock: Clock) : UserSteril
                     zip = request.zip,
                     phone = request.phone,
                     email = request.email,
+                    emailVerified = emailVerified,
                     website = request.website,
                     description = request.description,
                     createdAt = now
@@ -91,7 +94,7 @@ class UserSterilizationLocationRepository(private val clock: Clock) : UserSteril
         }
     }
 
-    override suspend fun update(userId: Int, request: UpdateUserSterilizationLocationRequest): UserSterilizationLocationDto? {
+    override suspend fun update(userId: Int, request: UpdateUserSterilizationLocationRequest, emailVerifiedOverride: Boolean?): UserSterilizationLocationDto? {
         val now = clock.now().toEpochMilliseconds()
         return withContext(dbDispatcher) {
             transaction {
@@ -111,6 +114,7 @@ class UserSterilizationLocationRepository(private val clock: Clock) : UserSteril
                     request.zip?.let { row[UserSterilizationLocations.zip] = it }
                     request.phone?.let { row[UserSterilizationLocations.phone] = it }
                     request.email?.let { row[UserSterilizationLocations.email] = it }
+                    emailVerifiedOverride?.let { row[UserSterilizationLocations.emailVerified] = it }
                     request.website?.let { row[UserSterilizationLocations.website] = it }
                     request.description?.let { row[UserSterilizationLocations.description] = it }
                     row[UserSterilizationLocations.updatedAt] = now

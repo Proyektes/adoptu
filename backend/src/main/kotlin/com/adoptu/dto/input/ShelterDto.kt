@@ -87,6 +87,7 @@ data class UserShelterDto(
     val zip: String? = null,
     val phone: String? = null,
     val email: String? = null,
+    val emailVerified: Boolean = false,
     val website: String? = null,
     val fiscalId: String? = null,
     val bankName: String? = null,

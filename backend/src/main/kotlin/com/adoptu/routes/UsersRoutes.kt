@@ -10,7 +10,9 @@ import com.adoptu.dto.output.VerificationResponse
 import com.adoptu.services.EmailChangeService
 import com.adoptu.services.PasswordService
 import com.adoptu.services.PhotographerService
+import com.adoptu.services.ProfileEmailVerificationService
 import com.adoptu.services.UserService
+import com.adoptu.services.VerifiableProfileType
 import com.adoptu.services.validation.ValidationConstants
 import com.adoptu.web.Deps
 import com.adoptu.web.SuccessResponse
@@ -43,6 +45,7 @@ fun HttpRules.usersRoutes() {
     val photographerService by Deps.inject<PhotographerService>()
     val passwordService by Deps.inject<PasswordService>()
     val emailChangeService by Deps.inject<EmailChangeService>()
+    val profileEmailVerificationService by Deps.inject<ProfileEmailVerificationService>()
 
     post("/api/users/accept-terms", Handler { req, res ->
         val session = req.getSession() ?: return@Handler res.respondUnauthorized()
@@ -114,6 +117,12 @@ fun HttpRules.usersRoutes() {
 
         runBlocking {
             val body = req.receiveJson<RoleActivationRequest>()
+            if (body.activate) {
+                val existing = userService.getById(session.userId) ?: return@runBlocking res.respondNotFound()
+                if (!existing.isEmailVerified) {
+                    return@runBlocking res.respondError("Please verify your account email before publishing this profile", 403)
+                }
+            }
             val user = if (body.activate) {
                 userService.activateTemporalHomeProfile(session.userId)
             } else {
@@ -141,6 +150,12 @@ fun HttpRules.usersRoutes() {
 
         runBlocking {
             val body = req.receiveJson<RoleActivationRequest>()
+            if (body.activate) {
+                val existing = userService.getById(session.userId) ?: return@runBlocking res.respondNotFound()
+                if (!existing.isEmailVerified) {
+                    return@runBlocking res.respondError("Please verify your account email before publishing this profile", 403)
+                }
+            }
             val user = if (body.activate) {
                 photographerService.activatePhotographerProfile(session.userId)
             } else {
@@ -156,6 +171,15 @@ fun HttpRules.usersRoutes() {
 
         runBlocking {
             val body = req.receiveJson<RoleActivationRequest>()
+            if (body.activate) {
+                val existing = userService.getById(session.userId) ?: return@runBlocking res.respondNotFound()
+                if (!existing.isEmailVerified) {
+                    return@runBlocking res.respondError("Please verify your account email before publishing this profile", 403)
+                }
+                if (!profileEmailVerificationService.isProfileEmailVerified(VerifiableProfileType.SHELTER, session.userId)) {
+                    return@runBlocking res.respondError("Please verify your shelter's contact email before publishing this profile", 403)
+                }
+            }
             val user = if (body.activate) {
                 userService.activateShelterProfile(session.userId)
             } else {
@@ -171,6 +195,15 @@ fun HttpRules.usersRoutes() {
 
         runBlocking {
             val body = req.receiveJson<RoleActivationRequest>()
+            if (body.activate) {
+                val existing = userService.getById(session.userId) ?: return@runBlocking res.respondNotFound()
+                if (!existing.isEmailVerified) {
+                    return@runBlocking res.respondError("Please verify your account email before publishing this profile", 403)
+                }
+                if (!profileEmailVerificationService.isProfileEmailVerified(VerifiableProfileType.STERILIZATION, session.userId)) {
+                    return@runBlocking res.respondError("Please verify your contact email before publishing this profile", 403)
+                }
+            }
             val user = if (body.activate) {
                 userService.activateSterilizationProfile(session.userId)
             } else {
@@ -254,6 +287,21 @@ fun HttpRules.usersRoutes() {
             res.send(VerificationResponse(success = true, message = "Email changed successfully"))
         } else {
             res.send(VerificationResponse(success = false, message = "Failed to change email. Token may be invalid or expired."))
+        }
+    })
+
+    get("/api/users/verify-profile-email", Handler { req, res ->
+        val token = req.queryParam("token")
+        if (token.isNullOrBlank()) {
+            res.respondError("Token is required", 400)
+            return@Handler
+        }
+
+        val success = runBlocking { profileEmailVerificationService.verifyToken(token) }
+        if (success) {
+            res.send(VerificationResponse(success = true, message = "Contact email verified successfully"))
+        } else {
+            res.send(VerificationResponse(success = false, message = "Failed to verify email. The link may be invalid or expired."))
         }
     })
 }

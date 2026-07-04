@@ -2,9 +2,11 @@ package com.adoptu.services
 
 import com.adoptu.adapters.db.UserSterilizationLocations
 import com.adoptu.adapters.db.Users
+import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.adapters.db.repositories.UserSterilizationLocationRepository
 import com.adoptu.dto.input.CreateUserSterilizationLocationRequest
 import com.adoptu.dto.input.UpdateUserSterilizationLocationRequest
+import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestClock
 import com.adoptu.mocks.TestDatabase
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -31,8 +33,12 @@ class UserSterilizationLocationServiceTest {
     fun setup() {
         TestDatabase.initH2()
         val repository = UserSterilizationLocationRepository(clock)
-        userSterilizationLocationService = UserSterilizationLocationService(repository)
+        val profileEmailVerificationService = ProfileEmailVerificationService(UserRepository(clock), MockNotificationAdapter(), clock)
+        userSterilizationLocationService = UserSterilizationLocationService(repository, profileEmailVerificationService)
     }
+
+    private val accountEmail = "account@test.com"
+    private val displayName = "Test User"
 
     @Test
     fun `getByUserId returns null when no location exists`() = runBlocking {
@@ -77,7 +83,7 @@ class UserSterilizationLocationServiceTest {
             description = "A great veterinary clinic"
         )
 
-        val result = userSterilizationLocationService.create(userId, request)
+        val result = userSterilizationLocationService.create(userId, accountEmail, displayName, request)
 
         assertEquals(userId, result.userId)
         assertEquals("Carol's Vet Clinic", result.name)
@@ -108,7 +114,7 @@ class UserSterilizationLocationServiceTest {
             address = "456 Oak Ave"
         )
 
-        val result = userSterilizationLocationService.create(userId, request)
+        val result = userSterilizationLocationService.create(userId, accountEmail, displayName, request)
 
         assertEquals(userId, result.userId)
         assertEquals("Minimal Clinic", result.name)
@@ -129,7 +135,7 @@ class UserSterilizationLocationServiceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            userSterilizationLocationService.create(userId, request)
+            userSterilizationLocationService.create(userId, accountEmail, displayName, request)
         }
         assertEquals("Name is required", exception.message)
         Unit
@@ -146,7 +152,7 @@ class UserSterilizationLocationServiceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            userSterilizationLocationService.create(userId, request)
+            userSterilizationLocationService.create(userId, accountEmail, displayName, request)
         }
         assertEquals("Country is required", exception.message)
         Unit
@@ -163,7 +169,7 @@ class UserSterilizationLocationServiceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            userSterilizationLocationService.create(userId, request)
+            userSterilizationLocationService.create(userId, accountEmail, displayName, request)
         }
         assertEquals("City is required", exception.message)
         Unit
@@ -180,7 +186,7 @@ class UserSterilizationLocationServiceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            userSterilizationLocationService.create(userId, request)
+            userSterilizationLocationService.create(userId, accountEmail, displayName, request)
         }
         assertEquals("Address is required", exception.message)
         Unit
@@ -204,10 +210,10 @@ class UserSterilizationLocationServiceTest {
             address = "456 Queen St"
         )
 
-        val firstResult = userSterilizationLocationService.create(userId, firstRequest)
+        val firstResult = userSterilizationLocationService.create(userId, accountEmail, displayName, firstRequest)
         assertEquals("First Clinic", firstResult.name)
 
-        val secondResult = userSterilizationLocationService.create(userId, secondRequest)
+        val secondResult = userSterilizationLocationService.create(userId, accountEmail, displayName, secondRequest)
 
         assertEquals(userId, secondResult.userId)
         assertEquals("Second Clinic", secondResult.name)
@@ -231,7 +237,7 @@ class UserSterilizationLocationServiceTest {
         val userId = createTestUser("judy")
         createTestUserLocation(userId, name = "Old Name", country = "United States", state = "NY", city = "New York")
 
-        val result = userSterilizationLocationService.update(userId, UpdateUserSterilizationLocationRequest(
+        val result = userSterilizationLocationService.update(userId, accountEmail, displayName, UpdateUserSterilizationLocationRequest(
             name = "Updated Name",
             city = "Brooklyn"
         ))
@@ -248,7 +254,7 @@ class UserSterilizationLocationServiceTest {
     fun `update returns not found for user without location`() = runBlocking {
         val userId = createTestUser("kevin")
 
-        val result = userSterilizationLocationService.update(userId, UpdateUserSterilizationLocationRequest(name = "New Name"))
+        val result = userSterilizationLocationService.update(userId, accountEmail, displayName, UpdateUserSterilizationLocationRequest(name = "New Name"))
 
         assertTrue(result is ServiceResult.NotFound)
         Unit
@@ -262,7 +268,7 @@ class UserSterilizationLocationServiceTest {
             phone = "555-0000", email = "old@test.com"
         )
 
-        val result = userSterilizationLocationService.update(userId, UpdateUserSterilizationLocationRequest(name = "Updated"))
+        val result = userSterilizationLocationService.update(userId, accountEmail, displayName, UpdateUserSterilizationLocationRequest(name = "Updated"))
 
         assertTrue(result is ServiceResult.Success)
         val updated = result.data
