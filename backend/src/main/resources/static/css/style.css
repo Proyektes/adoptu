@@ -1266,7 +1266,7 @@ form input:-webkit-autofill:active {
   width: 100%;
 }
 
-.fee-amount-wide {
+.fee-input-group input.fee-amount-wide {
   flex: 3;
 }
 
