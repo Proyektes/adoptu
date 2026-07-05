@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-05T16:32:50.063Z
-> Files: 1042 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-05T18:15:12.651Z
+> Files: 1049 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -1904,7 +1904,7 @@
 
 ## backend/src/main/kotlin/com/adoptu/routes/
 
-- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~6777 tok)
+- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~6860 tok)
 - `CountryRoutes.kt` — HttpRules, regionFromLocale (~320 tok)
 - `PhotographerRoutes.kt` — HttpRules, validateUser (~2385 tok)
 - `ShelterRoutes.kt` — HttpRules, HttpRules (~1627 tok)
@@ -1933,6 +1933,10 @@
 
 - `TemporalHomesValidationService.kt` — TemporalHomesValidationService: validateSession, validateUserById, validateUser, validateId (~1127 tok)
 
+## backend/src/main/kotlin/com/adoptu/web/
+
+- `Sessions.kt` — Replaces Ktor's `install(Sessions) { cookie<SessionUser>(...) }` (plugins/Sessions.kt). (~917 tok)
+
 ## backend/src/main/kotlin/com/adoptu/web/ (helidon-nima-migration worktree — replaces the deleted `plugins/` package)
 
 - `AccessLogFilter.kt` — Helidon `Filter` logging `METHOD path → status (ms)`, skipping `/health`/`/static`/`/css`/`/js`, replacing `plugins/Logging.kt`'s `CallLogging` (~150 tok)
@@ -1945,7 +1949,7 @@
 
 ## backend/src/main/resources/
 
-- `application.conf` — Declares STRING (~753 tok)
+- `application.conf` — Declares STRING (~833 tok)
 
 ## backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/ (graalvm-native-image worktree)
 
@@ -1980,6 +1984,7 @@
 
 ## backend/src/test/kotlin/com/adoptu/routes/
 
+- `AuthRoutesE2ETest.kt` — Covers endpoints/branches in AuthRoutes.kt not already exercised by (~13770 tok)
 - `PhotographerRoutesE2ETest.kt` — E2E tests for [photographerRoutes]. (~7449 tok)
 - `ShelterRoutesE2ETest.kt` — ShelterRoutesE2ETest: setup, createTestUsers, createShelterInDb (~5411 tok)
 - `SterilizationLocationRoutesE2ETest.kt` — SterilizationLocationRoutesE2ETest: setup, createTestUsers, testModules, startServer (~6084 tok)
@@ -2005,6 +2010,10 @@
 - `TestHttp.kt` — `java.net.http.HttpClient`-based replacement for Ktor's test `HttpClient`: `get/delete/post/postJson/postForm/put/putJson/putForm(url, cookie)` returning `HttpResponse<String>` (use `.statusCode()`/`.body()`), `loginAs(baseUrl, userId)` hitting the harness's built-in `/test/login/{userId}` route, and `buildMultipartBody(boundary, fields, files)` for multipart upload tests (~400 tok)
 - `TestServer.kt` — replaces Ktor's `testApplication{}`/`embeddedServer(Netty,...)`. `TestServer.start(configOverrides, modules, initDatabase, withTestLogin)` starts a real Helidon `WebServer` on a random port through the same `configureRouting` production path, against H2 (`MODE=PostgreSQL`). Always appends a `single { config }` Koin fallback so route files that eagerly resolve `AppConfig` (namely `authRoutes()`) don't crash when a test supplies its own narrow custom module (see bug-035); cleans up Koin via `stopKoin()` both on `TestServerHandle.stop()` and on any startup failure (~600 tok)
 
+## backend/src/test/resources/
+
+- `application.conf` (~213 tok)
+
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/
 
 - `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~2600 tok)
@@ -2016,21 +2025,28 @@
 
 - `AuthFlowPages.kt` — init, submit, init, tokenFromUrl, submit (~2350 tok)
 - `IndexPage.kt` — init, loadPets, updateCountryHint, showEmptyState, hideEmptyState (~2198 tok)
+- `LoginPage.kt` — init, setupEnterKeySubmit, showRegistrationNotification, getPublicKey, setupPasskeyButton (~1758 tok)
 - `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~9997 tok)
 - `RegisterPage.kt` — init, setupMethodToggle, updateVisibility, ensureAtLeastOne, setupForm (~2970 tok)
 - `SheltersPage.kt` — init, search, renderShelters (~1474 tok)
 - `SterilizationLocationsPage.kt` — init, search, render, locationCard, init (~2832 tok)
 - `TemporalHomePage.kt` — init, search, displayResults, init, render (~2447 tok)
 
+## frontend/webpack.config.d/
+
+- `disable-concat-modules.js` (~28 tok)
+
 ## infra/
 
 - `cloudfront.tf` (~2999 tok)
 - `data.tf` — Pre-existing resources this stack plugs into. These are read-only lookups; (~490 tok)
 - `dns_updater.tf` — Keeps backend.<domain> (route53.tf) pointed at whichever ECS task is (~986 tok)
-- `ecs.tf` — New, dedicated cluster rather than reusing the account's existing (~1289 tok)
+- `ecs.tf` — New, dedicated cluster rather than reusing the account's existing (~1316 tok)
+- `iam.tf` (~816 tok)
 - `network.tf` — Dual-stack subnets for ECS Fargate tasks. Originally built pure (~619 tok)
 - `rds.tf` — Declares allocated_storage (~542 tok)
 - `route53.tf` — Only the records tied to resources this stack manages. The zone's other (~1137 tok)
+- `secrets.tf` — RDS master ("postgres" superuser) password - generated, never typed in by (~441 tok)
 - `security_groups.tf` (~746 tok)
 - `terraform.tfvars` (~107 tok)
 - `variables.tf` — Declares can (~1629 tok)

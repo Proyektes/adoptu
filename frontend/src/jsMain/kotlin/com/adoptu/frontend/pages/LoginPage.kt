@@ -22,7 +22,23 @@ object LoginPageModule {
             setupMagicLinkButton()
             setupPasswordLoginButton()
             setupTabSwitching()
+            setupEnterKeySubmit("magic-email", "magic-link-btn")
+            setupEnterKeySubmit("password-email", "password-login-btn")
+            setupEnterKeySubmit("password-password", "password-login-btn")
         })
+    }
+
+    private fun setupEnterKeySubmit(inputId: String, buttonId: String) {
+        val input = document.getElementById(inputId)
+        val btn = document.getElementById(buttonId) as? HTMLElement
+        if (input != null && btn != null) {
+            input.addEventListener("keydown", { e: dynamic ->
+                if (e.key == "Enter") {
+                    e.preventDefault()
+                    btn.click()
+                }
+            })
+        }
     }
 
     private fun showRegistrationNotification() {

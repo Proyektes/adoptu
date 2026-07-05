@@ -7,7 +7,7 @@
       "error_message": "Wrong reference: petsRoutes should be countryRoutes",
       "file": "backend/src/main/kotlin/com/adoptu/Application.kt",
       "root_cause": "Used \"petsRoutes\" instead of \"countryRoutes\"",
-      "fix": "Changed petsRoutes → countryRoutes",
+      "fix": "Changed petsRoutes \u2192 countryRoutes",
       "tags": [
         "auto-detected",
         "wrong-reference",
@@ -23,7 +23,7 @@
       "error_message": "Significant refactor of ",
       "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/Common.kt",
       "root_cause": "4 lines replaced/restructured",
-      "fix": "Rewrote 26→40 lines (4 removed)",
+      "fix": "Rewrote 26\u219240 lines (4 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -39,7 +39,7 @@
       "error_message": "Significant refactor of ",
       "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/Common.kt",
       "root_cause": "5 lines replaced/restructured",
-      "fix": "Rewrote 23→31 lines (5 removed)",
+      "fix": "Rewrote 23\u219231 lines (5 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -54,8 +54,8 @@
       "timestamp": "2026-07-04T18:29:07.453Z",
       "error_message": "CSS fix: display",
       "file": "backend/src/main/resources/static/css/sterilization.css",
-      "root_cause": "display: flex → grid",
-      "fix": "Changed display: flex → grid",
+      "root_cause": "display: flex \u2192 grid",
+      "fix": "Changed display: flex \u2192 grid",
       "tags": [
         "auto-detected",
         "style-fix",
@@ -88,8 +88,8 @@
       "timestamp": "2026-07-04T18:34:06.316Z",
       "error_message": "CSS fix: color",
       "file": "backend/src/main/resources/static/css/style.css",
-      "root_cause": "color: #060 → #c00",
-      "fix": "Changed color: #060 → #c00",
+      "root_cause": "color: #060 \u2192 #c00",
+      "fix": "Changed color: #060 \u2192 #c00",
       "tags": [
         "auto-detected",
         "style-fix",
@@ -104,8 +104,8 @@
       "timestamp": "2026-07-04T18:34:56.661Z",
       "error_message": "CSS fix: color",
       "file": "backend/src/main/scss/_base.scss",
-      "root_cause": "color: #060 → #c00",
-      "fix": "Changed color: #060 → #c00",
+      "root_cause": "color: #060 \u2192 #c00",
+      "fix": "Changed color: #060 \u2192 #c00",
       "tags": [
         "auto-detected",
         "style-fix",
@@ -121,7 +121,7 @@
       "error_message": "Significant refactor of ",
       "file": "../../.claude/jobs/e14108f5/tmp/shot.mjs",
       "root_cause": "5 lines replaced/restructured",
-      "fix": "Rewrote 7→3 lines (5 removed)",
+      "fix": "Rewrote 7\u21923 lines (5 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -136,8 +136,8 @@
       "timestamp": "2026-07-04T18:36:15.950Z",
       "error_message": "CSS fix: display, justify-content",
       "file": "backend/src/main/scss/style.scss",
-      "root_cause": "display: flex → none; justify-content: space-between → flex-end",
-      "fix": "Changed display: flex → none; justify-content: space-between → flex-end",
+      "root_cause": "display: flex \u2192 none; justify-content: space-between \u2192 flex-end",
+      "fix": "Changed display: flex \u2192 none; justify-content: space-between \u2192 flex-end",
       "tags": [
         "auto-detected",
         "style-fix",
@@ -153,7 +153,7 @@
       "error_message": "Significant refactor of ",
       "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/ProfilePage.kt",
       "root_cause": "3 lines replaced/restructured",
-      "fix": "Rewrote 6→4 lines (3 removed)",
+      "fix": "Rewrote 6\u21924 lines (3 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -219,7 +219,7 @@
       "error_message": "Wrong reference: login should be postRegisterRedirect",
       "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt",
       "root_cause": "Used \"login\" instead of \"postRegisterRedirect\"",
-      "fix": "Changed login → postRegisterRedirect",
+      "fix": "Changed login \u2192 postRegisterRedirect",
       "tags": [
         "auto-detected",
         "wrong-reference",
@@ -299,7 +299,7 @@
       "error_message": "Wrong reference: body should be session",
       "file": "backend/src/main/kotlin/com/adoptu/routes/UserShelterRoutes.kt",
       "root_cause": "Used \"body\" instead of \"session\"",
-      "fix": "Changed body → session",
+      "fix": "Changed body \u2192 session",
       "tags": [
         "auto-detected",
         "wrong-reference",
@@ -315,7 +315,7 @@
       "error_message": "Wrong reference: body should be session",
       "file": "backend/src/main/kotlin/com/adoptu/routes/UserSterilizationLocationRoutes.kt",
       "root_cause": "Used \"body\" instead of \"session\"",
-      "fix": "Changed body → session",
+      "fix": "Changed body \u2192 session",
       "tags": [
         "auto-detected",
         "wrong-reference",
@@ -331,7 +331,7 @@
       "error_message": "Wrong reference: ProfilePageModule should be ProfileEmailVerificationPageModule",
       "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/Main.kt",
       "root_cause": "Used \"ProfilePageModule\" instead of \"ProfileEmailVerificationPageModule\"",
-      "fix": "Changed ProfilePageModule → ProfileEmailVerificationPageModule",
+      "fix": "Changed ProfilePageModule \u2192 ProfileEmailVerificationPageModule",
       "tags": [
         "auto-detected",
         "wrong-reference",
@@ -410,7 +410,7 @@
       "timestamp": "2026-07-04T19:51:45.395Z",
       "error_message": "Missing error handling in unknown",
       "file": "backend/src/main/kotlin/com/adoptu/services/UserShelterService.kt",
-      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "root_cause": "Code path had no error handling \u2014 exceptions would propagate uncaught",
       "fix": "Added try/catch block",
       "tags": [
         "auto-detected",
@@ -442,7 +442,7 @@
       "timestamp": "2026-07-04T19:52:02.188Z",
       "error_message": "Missing error handling in unknown",
       "file": "backend/src/main/kotlin/com/adoptu/services/UserSterilizationLocationService.kt",
-      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "root_cause": "Code path had no error handling \u2014 exceptions would propagate uncaught",
       "fix": "Added try/catch block",
       "tags": [
         "auto-detected",
@@ -459,7 +459,7 @@
       "error_message": "Wrong reference: MockNotificationAdapter should be UserRepository",
       "file": "backend/src/test/kotlin/com/adoptu/services/UserShelterServiceTest.kt",
       "root_cause": "Used \"MockNotificationAdapter\" instead of \"UserRepository\"",
-      "fix": "Changed MockNotificationAdapter → UserRepository",
+      "fix": "Changed MockNotificationAdapter \u2192 UserRepository",
       "tags": [
         "auto-detected",
         "wrong-reference",
@@ -475,7 +475,7 @@
       "error_message": "Wrong reference: UserSterilizationLocationRepository should be UserRepository",
       "file": "backend/src/test/kotlin/com/adoptu/services/UserSterilizationLocationServiceTest.kt",
       "root_cause": "Used \"UserSterilizationLocationRepository\" instead of \"UserRepository\"",
-      "fix": "Changed UserSterilizationLocationRepository → UserRepository",
+      "fix": "Changed UserSterilizationLocationRepository \u2192 UserRepository",
       "tags": [
         "auto-detected",
         "wrong-reference",
@@ -490,7 +490,7 @@
       "timestamp": "2026-07-04T19:53:35.278Z",
       "error_message": "Missing error handling in unknown",
       "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/ApiClient.kt",
-      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "root_cause": "Code path had no error handling \u2014 exceptions would propagate uncaught",
       "fix": "Added try/catch block",
       "tags": [
         "auto-detected",
@@ -506,8 +506,8 @@
       "timestamp": "2026-07-04T19:53:56.132Z",
       "error_message": "CSS fix: color",
       "file": "backend/src/main/scss/_base.scss",
-      "root_cause": "color: #c00 → #966400",
-      "fix": "Changed color: #c00 → #966400",
+      "root_cause": "color: #c00 \u2192 #966400",
+      "fix": "Changed color: #c00 \u2192 #966400",
       "tags": [
         "auto-detected",
         "style-fix",
@@ -522,8 +522,8 @@
       "timestamp": "2026-07-04T19:54:20.047Z",
       "error_message": "CSS fix: color",
       "file": "backend/src/main/resources/static/css/style.css",
-      "root_cause": "color: #c00 → #966400",
-      "fix": "Changed color: #c00 → #966400",
+      "root_cause": "color: #c00 \u2192 #966400",
+      "fix": "Changed color: #c00 \u2192 #966400",
       "tags": [
         "auto-detected",
         "style-fix",
@@ -555,8 +555,8 @@
       "timestamp": "2026-07-04T20:41:12.716Z",
       "error_message": "CSS fix: display, gap",
       "file": "backend/src/main/scss/sterilization.scss",
-      "root_cause": "display: flex → grid; gap: 1rem → 1.5rem",
-      "fix": "Changed display: flex → grid; gap: 1rem → 1.5rem",
+      "root_cause": "display: flex \u2192 grid; gap: 1rem \u2192 1.5rem",
+      "fix": "Changed display: flex \u2192 grid; gap: 1rem \u2192 1.5rem",
       "tags": [
         "auto-detected",
         "style-fix",
@@ -572,7 +572,7 @@
       "error_message": "Significant refactor of ",
       "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SterilizationLocationsPage.kt",
       "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 13→25 lines (2 removed)",
+      "fix": "Rewrote 13\u219225 lines (2 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -603,7 +603,7 @@
       "timestamp": "2026-07-04T20:51:51.276Z",
       "error_message": "Missing error handling in unknown",
       "file": "backend/src/test/kotlin/com/adoptu/routes/UserShelterRoutesE2ETest.kt",
-      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "root_cause": "Code path had no error handling \u2014 exceptions would propagate uncaught",
       "fix": "Added try/catch block",
       "tags": [
         "auto-detected",
@@ -619,7 +619,7 @@
       "timestamp": "2026-07-04T20:52:13.688Z",
       "error_message": "Missing error handling in unknown",
       "file": "backend/src/test/kotlin/com/adoptu/routes/UserSterilizationLocationRoutesE2ETest.kt",
-      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "root_cause": "Code path had no error handling \u2014 exceptions would propagate uncaught",
       "fix": "Added try/catch block",
       "tags": [
         "auto-detected",
@@ -636,7 +636,7 @@
       "error_message": "Significant refactor of ",
       "file": "infra/variables.tf",
       "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 4→5 lines (2 removed)",
+      "fix": "Rewrote 4\u21925 lines (2 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -684,7 +684,7 @@
       "error_message": "Significant refactor of ",
       "file": "infra/network.tf",
       "root_cause": "14 lines replaced/restructured",
-      "fix": "Rewrote 36→45 lines (14 removed)",
+      "fix": "Rewrote 36\u219245 lines (14 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -700,7 +700,7 @@
       "error_message": "Significant refactor of ",
       "file": "infra/security_groups.tf",
       "root_cause": "8 lines replaced/restructured",
-      "fix": "Rewrote 10→21 lines (8 removed)",
+      "fix": "Rewrote 10\u219221 lines (8 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -732,7 +732,7 @@
       "error_message": "Significant refactor of ",
       "file": "infra/data.tf",
       "root_cause": "4 lines replaced/restructured",
-      "fix": "Rewrote 11→3 lines (4 removed)",
+      "fix": "Rewrote 11\u21923 lines (4 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -748,7 +748,7 @@
       "error_message": "Significant refactor of ",
       "file": "infra/rds.tf",
       "root_cause": "6 lines replaced/restructured",
-      "fix": "Rewrote 8→10 lines (6 removed)",
+      "fix": "Rewrote 8\u219210 lines (6 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -764,7 +764,7 @@
       "error_message": "Significant refactor of ",
       "file": "infra/lambda/dns_updater/index.py",
       "root_cause": "3 lines replaced/restructured",
-      "fix": "Rewrote 24→41 lines (3 removed)",
+      "fix": "Rewrote 24\u219241 lines (3 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -780,7 +780,7 @@
       "error_message": "Wrong reference: return should be print",
       "file": "infra/lambda/dns_updater/index.py",
       "root_cause": "Used \"return\" instead of \"print\"",
-      "fix": "Changed return → print",
+      "fix": "Changed return \u2192 print",
       "tags": [
         "auto-detected",
         "wrong-reference",
@@ -812,7 +812,7 @@
       "error_message": "Significant refactor of ",
       "file": "infra/lambda/dns_updater/index.py",
       "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 8→13 lines (2 removed)",
+      "fix": "Rewrote 8\u219213 lines (2 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -828,7 +828,7 @@
       "error_message": "Significant refactor of ",
       "file": "infra/terraform.tfvars",
       "root_cause": "3 lines replaced/restructured",
-      "fix": "Rewrote 3→4 lines (3 removed)",
+      "fix": "Rewrote 3\u21924 lines (3 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -844,7 +844,7 @@
       "error_message": "Significant refactor of ",
       "file": "infra/variables.tf",
       "root_cause": "3 lines replaced/restructured",
-      "fix": "Rewrote 4→5 lines (3 removed)",
+      "fix": "Rewrote 4\u21925 lines (3 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -892,7 +892,7 @@
       "error_message": "Significant refactor of ",
       "file": "Dockerfile",
       "root_cause": "3 lines replaced/restructured",
-      "fix": "Rewrote 12→16 lines (3 removed)",
+      "fix": "Rewrote 12\u219216 lines (3 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -924,7 +924,7 @@
       "error_message": "Significant refactor of ",
       "file": "backend/src/main/kotlin/com/adoptu/routes/ShelterRoutes.kt",
       "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 54→79 lines (2 removed)",
+      "fix": "Rewrote 54\u219279 lines (2 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -940,7 +940,7 @@
       "error_message": "Significant refactor of ",
       "file": "backend/src/main/kotlin/com/adoptu/routes/SterilizationLocationRoutes.kt",
       "root_cause": "6 lines replaced/restructured",
-      "fix": "Rewrote 44→74 lines (6 removed)",
+      "fix": "Rewrote 44\u219274 lines (6 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -956,7 +956,7 @@
       "error_message": "Significant refactor of ",
       "file": "backend/src/test/kotlin/com/adoptu/routes/ShelterRoutesE2ETest.kt",
       "root_cause": "6 lines replaced/restructured",
-      "fix": "Rewrote 235→333 lines (6 removed)",
+      "fix": "Rewrote 235\u2192333 lines (6 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -972,7 +972,7 @@
       "error_message": "Significant refactor of ",
       "file": "backend/src/test/kotlin/com/adoptu/routes/SterilizationLocationRoutesE2ETest.kt",
       "root_cause": "6 lines replaced/restructured",
-      "fix": "Rewrote 228→326 lines (6 removed)",
+      "fix": "Rewrote 228\u2192326 lines (6 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -1036,7 +1036,7 @@
       "error_message": "Significant refactor of ",
       "file": "backend/src/test/kotlin/com/adoptu/routes/UIRoutesE2ETest.kt",
       "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 11→35 lines (2 removed) | Also: fun `GET admin shelters returns 200 for unauthenti; assertEquals(200, TestHttp.get(\"${handle.baseUrl}/ | Also: fun `GET admin sterilization-locations returns 200; assertEquals(200, TestHttp.get(\"${handle.baseUrl}/",
+      "fix": "Rewrote 11\u219235 lines (2 removed) | Also: fun `GET admin shelters returns 200 for unauthenti; assertEquals(200, TestHttp.get(\"${handle.baseUrl}/ | Also: fun `GET admin sterilization-locations returns 200; assertEquals(200, TestHttp.get(\"${handle.baseUrl}/",
       "tags": [
         "auto-detected",
         "refactor",
@@ -1068,7 +1068,7 @@
       "error_message": "Significant refactor of ",
       "file": "backend/src/main/kotlin/com/adoptu/services/TemporalHomeService.kt",
       "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 5→8 lines (2 removed)",
+      "fix": "Rewrote 5\u21928 lines (2 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -1100,7 +1100,7 @@
       "error_message": "Significant refactor of ",
       "file": "backend/src/main/kotlin/com/adoptu/services/validation/TemporalHomesValidationService.kt",
       "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 12→6 lines (2 removed)",
+      "fix": "Rewrote 12\u21926 lines (2 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -1116,7 +1116,7 @@
       "error_message": "Significant refactor of ",
       "file": "backend/src/test/kotlin/com/adoptu/services/validation/TemporalHomesValidationServiceTest.kt",
       "root_cause": "14 lines replaced/restructured",
-      "fix": "Rewrote 34→5 lines (14 removed)",
+      "fix": "Rewrote 34\u21925 lines (14 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -1148,7 +1148,7 @@
       "error_message": "Significant refactor of ",
       "file": "backend/src/test/kotlin/com/adoptu/routes/TemporalHomeRoutesE2ETest.kt",
       "root_cause": "10 lines replaced/restructured",
-      "fix": "Rewrote 50→59 lines (10 removed)",
+      "fix": "Rewrote 50\u219259 lines (10 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -1180,7 +1180,7 @@
       "error_message": "Significant refactor of ",
       "file": "backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt",
       "root_cause": "21 lines replaced/restructured",
-      "fix": "Rewrote 26→4 lines (21 removed)",
+      "fix": "Rewrote 26\u21924 lines (21 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -1205,6 +1205,158 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-05T16:32:50.086Z"
+    },
+    {
+      "id": "bug-076",
+      "timestamp": "2026-07-05T17:42:00.253Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T17:42:00.253Z"
+    },
+    {
+      "id": "bug-077",
+      "timestamp": "2026-07-05T17:46:14.689Z",
+      "error_message": "Null/undefined access in ",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T17:46:14.689Z"
+    },
+    {
+      "id": "bug-078",
+      "timestamp": "2026-07-05T17:46:21.450Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 14\u21929 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T17:46:21.450Z"
+    },
+    {
+      "id": "bug-079",
+      "timestamp": "2026-07-05T17:47:11.376Z",
+      "error_message": "Null/undefined access in ",
+      "file": "backend/src/main/kotlin/com/adoptu/web/Sessions.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T17:47:11.376Z"
+    },
+    {
+      "id": "bug-080",
+      "timestamp": "2026-07-05T17:57:41.140Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T17:57:41.140Z"
+    },
+    {
+      "id": "bug-081",
+      "timestamp": "2026-07-05T18:04:14.738Z",
+      "error_message": "Significant refactor of ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt",
+      "root_cause": "10 lines replaced/restructured",
+      "fix": "Rewrote 27\u219241 lines (10 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T18:04:14.738Z"
+    },
+    {
+      "id": "bug-082",
+      "timestamp": "2026-07-05T18:15:02.571Z",
+      "error_message": "Significant refactor of ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt",
+      "root_cause": "29 lines replaced/restructured",
+      "fix": "Rewrote 39\u219211 lines (29 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T18:15:02.571Z"
+    },
+    {
+      "id": "bug-083",
+      "timestamp": "2026-07-05T18:15:12.672Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T18:15:12.672Z"
+    },
+    {
+      "id": "bug-084",
+      "timestamp": "2026-07-05T18:16:33.000Z",
+      "error_message": "Pressing Enter in the login page's email/password fields does nothing",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt",
+      "root_cause": "The passkey/magic-link/password login forms (backend/src/main/kotlin/com/adoptu/pages/LoginPage.kt) are plain divs with type=\"button\" buttons, not a <form>, and the frontend only wired click listeners on the buttons - no keydown handling existed anywhere, so Enter had nothing to trigger. Verification was separately confounded for ~40 minutes by Chromium caching /static/js/common.js across every browser_navigate reload: the server sends ETag/Last-Modified but no Cache-Control, so the browser kept executing a stale pre-fix bundle across repeated same-session reloads even though the file on disk was correctly rebuilt each time. Confirmed via window.AdoptuLoginPage.init's live runtime function body differing from the on-disk build, resolved by force-loading the script with a cache-busting query string.",
+      "fix": "Added setupEnterKeySubmit(inputId, buttonId) to LoginPageModule (frontend jsMain), wired via keydown listeners on magic-email, password-email, and password-password that call preventDefault() + click() on the corresponding button when e.key==\"Enter\". Rebuilt via :frontend:jsBrowserProductionWebpack and :backend:processResources, verified live via Playwright with a cache-busted <script src=\"...?v=timestamp\"> reload and a real CDP-level Enter keypress that successfully navigated to /profile.",
+      "tags": [
+        "login",
+        "ux",
+        "keydown",
+        "kt",
+        "frontend",
+        "browser-caching",
+        "false-lead"
+      ],
+      "related_bugs": [
+        "bug-081",
+        "bug-082",
+        "bug-083"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T18:16:33.000Z"
     }
   ]
 }

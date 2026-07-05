@@ -2103,3 +2103,33 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+
+## Session: 2026-07-05 11:39
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:42 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt | added 2 condition(s) | ~221 |
+| 11:42 | Session end: 1 writes across 1 files (LoginPage.kt) | 11 reads | ~16256 tok |
+| 11:46 | Edited backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt | added optional chaining | ~210 |
+| 11:46 | Edited backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt | 14→9 lines | ~100 |
+| 11:46 | Edited backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt | 12→8 lines | ~100 |
+| 11:47 | Edited backend/src/main/kotlin/com/adoptu/web/Sessions.kt | added optional chaining | ~436 |
+| 11:47 | Edited backend/src/main/resources/application.conf | expanded (+7 lines) | ~112 |
+| 11:47 | Edited backend/src/test/resources/application.conf | 3→7 lines | ~33 |
+| 11:50 | Edited backend/src/test/kotlin/com/adoptu/routes/AuthRoutesE2ETest.kt | expanded (+27 lines) | ~364 |
+| 11:52 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt | modified setupEnterKeySubmit() | ~183 |
+| 11:55 | Edited infra/secrets.tf | expanded (+18 lines) | ~241 |
+| 11:55 | Edited infra/iam.tf | 3→4 lines | ~35 |
+| 11:55 | Edited infra/ecs.tf | 3→4 lines | ~61 |
+| 11:56 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt | modified init() | ~289 |
+| 11:57 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt | modified submitOnEnter() | ~200 |
+| 11:57 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt | added optional chaining | ~89 |
+| 11:59 | Session end: 15 writes across 8 files (LoginPage.kt, AuthRoutes.kt, Sessions.kt, application.conf, AuthRoutesE2ETest.kt) | 21 reads | ~24384 tok |
+| 11:59 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt | modified init() | ~281 |
+| 12:04 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt | added 4 condition(s) | ~479 |
+| 12:06 | Created frontend/webpack.config.d/disable-concat-modules.js | — | ~28 |
+| 12:15 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt | modified init() | ~145 |
+| 12:15 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt | added 2 condition(s) | ~136 |
+| 12:17 | Removed frontend/webpack.config.d/disable-concat-modules.js (dead-end theory) | — | ~0 |
+| 12:17 | Fixed: Enter key in login forms (magic-link/password) now submits via new setupEnterKeySubmit(); root bug was missing keydown handling, not a compiler collision - verified live via Playwright with cache-busted script reload | LoginPage.kt (frontend+backend), buglog.json bug-084, cerebrum.md | ~large (40min misdiagnosis due to Chromium caching stale common.js across reloads) |
+| 12:18 | Session end: 20 writes across 9 files (LoginPage.kt, AuthRoutes.kt, Sessions.kt, application.conf, AuthRoutesE2ETest.kt) | 21 reads | ~25454 tok |
