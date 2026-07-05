@@ -159,6 +159,15 @@ variable "webauthn_origin" {
   default = "https://www.adopt-u.org"
 }
 
+# Correct fix for the newer (HEAD) code's application.conf, which reads the
+# plural ADOPTU_WEB_AUTHN_ORIGINS as a HOCON list. Not wired into ecs.tf yet -
+# see the comment there - apply together with the next successful deploy.
+variable "webauthn_origins" {
+  description = "JSON array (as a string) of accepted WebAuthn origins - application.conf substitutes this raw into a HOCON list slot via ADOPTU_WEB_AUTHN_ORIGINS, so it must be valid HOCON/JSON array syntax, not a bare string."
+  type        = string
+  default     = "[\"https://www.adopt-u.org\",\"https://adopt-u.org\"]"
+}
+
 variable "webauthn_rp_id" {
   type    = string
   default = "adopt-u.org"

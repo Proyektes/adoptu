@@ -31,14 +31,18 @@ RUN --mount=type=cache,target=/root/.gradle \
 
 # jdeps-derive the JDK modules the fat jar actually needs, plus a small
 # safety-net set that static bytecode analysis misses: TLS ECDSA cipher
-# suites and DNS-based JNDI used by the AWS SDK, and jdk.unsupported for
-# Netty's reflective sun.misc.Unsafe access.
+# suites and DNS-based JNDI used by the AWS SDK, jdk.unsupported for
+# Netty's reflective sun.misc.Unsafe access, and jdk.zipfs for Helidon's
+# runtime classpath metadata scanning (it opens its own jar as a
+# java.nio.file filesystem via FileSystems.newFileSystem, which throws
+# ProviderNotFoundException without this module - jdeps' static analysis
+# doesn't see this reflective use).
 RUN --mount=type=cache,target=/root/.gradle \
     MODULES=$(jdeps --multi-release 25 --print-module-deps --ignore-missing-deps \
       backend/build/libs/*-all.jar) \
     && jlink \
       --module-path "$JAVA_HOME/jmods" \
-      --add-modules "${MODULES},jdk.crypto.ec,jdk.naming.dns,jdk.unsupported,java.naming" \
+      --add-modules "${MODULES},jdk.crypto.ec,jdk.naming.dns,jdk.unsupported,java.naming,jdk.zipfs" \
       --strip-debug --no-header-files --no-man-pages --compress=zip-9 \
       --output /jre
 

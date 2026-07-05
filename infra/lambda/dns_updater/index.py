@@ -1,10 +1,20 @@
 import os
+import time
 
 import boto3
 
 ecs = boto3.client("ecs")
 ec2 = boto3.client("ec2")
 route53 = boto3.client("route53")
+
+# A task can reach RUNNING and then crash seconds later (e.g. a bad image or
+# missing runtime dependency) - if this fires on that first RUNNING event
+# unconditionally, it points DNS at a task that's about to disappear, taking
+# the site down even though a perfectly good previous task might still be up.
+# Waiting here and re-checking the task is still RUNNING before touching DNS
+# avoids that: a real crash surfaces as a fast, self-correcting "skipped"
+# instead of an outage.
+STABILITY_WAIT_SECONDS = 12
 
 
 def handler(event, context):
@@ -21,6 +31,43 @@ def handler(event, context):
     if not tasks:
         print({"skipped": "task not found (already stopped?)", "task_arn": task_arn})
         return {"skipped": "task not found (already stopped?)"}
+
+    time.sleep(STABILITY_WAIT_SECONDS)
+    tasks = ecs.describe_tasks(cluster=cluster_arn, tasks=[task_arn])["tasks"]
+    if not tasks or tasks[0].get("lastStatus") != "RUNNING":
+        result = {
+            "skipped": "task no longer RUNNING after stability wait (crashed?)",
+            "task_arn": task_arn,
+            "last_status": tasks[0].get("lastStatus") if tasks else "not found",
+        }
+        print(result)
+        return result
+
+    # During a normal rolling deployment, the old task and the new task are
+    # BOTH briefly RUNNING at once (that's how a zero-downtime deploy works)
+    # - EventBridge fires for both, and nothing guarantees the new task's
+    # event is processed last. Without this check, the old (soon-to-be-
+    # stopped) task's event can be handled after the new one's and overwrite
+    # DNS right back to the task that's about to disappear. A task's
+    # startedBy is the ECS deployment ID that launched it, so comparing
+    # against the service's current PRIMARY deployment tells us whether this
+    # task is actually the one the service wants running, not a
+    # being-drained leftover from the previous deployment.
+    services = ecs.describe_services(cluster=cluster_arn, services=[os.environ["SERVICE_NAME"]])["services"]
+    primary_deployment_id = next(
+        (d["id"] for d in services[0].get("deployments", []) if d.get("status") == "PRIMARY"),
+        None,
+    )
+    started_by = tasks[0].get("startedBy")
+    if primary_deployment_id and started_by != primary_deployment_id:
+        result = {
+            "skipped": "task belongs to a non-PRIMARY deployment (being drained)",
+            "task_arn": task_arn,
+            "started_by": started_by,
+            "primary_deployment_id": primary_deployment_id,
+        }
+        print(result)
+        return result
 
     eni_id = next(
         (

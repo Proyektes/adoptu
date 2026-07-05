@@ -59,7 +59,14 @@ resource "aws_ecs_task_definition" "app" {
         { name = "ADOPTU_S3_ENDPOINT", value = "https://${aws_s3_bucket.dynamic_images.bucket_regional_domain_name}" },
         { name = "AWS_REGION", value = var.aws_region },
         { name = "AWS_SES_ENDPOINT", value = "https://email.${var.aws_region}.amazonaws.com" },
-        { name = "ADOPTU_WEB_AUTHN_ORIGIN", value = var.webauthn_origin },
+        # Plural: application.conf's "webauthn.origins" is a HOCON list,
+        # substituted raw from this env var - it must stay a JSON/HOCON
+        # array string, not a bare origin. The live task definition had this
+        # as "ADOPTU_WEB_AUTHN_ORIGIN" (singular), which application.conf
+        # never actually reads - the app silently fell back to its default
+        # (["http://localhost:8080"]) in production, so WebAuthn origin
+        # validation likely never worked for real users on the old image.
+        { name = "ADOPTU_WEB_AUTHN_ORIGINS", value = var.webauthn_origins },
         { name = "ADOPTU_WEB_AUTHN_RP_ID", value = var.webauthn_rp_id },
       ]
 
