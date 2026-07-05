@@ -18,6 +18,7 @@ object LoginPageModule {
         I18n.loadLang(window.localStorage.getItem("preferredLanguage") ?: "en").then({ _: dynamic ->
             I18n.updatePage()
             showRegistrationNotification()
+            showMagicLinkErrorNotification()
             setupPasskeyButton()
             setupMagicLinkButton()
             setupPasswordLoginButton()
@@ -45,7 +46,29 @@ object LoginPageModule {
         val params = window.location.search
         if (!params.contains("registered=true")) return
         val el = document.getElementById("register-notification") as? HTMLElement ?: return
+        el.setAttribute("class", "register-notification")
         el.textContent = I18n.t("emailVerificationSent")
+        el.style.display = "block"
+    }
+
+    // The magic-link-login redirect (AuthRoutes.kt) encodes failures as /login?error=...
+    // query params; this was previously never read by the frontend, so invalid/expired/
+    // banned/unverified outcomes redirected here with zero feedback to the user.
+    private fun showMagicLinkErrorNotification() {
+        val error: String = js("new URLSearchParams(window.location.search).get('error')") ?: return
+        val resent: String? = js("new URLSearchParams(window.location.search).get('resent')")
+        val el = document.getElementById("register-notification") as? HTMLElement ?: return
+
+        val message = when (error) {
+            "invalid_token" -> I18n.t("invalidToken")
+            "invalid_or_expired" -> I18n.t("invalidOrExpiredMagicLink")
+            "banned" -> I18n.t("accountBanned")
+            "not_verified" -> if (resent == "true") I18n.t("verificationEmailResent") else I18n.t("emailNotVerifiedLogin")
+            else -> return
+        }
+
+        el.setAttribute("class", "register-notification error")
+        el.textContent = message
         el.style.display = "block"
     }
 
