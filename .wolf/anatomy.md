@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-05T18:15:12.651Z
-> Files: 1049 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-05T19:58:51.776Z
+> Files: 1052 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -1828,7 +1828,7 @@
 
 ## backend/src/main/kotlin/com/adoptu/
 
-- `Application.kt` — main, configureRouting (~900 tok)
+- `Application.kt` — main, configureRouting (~925 tok)
 
 ## backend/src/main/kotlin/com/adoptu/ (graalvm-native-image worktree)
 
@@ -1840,8 +1840,8 @@
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/
 
-- `DatabaseFactory.kt` — init, createDefaultAdmin (~1441 tok)
-- `Models.kt` (~3916 tok)
+- `DatabaseFactory.kt` — init, createDefaultAdmin (~1447 tok)
+- `Models.kt` (~3986 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/ (canonical)
 
@@ -1904,7 +1904,7 @@
 
 ## backend/src/main/kotlin/com/adoptu/routes/
 
-- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~6860 tok)
+- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~7261 tok)
 - `CountryRoutes.kt` — HttpRules, regionFromLocale (~320 tok)
 - `PhotographerRoutes.kt` — HttpRules, validateUser (~2385 tok)
 - `ShelterRoutes.kt` — HttpRules, HttpRules (~1627 tok)
@@ -1922,7 +1922,8 @@
 
 ## backend/src/main/kotlin/com/adoptu/services/
 
-- `PetService.kt` — PetService: getAll, getMine, getById, create (~3030 tok)
+- `PasswordService.kt` — PasswordService: isLoginRateLimited, recordLoginAttempt, hasPassword, extractPassword (~3460 tok)
+- `PetService.kt` — PetService: getAll, getMine, getById, create (~3312 tok)
 - `ProfileEmailVerificationService.kt` — Shelter and sterilization-location profiles carry their own public "contact email", (~1823 tok)
 - `TemporalHomeService.kt` — Validates and consumes a spam-report token (see sendRequest), then blocks the rescuer it names. (~1332 tok)
 - `UserService.kt` — UserService: getById, getByEmail, getAllUsers, getRescuers (~892 tok)
@@ -1935,6 +1936,7 @@
 
 ## backend/src/main/kotlin/com/adoptu/web/
 
+- `SecurityHeadersFilter.kt` — Adds baseline defense-in-depth headers to every response. CloudFront always terminates TLS (~668 tok)
 - `Sessions.kt` — Replaces Ktor's `install(Sessions) { cookie<SessionUser>(...) }` (plugins/Sessions.kt). (~917 tok)
 
 ## backend/src/main/kotlin/com/adoptu/web/ (helidon-nima-migration worktree — replaces the deleted `plugins/` package)
@@ -1976,15 +1978,16 @@
 
 ## backend/src/test/kotlin/com/adoptu/adapters/db/
 
-- `DatabaseFactoryTest.kt` — Declares DatabaseFactoryTest (~3390 tok)
+- `DatabaseFactoryTest.kt` — Declares DatabaseFactoryTest (~3397 tok)
 
 ## backend/src/test/kotlin/com/adoptu/mocks/
 
-- `TestDatabase.kt` — initH2, clearAllData (~1008 tok)
+- `TestDatabase.kt` — initH2, clearAllData (~1039 tok)
 
 ## backend/src/test/kotlin/com/adoptu/routes/
 
-- `AuthRoutesE2ETest.kt` — Covers endpoints/branches in AuthRoutes.kt not already exercised by (~13770 tok)
+- `AuthRoutesE2ETest.kt` — Covers endpoints/branches in AuthRoutes.kt not already exercised by (~14444 tok)
+- `PetsRoutesE2ETest.kt` — PetsRoutesE2ETest: setup, createTestUsers, startTestServer, generateTestImageBytes (~16567 tok)
 - `PhotographerRoutesE2ETest.kt` — E2E tests for [photographerRoutes]. (~7449 tok)
 - `ShelterRoutesE2ETest.kt` — ShelterRoutesE2ETest: setup, createTestUsers, createShelterInDb (~5411 tok)
 - `SterilizationLocationRoutesE2ETest.kt` — SterilizationLocationRoutesE2ETest: setup, createTestUsers, testModules, startServer (~6084 tok)

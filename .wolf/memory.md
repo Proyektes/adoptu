@@ -2133,3 +2133,27 @@
 | 12:17 | Removed frontend/webpack.config.d/disable-concat-modules.js (dead-end theory) | — | ~0 |
 | 12:17 | Fixed: Enter key in login forms (magic-link/password) now submits via new setupEnterKeySubmit(); root bug was missing keydown handling, not a compiler collision - verified live via Playwright with cache-busted script reload | LoginPage.kt (frontend+backend), buglog.json bug-084, cerebrum.md | ~large (40min misdiagnosis due to Chromium caching stale common.js across reloads) |
 | 12:18 | Session end: 20 writes across 9 files (LoginPage.kt, AuthRoutes.kt, Sessions.kt, application.conf, AuthRoutesE2ETest.kt) | 21 reads | ~25454 tok |
+| 13:36 | Session end: 20 writes across 9 files (LoginPage.kt, AuthRoutes.kt, Sessions.kt, application.conf, AuthRoutesE2ETest.kt) | 21 reads | ~25454 tok |
+| 13:37 | Edited backend/src/main/kotlin/com/adoptu/services/PetService.kt | added error handling | ~525 |
+| 13:37 | Session end: 21 writes across 10 files (LoginPage.kt, AuthRoutes.kt, Sessions.kt, application.conf, AuthRoutesE2ETest.kt) | 23 reads | ~26017 tok |
+| 13:39 | Created backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt | — | ~572 |
+| 13:40 | Edited backend/src/main/kotlin/com/adoptu/Application.kt | added 1 import(s) | ~31 |
+| 13:40 | Edited backend/src/main/kotlin/com/adoptu/Application.kt | 1→2 lines | ~24 |
+| 13:41 | Edited backend/src/main/kotlin/com/adoptu/adapters/db/Models.kt | modified Table() | ~87 |
+| 13:41 | Edited backend/src/main/kotlin/com/adoptu/adapters/db/DatabaseFactory.kt | 2→3 lines | ~24 |
+| 13:41 | Edited backend/src/main/kotlin/com/adoptu/services/PasswordService.kt | added 1 import(s) | ~37 |
+| 13:42 | Edited backend/src/main/kotlin/com/adoptu/services/PasswordService.kt | modified isLoginRateLimited() | ~388 |
+| 13:42 | Edited backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt | added 1 import(s) | ~34 |
+| 13:42 | Edited backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt | 3→4 lines | ~60 |
+| 13:42 | Edited backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt | added 1 condition(s) | ~313 |
+| 13:46 | Edited backend/src/test/kotlin/com/adoptu/mocks/TestDatabase.kt | 2→3 lines | ~31 |
+| 13:46 | Edited backend/src/test/kotlin/com/adoptu/mocks/TestDatabase.kt | 3→4 lines | ~35 |
+| 13:46 | Edited backend/src/test/kotlin/com/adoptu/mocks/TestDatabase.kt | modified clearAllData() | ~41 |
+| 13:46 | Edited backend/src/test/kotlin/com/adoptu/adapters/db/DatabaseFactoryTest.kt | 3→4 lines | ~30 |
+| 13:47 | Edited backend/src/test/kotlin/com/adoptu/adapters/db/DatabaseFactoryTest.kt | 3→3 lines | ~30 |
+| 13:47 | Edited backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt | modified filter() | ~238 |
+| 13:50 | Edited backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt | added 1 condition(s) | ~76 |
+| 13:51 | Edited backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt | modified when() | ~543 |
+| 13:51 | Edited backend/src/test/kotlin/com/adoptu/routes/PetsRoutesE2ETest.kt | expanded (+20 lines) | ~428 |
+| 13:52 | Edited backend/src/test/kotlin/com/adoptu/routes/AuthRoutesE2ETest.kt | modified repeat() | ~408 |
+| 13:58 | Edited backend/src/test/kotlin/com/adoptu/routes/AuthRoutesE2ETest.kt | modified repeat() | ~351 |

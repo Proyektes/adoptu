@@ -1357,6 +1357,92 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-07-05T18:16:33.000Z"
+    },
+    {
+      "id": "bug-085",
+      "timestamp": "2026-07-05T19:37:42.734Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "backend/src/main/kotlin/com/adoptu/services/PetService.kt",
+      "root_cause": "Code path had no error handling \u2014 exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T19:37:42.734Z"
+    },
+    {
+      "id": "bug-086",
+      "timestamp": "2026-07-05T19:46:27.352Z",
+      "error_message": "Wrong reference: EmailVerificationAttempts should be LoginAttempts",
+      "file": "backend/src/test/kotlin/com/adoptu/mocks/TestDatabase.kt",
+      "root_cause": "Used \"EmailVerificationAttempts\" instead of \"LoginAttempts\"",
+      "fix": "Changed EmailVerificationAttempts \u2192 LoginAttempts",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T19:46:27.352Z"
+    },
+    {
+      "id": "bug-087",
+      "timestamp": "2026-07-05T19:47:08.363Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/test/kotlin/com/adoptu/adapters/db/DatabaseFactoryTest.kt",
+      "root_cause": "Had `DatabaseFactory has 23 tables`",
+      "fix": "Changed to `DatabaseFactory has 24 tables`",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T19:47:08.363Z"
+    },
+    {
+      "id": "bug-088",
+      "timestamp": "2026-07-05T19:51:53.485Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/test/kotlin/com/adoptu/routes/PetsRoutesE2ETest.kt",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 20\u219240 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T19:51:53.485Z"
+    },
+    {
+      "id": "bug-089",
+      "timestamp": "2026-07-05T19:59:00.000Z",
+      "error_message": "Registration page always shows \"verification email sent, check your inbox\" even when no email was actually sent - user requested it several times and received nothing",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt",
+      "root_cause": "POST /api/auth/registration-options's re-registration path (existingUser exists but not yet verified) called webAuthnService.resendVerificationEmail(existingUser.id) and discarded its Boolean return value, then unconditionally responded with the localized 'verification email sent' message. resendVerificationEmail() internally checks EmailVerificationService.canSendVerificationEmail() (a 3-emails/day cap enforced via EmailVerificationTokens/EmailVerificationAttempts) and returns false without sending once exhausted - so once a user hit the cap, every subsequent registration attempt silently did nothing while still claiming success. The identical rate-limit condition was already correctly handled on the login-with-password route (checks the boolean, reports 'daily limit' in the error) with an existing passing test - but no one had written the equivalent test for registration-options, so this sibling code path's bug went uncaught.",
+      "fix": "Captured the resendVerificationEmail() boolean and branch the response: true -> existing 'verification email sent' message, false -> new 'verification email limit reached' localized message (en/es/fr/pt/zh) mirroring login-with-password's daily-limit wording. Added the missing test 'POST registration-options reports rate limit when daily verification emails exhausted' (mirrors the existing login-with-password test) to AuthRoutesE2ETest.kt. Verified live against a real Postgres-backed dev server: created an unverified user with 3 EmailVerificationAttempts rows already inserted for today, confirmed POST /api/auth/registration-options now returns the honest rate-limit message instead of a false 'sent' claim; confirmed a fresh unverified user with zero attempts still gets the normal 'sent' message (no regression). Full AuthRoutesE2ETest suite passes.",
+      "tags": [
+        "registration",
+        "email-verification",
+        "rate-limit",
+        "ux",
+        "kt",
+        "backend",
+        "production-bug"
+      ],
+      "related_bugs": [
+        "bug-012"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T19:59:00.000Z"
     }
   ]
 }
