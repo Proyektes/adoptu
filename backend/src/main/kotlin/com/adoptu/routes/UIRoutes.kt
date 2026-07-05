@@ -88,10 +88,12 @@ fun HttpRules.uiRoutes() {
     })
     get("/admin", Handler { req, res ->
         val navParams = getNavParams(req.getSession())
+        if (!navParams.isAdmin) return@Handler res.respondRedirect(if (navParams.isLoggedIn) "/" else "/login")
         res.respondHtml(Status.OK_200) { adminPage(navParams) }
     })
     get("/admin/shelters", Handler { req, res ->
         val navParams = getNavParams(req.getSession())
+        if (!navParams.isAdmin) return@Handler res.respondRedirect(if (navParams.isLoggedIn) "/" else "/login")
         res.respondHtml(Status.OK_200) { adminSheltersPage(navParams) }
     })
     get("/privacy", Handler { req, res ->
@@ -126,6 +128,7 @@ fun HttpRules.uiRoutes() {
     })
     get("/admin/sterilization-locations", Handler { req, res ->
         val navParams = getNavParams(req.getSession())
+        if (!navParams.isAdmin) return@Handler res.respondRedirect(if (navParams.isLoggedIn) "/" else "/login")
         res.respondHtml(Status.OK_200) { adminSterilizationLocationsPage(navParams) }
     })
     get("/verify", Handler { req, res ->

@@ -318,10 +318,34 @@ class UIRoutesE2ETest {
     }
 
     @Test
-    fun `GET admin returns 200 for unauthenticated and admin`() {
+    fun `GET admin redirects to login when unauthenticated`() {
         val handle = startServer()
         try {
-            assertEquals(200, TestHttp.get("${handle.baseUrl}/admin").statusCode())
+            val response = TestHttp.get("${handle.baseUrl}/admin")
+            assertEquals(302, response.statusCode())
+            assertEquals("/login", response.headers().firstValue("Location").orElse(null))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin redirects to home when authenticated as non-admin`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, rescuerId)
+            val response = TestHttp.get("${handle.baseUrl}/admin", cookie)
+            assertEquals(302, response.statusCode())
+            assertEquals("/", response.headers().firstValue("Location").orElse(null))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin returns 200 for admin`() {
+        val handle = startServer()
+        try {
             val cookie = TestHttp.loginAs(handle.baseUrl, adminId)
             assertEquals(200, TestHttp.get("${handle.baseUrl}/admin", cookie).statusCode())
         } finally {
@@ -330,10 +354,34 @@ class UIRoutesE2ETest {
     }
 
     @Test
-    fun `GET admin shelters returns 200 for unauthenticated and admin`() {
+    fun `GET admin shelters redirects to login when unauthenticated`() {
         val handle = startServer()
         try {
-            assertEquals(200, TestHttp.get("${handle.baseUrl}/admin/shelters").statusCode())
+            val response = TestHttp.get("${handle.baseUrl}/admin/shelters")
+            assertEquals(302, response.statusCode())
+            assertEquals("/login", response.headers().firstValue("Location").orElse(null))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin shelters redirects to home when authenticated as non-admin`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, rescuerId)
+            val response = TestHttp.get("${handle.baseUrl}/admin/shelters", cookie)
+            assertEquals(302, response.statusCode())
+            assertEquals("/", response.headers().firstValue("Location").orElse(null))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin shelters returns 200 for admin`() {
+        val handle = startServer()
+        try {
             val cookie = TestHttp.loginAs(handle.baseUrl, adminId)
             assertEquals(200, TestHttp.get("${handle.baseUrl}/admin/shelters", cookie).statusCode())
         } finally {
@@ -438,10 +486,34 @@ class UIRoutesE2ETest {
     }
 
     @Test
-    fun `GET admin sterilization-locations returns 200 for unauthenticated and admin`() {
+    fun `GET admin sterilization-locations redirects to login when unauthenticated`() {
         val handle = startServer()
         try {
-            assertEquals(200, TestHttp.get("${handle.baseUrl}/admin/sterilization-locations").statusCode())
+            val response = TestHttp.get("${handle.baseUrl}/admin/sterilization-locations")
+            assertEquals(302, response.statusCode())
+            assertEquals("/login", response.headers().firstValue("Location").orElse(null))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin sterilization-locations redirects to home when authenticated as non-admin`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, rescuerId)
+            val response = TestHttp.get("${handle.baseUrl}/admin/sterilization-locations", cookie)
+            assertEquals(302, response.statusCode())
+            assertEquals("/", response.headers().firstValue("Location").orElse(null))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin sterilization-locations returns 200 for admin`() {
+        val handle = startServer()
+        try {
             val cookie = TestHttp.loginAs(handle.baseUrl, adminId)
             assertEquals(200, TestHttp.get("${handle.baseUrl}/admin/sterilization-locations", cookie).statusCode())
         } finally {
