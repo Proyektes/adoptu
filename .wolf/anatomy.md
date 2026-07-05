@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-05T22:21:07.888Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-05T23:27:42.739Z
 > Files: 1070 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
@@ -1917,7 +1917,7 @@
 
 ## backend/src/main/kotlin/com/adoptu/routes/
 
-- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~7265 tok)
+- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~7210 tok)
 - `CountryRoutes.kt` — HttpRules, regionFromLocale (~320 tok)
 - `PhotographerRoutes.kt` — HttpRules, validateUser (~2385 tok)
 - `ShelterRoutes.kt` — HttpRules, HttpRules (~1627 tok)
@@ -1950,7 +1950,7 @@
 ## backend/src/main/kotlin/com/adoptu/web/
 
 - `CspNonce.kt` — Per-request CSP nonce, set by [SecurityHeadersFilter] before the request reaches its handler (~298 tok)
-- `SecurityHeadersFilter.kt` — Adds baseline defense-in-depth headers to every response. CloudFront always terminates TLS (~979 tok)
+- `SecurityHeadersFilter.kt` — Adds baseline defense-in-depth headers to every response. CloudFront always terminates TLS (~1057 tok)
 - `Sessions.kt` — Replaces Ktor's `install(Sessions) { cookie<SessionUser>(...) }` (plugins/Sessions.kt). (~917 tok)
 
 ## backend/src/main/kotlin/com/adoptu/web/ (helidon-nima-migration worktree — replaces the deleted `plugins/` package)
@@ -2010,7 +2010,7 @@
 - `ShelterRoutesE2ETest.kt` — ShelterRoutesE2ETest: setup, createTestUsers, createShelterInDb (~5411 tok)
 - `SterilizationLocationRoutesE2ETest.kt` — SterilizationLocationRoutesE2ETest: setup, createTestUsers, testModules, startServer (~6084 tok)
 - `TemporalHomeRoutesE2ETest.kt` — E2E tests for [temporalHomeRoutes]. (~7291 tok)
-- `UIRoutesE2ETest.kt` — End-to-end tests for [uiRoutes]: starts a real Helidon Nima [TestServer] mounting the full (~7196 tok)
+- `UIRoutesE2ETest.kt` — End-to-end tests for [uiRoutes]: starts a real Helidon Nima [TestServer] mounting the full (~7372 tok)
 - `UserShelterRoutesE2ETest.kt` — UserShelterRoutesE2ETest: setup, createTestUsers, startServer, createShelterInDb (~3875 tok)
 - `UsersRoutesE2ETest.kt` — Verbatim port of the old Ktor test's inline `module { ... }` block of mocked adapters. (~11108 tok)
 - `UserSterilizationLocationRoutesE2ETest.kt` — UserSterilizationLocationRoutesE2ETest: setup, createTestUsers, createLocationInDb (~4424 tok)
@@ -2050,8 +2050,8 @@
 - `IndexPage.kt` — init, loadPets, updateCountryHint, showEmptyState, hideEmptyState (~2200 tok)
 - `LoginPage.kt` — init, setupEnterKeySubmit, showRegistrationNotification, showMagicLinkErrorNotification, getPublicKe (~2082 tok)
 - `MyPetsPage.kt` — init, clampNonNegative, load, onPetsLoaded, renderPetCard (~5862 tok)
-- `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~9997 tok)
-- `RegisterPage.kt` — init, showError, showStatus, hideMessage, setupMethodToggle (~2965 tok)
+- `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~9910 tok)
+- `RegisterPage.kt` — init, showError, showStatus, hideMessage, setupMethodToggle (~2804 tok)
 - `SheltersPage.kt` — init, search, renderShelters (~1474 tok)
 - `SterilizationLocationsPage.kt` — init, search, render, locationCard, init (~2853 tok)
 - `TemporalHomePage.kt` — init, search, displayResults, init, render (~2457 tok)
@@ -2072,7 +2072,7 @@
 - `route53.tf` — Only the records tied to resources this stack manages. The zone's other (~1137 tok)
 - `secrets.tf` — RDS master ("postgres" superuser) password - generated, never typed in by (~441 tok)
 - `security_groups.tf` (~746 tok)
-- `terraform.tfvars` (~127 tok)
+- `terraform.tfvars` (~115 tok)
 - `variables.tf` — Declares can (~1629 tok)
 
 ## infra/ (OpenTofu - AWS deployment)
