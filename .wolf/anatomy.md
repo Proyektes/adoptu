@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-05T20:16:10.943Z
-> Files: 1052 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-05T20:37:54.064Z
+> Files: 1057 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -1886,9 +1886,12 @@
 
 ## backend/src/main/kotlin/com/adoptu/pages/
 
+- `EmailVerificationPage.kt` — HTML (~1292 tok)
 - `ForgotPasswordPage.kt` — HTML, HTML, HTML, HTML, HTML (~1164 tok)
+- `LocationSearchFilters.kt` — DIV (~1112 tok)
 - `PetsPage.kt` — HTML (~644 tok)
 - `ProfilePage.kt` — HTML (~4878 tok)
+- `Shared.kt` — HTML, A, BODY, DIV, NAV (~2040 tok)
 
 ## backend/src/main/kotlin/com/adoptu/pages/ (canonical)
 
@@ -1910,7 +1913,7 @@
 - `ShelterRoutes.kt` — HttpRules, HttpRules (~1627 tok)
 - `SterilizationLocationRoutes.kt` — HttpRules, HttpRules (~1754 tok)
 - `TemporalHomeRoutes.kt` — HttpRules (~2738 tok)
-- `UIRoutes.kt` — Data class: NavParams (~2628 tok)
+- `UIRoutes.kt` — Data class: NavParams (~2647 tok)
 - `UserShelterRoutes.kt` — HttpRules (~767 tok)
 - `UsersRoutes.kt` — Data class: UpdateProfileRequest (~4298 tok)
 - `UserSterilizationLocationRoutes.kt` — HttpRules (~820 tok)
@@ -1936,7 +1939,8 @@
 
 ## backend/src/main/kotlin/com/adoptu/web/
 
-- `SecurityHeadersFilter.kt` — Adds baseline defense-in-depth headers to every response. CloudFront always terminates TLS (~668 tok)
+- `CspNonce.kt` — Per-request CSP nonce, set by [SecurityHeadersFilter] before the request reaches its handler (~298 tok)
+- `SecurityHeadersFilter.kt` — Adds baseline defense-in-depth headers to every response. CloudFront always terminates TLS (~946 tok)
 - `Sessions.kt` — Replaces Ktor's `install(Sessions) { cookie<SessionUser>(...) }` (plugins/Sessions.kt). (~917 tok)
 
 ## backend/src/main/kotlin/com/adoptu/web/ (helidon-nima-migration worktree — replaces the deleted `plugins/` package)
@@ -1984,6 +1988,10 @@
 
 - `TestDatabase.kt` — initH2, clearAllData (~1039 tok)
 
+## backend/src/test/kotlin/com/adoptu/pages/
+
+- `SharedPageElementsTest.kt` — Covers small page-builder helpers that aren't reached through any HTTP route in production (~660 tok)
+
 ## backend/src/test/kotlin/com/adoptu/routes/
 
 - `AuthRoutesE2ETest.kt` — Covers endpoints/branches in AuthRoutes.kt not already exercised by (~14444 tok)
@@ -1992,7 +2000,7 @@
 - `ShelterRoutesE2ETest.kt` — ShelterRoutesE2ETest: setup, createTestUsers, createShelterInDb (~5411 tok)
 - `SterilizationLocationRoutesE2ETest.kt` — SterilizationLocationRoutesE2ETest: setup, createTestUsers, testModules, startServer (~6084 tok)
 - `TemporalHomeRoutesE2ETest.kt` — E2E tests for [temporalHomeRoutes]. (~7291 tok)
-- `UIRoutesE2ETest.kt` — End-to-end tests for [uiRoutes]: starts a real Helidon Nima [TestServer] mounting the full (~6918 tok)
+- `UIRoutesE2ETest.kt` — End-to-end tests for [uiRoutes]: starts a real Helidon Nima [TestServer] mounting the full (~7196 tok)
 - `UserShelterRoutesE2ETest.kt` — UserShelterRoutesE2ETest: setup, createTestUsers, startServer, createShelterInDb (~3875 tok)
 - `UsersRoutesE2ETest.kt` — Verbatim port of the old Ktor test's inline `module { ... }` block of mocked adapters. (~11108 tok)
 - `UserSterilizationLocationRoutesE2ETest.kt` — UserSterilizationLocationRoutesE2ETest: setup, createTestUsers, createLocationInDb (~4424 tok)
@@ -2051,7 +2059,7 @@
 - `route53.tf` — Only the records tied to resources this stack manages. The zone's other (~1137 tok)
 - `secrets.tf` — RDS master ("postgres" superuser) password - generated, never typed in by (~441 tok)
 - `security_groups.tf` (~746 tok)
-- `terraform.tfvars` (~107 tok)
+- `terraform.tfvars` (~122 tok)
 - `variables.tf` — Declares can (~1629 tok)
 
 ## infra/ (OpenTofu - AWS deployment)

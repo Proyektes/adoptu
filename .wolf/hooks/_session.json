@@ -153,8 +153,8 @@
       "first_read": "2026-07-05T20:13:41.939Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/test/kotlin/com/adoptu/routes/UIRoutesE2ETest.kt": {
-      "count": 1,
-      "tokens": 6833,
+      "count": 2,
+      "tokens": 6918,
       "first_read": "2026-07-05T20:15:51.316Z"
     },
     "/home/laf/Proyektes/adoptu/scripts/build-native-image.sh": {
@@ -166,6 +166,46 @@
       "count": 1,
       "tokens": 986,
       "first_read": "2026-07-05T20:20:06.243Z"
+    },
+    "/home/laf/Proyektes/adoptu/infra/terraform.tfvars": {
+      "count": 1,
+      "tokens": 107,
+      "first_read": "2026-07-05T20:29:22.448Z"
+    },
+    "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/web/Html.kt": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-07-05T20:32:06.195Z"
+    },
+    "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/Shared.kt": {
+      "count": 2,
+      "tokens": 2040,
+      "first_read": "2026-07-05T20:32:59.629Z"
+    },
+    "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/EmailVerificationPage.kt": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-07-05T20:33:04.549Z"
+    },
+    "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/LocationSearchFilters.kt": {
+      "count": 3,
+      "tokens": 1107,
+      "first_read": "2026-07-05T20:33:10.605Z"
+    },
+    "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt": {
+      "count": 1,
+      "tokens": 668,
+      "first_read": "2026-07-05T20:34:33.078Z"
+    },
+    "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt": {
+      "count": 1,
+      "tokens": 2628,
+      "first_read": "2026-07-05T20:36:11.836Z"
+    },
+    "/home/laf/Proyektes/adoptu/backend/src/test/kotlin/com/adoptu/pages/SharedPageElementsTest.kt": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-07-05T20:37:01.430Z"
     }
   },
   "files_written": [
@@ -444,6 +484,114 @@
       "action": "edit",
       "tokens": 108,
       "at": "2026-07-05T20:16:11.089Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/infra/terraform.tfvars",
+      "action": "edit",
+      "tokens": 65,
+      "at": "2026-07-05T20:29:28.307Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/web/CspNonce.kt",
+      "action": "create",
+      "tokens": 320,
+      "at": "2026-07-05T20:34:28.256Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt",
+      "action": "edit",
+      "tokens": 944,
+      "at": "2026-07-05T20:34:53.743Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/Shared.kt",
+      "action": "edit",
+      "tokens": 171,
+      "at": "2026-07-05T20:35:01.626Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/Shared.kt",
+      "action": "edit",
+      "tokens": 25,
+      "at": "2026-07-05T20:35:12.571Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/Shared.kt",
+      "action": "edit",
+      "tokens": 162,
+      "at": "2026-07-05T20:35:20.059Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/EmailVerificationPage.kt",
+      "action": "edit",
+      "tokens": 25,
+      "at": "2026-07-05T20:35:25.346Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/EmailVerificationPage.kt",
+      "action": "edit",
+      "tokens": 257,
+      "at": "2026-07-05T20:35:32.209Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/EmailVerificationPage.kt",
+      "action": "edit",
+      "tokens": 82,
+      "at": "2026-07-05T20:35:42.397Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/LocationSearchFilters.kt",
+      "action": "edit",
+      "tokens": 37,
+      "at": "2026-07-05T20:35:52.498Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/LocationSearchFilters.kt",
+      "action": "edit",
+      "tokens": 23,
+      "at": "2026-07-05T20:36:01.923Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/LocationSearchFilters.kt",
+      "action": "edit",
+      "tokens": 33,
+      "at": "2026-07-05T20:36:07.575Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt",
+      "action": "edit",
+      "tokens": 34,
+      "at": "2026-07-05T20:36:22.374Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt",
+      "action": "edit",
+      "tokens": 26,
+      "at": "2026-07-05T20:36:32.886Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt",
+      "action": "edit",
+      "tokens": 29,
+      "at": "2026-07-05T20:36:38.060Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/test/kotlin/com/adoptu/pages/SharedPageElementsTest.kt",
+      "action": "edit",
+      "tokens": 96,
+      "at": "2026-07-05T20:37:10.690Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/test/kotlin/com/adoptu/pages/SharedPageElementsTest.kt",
+      "action": "edit",
+      "tokens": 133,
+      "at": "2026-07-05T20:37:16.845Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/test/kotlin/com/adoptu/routes/UIRoutesE2ETest.kt",
+      "action": "edit",
+      "tokens": 318,
+      "at": "2026-07-05T20:37:54.081Z"
     }
   ],
   "edit_counts": {
@@ -458,7 +606,7 @@
     "infra/ecs.tf": 1,
     "frontend/webpack.config.d/disable-concat-modules.js": 1,
     "backend/src/main/kotlin/com/adoptu/services/PetService.kt": 1,
-    "backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt": 2,
+    "backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt": 3,
     "backend/src/main/kotlin/com/adoptu/Application.kt": 4,
     "backend/src/main/kotlin/com/adoptu/adapters/db/Models.kt": 1,
     "backend/src/main/kotlin/com/adoptu/adapters/db/DatabaseFactory.kt": 1,
@@ -466,11 +614,18 @@
     "backend/src/test/kotlin/com/adoptu/mocks/TestDatabase.kt": 3,
     "backend/src/test/kotlin/com/adoptu/adapters/db/DatabaseFactoryTest.kt": 2,
     "backend/src/test/kotlin/com/adoptu/routes/PetsRoutesE2ETest.kt": 1,
-    "backend/src/test/kotlin/com/adoptu/routes/UIRoutesE2ETest.kt": 1
+    "backend/src/test/kotlin/com/adoptu/routes/UIRoutesE2ETest.kt": 2,
+    "infra/terraform.tfvars": 1,
+    "backend/src/main/kotlin/com/adoptu/web/CspNonce.kt": 1,
+    "backend/src/main/kotlin/com/adoptu/pages/Shared.kt": 3,
+    "backend/src/main/kotlin/com/adoptu/pages/EmailVerificationPage.kt": 3,
+    "backend/src/main/kotlin/com/adoptu/pages/LocationSearchFilters.kt": 3,
+    "backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt": 3,
+    "backend/src/test/kotlin/com/adoptu/pages/SharedPageElementsTest.kt": 2
   },
-  "anatomy_hits": 15,
-  "anatomy_misses": 18,
-  "repeated_reads_warned": 23,
+  "anatomy_hits": 18,
+  "anatomy_misses": 23,
+  "repeated_reads_warned": 27,
   "cerebrum_warnings": 0,
-  "stop_count": 6
+  "stop_count": 9
 }

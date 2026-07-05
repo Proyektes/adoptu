@@ -2161,3 +2161,24 @@
 | 14:14 | Edited backend/src/main/kotlin/com/adoptu/Application.kt | added 1 import(s) | ~34 |
 | 14:14 | Edited backend/src/main/kotlin/com/adoptu/Application.kt | 1→4 lines | ~40 |
 | 14:16 | Edited backend/src/test/kotlin/com/adoptu/routes/UIRoutesE2ETest.kt | expanded (+11 lines) | ~101 |
+| 14:22 | Session end: 46 writes across 19 files (LoginPage.kt, AuthRoutes.kt, Sessions.kt, application.conf, AuthRoutesE2ETest.kt) | 33 reads | ~62585 tok |
+| 14:26 | Session end: 46 writes across 19 files (LoginPage.kt, AuthRoutes.kt, Sessions.kt, application.conf, AuthRoutesE2ETest.kt) | 33 reads | ~62585 tok |
+| 14:29 | Edited infra/terraform.tfvars | "sha256:8f686085e00339215a" → "sha256:903935548cf83d100e" | ~61 |
+| 14:34 | Created backend/src/main/kotlin/com/adoptu/web/CspNonce.kt | — | ~298 |
+| 14:34 | Edited backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt | modified unconditionally() | ~881 |
+| 14:35 | Edited backend/src/main/kotlin/com/adoptu/pages/Shared.kt | modified commonScripts() | ~160 |
+| 14:35 | Edited backend/src/main/kotlin/com/adoptu/pages/Shared.kt | added 1 import(s) | ~23 |
+| 14:35 | Edited backend/src/main/kotlin/com/adoptu/pages/Shared.kt | modified commonScripts() | ~152 |
+| 14:35 | Edited backend/src/main/kotlin/com/adoptu/pages/EmailVerificationPage.kt | added 1 import(s) | ~24 |
+| 14:35 | Edited backend/src/main/kotlin/com/adoptu/pages/EmailVerificationPage.kt | modified raw() | ~240 |
+| 14:35 | Edited backend/src/main/kotlin/com/adoptu/pages/EmailVerificationPage.kt | modified script() | ~76 |
+| 14:35 | Edited backend/src/main/kotlin/com/adoptu/pages/LocationSearchFilters.kt | 3→4 lines | ~35 |
+| 14:36 | Edited backend/src/main/kotlin/com/adoptu/pages/LocationSearchFilters.kt | added 1 import(s) | ~21 |
+| 14:36 | Edited backend/src/main/kotlin/com/adoptu/pages/LocationSearchFilters.kt | 4→4 lines | ~31 |
+| 14:36 | Edited backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt | inline fix | ~31 |
+| 14:36 | Edited backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt | added 1 import(s) | ~24 |
+| 14:36 | Edited backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt | inline fix | ~27 |
+| 14:37 | Edited backend/src/test/kotlin/com/adoptu/pages/SharedPageElementsTest.kt | added 3 import(s) | ~90 |
+| 14:37 | Edited backend/src/test/kotlin/com/adoptu/pages/SharedPageElementsTest.kt | modified setNonce() | ~124 |
+| 14:37 | Edited backend/src/test/kotlin/com/adoptu/routes/UIRoutesE2ETest.kt | added optional chaining | ~297 |
+| 14:41 | Session end: 64 writes across 26 files (LoginPage.kt, AuthRoutes.kt, Sessions.kt, application.conf, AuthRoutesE2ETest.kt) | 41 reads | ~72000 tok |
