@@ -1,6 +1,7 @@
 package com.adoptu.pages
 
 import com.adoptu.common.Country
+import com.adoptu.web.CspNonce
 import kotlinx.html.*
 
 fun HTML.commonHead(title: String, extraCss: String? = null) {
@@ -22,8 +23,11 @@ fun A.commonLogo() {
 }
 
 fun BODY.commonScripts(isLoggedIn: Boolean = false) {
-    script(src = "/static/js/common.js") {}
-    script { unsafe { raw("window.isLoggedInGlobal = $isLoggedIn; frontend.com.adoptu.frontend.Common.initDropdowns(); frontend.com.adoptu.frontend.Common.initI18n(null); window.t = function(k) { return window.AdoptuI18n ? window.AdoptuI18n.t(k) : k; }; window.tCountry = function(n) { return window.AdoptuI18n ? window.AdoptuI18n.translateCountry(n) : n; };") } }
+    script(src = "/static/js/common.js") { attributes["nonce"] = CspNonce.current() }
+    script {
+        attributes["nonce"] = CspNonce.current()
+        unsafe { raw("window.isLoggedInGlobal = $isLoggedIn; frontend.com.adoptu.frontend.Common.initDropdowns(); frontend.com.adoptu.frontend.Common.initI18n(null); window.t = function(k) { return window.AdoptuI18n ? window.AdoptuI18n.t(k) : k; }; window.tCountry = function(n) { return window.AdoptuI18n ? window.AdoptuI18n.translateCountry(n) : n; };") }
+    }
 }
 
 fun DIV.languageDropdown() {

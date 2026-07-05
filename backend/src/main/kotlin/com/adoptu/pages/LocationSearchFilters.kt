@@ -1,5 +1,6 @@
 package com.adoptu.pages
 
+import com.adoptu.web.CspNonce
 import kotlinx.html.*
 
 fun DIV.locationSearchFilters(
@@ -41,6 +42,7 @@ fun DIV.locationSearchFilters(
             }
         }
         script {
+            attributes["nonce"] = CspNonce.current()
             unsafe {
                 raw("""
 window.onCountryChange = function() {

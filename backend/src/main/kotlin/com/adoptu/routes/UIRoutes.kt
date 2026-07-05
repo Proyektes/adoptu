@@ -6,6 +6,7 @@ import com.adoptu.pages.*
 import com.adoptu.ports.UserRepositoryPort
 import com.adoptu.services.auth.SessionUser
 import com.adoptu.services.auth.WebAuthnService
+import com.adoptu.web.CspNonce
 import com.adoptu.web.Deps
 import com.adoptu.web.getSession
 import com.adoptu.web.pathParam
@@ -131,7 +132,7 @@ fun HttpRules.uiRoutes() {
                         onClick = "blockRescuerAndRedirect('$token')"
                         +"Block Rescuer"
                     }
-                    script(src = "/static/js/common.js") {}
+                    script(src = "/static/js/common.js") { attributes["nonce"] = CspNonce.current() }
                 }
             }
         } else {

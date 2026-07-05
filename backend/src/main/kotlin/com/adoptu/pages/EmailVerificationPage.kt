@@ -1,6 +1,7 @@
 package com.adoptu.pages
 
 import com.adoptu.routes.NavParams
+import com.adoptu.web.CspNonce
 import kotlinx.html.*
 
 fun HTML.emailVerificationPage(success: Boolean, language: String = "en", navParams: NavParams = NavParams()) {
@@ -43,6 +44,7 @@ fun HTML.emailVerificationPage(success: Boolean, language: String = "en", navPar
                         }
                     }
                     script {
+                        attributes["nonce"] = CspNonce.current()
                         unsafe { raw("""
                             (function() {
                                 var countdown = 10;
@@ -82,7 +84,10 @@ fun HTML.emailVerificationPage(success: Boolean, language: String = "en", navPar
             }
         }
         footer()
-        script(src = "/static/js/common.js") {}
-        script { unsafe { raw("window.isLoggedInGlobal = false; frontend.com.adoptu.frontend.Common.initI18n(null);") } }
+        script(src = "/static/js/common.js") { attributes["nonce"] = CspNonce.current() }
+        script {
+            attributes["nonce"] = CspNonce.current()
+            unsafe { raw("window.isLoggedInGlobal = false; frontend.com.adoptu.frontend.Common.initI18n(null);") }
+        }
     }
 }

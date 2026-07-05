@@ -152,6 +152,25 @@ class UIRoutesE2ETest {
     }
 
     @Test
+    fun `GET root CSP nonce matches the nonce stamped on every script tag`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get(handle.baseUrl)
+            val csp = response.headers().firstValue("Content-Security-Policy").orElse(null)
+            assertTrue(csp != null, "Content-Security-Policy header missing")
+            val nonce = Regex("'nonce-([^']+)'").find(csp!!)?.groupValues?.get(1)
+            assertTrue(nonce != null && nonce.isNotBlank(), "No nonce found in CSP header: $csp")
+
+            val scriptTagCount = Regex("<script\\b").findAll(response.body()).count()
+            val matchingScriptTagCount = Regex("<script\\b[^>]*\\bnonce=\"${Regex.escape(nonce!!)}\"").findAll(response.body()).count()
+            assertEquals(scriptTagCount, matchingScriptTagCount, "Every <script> tag must carry the CSP header's nonce")
+            assertTrue(scriptTagCount > 0, "Expected at least one <script> tag on the page")
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `GET static asset is served from the classpath`() {
         val handle = startServer()
         try {

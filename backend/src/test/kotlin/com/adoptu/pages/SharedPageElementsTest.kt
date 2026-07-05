@@ -1,10 +1,13 @@
 package com.adoptu.pages
 
+import com.adoptu.web.CspNonce
 import kotlinx.html.body
 import kotlinx.html.div
 import kotlinx.html.html
 import kotlinx.html.nav
 import kotlinx.html.stream.createHTML
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertTrue
 
@@ -15,6 +18,19 @@ import kotlin.test.assertTrue
  * zero arguments -- every route handler always passes explicit args, so these otherwise never run.
  */
 class SharedPageElementsTest {
+
+    // commonScripts()/magicLinkLoginPage() read the per-request CSP nonce (normally set by
+    // SecurityHeadersFilter before a real request reaches its handler) - stand one in here since
+    // these tests call the page builders directly, with no filter chain involved.
+    @BeforeEach
+    fun setNonce() {
+        CspNonce.set("test-nonce")
+    }
+
+    @AfterEach
+    fun clearNonce() {
+        CspNonce.clear()
+    }
 
     @Test
     fun `DIV languageDropdown renders all language options`() {
