@@ -78,6 +78,7 @@ resource "aws_ecs_task_definition" "app" {
       # Was a plaintext environment variable in the live task definition.
       secrets = [
         { name = "ADOPTU_DB_PASSWORD", valueFrom = aws_secretsmanager_secret.db_app_password.arn },
+        { name = "ADOPTU_SESSION_SECRET", valueFrom = aws_secretsmanager_secret.session_secret.arn },
       ]
 
       logConfiguration = {
