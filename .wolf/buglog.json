@@ -2086,6 +2086,59 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-07-05T22:25:00.000Z"
+    },
+    {
+      "id": "bug-129",
+      "timestamp": "2026-07-05T22:46:56.670Z",
+      "error_message": "Significant refactor of ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/ProfilePage.kt",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 23\u219214 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T22:46:56.670Z"
+    },
+    {
+      "id": "bug-130",
+      "timestamp": "2026-07-05T22:59:07.200Z",
+      "error_message": "Incorrect value in code",
+      "file": "infra/terraform.tfvars",
+      "root_cause": "Had \"sha256:63792a098559a62d17d51e2ed2a12caf661c1e3658",
+      "fix": "Changed to \"sha256:fc0773487e14f2597433fd91b6c43c29bea6fd538c",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tfvars"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T22:59:07.200Z"
+    },
+    {
+      "id": "bug-131",
+      "timestamp": "2026-07-05T23:05:00.000Z",
+      "error_message": "Clicking Save on the profile page never visibly shows \"Profile updated!\" - the field values just silently reset to the freshly-saved values",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/ProfilePage.kt",
+      "root_cause": "saveRoles() called showMessage(msg, \"success\", I18n.t(\"profileUpdated\")) immediately followed by a synchronous window.location.reload() with no delay - the reload wiped the DOM before the browser ever painted the message, on both the empty-role-changes fast path and the Promise.all(promises) success path. There was also a second, near-duplicate Promise.all(promises...).then block doing the exact same success handling with its own redundant .catch - dead/leftover code from an incomplete refactor. Found while testing the profile flow end-to-end on production per user request; only caught by polling document.getElementById('message') on a tight interval immediately after clicking Save, since a normal page inspection a second later would show nothing (already reloaded).",
+      "fix": "Wrapped both window.location.reload() calls in window.setTimeout(..., 1500) so the success message is visible before the page refreshes, and deleted the dead duplicate Promise.all block. Verified live on production by sampling the #message element every 150ms after clicking Save: \"Profile updated!\" (green .message.success) stays visible continuously from ~150ms to beyond 1350ms, then the page reloads with the saved data.",
+      "tags": [
+        "profile",
+        "ux",
+        "kt",
+        "frontend",
+        "dead-code",
+        "production-bug"
+      ],
+      "related_bugs": [
+        "bug-109"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T23:05:00.000Z"
     }
   ]
 }
