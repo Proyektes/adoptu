@@ -31,7 +31,7 @@ fun appModule(config: AppConfig) = module {
     single<PhotographerService> { PhotographerService(get(), get(), get(), get()) }
     single<UserService> { UserService(get()) }
     single<PetService> { PetService(get(), get(), get(), get()) }
-    single<TemporalHomeService> { TemporalHomeService(get(), get(), get(), get()) }
+    single<TemporalHomeService> { TemporalHomeService(get(), get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
     single { ProfileEmailVerificationService(get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
     single { UserShelterService(get(), get()) }
     single { UserSterilizationLocationService(get(), get()) }

@@ -141,6 +141,26 @@ fun HttpRules.temporalHomeRoutes() {
         res.send(results)
     })
 
+    // Registered before "/api/temporal-homes/{id}" below: Helidon matches route rules
+    // in registration order, so this literal-segment route must precede the templated
+    // one at the same path depth or "block" would be shadowed as if it were {id} (see
+    // the identical note in PetsRoutes.kt). No session required by design - this is a
+    // no-login, one-click link sent in the request-notification email (see
+    // TemporalHomeService.sendRequest). Security comes from the token being a
+    // single-use, signed secret, not from the caller's identity - the previous version
+    // of this endpoint trusted a raw temporalHomeId/rescuerId pair straight from the
+    // URL with no proof the caller was actually that temporal home.
+    get("/api/temporal-homes/block", Handler { req, res ->
+        val token = req.queryParam("token")
+        if (token.isNullOrBlank()) {
+            return@Handler res.respondError("Token is required", 400)
+        }
+        runBlocking {
+            val blocked = temporalHomeService.blockRescuerByToken(token)
+            res.send(mapOf("blocked" to blocked))
+        }
+    })
+
     get("/api/temporal-homes/{id}", Handler { req, res ->
         runBlocking {
             val temporalHomeIdResult = validationService.validateTemporalHomeId(req.pathParam("id"))
@@ -186,25 +206,6 @@ fun HttpRules.temporalHomeRoutes() {
                 return@runBlocking res.respondError(ValidationConstants.FAILED_TO_SEND_REQUEST, 400)
             }
             res.send(mapOf("success" to true, "requestId" to result.getOrNull()))
-        }
-    })
-
-    get("/api/temporal-homes/block/{temporalHomeId}", Handler { req, res ->
-        runBlocking {
-            val temporalHomeIdResult = validationService.validateTemporalHomeId(req.pathParam("temporalHomeId"))
-            if (temporalHomeIdResult is ServiceResult.Error) {
-                return@runBlocking res.respondError(temporalHomeIdResult.message, 400)
-            }
-            val temporalHomeId = (temporalHomeIdResult as ServiceResult.Success).data
-
-            val rescuerIdResult = validationService.validateRescuerId(req.queryParam("rescuer"))
-            if (rescuerIdResult is ServiceResult.Error) {
-                return@runBlocking res.respondError(rescuerIdResult.message, 400)
-            }
-            val rescuerId = (rescuerIdResult as ServiceResult.Success).data
-
-            val blocked = temporalHomeService.blockRescuer(temporalHomeId, rescuerId)
-            res.send(mapOf("blocked" to blocked))
         }
     })
 

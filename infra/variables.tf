@@ -154,6 +154,12 @@ variable "admin_username" {
   default = "adopt-u@adopt-u.org"
 }
 
+variable "base_url" {
+  description = "Public base URL used to build links in outbound emails (password reset, magic-link login, email/profile-email verification, temporal-home spam-report). Never wired to ADOPTU_BASE_URL before this - every such link defaulted to application.conf's http://localhost:80 in production."
+  type        = string
+  default     = "https://www.adopt-u.org"
+}
+
 variable "webauthn_origins" {
   description = "Comma-separated list of accepted WebAuthn origins. application.conf reads this as a plain string and splits it in Kotlin (AppModule.kt's getOrigins) - a HOCON list type can't be produced by substituting an env var (env var substitution is always a string, even if it looks like JSON/HOCON array syntax, which throws ConfigException.WrongType at first use)."
   type        = string

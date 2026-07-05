@@ -185,11 +185,11 @@ object TemporalHomeProfilePageModule {
 @JsName("TemporalHomeBlockPage")
 object TemporalHomeBlockPageModule {
     fun init() {
-        window.asDynamic().blockRescuerAndRedirect = { thId: Int, rId: Int -> blockRescuerAndRedirect(thId, rId) }
+        window.asDynamic().blockRescuerAndRedirect = { token: String -> blockRescuerAndRedirect(token) }
     }
 
-    private fun blockRescuerAndRedirect(temporalHomeId: Int, rescuerId: Int) {
-        window.asDynamic().fetch("/api/temporal-homes/block/$temporalHomeId?rescuer=$rescuerId").then { res: dynamic ->
+    private fun blockRescuerAndRedirect(token: String) {
+        window.asDynamic().fetch("/api/temporal-homes/block?token=$token").then { res: dynamic ->
             res.json().then { data: dynamic ->
                 document.body?.innerHTML = if (data.blocked == true) {
                     "<h1>Rescuer blocked!</h1><p>You will no longer receive requests from this rescuer.</p><a href=\"/\">Go to Home</a>"

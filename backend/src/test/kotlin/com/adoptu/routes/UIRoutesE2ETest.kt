@@ -666,12 +666,16 @@ class UIRoutesE2ETest {
     }
 
     // ==================== Temporal home block rescuer ====================
+    // No login required by design - see the matching comment on this route in
+    // UIRoutes.kt / the API route in TemporalHomeRoutes.kt. The page only checks a
+    // token is present to decide whether to render; whether it's actually valid is
+    // checked when the button posts to the API (covered in TemporalHomeRoutesE2ETest).
 
     @Test
-    fun `GET temporal-home block with valid ids returns 200 html`() {
+    fun `GET temporal-home block with a token returns 200 html`() {
         val handle = startServer()
         try {
-            val response = TestHttp.get("${handle.baseUrl}/temporal-home/block/$temporalHomeId?rescuer=$rescuerId")
+            val response = TestHttp.get("${handle.baseUrl}/temporal-home/block?token=some-token")
             assertEquals(200, response.statusCode())
             val body = response.body()
             assertTrue(body.contains("Block Rescuer"))
@@ -681,10 +685,10 @@ class UIRoutesE2ETest {
     }
 
     @Test
-    fun `GET temporal-home block without rescuer query redirects to temporal-home`() {
+    fun `GET temporal-home block without a token redirects to temporal-home`() {
         val handle = startServer()
         try {
-            val response = TestHttp.get("${handle.baseUrl}/temporal-home/block/$temporalHomeId")
+            val response = TestHttp.get("${handle.baseUrl}/temporal-home/block")
             assertEquals(302, response.statusCode())
             assertEquals("/temporal-home", response.headers().firstValue("Location").orElse(null))
         } finally {
@@ -693,22 +697,10 @@ class UIRoutesE2ETest {
     }
 
     @Test
-    fun `GET temporal-home block with non-numeric id redirects to temporal-home`() {
+    fun `GET temporal-home block with a blank token redirects to temporal-home`() {
         val handle = startServer()
         try {
-            val response = TestHttp.get("${handle.baseUrl}/temporal-home/block/not-a-number?rescuer=$rescuerId")
-            assertEquals(302, response.statusCode())
-            assertEquals("/temporal-home", response.headers().firstValue("Location").orElse(null))
-        } finally {
-            handle.stop()
-        }
-    }
-
-    @Test
-    fun `GET temporal-home block with non-numeric rescuer redirects to temporal-home`() {
-        val handle = startServer()
-        try {
-            val response = TestHttp.get("${handle.baseUrl}/temporal-home/block/$temporalHomeId?rescuer=not-a-number")
+            val response = TestHttp.get("${handle.baseUrl}/temporal-home/block?token=")
             assertEquals(302, response.statusCode())
             assertEquals("/temporal-home", response.headers().firstValue("Location").orElse(null))
         } finally {

@@ -1,6 +1,7 @@
 package com.adoptu.routes
 
 import com.adoptu.adapters.db.BlockedRescuers
+import com.adoptu.adapters.db.SpamReportTokens
 import com.adoptu.adapters.db.TemporalHomes
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
@@ -146,6 +147,20 @@ class TemporalHomeRoutesE2ETest {
     }
 
     private fun startServer() = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+
+    private fun insertSpamReportToken(temporalHomeId: Int, rescuerId: Int, expired: Boolean = false): String {
+        val token = "spam-report-token-$temporalHomeId-$rescuerId-${clock.now().toEpochMilliseconds()}"
+        transaction {
+            SpamReportTokens.insert {
+                it[SpamReportTokens.temporalHomeId] = temporalHomeId
+                it[SpamReportTokens.rescuerId] = rescuerId
+                it[SpamReportTokens.token] = token
+                it[SpamReportTokens.expiresAt] = clock.now().toEpochMilliseconds() + if (expired) -1000 else 900000
+                it[SpamReportTokens.createdAt] = clock.now().toEpochMilliseconds()
+            }
+        }
+        return token
+    }
 
     /** See class-level doc comment: only the POST /request success payload hits the known issue. */
     private fun assertOkOrKnownSerializationFailure(status: Int) {
@@ -580,13 +595,17 @@ class TemporalHomeRoutesE2ETest {
         }
     }
 
-    // ==================== GET /api/temporal-homes/block/{temporalHomeId} ====================
+    // ==================== GET /api/temporal-homes/block ====================
+    // No session required by design (see TemporalHomeRoutes.kt) - a signed single-use
+    // token embedded in the request-notification email is what makes this safe, not
+    // the caller's identity. These tests seed a token directly rather than going
+    // through sendRequest's email-sending path.
 
     @Test
-    fun `GET block returns 400 for invalid temporal home id`() {
+    fun `GET block returns 400 when token is missing`() {
         val handle = startServer()
         try {
-            val response = TestHttp.get("${handle.baseUrl}/api/temporal-homes/block/abc?rescuer=5")
+            val response = TestHttp.get("${handle.baseUrl}/api/temporal-homes/block")
             assertEquals(400, response.statusCode())
         } finally {
             handle.stop()
@@ -594,36 +613,41 @@ class TemporalHomeRoutesE2ETest {
     }
 
     @Test
-    fun `GET block returns 400 for invalid rescuer id`() {
+    fun `GET block returns blocked false for an unknown token`() {
         val handle = startServer()
         try {
-            val response = TestHttp.get("${handle.baseUrl}/api/temporal-homes/block/2?rescuer=abc")
-            assertEquals(400, response.statusCode())
+            val response = TestHttp.get("${handle.baseUrl}/api/temporal-homes/block?token=does-not-exist")
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("false"))
         } finally {
             handle.stop()
         }
     }
 
     @Test
-    fun `GET block returns 400 when rescuer query param is missing`() {
+    fun `GET block returns blocked false for an expired token`() {
+        val token = insertSpamReportToken(temporalHomeId = 2, rescuerId = 5, expired = true)
         val handle = startServer()
         try {
-            val response = TestHttp.get("${handle.baseUrl}/api/temporal-homes/block/2")
-            assertEquals(400, response.statusCode())
+            val response = TestHttp.get("${handle.baseUrl}/api/temporal-homes/block?token=$token")
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("false"))
         } finally {
             handle.stop()
         }
     }
 
     @Test
-    fun `GET block marks a rescuer as blocked and is idempotent`() {
+    fun `GET block marks a rescuer as blocked and the token is single-use`() {
+        val token = insertSpamReportToken(temporalHomeId = 2, rescuerId = 5)
         val handle = startServer()
         try {
-            val first = TestHttp.get("${handle.baseUrl}/api/temporal-homes/block/2?rescuer=5")
+            val first = TestHttp.get("${handle.baseUrl}/api/temporal-homes/block?token=$token")
             assertEquals(200, first.statusCode())
             assertTrue(first.body().contains("true"))
 
-            val second = TestHttp.get("${handle.baseUrl}/api/temporal-homes/block/2?rescuer=5")
+            // Same token again: already consumed, so this must not re-block or succeed again.
+            val second = TestHttp.get("${handle.baseUrl}/api/temporal-homes/block?token=$token")
             assertEquals(200, second.statusCode())
             assertTrue(second.body().contains("false"))
         } finally {

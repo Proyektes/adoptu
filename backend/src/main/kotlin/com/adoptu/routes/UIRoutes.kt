@@ -112,6 +112,32 @@ fun HttpRules.uiRoutes() {
         val navParams = getNavParams(req.getSession())
         res.respondHtml(Status.OK_200) { temporalHomesSearchPage(navParams) }
     })
+    // Registered before "/temporal-home/{id}" below: Helidon matches route rules in
+    // registration order, so this literal-segment route must precede the templated one
+    // at the same path depth or "block" would be shadowed as if it were {id} (see the
+    // identical note in PetsRoutes.kt / TemporalHomeRoutes.kt). No session required by
+    // design - see the matching comment on the API route (TemporalHomeRoutes.kt) for
+    // why a signed single-use token, not the caller's identity, is what makes this
+    // safe to expose without login.
+    get("/temporal-home/block", Handler { req, res ->
+        val token = req.queryParam("token")
+        if (!token.isNullOrBlank()) {
+            res.respondHtml(Status.OK_200) {
+                head { title { +"Block Rescuer" } }
+                body {
+                    h1 { +"Report as Spam & Block Rescuer" }
+                    p { +"Are you sure you want to block this rescuer from sending you more requests?" }
+                    button(type = ButtonType.button) {
+                        onClick = "blockRescuerAndRedirect('$token')"
+                        +"Block Rescuer"
+                    }
+                    script(src = "/static/js/common.js") {}
+                }
+            }
+        } else {
+            res.respondRedirect("/temporal-home")
+        }
+    })
     get("/temporal-home/{id}", Handler { req, res ->
         val id = req.pathParam("id").toIntOrNull()
         if (id == null) return@Handler res.respondRedirect("/temporal-homes")
@@ -193,25 +219,5 @@ fun HttpRules.uiRoutes() {
     get("/verify-profile-email", Handler { req, res ->
         val navParams = getNavParams(req.getSession())
         res.respondHtml(Status.OK_200) { profileEmailVerificationPage(navParams) }
-    })
-    get("/temporal-home/block/{temporalHomeId}", Handler { req, res ->
-        val temporalHomeId = req.pathParam("temporalHomeId").toIntOrNull()
-        val rescuerId = req.queryParam("rescuer")?.toIntOrNull()
-        if (temporalHomeId != null && rescuerId != null) {
-            res.respondHtml(Status.OK_200) {
-                head { title { +"Block Rescuer" } }
-                body {
-                    h1 { +"Report as Spam & Block Rescuer" }
-                    p { +"Are you sure you want to block this rescuer from sending you more requests?" }
-                    button(type = ButtonType.button) {
-                        onClick = "blockRescuerAndRedirect($temporalHomeId, $rescuerId)"
-                        +"Block Rescuer"
-                    }
-                    script(src = "/static/js/common.js") {}
-                }
-            }
-        } else {
-            res.respondRedirect("/temporal-home")
-        }
     })
 }

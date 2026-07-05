@@ -87,6 +87,25 @@ object ProfileEmailVerificationTokens : Table("profile_email_verification_tokens
     override val primaryKey = PrimaryKey(id)
 }
 
+// Backs the one-click "report as spam / block this rescuer" link emailed to a
+// temporal home when a rescuer sends them a request (see
+// TemporalHomeService.sendRequest). The link must work without the recipient
+// being logged in, so - like every other no-login action link in this
+// codebase - it's gated by a random single-use token rather than trusting the
+// temporalHomeId/rescuerId embedded in the URL directly (those are guessable
+// sequential integers with no secret component).
+object SpamReportTokens : Table("spam_report_tokens") {
+    val id = integer("id").autoIncrement()
+    val temporalHomeId = integer("temporal_home_id").references(Users.id)
+    val rescuerId = integer("rescuer_id").references(Users.id)
+    val token = varchar("token", 64)
+    val expiresAt = long("expires_at")
+    val createdAt = long("created_at")
+    val usedAt = long("used_at").nullable()
+
+    override val primaryKey = PrimaryKey(id)
+}
+
 object EmailVerificationAttempts : Table("email_verification_attempts") {
     val id = integer("id").autoIncrement()
     val userId = integer("user_id").references(Users.id)

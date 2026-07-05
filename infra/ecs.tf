@@ -59,6 +59,11 @@ resource "aws_ecs_task_definition" "app" {
         { name = "ADOPTU_S3_ENDPOINT", value = "https://${aws_s3_bucket.dynamic_images.bucket_regional_domain_name}" },
         { name = "AWS_REGION", value = var.aws_region },
         { name = "AWS_SES_ENDPOINT", value = "https://email.${var.aws_region}.amazonaws.com" },
+        # Never set before - every outbound-email action link (password
+        # reset, magic-link login, email/profile-email verification,
+        # temporal-home spam-report) defaulted to application.conf's
+        # http://localhost:80 in production as a result.
+        { name = "ADOPTU_BASE_URL", value = var.base_url },
         # Plural: application.conf's "webauthn.origins" is a HOCON list,
         # substituted raw from this env var - it must stay a JSON/HOCON
         # array string, not a bare origin. The live task definition had this
