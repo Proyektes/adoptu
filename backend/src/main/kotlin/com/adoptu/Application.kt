@@ -20,6 +20,7 @@ import com.adoptu.routes.usersRoutes
 import com.adoptu.services.crypto.CryptoService
 import com.adoptu.web.AccessLogFilter
 import com.adoptu.web.JsonSupport
+import com.adoptu.web.SecurityHeadersFilter
 import io.helidon.http.Status
 import io.helidon.webserver.WebServer
 import io.helidon.webserver.http.Handler
@@ -57,6 +58,7 @@ fun main() {
 
 internal fun configureRouting(routing: HttpRouting.Builder) {
     routing.addFilter(AccessLogFilter())
+    routing.addFilter(SecurityHeadersFilter())
 
     routing.error(io.helidon.http.NotFoundException::class.java) { _, res, _ ->
         res.status(Status.NOT_FOUND_404).send()
