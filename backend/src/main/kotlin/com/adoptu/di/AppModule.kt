@@ -51,7 +51,12 @@ fun appModule(config: AppConfig) = module {
 }
 
 private fun getOrigins(config: AppConfig): List<String> {
-    val originsList = config.propertyOrNull("webauthn.origins")?.getList()
+    // Comma-separated string, not a HOCON list - see application.conf's
+    // webauthn.origins comment for why.
+    val originsList = config.propertyOrNull("webauthn.origins")?.getString()
+        ?.split(",")
+        ?.map { it.trim() }
+        ?.filter { it.isNotEmpty() }
     if (!originsList.isNullOrEmpty()) {
         return originsList
     }

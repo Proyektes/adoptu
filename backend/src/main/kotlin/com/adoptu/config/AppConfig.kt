@@ -27,5 +27,4 @@ class AppConfig(private val raw: Config) {
 
 class ConfigValue(private val raw: Config, private val path: String) {
     fun getString(): String = raw.getString(path)
-    fun getList(): List<String> = raw.getStringList(path)
 }

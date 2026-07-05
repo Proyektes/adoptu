@@ -2,15 +2,20 @@ package com.adoptu.routes
 
 import com.adoptu.dto.input.CreateShelterRequest
 import com.adoptu.dto.input.UpdateShelterRequest
+import com.adoptu.dto.input.UserRole
+import com.adoptu.ports.UserRepositoryPort
 import com.adoptu.services.ShelterService
 import com.adoptu.services.validation.ValidationConstants
 import com.adoptu.web.Deps
+import com.adoptu.web.getSession
 import com.adoptu.web.pathParam
 import com.adoptu.web.queryParam
 import com.adoptu.web.receiveJson
 import com.adoptu.web.respondData
 import com.adoptu.web.respondError
+import com.adoptu.web.respondForbidden
 import com.adoptu.web.respondSuccess
+import com.adoptu.web.respondUnauthorized
 import io.helidon.http.HeaderNames
 import io.helidon.webserver.http.Handler
 import io.helidon.webserver.http.HttpRules
@@ -63,33 +68,50 @@ fun HttpRules.shelterRoutes() {
 
 fun HttpRules.adminShelterRoutes() {
     val shelterService by Deps.inject<ShelterService>()
+    val userRepository by Deps.inject<UserRepositoryPort>()
 
     get("/api/admin/shelters", Handler { req, res ->
-        val country = req.queryParam("country")
-        val state = req.queryParam("state")
-        val city = req.queryParam("city")
-        val neighborhood = req.queryParam("neighborhood")
-        val zip = req.queryParam("zip")
-        val shelters = if (country.isNullOrBlank()) {
-            emptyList()
-        } else {
-            runBlocking { shelterService.getAll(country, state, city, neighborhood, zip) }
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        runBlocking {
+            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+                return@runBlocking res.respondForbidden()
+            }
+            val country = req.queryParam("country")
+            val state = req.queryParam("state")
+            val city = req.queryParam("city")
+            val neighborhood = req.queryParam("neighborhood")
+            val zip = req.queryParam("zip")
+            val shelters = if (country.isNullOrBlank()) {
+                emptyList()
+            } else {
+                shelterService.getAll(country, state, city, neighborhood, zip)
+            }
+            res.send(shelters)
         }
-        res.send(shelters)
     })
 
     get("/api/admin/shelters/{id}", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
         val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
-        val shelter = runBlocking { shelterService.getById(id) }
-        if (shelter != null) {
-            res.send(shelter)
-        } else {
-            res.respondError(ValidationConstants.SHELTER_NOT_FOUND, 404)
+        runBlocking {
+            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+                return@runBlocking res.respondForbidden()
+            }
+            val shelter = shelterService.getById(id)
+            if (shelter != null) {
+                res.send(shelter)
+            } else {
+                res.respondError(ValidationConstants.SHELTER_NOT_FOUND, 404)
+            }
         }
     })
 
     post("/api/admin/shelters", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
         runBlocking {
+            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+                return@runBlocking res.respondForbidden()
+            }
             val request = req.receiveJson<CreateShelterRequest>()
             try {
                 val shelter = shelterService.create(request)
@@ -101,16 +123,24 @@ fun HttpRules.adminShelterRoutes() {
     })
 
     put("/api/admin/shelters/{id}", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
         val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
         runBlocking {
+            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+                return@runBlocking res.respondForbidden()
+            }
             val request = req.receiveJson<UpdateShelterRequest>()
             res.respondData(shelterService.update(id, request))
         }
     })
 
     delete("/api/admin/shelters/{id}", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
         val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
         runBlocking {
+            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+                return@runBlocking res.respondForbidden()
+            }
             res.respondSuccess(shelterService.delete(id))
         }
     })
