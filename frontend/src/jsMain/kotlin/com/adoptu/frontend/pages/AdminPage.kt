@@ -16,9 +16,9 @@ object AdminPageModule {
     fun init() {
         window.asDynamic().confirmBan = { confirmBan() }
         window.asDynamic().hideBanModal = { hideBanModal() }
-        window.asDynamic().banUser = { id: Int, name: String -> showBanModal(id, name) }
-        window.asDynamic().unbanUser = { id: Int -> unbanUser(id) }
-        window.asDynamic().deletePet = { id: Int -> deletePet(id) }
+        window.asDynamic().banUser = { id: dynamic, name: dynamic -> showBanModal(id.toString().toInt(), name.toString()) }
+        window.asDynamic().unbanUser = { id: dynamic -> unbanUser(id.toString().toInt()) }
+        window.asDynamic().deletePet = { id: dynamic -> deletePet(id.toString().toInt()) }
 
         document.getElementById("tab-users")?.addEventListener("click", { switchTab("users") })
         document.getElementById("tab-pets")?.addEventListener("click", { switchTab("pets") })
@@ -66,14 +66,14 @@ object AdminPageModule {
         container?.innerHTML = "<table class=\"admin-table\"><thead><tr><th>Email</th><th>Name</th><th>Roles</th><th>Status</th><th>Actions</th></tr></thead><tbody>" +
             list.joinToString("") { u ->
                 val roles = (u.activeRoles as? Array<dynamic>)?.joinToString(", ") ?: ""
-                val isBanned = u.banned == true
+                val isBanned = u.isBanned == true
                 val name = CommonModule.escapeHtml(u.displayName?.toString() ?: "")
                 val email = CommonModule.escapeHtml(u.email?.toString() ?: "")
                 val statusBadge = if (isBanned) "<span class=\"status-banned\">Banned</span>" else "<span class=\"status-active\">Active</span>"
                 val action = if (isBanned) {
-                    "<button class=\"btn btn-secondary\" onclick=\"unbanUser(${u.id})\">Unban</button>"
+                    "<button class=\"btn btn-secondary\" data-action=\"unbanUser\" data-arg=\"${u.id}\">Unban</button>"
                 } else {
-                    "<button class=\"btn btn-danger\" onclick=\"banUser(${u.id}, '${email.replace("'", "\\'")}')\">Ban</button>"
+                    "<button class=\"btn btn-danger\" data-action=\"banUser\" data-arg=\"${u.id}\" data-arg2=\"$email\">Ban</button>"
                 }
                 "<tr><td>$email</td><td>$name</td><td>$roles</td><td>$statusBadge</td><td>$action</td></tr>"
             } + "</tbody></table>"
@@ -133,7 +133,7 @@ object AdminPageModule {
             "<div class=\"pet-card\"><div class=\"pet-card-body\">" +
                 "<h3>${CommonModule.escapeHtml(p.name?.toString())}</h3><p class=\"pet-status\">${p.status}</p>" +
                 "<div class=\"pet-card-actions\"><a href=\"/pet/${p.id}\" class=\"btn\">View</a>" +
-                "<button class=\"btn btn-danger\" onclick=\"deletePet(${p.id})\">Delete</button></div>" +
+                "<button class=\"btn btn-danger\" data-action=\"deletePet\" data-arg=\"${p.id}\">Delete</button></div>" +
                 "</div></div>"
         }
     }

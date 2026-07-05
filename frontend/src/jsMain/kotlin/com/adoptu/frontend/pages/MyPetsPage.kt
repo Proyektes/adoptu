@@ -22,13 +22,13 @@ object MyPetsPageModule {
     private var selectedFiles: MutableList<dynamic> = mutableListOf()
 
     fun init() {
-        window.asDynamic().edit = { id: Int -> editPet(id) }
-        window.asDynamic().del = { id: Int -> deletePet(id) }
-        window.asDynamic().approveRequest = { id: Int -> approveRequest(id) }
-        window.asDynamic().rejectRequest = { id: Int -> rejectRequest(id) }
-        window.asDynamic().setPrimaryImage = { index: Int -> setPrimaryImage(index) }
-        window.asDynamic().removeExistingImage = { index: Int -> removeExistingImage(index) }
-        window.asDynamic().removePreview = { index: Int -> removePreview(index) }
+        window.asDynamic().edit = { id: dynamic -> editPet(id.toString().toInt()) }
+        window.asDynamic().del = { id: dynamic -> deletePet(id.toString().toInt()) }
+        window.asDynamic().approveRequest = { id: dynamic -> approveRequest(id.toString().toInt()) }
+        window.asDynamic().rejectRequest = { id: dynamic -> rejectRequest(id.toString().toInt()) }
+        window.asDynamic().setPrimaryImage = { index: dynamic -> setPrimaryImage(index.toString().toInt()) }
+        window.asDynamic().removeExistingImage = { index: dynamic -> removeExistingImage(index.toString().toInt()) }
+        window.asDynamic().removePreview = { index: dynamic -> removePreview(index.toString().toInt()) }
 
         document.getElementById("add-btn")?.addEventListener("click", { openAddForm() })
         document.getElementById("cancel-btn")?.addEventListener("click", { closeForm() })
@@ -115,8 +115,8 @@ object MyPetsPageModule {
             "<span class=\"pet-rescue-date\">$rescueDateHtml</span></p>" +
             "<p class=\"pet-status\">${CommonModule.escapeHtml(p.status?.toString())}</p>" +
             "<div class=\"pet-card-actions\"><a href=\"/pet/${p.id}\" class=\"btn\">${I18n.t("viewDetails")}</a>" +
-            "<button class=\"btn btn-secondary\" onclick=\"edit(${p.id})\">${I18n.t("edit")}</button>" +
-            "<button class=\"btn btn-secondary\" onclick=\"del(${p.id})\">${I18n.t("delete")}</button></div></div></div>"
+            "<button class=\"btn btn-secondary\" data-action=\"edit\" data-arg=\"${p.id}\">${I18n.t("edit")}</button>" +
+            "<button class=\"btn btn-secondary\" data-action=\"del\" data-arg=\"${p.id}\">${I18n.t("delete")}</button></div></div></div>"
     }
 
     private fun loadAdoptionRequests(pets: Array<dynamic>) {
@@ -151,8 +151,8 @@ object MyPetsPageModule {
             val date = js("new Date(r.createdAt)").toLocaleDateString()
             val message = if (r.message != null) CommonModule.escapeHtml(r.message.toString()) else "No message"
             val actions = if (r.status == "PENDING") {
-                "<div class=\"ar-actions\"><button class=\"btn btn-secondary\" onclick=\"approveRequest(${r.id})\">Approve</button>" +
-                    "<button class=\"btn btn-secondary\" onclick=\"rejectRequest(${r.id})\">Reject</button></div>"
+                "<div class=\"ar-actions\"><button class=\"btn btn-secondary\" data-action=\"approveRequest\" data-arg=\"${r.id}\">Approve</button>" +
+                    "<button class=\"btn btn-secondary\" data-action=\"rejectRequest\" data-arg=\"${r.id}\">Reject</button></div>"
             } else ""
             "<div class=\"adoption-request-card\"><div class=\"ar-pet\">${emoji[r.petType.toString()] ?: "🐾"} ${CommonModule.escapeHtml(r.petName?.toString())}</div>" +
                 "<div class=\"ar-status status-${r.status.toString().lowercase()}\">${CommonModule.escapeHtml(r.status?.toString())}</div>" +
@@ -271,13 +271,13 @@ object MyPetsPageModule {
             val primaryControl = if (img.isPrimary == true) {
                 "<span class=\"primary-badge\">★</span>"
             } else {
-                "<button type=\"button\" class=\"primary-btn\" onclick=\"setPrimaryImage($index)\" title=\"Set as primary\">☆</button>"
+                "<button type=\"button\" class=\"primary-btn\" data-action=\"setPrimaryImage\" data-arg=\"$index\" title=\"Set as primary\">☆</button>"
             }
-            "<div class=\"preview-item$primaryClass\"><img src=\"${img.imageUrl}\">$primaryControl<button type=\"button\" onclick=\"removeExistingImage($index)\">×</button></div>"
+            "<div class=\"preview-item$primaryClass\"><img src=\"${img.imageUrl}\">$primaryControl<button type=\"button\" data-action=\"removeExistingImage\" data-arg=\"$index\">×</button></div>"
         }.joinToString("")
         val newFilesHtml = selectedFiles.mapIndexed { index, file ->
             val url = window.asDynamic().URL.createObjectURL(file)
-            "<div class=\"preview-item\"><img src=\"$url\"><button type=\"button\" onclick=\"removePreview($index)\">×</button></div>"
+            "<div class=\"preview-item\"><img src=\"$url\"><button type=\"button\" data-action=\"removePreview\" data-arg=\"$index\">×</button></div>"
         }.joinToString("")
         previewContainer.innerHTML = existingHtml + newFilesHtml
     }

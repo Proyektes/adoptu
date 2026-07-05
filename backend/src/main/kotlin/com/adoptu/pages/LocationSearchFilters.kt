@@ -17,7 +17,6 @@ fun DIV.locationSearchFilters(
             select {
                 id = "search-country"
                 name = "country"
-                onChange = "window.onCountryChange()"
                 countrySelect("search-country", true, "selectCountryToSearch")
             }
         }
@@ -61,6 +60,7 @@ window.onCountryChange = function() {
     var hint = document.querySelector('.location-search-hint');
     if (hint) hint.style.display = hasCountry ? 'none' : '';
 };
+document.getElementById('search-country').addEventListener('change', window.onCountryChange);
 // Shared helper: build URLSearchParams from the filter fields.
 // Returns null if country is not selected.
 window.buildLocationSearchParams = function() {

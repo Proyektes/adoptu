@@ -78,8 +78,8 @@ private fun locationCard(loc: dynamic, includeActions: Boolean): String {
     if (loc.website != null) sb.append("<p class=\"location-website\"><a href=\"${loc.website}\" target=\"_blank\">${I18n.t("website")}</a></p>")
     if (loc.description != null) sb.append("<p class=\"location-description\">${if (includeActions) CommonModule.escapeHtml(loc.description.toString()) else loc.description}</p>")
     if (includeActions) {
-        sb.append("<div class=\"pet-card-actions\"><button class=\"btn\" onclick=\"editLocation(${loc.id})\">${I18n.t("edit")}</button> ")
-        sb.append("<button class=\"btn btn-danger\" onclick=\"deleteLocation(${loc.id})\">${I18n.t("delete")}</button></div>")
+        sb.append("<div class=\"pet-card-actions\"><button class=\"btn\" data-action=\"editLocation\" data-arg=\"${loc.id}\">${I18n.t("edit")}</button> ")
+        sb.append("<button class=\"btn btn-danger\" data-action=\"deleteLocation\" data-arg=\"${loc.id}\">${I18n.t("delete")}</button></div>")
     }
     sb.append("</div>")
     return sb.toString()
@@ -93,8 +93,8 @@ object AdminSterilizationLocationsPageModule {
     fun init() {
         window.asDynamic().showForm = { showForm() }
         window.asDynamic().hideForm = { hideForm() }
-        window.asDynamic().editLocation = { id: Int -> editLocation(id) }
-        window.asDynamic().deleteLocation = { id: Int -> deleteLocation(id) }
+        window.asDynamic().editLocation = { id: dynamic -> editLocation(id.toString().toInt()) }
+        window.asDynamic().deleteLocation = { id: dynamic -> deleteLocation(id.toString().toInt()) }
 
         document.getElementById("location-form")?.addEventListener("submit", { e: Event -> onSubmit(e) })
         loadLocations()

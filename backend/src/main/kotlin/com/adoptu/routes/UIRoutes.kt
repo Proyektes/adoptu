@@ -129,7 +129,8 @@ fun HttpRules.uiRoutes() {
                     h1 { +"Report as Spam & Block Rescuer" }
                     p { +"Are you sure you want to block this rescuer from sending you more requests?" }
                     button(type = ButtonType.button) {
-                        onClick = "blockRescuerAndRedirect('$token')"
+                        attributes["data-action"] = "blockRescuerAndRedirect"
+                        attributes["data-arg"] = token
                         +"Block Rescuer"
                     }
                     script(src = "/static/js/common.js") { attributes["nonce"] = CspNonce.current() }

@@ -17,11 +17,10 @@ fun HTML.sheltersPage(navParams: NavParams = NavParams()) {
                 locationSearchFilters(
                     includeNeighborhood = true
                 )
-                button(classes = "btn", type = ButtonType.button) { 
+                button(classes = "btn", type = ButtonType.button) {
                     id = "search-btn"
-                    attributes["data-i18n"] = "searchShelters"; 
-                    onClick = "searchShelters()"; 
-                    +"Search" 
+                    attributes["data-i18n"] = "searchShelters";
+                    +"Search"
                 }
             }
             div { id = "shelters-error"; classes = setOf("error-message"); style = "display:none" }

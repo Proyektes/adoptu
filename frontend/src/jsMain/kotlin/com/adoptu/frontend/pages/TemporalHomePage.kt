@@ -141,7 +141,7 @@ object TemporalHomeDetailPageModule {
 @JsName("TemporalHomeProfilePage")
 object TemporalHomeProfilePageModule {
     fun init() {
-        window.asDynamic().blockRescuer = { rescuerId: Int -> blockRescuer(rescuerId) }
+        window.asDynamic().blockRescuer = { rescuerId: dynamic -> blockRescuer(rescuerId.toString().toInt()) }
         ApiClientModule.me().then<Unit> { user ->
             val roles = user.activeRoles as? Array<String>
             if (user.authenticated == false) {
@@ -167,7 +167,7 @@ object TemporalHomeProfilePageModule {
             container?.innerHTML = list.joinToString("") { r ->
                 val petName = r.petName?.toString()?.takeIf { it.isNotEmpty() } ?: "a pet"
                 "<div class=\"request-card\"><p><strong>${r.rescuerName}</strong> wants help with $petName</p><p>${r.message}</p>" +
-                    "<button class=\"btn btn-small\" onclick=\"blockRescuer(${r.rescuerId})\">Block Rescuer</button></div>"
+                    "<button class=\"btn btn-small\" data-action=\"blockRescuer\" data-arg=\"${r.rescuerId}\">Block Rescuer</button></div>"
             }
         }.catch { err: dynamic -> console.error(err) }
     }

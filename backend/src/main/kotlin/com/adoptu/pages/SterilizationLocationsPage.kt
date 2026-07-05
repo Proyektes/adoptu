@@ -18,11 +18,10 @@ fun HTML.sterilizationLocationsPage(navParams: NavParams = NavParams()) {
                 locationSearchFilters(
                     includeNeighborhood = true
                 )
-                button(classes = "btn", type = ButtonType.button) { 
+                button(classes = "btn", type = ButtonType.button) {
                     id = "search-btn"
-                    attributes["data-i18n"] = "search"; 
-                    onClick = "searchLocations()"; 
-                    +"Search" 
+                    attributes["data-i18n"] = "search";
+                    +"Search"
                 }
             }
             
@@ -50,7 +49,7 @@ fun HTML.adminSterilizationLocationsPage(navParams: NavParams = NavParams()) {
             button(classes = "btn") {
                 id = "add-btn"
                 attributes["data-i18n"] = "addLocation"
-                onClick = "showForm()"
+                attributes["data-action"] = "showForm"
                 +"Add Location"
             }
             
@@ -110,7 +109,7 @@ fun HTML.adminSterilizationLocationsPage(navParams: NavParams = NavParams()) {
                             button(type = ButtonType.button) {
                                 classes = setOf("btn", "btn-secondary")
                                 attributes["data-i18n"] = "cancel"
-                                onClick = "hideForm()"
+                                attributes["data-action"] = "hideForm"
                                 +"Cancel"
                             }
                         }

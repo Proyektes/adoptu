@@ -37,6 +37,34 @@ object CommonModule {
         }
     }
 
+    // Delegated click handler backing every data-action="fnName" [data-arg="..."] [data-arg2="..."]
+    // element - replaces per-element onclick="..." attributes, which a nonce-based CSP script-src
+    // can't allow (nonces apply to <script> elements, not inline event-handler attributes) without
+    // a separate, broader script-src-attr 'unsafe-inline' allowance. One delegated listener on
+    // document also survives elements being replaced via innerHTML - no per-render re-attachment.
+    fun initClickActions() {
+        document.addEventListener("click", { event ->
+            val origin = event.target as? Element ?: return@addEventListener
+            val el = origin.closest("[data-action]") as? HTMLElement ?: return@addEventListener
+            when (val action = el.getAttribute("data-action")) {
+                null -> {}
+                "hide-self" -> el.style.display = "none"
+                else -> {
+                    val fn = window.asDynamic()[action]
+                    if (jsTypeOf(fn) == "function") {
+                        val arg = el.getAttribute("data-arg")
+                        val arg2 = el.getAttribute("data-arg2")
+                        when {
+                            arg2 != null -> fn(arg, arg2)
+                            arg != null -> fn(arg)
+                            else -> fn()
+                        }
+                    }
+                }
+            }
+        })
+    }
+
     fun initDropdowns() {
         // Handle user menu dropdown
         val userMenus = document.querySelectorAll(".user-menu")

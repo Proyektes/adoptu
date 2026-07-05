@@ -38,6 +38,8 @@ fun main() {
         window.asDynamic().AdoptuRegisterPage = RegisterPageModule
         window.asDynamic().AdoptuMyPets = MyPetsPageModule
 
+        CommonModule.initClickActions()
+
         CommonModule.initI18n(null).then<Unit> {
             try {
                 when {
@@ -52,7 +54,7 @@ fun main() {
                     path == "/admin/shelters" || path == "/admin/shelters/" -> AdminSheltersPageModule.init()
                     path == "/temporal-homes" || path == "/temporal-homes/" -> TemporalHomeSearchPageModule.init()
                     path == "/temporal-home" || path == "/temporal-home/" -> TemporalHomeProfilePageModule.init()
-                    path.startsWith("/temporal-home/block/") -> TemporalHomeBlockPageModule.init()
+                    path == "/temporal-home/block" -> TemporalHomeBlockPageModule.init()
                     path.startsWith("/temporal-home/") -> TemporalHomeDetailPageModule.init()
                     path == "/photographers" || path == "/photographers/" -> PhotographersPageModule.init()
                     path == "/sterilization-locations" || path == "/sterilization-locations/" -> SterilizationLocationsPageModule.init()

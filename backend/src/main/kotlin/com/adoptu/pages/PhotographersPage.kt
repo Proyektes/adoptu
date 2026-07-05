@@ -19,11 +19,10 @@ fun HTML.photographersPage(navParams: NavParams = NavParams()) {
                 locationSearchFilters(
                     includeNeighborhood = true
                 )
-                button(classes = "btn", type = ButtonType.button) { 
+                button(classes = "btn", type = ButtonType.button) {
                     id = "search-btn"
-                    attributes["data-i18n"] = "search"; 
-                    onClick = "searchPhotographers()"; 
-                    +"Search" 
+                    attributes["data-i18n"] = "search";
+                    +"Search"
                 }
             }
             div { id = "photographers"; classes = setOf("photographer-grid"); +"" }

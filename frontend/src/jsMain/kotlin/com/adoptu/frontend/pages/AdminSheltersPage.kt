@@ -16,8 +16,8 @@ object AdminSheltersPageModule {
     private var editingId: Int? = null
 
     fun init() {
-        window.asDynamic().editShelter = { id: Int -> editShelter(id) }
-        window.asDynamic().deleteShelter = { id: Int -> deleteShelter(id) }
+        window.asDynamic().editShelter = { id: dynamic -> editShelter(id.toString().toInt()) }
+        window.asDynamic().deleteShelter = { id: dynamic -> deleteShelter(id.toString().toInt()) }
         window.asDynamic().cancelEdit = { clearForm() }
         document.getElementById("cancel-btn")?.addEventListener("click", { clearForm() })
 
@@ -83,8 +83,8 @@ object AdminSheltersPageModule {
             "<tr><td><strong>${CommonModule.escapeHtml(s.name?.toString())}</strong></td>" +
                 "<td>${CommonModule.escapeHtml(s.city?.toString() ?: "")}, ${CommonModule.escapeHtml(s.state?.toString() ?: "")}, ${CommonModule.escapeHtml(I18n.translateCountry(s.country?.toString()) ?: "")}</td>" +
                 "<td>${CommonModule.escapeHtml(contact.toString())}</td>" +
-                "<td><button class=\"btn btn-secondary\" onclick=\"editShelter(${s.id})\">${I18n.t("edit")}</button> " +
-                "<button class=\"btn btn-danger\" onclick=\"deleteShelter(${s.id})\">${I18n.t("delete")}</button></td></tr>"
+                "<td><button class=\"btn btn-secondary\" data-action=\"editShelter\" data-arg=\"${s.id}\">${I18n.t("edit")}</button> " +
+                "<button class=\"btn btn-danger\" data-action=\"deleteShelter\" data-arg=\"${s.id}\">${I18n.t("delete")}</button></td></tr>"
         }
         container?.innerHTML = "<table class=\"admin-table\"><thead><tr><th>${I18n.t("name")}</th><th>${I18n.t("location")}</th>" +
             "<th>${I18n.t("contact")}</th><th>${I18n.t("actions")}</th></tr></thead><tbody>$rows</tbody></table>"

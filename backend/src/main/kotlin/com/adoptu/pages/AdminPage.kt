@@ -54,13 +54,13 @@ fun HTML.adminPage(navParams: NavParams = NavParams()) {
                         button(type = ButtonType.button) {
                             classes = setOf("btn", "btn-danger")
                             attributes["data-i18n"] = "banUser"
-                            onClick = "confirmBan()"
+                            attributes["data-action"] = "confirmBan"
                             +"Ban User"
                         }
                         button(type = ButtonType.button) {
                             classes = setOf("btn", "btn-secondary")
                             attributes["data-i18n"] = "cancel"
-                            onClick = "hideBanModal()"
+                            attributes["data-action"] = "hideBanModal"
                             +"Cancel"
                         }
                     }
