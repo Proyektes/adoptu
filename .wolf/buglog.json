@@ -629,6 +629,582 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-04T20:52:13.688Z"
+    },
+    {
+      "id": "bug-040",
+      "timestamp": "2026-07-04T23:56:08.147Z",
+      "error_message": "Significant refactor of ",
+      "file": "infra/variables.tf",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 4→5 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tf"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T23:56:08.147Z"
+    },
+    {
+      "id": "bug-041",
+      "timestamp": "2026-07-04T23:56:41.420Z",
+      "error_message": "Incorrect value in code",
+      "file": "infra/ecs.tf",
+      "root_cause": "Had \"jdbc:postgresql://${aws_db_instance.postgres.addr",
+      "fix": "Changed to \"jdbc:postgresql://${aws_db_instance.postgres.addr",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tf"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T23:56:41.420Z"
+    },
+    {
+      "id": "bug-042",
+      "timestamp": "2026-07-04T23:58:57.579Z",
+      "error_message": "Null/undefined access in ",
+      "file": "infra/security_groups.tf",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tf"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T23:58:57.579Z"
+    },
+    {
+      "id": "bug-043",
+      "timestamp": "2026-07-05T00:56:15.885Z",
+      "error_message": "Significant refactor of ",
+      "file": "infra/network.tf",
+      "root_cause": "14 lines replaced/restructured",
+      "fix": "Rewrote 36→45 lines (14 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tf"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T00:56:15.885Z"
+    },
+    {
+      "id": "bug-044",
+      "timestamp": "2026-07-05T02:12:30.777Z",
+      "error_message": "Significant refactor of ",
+      "file": "infra/security_groups.tf",
+      "root_cause": "8 lines replaced/restructured",
+      "fix": "Rewrote 10→21 lines (8 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tf"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T02:12:30.777Z"
+    },
+    {
+      "id": "bug-045",
+      "timestamp": "2026-07-05T02:13:01.346Z",
+      "error_message": "Incorrect value in code",
+      "file": "infra/security_groups.tf",
+      "root_cause": "Had \"App port from CloudFront over IPv4 (CloudFront fa",
+      "fix": "Changed to \"App port from CloudFront over IPv4 (falls back to",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tf"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T02:13:01.346Z"
+    },
+    {
+      "id": "bug-046",
+      "timestamp": "2026-07-05T02:14:02.980Z",
+      "error_message": "Significant refactor of ",
+      "file": "infra/data.tf",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 11→3 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tf"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T02:14:02.981Z"
+    },
+    {
+      "id": "bug-047",
+      "timestamp": "2026-07-05T02:21:29.261Z",
+      "error_message": "Significant refactor of ",
+      "file": "infra/rds.tf",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 8→10 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tf"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T02:21:29.261Z"
+    },
+    {
+      "id": "bug-048",
+      "timestamp": "2026-07-05T02:22:31.841Z",
+      "error_message": "Significant refactor of ",
+      "file": "infra/lambda/dns_updater/index.py",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 24→41 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T02:22:31.841Z"
+    },
+    {
+      "id": "bug-049",
+      "timestamp": "2026-07-05T02:28:00.128Z",
+      "error_message": "Wrong reference: return should be print",
+      "file": "infra/lambda/dns_updater/index.py",
+      "root_cause": "Used \"return\" instead of \"print\"",
+      "fix": "Changed return → print",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T02:28:00.128Z"
+    },
+    {
+      "id": "bug-050",
+      "timestamp": "2026-07-05T02:28:05.919Z",
+      "error_message": "Wrong return value",
+      "file": "infra/lambda/dns_updater/index.py",
+      "root_cause": "Was returning: {\"skipped\": f\"lastStatus={detail.get('lastStatus')",
+      "fix": "Now returns: result",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-05T02:28:17.390Z"
+    },
+    {
+      "id": "bug-051",
+      "timestamp": "2026-07-05T02:28:12.283Z",
+      "error_message": "Significant refactor of ",
+      "file": "infra/lambda/dns_updater/index.py",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 8→13 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T02:28:12.283Z"
+    },
+    {
+      "id": "bug-052",
+      "timestamp": "2026-07-05T02:38:20.578Z",
+      "error_message": "Significant refactor of ",
+      "file": "infra/terraform.tfvars",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 3→4 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tfvars"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T02:38:20.578Z"
+    },
+    {
+      "id": "bug-053",
+      "timestamp": "2026-07-05T03:42:59.463Z",
+      "error_message": "Significant refactor of ",
+      "file": "infra/variables.tf",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 4→5 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tf"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T03:42:59.463Z"
+    },
+    {
+      "id": "bug-054",
+      "timestamp": "2026-07-05T03:48:32.969Z",
+      "error_message": "Incorrect value in code",
+      "file": "infra/terraform.tfvars",
+      "root_cause": "Had \"sha256:d841f1e332819a7ec356c04924febe54da94f50d44",
+      "fix": "Changed to \"sha256:61693411917da2f36166a74979da3dfba7e2ea13f0",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tfvars"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T03:48:32.969Z"
+    },
+    {
+      "id": "bug-055",
+      "timestamp": "2026-07-05T04:07:09.925Z",
+      "error_message": "Incorrect value in code",
+      "file": "infra/terraform.tfvars",
+      "root_cause": "Had \"sha256:61693411917da2f36166a74979da3dfba7e2ea13f0",
+      "fix": "Changed to \"sha256:d841f1e332819a7ec356c04924febe54da94f50d44",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tfvars"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T04:07:09.925Z"
+    },
+    {
+      "id": "bug-056",
+      "timestamp": "2026-07-05T04:17:25.263Z",
+      "error_message": "Significant refactor of ",
+      "file": "Dockerfile",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 12→16 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "unknown"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T04:17:25.263Z"
+    },
+    {
+      "id": "bug-057",
+      "timestamp": "2026-07-05T04:21:51.303Z",
+      "error_message": "Incorrect value in code",
+      "file": "infra/terraform.tfvars",
+      "root_cause": "Had \"sha256:d841f1e332819a7ec356c04924febe54da94f50d44",
+      "fix": "Changed to \"sha256:9177b0b7786c7aad4540bf5564867ae83105ffd539",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tfvars"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T04:21:51.303Z"
+    },
+    {
+      "id": "bug-058",
+      "timestamp": "2026-07-05T06:09:38.401Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/ShelterRoutes.kt",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 54→79 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T06:09:38.401Z"
+    },
+    {
+      "id": "bug-059",
+      "timestamp": "2026-07-05T06:10:09.879Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/SterilizationLocationRoutes.kt",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 44→74 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T06:10:09.879Z"
+    },
+    {
+      "id": "bug-060",
+      "timestamp": "2026-07-05T06:16:41.638Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/test/kotlin/com/adoptu/routes/ShelterRoutesE2ETest.kt",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 235→333 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T06:16:41.638Z"
+    },
+    {
+      "id": "bug-061",
+      "timestamp": "2026-07-05T06:19:03.358Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/test/kotlin/com/adoptu/routes/SterilizationLocationRoutesE2ETest.kt",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 228→326 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T06:19:03.358Z"
+    },
+    {
+      "id": "bug-062",
+      "timestamp": "2026-07-05T06:24:41.817Z",
+      "error_message": "Incorrect value in code",
+      "file": "infra/terraform.tfvars",
+      "root_cause": "Had \"sha256:9177b0b7786c7aad4540bf5564867ae83105ffd539",
+      "fix": "Changed to \"sha256:a900bf80f2f97b1fc157b06cc6f756246318678157",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tfvars"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T06:24:41.817Z"
+    },
+    {
+      "id": "bug-063",
+      "timestamp": "2026-07-05T06:25:03.228Z",
+      "error_message": "Incorrect value in code",
+      "file": "infra/variables.tf",
+      "root_cause": "Had 't be produced by substituting an env var (${?VAR}",
+      "fix": "Changed to 't be produced by substituting an env var (env var",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tf"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T06:25:03.228Z"
+    },
+    {
+      "id": "bug-064",
+      "timestamp": "2026-07-05T15:38:13.568Z",
+      "error_message": "Missing guard clause",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt",
+      "root_cause": "No early return/throw for edge case: !navParams.isAdmin",
+      "fix": "Added guard clause: if (!navParams.isAdmin)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-05T15:38:19.832Z"
+    },
+    {
+      "id": "bug-065",
+      "timestamp": "2026-07-05T15:39:47.285Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/test/kotlin/com/adoptu/routes/UIRoutesE2ETest.kt",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 11→35 lines (2 removed) | Also: fun `GET admin shelters returns 200 for unauthenti; assertEquals(200, TestHttp.get(\"${handle.baseUrl}/ | Also: fun `GET admin sterilization-locations returns 200; assertEquals(200, TestHttp.get(\"${handle.baseUrl}/",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-07-05T15:40:05.735Z"
+    },
+    {
+      "id": "bug-066",
+      "timestamp": "2026-07-05T15:46:28.535Z",
+      "error_message": "Incorrect value in code",
+      "file": "infra/terraform.tfvars",
+      "root_cause": "Had \"sha256:a900bf80f2f97b1fc157b06cc6f756246318678157",
+      "fix": "Changed to \"sha256:af81154f9bd0de2e3cde56bba96acf6976c9e786a7",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tfvars"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T15:46:28.535Z"
+    },
+    {
+      "id": "bug-067",
+      "timestamp": "2026-07-05T16:05:33.095Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/kotlin/com/adoptu/services/TemporalHomeService.kt",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 5→8 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T16:05:33.095Z"
+    },
+    {
+      "id": "bug-068",
+      "timestamp": "2026-07-05T16:06:01.338Z",
+      "error_message": "Null/undefined access in ",
+      "file": "backend/src/main/kotlin/com/adoptu/di/AppModule.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T16:06:01.338Z"
+    },
+    {
+      "id": "bug-069",
+      "timestamp": "2026-07-05T16:07:50.764Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/kotlin/com/adoptu/services/validation/TemporalHomesValidationService.kt",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 12→6 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T16:07:50.764Z"
+    },
+    {
+      "id": "bug-070",
+      "timestamp": "2026-07-05T16:08:04.834Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/test/kotlin/com/adoptu/services/validation/TemporalHomesValidationServiceTest.kt",
+      "root_cause": "14 lines replaced/restructured",
+      "fix": "Rewrote 34→5 lines (14 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T16:08:04.834Z"
+    },
+    {
+      "id": "bug-071",
+      "timestamp": "2026-07-05T16:11:40.222Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/test/kotlin/com/adoptu/mocks/TestDatabase.kt",
+      "root_cause": "Had \"DELETE FROM user_passwords\"",
+      "fix": "Changed to \"DELETE FROM spam_report_tokens\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T16:11:40.222Z"
+    },
+    {
+      "id": "bug-072",
+      "timestamp": "2026-07-05T16:12:21.703Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/test/kotlin/com/adoptu/routes/TemporalHomeRoutesE2ETest.kt",
+      "root_cause": "10 lines replaced/restructured",
+      "fix": "Rewrote 50→59 lines (10 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T16:12:21.703Z"
+    },
+    {
+      "id": "bug-073",
+      "timestamp": "2026-07-05T16:21:32.124Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/test/kotlin/com/adoptu/adapters/db/DatabaseFactoryTest.kt",
+      "root_cause": "Had `DatabaseFactory has 22 tables`",
+      "fix": "Changed to `DatabaseFactory has 23 tables`",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T16:21:32.124Z"
+    },
+    {
+      "id": "bug-074",
+      "timestamp": "2026-07-05T16:26:18.074Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt",
+      "root_cause": "21 lines replaced/restructured",
+      "fix": "Rewrote 26→4 lines (21 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T16:26:18.074Z"
+    },
+    {
+      "id": "bug-075",
+      "timestamp": "2026-07-05T16:32:50.086Z",
+      "error_message": "Incorrect value in code",
+      "file": "infra/terraform.tfvars",
+      "root_cause": "Had \"sha256:af81154f9bd0de2e3cde56bba96acf6976c9e786a7",
+      "fix": "Changed to \"sha256:8f686085e00339215a7b8584042fd6ae04c757fe09",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tfvars"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T16:32:50.086Z"
     }
   ]
 }

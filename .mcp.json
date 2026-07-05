@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "tokensave": {
+      "command": "/home/laf/.cargo/bin/tokensave",
+      "args": [
+        "serve"
+      ]
+    }
+  }
+}

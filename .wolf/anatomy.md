@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-04T20:52:13.666Z
-> Files: 1016 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-05T16:32:50.063Z
+> Files: 1042 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -23,6 +23,10 @@
 
 - `shot.mjs` — Declares browser (~205 tok)
 
+## ../../.claude/jobs/e8703a86/tmp/
+
+- `rps_test.py` — worker, main, pct (~578 tok)
+
 ## ../../.claude/plans/
 
 - `enumerated-yawning-cloud.md` — Country enum as single source of truth (~1699 tok)
@@ -43,7 +47,7 @@
 - `CLAUDE.md` — OpenWolf (~57 tok)
 - `docker-compose.test.yml` — Docker Compose: 1 services (~251 tok)
 - `docker-compose.yml` — Docker Compose services (~241 tok)
-- `Dockerfile` — Multi-stage build: musl-based Corretto 25 builder (Shadow-plugin fat jar) -> jdeps-derived jlink minimal JRE on Alpine, no dead Sass step, container-aware JVM flags (~520 tok)
+- `Dockerfile` — Docker container definition (~743 tok)
 - `gradle.properties` (~159 tok)
 - `gradlew` — you may not use this file except in compliance with the License. (~2292 tok)
 - `gradlew.bat` (~748 tok)
@@ -1836,8 +1840,8 @@
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/
 
-- `DatabaseFactory.kt` — init, createDefaultAdmin (~1434 tok)
-- `Models.kt` (~3667 tok)
+- `DatabaseFactory.kt` — init, createDefaultAdmin (~1441 tok)
+- `Models.kt` (~3916 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/ (canonical)
 
@@ -1849,6 +1853,7 @@
 ## backend/src/main/kotlin/com/adoptu/adapters/db/repositories/
 
 - `PetRepository.kt` — PetRepositoryImpl: rowToPetDto, getPetImages, getAll, getAllUnfiltered (~4397 tok)
+- `TemporalHomeRepository.kt` — Data class: TemporalHomeRepositoryImpl (~3509 tok)
 - `UserRepository.kt` — UserRepository: getActiveRolesForUser, getById, getByEmail, getAllUsers (~6321 tok)
 - `UserShelterRepository.kt` — UserShelterRepository: rowToDto, getByUserId, create, update (~2589 tok)
 - `UserSterilizationLocationRepository.kt` — UserSterilizationLocationRepository: rowToDto, getByUserId, create, update (~2404 tok)
@@ -1860,13 +1865,17 @@
 
 - `Country.kt` — Country enum: canonical list of 112 countries (displayName + i18nKey), `fromDisplayName()` resolves exact/accent-insensitive/case-insensitive input to an enum value. Single source of truth for the country dropdown (Shared.kt), validation, and DB storage (~1700 tok)
 
+## backend/src/main/kotlin/com/adoptu/config/
+
+- `AppConfig.kt` — Drop-in replacement for Ktor's `io.ktor.server.config.ApplicationConfig` (same (~325 tok)
+
 ## backend/src/main/kotlin/com/adoptu/config/ (helidon-nima-migration worktree)
 
 - `AppConfig.kt` — drop-in replacement for Ktor's `ApplicationConfig` (same `propertyOrNull(path)?.getString()`/`property(path).getString()`/`.getList()` shape), backed by `com.typesafe.config.Config` directly. `AppConfig.load()` reads `application.conf` unchanged; `AppConfig.fromMap(Map<String,Any>)` is the test-only equivalent of Ktor's `MapApplicationConfig` (~200 tok)
 
 ## backend/src/main/kotlin/com/adoptu/di/
 
-- `AppModule.kt` — appModule, getOrigins, createImageStorageAdapter (~1150 tok)
+- `AppModule.kt` — appModule, getOrigins, createImageStorageAdapter (~1223 tok)
 
 ## backend/src/main/kotlin/com/adoptu/dto/input/
 
@@ -1888,6 +1897,7 @@
 ## backend/src/main/kotlin/com/adoptu/ports/
 
 - `PetRepositoryPort.kt` — getAll, getAllUnfiltered, getById, create, update (~682 tok)
+- `TemporalHomeRepositoryPort.kt` — Returns (temporalHomeId, rescuerId) and marks the token used, or null if invalid/expired/already use (~343 tok)
 - `UserRepositoryPort.kt` — getById, getByEmail, getAllUsers, getPhotographers, getRescuers (~614 tok)
 - `UserShelterRepositoryPort.kt` — getByUserId, create, update, delete, search (~182 tok)
 - `UserSterilizationLocationRepositoryPort.kt` — getByUserId, create, update, delete, search (~219 tok)
@@ -1897,7 +1907,10 @@
 - `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~6777 tok)
 - `CountryRoutes.kt` — HttpRules, regionFromLocale (~320 tok)
 - `PhotographerRoutes.kt` — HttpRules, validateUser (~2385 tok)
-- `UIRoutes.kt` — Data class: NavParams (~2431 tok)
+- `ShelterRoutes.kt` — HttpRules, HttpRules (~1627 tok)
+- `SterilizationLocationRoutes.kt` — HttpRules, HttpRules (~1754 tok)
+- `TemporalHomeRoutes.kt` — HttpRules (~2738 tok)
+- `UIRoutes.kt` — Data class: NavParams (~2628 tok)
 - `UserShelterRoutes.kt` — HttpRules (~767 tok)
 - `UsersRoutes.kt` — Data class: UpdateProfileRequest (~4298 tok)
 - `UserSterilizationLocationRoutes.kt` — HttpRules (~820 tok)
@@ -1911,9 +1924,14 @@
 
 - `PetService.kt` — PetService: getAll, getMine, getById, create (~3030 tok)
 - `ProfileEmailVerificationService.kt` — Shelter and sterilization-location profiles carry their own public "contact email", (~1823 tok)
+- `TemporalHomeService.kt` — Validates and consumes a spam-report token (see sendRequest), then blocks the rescuer it names. (~1332 tok)
 - `UserService.kt` — UserService: getById, getByEmail, getAllUsers, getRescuers (~892 tok)
 - `UserShelterService.kt` — UserShelterService: getByUserId, create, update, delete (~993 tok)
 - `UserSterilizationLocationService.kt` — UserSterilizationLocationService: getByUserId, create, update, delete (~976 tok)
+
+## backend/src/main/kotlin/com/adoptu/services/validation/
+
+- `TemporalHomesValidationService.kt` — TemporalHomesValidationService: validateSession, validateUserById, validateUser, validateId (~1127 tok)
 
 ## backend/src/main/kotlin/com/adoptu/web/ (helidon-nima-migration worktree — replaces the deleted `plugins/` package)
 
@@ -1924,6 +1942,10 @@
 - `RequestExtensions.kt` — `ServerRequest` extensions: `pathParam`/`queryParam`/`receiveJson<T>()`/`receiveText()` (defensive against empty/absent body, see bug-037)/`receiveFormParameters()`/`receiveMultipart()` (~300 tok)
 - `Responses.kt` — `ServerResponse` extensions: `respondError`/`respondUnauthorized`/`respondForbidden`/`respondNotFound`/`respondInvalidId`/`respondRedirect`/`respondData`/`respondSuccess`, replacing `plugins/Responses.kt` (dropped the confirmed-dead `DataResponder`/`SuccessResponder`/`CustomResponder` classes) (~250 tok)
 - `Sessions.kt` — HMAC-SHA256-signed cookie session (`getSession()`/`setSession()`/`clearSession()` on `ServerRequest`/`ServerResponse`), replacing Ktor's `Sessions` plugin; not wire-compatible with old Ktor session cookies (one-time silent logout on cutover, expected) (~350 tok)
+
+## backend/src/main/resources/
+
+- `application.conf` — Declares STRING (~753 tok)
 
 ## backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/ (graalvm-native-image worktree)
 
@@ -1950,15 +1972,19 @@
 
 ## backend/src/test/kotlin/com/adoptu/adapters/db/
 
-- `DatabaseFactoryTest.kt` — Declares DatabaseFactoryTest (~3382 tok)
+- `DatabaseFactoryTest.kt` — Declares DatabaseFactoryTest (~3390 tok)
 
 ## backend/src/test/kotlin/com/adoptu/mocks/
 
-- `TestDatabase.kt` — initH2, clearAllData (~976 tok)
+- `TestDatabase.kt` — initH2, clearAllData (~1008 tok)
 
 ## backend/src/test/kotlin/com/adoptu/routes/
 
 - `PhotographerRoutesE2ETest.kt` — E2E tests for [photographerRoutes]. (~7449 tok)
+- `ShelterRoutesE2ETest.kt` — ShelterRoutesE2ETest: setup, createTestUsers, createShelterInDb (~5411 tok)
+- `SterilizationLocationRoutesE2ETest.kt` — SterilizationLocationRoutesE2ETest: setup, createTestUsers, testModules, startServer (~6084 tok)
+- `TemporalHomeRoutesE2ETest.kt` — E2E tests for [temporalHomeRoutes]. (~7291 tok)
+- `UIRoutesE2ETest.kt` — End-to-end tests for [uiRoutes]: starts a real Helidon Nima [TestServer] mounting the full (~6833 tok)
 - `UserShelterRoutesE2ETest.kt` — UserShelterRoutesE2ETest: setup, createTestUsers, startServer, createShelterInDb (~3875 tok)
 - `UsersRoutesE2ETest.kt` — Verbatim port of the old Ktor test's inline `module { ... }` block of mocked adapters. (~11108 tok)
 - `UserSterilizationLocationRoutesE2ETest.kt` — UserSterilizationLocationRoutesE2ETest: setup, createTestUsers, createLocationInDb (~4424 tok)
@@ -1966,8 +1992,13 @@
 ## backend/src/test/kotlin/com/adoptu/services/
 
 - `PetServiceTest.kt` — PetServiceTest: setup (~7228 tok)
+- `TemporalHomeServiceTest.kt` — TemporalHomeServiceTest: setup, cleanup (~4375 tok)
 - `UserShelterServiceTest.kt` — UserShelterServiceTest: setup (~4913 tok)
 - `UserSterilizationLocationServiceTest.kt` — UserSterilizationLocationServiceTest: setup (~4822 tok)
+
+## backend/src/test/kotlin/com/adoptu/services/validation/
+
+- `TemporalHomesValidationServiceTest.kt` — TemporalHomesValidationServiceTest: setup, tearDown, createTestUser, createTemporalHomeRequest (~3874 tok)
 
 ## backend/src/test/kotlin/com/adoptu/testsupport/ (helidon-nima-migration worktree)
 
@@ -1989,11 +2020,20 @@
 - `RegisterPage.kt` — init, setupMethodToggle, updateVisibility, ensureAtLeastOne, setupForm (~2970 tok)
 - `SheltersPage.kt` — init, search, renderShelters (~1474 tok)
 - `SterilizationLocationsPage.kt` — init, search, render, locationCard, init (~2832 tok)
-- `TemporalHomePage.kt` — init, search, displayResults, init, render (~2461 tok)
+- `TemporalHomePage.kt` — init, search, displayResults, init, render (~2447 tok)
 
 ## infra/
 
 - `cloudfront.tf` (~2999 tok)
+- `data.tf` — Pre-existing resources this stack plugs into. These are read-only lookups; (~490 tok)
+- `dns_updater.tf` — Keeps backend.<domain> (route53.tf) pointed at whichever ECS task is (~986 tok)
+- `ecs.tf` — New, dedicated cluster rather than reusing the account's existing (~1289 tok)
+- `network.tf` — Dual-stack subnets for ECS Fargate tasks. Originally built pure (~619 tok)
+- `rds.tf` — Declares allocated_storage (~542 tok)
+- `route53.tf` — Only the records tied to resources this stack manages. The zone's other (~1137 tok)
+- `security_groups.tf` (~746 tok)
+- `terraform.tfvars` (~107 tok)
+- `variables.tf` — Declares can (~1629 tok)
 
 ## infra/ (OpenTofu - AWS deployment)
 
@@ -2018,6 +2058,10 @@
 - `terraform.tfvars.example` — sample values matching the live account (~60 tok)
 - `variables.tf` — all configurable inputs: region/profile, domain, container image/port, RDS sizing, db_app_password (sensitive, no default) (~700 tok)
 - `versions.tf` — OpenTofu/AWS+archive provider version pins, backend notes (local by default) (~170 tok)
+
+## infra/lambda/dns_updater/
+
+- `index.py` — handler (~1437 tok)
 
 ## scripts/ (graalvm-native-image worktree)
 
