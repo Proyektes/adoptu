@@ -152,6 +152,17 @@ class UIRoutesE2ETest {
     }
 
     @Test
+    fun `GET static asset is served from the classpath`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/static/js/common.js")
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `GET root returns 200 unauthenticated`() {
         val handle = startServer()
         try {
