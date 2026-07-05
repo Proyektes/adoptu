@@ -30,7 +30,11 @@ resource "aws_ecs_task_definition" "app" {
   container_definitions = jsonencode([
     {
       name      = "Main"
-      image     = "${data.aws_ecr_repository.backend.repository_url}:${var.container_image_tag}"
+      # container_image_tag may be a tag ("latest") or a digest
+      # ("sha256:..."), per its description - digests need an "@" separator,
+      # tags need ":". Without this, a digest value produces an invalid
+      # reference like "repo:sha256:abc" that ECS rejects at task startup.
+      image     = "${data.aws_ecr_repository.backend.repository_url}${startswith(var.container_image_tag, "sha256:") ? "@" : ":"}${var.container_image_tag}"
       essential = true
 
       # App listens on container_port (8080 by default, per Dockerfile/
@@ -48,7 +52,7 @@ resource "aws_ecs_task_definition" "app" {
         { name = "ADOPTU_PORT", value = tostring(var.container_port) },
         { name = "ADOPTU_ADMIN_EMAIL", value = var.admin_email },
         { name = "ADOPTU_ADMIN_USERNAME", value = var.admin_username },
-        { name = "ADOPTU_DB_URL", value = "jdbc:postgresql://${aws_db_instance.postgres.address}:5432/${var.db_name}" },
+        { name = "ADOPTU_DB_URL", value = "jdbc:postgresql://${aws_db_instance.postgres.address}:5432/${var.db_app_database_name}" },
         { name = "ADOPTU_DB_USER", value = "adoptu" },
         { name = "ADOPTU_S3_BUCKET", value = aws_s3_bucket.dynamic_images.bucket },
         { name = "ADOPTU_S3_REGION", value = var.aws_region },
@@ -89,6 +93,6 @@ resource "aws_ecs_service" "app" {
   network_configuration {
     subnets          = [for s in aws_subnet.ecs_ipv6_only : s.id]
     security_groups  = [aws_security_group.ecs_task.id]
-    assign_public_ip = false # no IPv4 at all on these subnets; tasks get a public IPv6 address automatically (subnet is ipv6_native)
+    assign_public_ip = true # required for ECR pulls (IPv4-only) - see network.tf; matches the live service's own config
   }
 }

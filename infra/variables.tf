@@ -74,8 +74,21 @@ variable "db_identifier" {
 }
 
 variable "db_name" {
-  type    = string
-  default = "adoptu"
+  description = "RDS-level initial database name. Live instance has this unset (null) - the 'adoptu' database was created manually via SQL after the fact, not via this parameter. Setting this to a non-null value forces DB replacement (immutable post-creation), so it must stay null."
+  type        = string
+  default     = null
+}
+
+variable "db_app_database_name" {
+  description = "Actual Postgres database name the app connects to (used in the JDBC URL). Distinct from db_name, which is the RDS-level init parameter and must stay null - see db_name."
+  type        = string
+  default     = "adoptu"
+}
+
+variable "legacy_ecs_task_sg_id" {
+  description = "Security group ID of the old hand-managed 'Adopt-u-ipv6' ECS service (cluster 'default'), temporarily allowed into the new RDS security group so that service keeps DB connectivity until it's decommissioned (README Step 4). Set to null once that service is deleted."
+  type        = string
+  default     = "sg-0b2d64479930a2ce1"
 }
 
 variable "db_username" {

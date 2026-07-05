@@ -42,3 +42,14 @@ data "aws_db_subnet_group" "default" {
 data "aws_iam_role" "rds_monitoring" {
   name = "rds-monitoring-role"
 }
+
+# 45 entries - comfortably under the per-security-group rule quota on its
+# own. The IPv6 equivalent list also exists (pl-02d12e369a4312e03) but isn't
+# used: combined, the two lists' entries exceed the quota, and CloudFront's
+# connection to a custom origin doesn't reliably work over IPv6 in practice
+# anyway (it fell back to needing an A record here - see route53.tf) even
+# though viewer-facing CloudFront traffic is dual-stack. IPv4-only for the
+# origin-facing rule is both simpler and sufficient.
+data "aws_ec2_managed_prefix_list" "cloudfront_origin_facing_ipv4" {
+  name = "com.amazonaws.global.cloudfront.origin-facing"
+}
