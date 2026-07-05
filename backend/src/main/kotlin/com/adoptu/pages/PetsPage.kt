@@ -23,8 +23,8 @@ fun HTML.petsPage(navParams: NavParams = NavParams()) {
                     }
                 }
             }
-            div { id = "pets-error"; classes = setOf("error-message"); style = "display:none" }
-            div { id = "pets-filters"; style = "display:none"
+            div { id = "pets-error"; classes = setOf("error-message", "hidden") }
+            div { id = "pets-filters"; classes = setOf("hidden")
                 div(classes = "filter-buttons") {
                     button(classes = "filter-btn active", type = ButtonType.button) { attributes["data-type"] = ""; attributes["data-i18n"] = "all"; +"All" }
                     button(classes = "filter-btn", type = ButtonType.button) { attributes["data-type"] = "DOG"; +"🐕 Dogs" }
@@ -41,7 +41,7 @@ fun HTML.petsPage(navParams: NavParams = NavParams()) {
                 }
             }
             div { id = "pets"; classes = setOf("pet-grid"); +"" }
-            div { id = "pets-empty"; classes = setOf("pets-empty-state"); style = "display:none" }
+            div { id = "pets-empty"; classes = setOf("pets-empty-state") }
             div { id = "pets-sentinel"; classes = setOf("pets-sentinel") }
         }
         footer()

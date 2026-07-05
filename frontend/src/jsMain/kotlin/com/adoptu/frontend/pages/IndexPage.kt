@@ -103,8 +103,8 @@ object IndexPageModule {
         val hint = document.getElementById("pets-country-hint").unsafeCast<HTMLElement?>()
         val filtersDiv = document.getElementById("pets-filters").unsafeCast<HTMLElement?>()
         val hasCountry = countrySelect?.value?.isNotEmpty() == true
-        hint?.style?.display = if (hasCountry) "none" else ""
-        filtersDiv?.style?.display = if (hasCountry) "" else "none"
+        hint?.style?.display = if (hasCountry) "none" else "block"
+        filtersDiv?.style?.display = if (hasCountry) "block" else "none"
     }
 
     private fun showEmptyState(titleKey: String, hintKey: String) {

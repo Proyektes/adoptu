@@ -14,10 +14,10 @@ fun HTML.registerPage(navParams: NavParams = NavParams()) {
             div {
                 id="auth-form"
                 classes = setOf("auth-form", "register-simple")
-                h1 { 
-                    attributes["data-i18n"] = "registerNewAccount"; 
-                    style = "text-align: center;"
-                    +"Create Account" 
+                h1 {
+                    attributes["data-i18n"] = "registerNewAccount";
+                    classes = setOf("text-center")
+                    +"Create Account"
                 }
                 
                 form { id = "register-form"
@@ -28,24 +28,24 @@ fun HTML.registerPage(navParams: NavParams = NavParams()) {
                     label { attributes["data-i18n"] = "selectAdditionalRoles"; +"Select additional roles:" }
                     div(classes = "checkbox-group") {
                         div {
-                            style = "display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0;"
-                            input(InputType.checkBox) { name = "roles"; value = "ADOPTER"; id = "role-adopter"; checked = true; disabled = true; style = "width: auto; height: auto; margin: 0;" }
+                            classes = setOf("checkbox-row")
+                            input(InputType.checkBox) { name = "roles"; value = "ADOPTER"; id = "role-adopter"; checked = true; disabled = true }
                             span { attributes["data-i18n"] = "adoptPet"; +"Adopt a pet" }
                             +" (required)"
                         }
                         div {
-                            style = "display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0;"
-                            input(InputType.checkBox) { name = "roles"; value = "RESCUER"; id = "role-rescuer"; style = "width: auto; height: auto; margin: 0;" }
+                            classes = setOf("checkbox-row")
+                            input(InputType.checkBox) { name = "roles"; value = "RESCUER"; id = "role-rescuer" }
                             span { attributes["data-i18n"] = "publishPets"; +"Publish pets for adoption" }
                         }
                         div {
-                            style = "display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0;"
-                            input(InputType.checkBox) { name = "roles"; value = "PHOTOGRAPHER"; id = "role-photographer"; style = "width: auto; height: auto; margin: 0;" }
+                            classes = setOf("checkbox-row")
+                            input(InputType.checkBox) { name = "roles"; value = "PHOTOGRAPHER"; id = "role-photographer" }
                             span { attributes["data-i18n"] = "offerPhotography"; +"Offer photography services" }
                         }
                         div {
-                            style = "display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0;"
-                            input(InputType.checkBox) { name = "roles"; value = "TEMPORAL_HOME"; id = "role-temporal-home"; style = "width: auto; height: auto; margin: 0;" }
+                            classes = setOf("checkbox-row")
+                            input(InputType.checkBox) { name = "roles"; value = "TEMPORAL_HOME"; id = "role-temporal-home" }
                             span { attributes["data-i18n"] = "provideTemporaryHome"; +"Provide temporary home for pets" }
                         }
                     }
@@ -53,16 +53,16 @@ fun HTML.registerPage(navParams: NavParams = NavParams()) {
                     h2 { attributes["data-i18n"] = "registrationMethod"; +"Registration Method" }
                     
                     div(classes = "method-selection") {
-                        p { style = "margin: 0 0 0.5rem 0; font-size: 0.9rem; color: var(--text-muted);"
+                        p { classes = setOf("hint-text")
                             +"Select one or more login methods:" }
                         label {
-                            style = "display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0; cursor: pointer;"
-                            input(InputType.checkBox) { name = "method"; value = "passkey"; id = "method-passkey"; checked = true; style = "width: auto; height: auto; margin: 0;" }
+                            classes = setOf("checkbox-row", "clickable")
+                            input(InputType.checkBox) { name = "method"; value = "passkey"; id = "method-passkey"; checked = true }
                             +"Passkey (most secure, works on all your devices)"
                         }
                         label {
-                            style = "display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0; cursor: pointer;"
-                            input(InputType.checkBox) { name = "method"; value = "password"; id = "method-password"; style = "width: auto; height: auto; margin: 0;" }
+                            classes = setOf("checkbox-row", "clickable")
+                            input(InputType.checkBox) { name = "method"; value = "password"; id = "method-password" }
                             +"Password (less secure, use as backup only)"
                         }
                     }
@@ -91,7 +91,7 @@ fun HTML.registerPage(navParams: NavParams = NavParams()) {
                 }
                 
                 div(classes = "form-actions") {
-                    p { style = "margin-top: 1rem; text-align: center; width: 100%;"; attributes["data-i18n"] = "alreadyHaveAccount"; +"Already have an account?" }
+                    p { classes = setOf("login-link-row"); attributes["data-i18n"] = "alreadyHaveAccount"; +"Already have an account?" }
                     a(href = "/login") { button(classes = "btn btn-secondary", type = ButtonType.button) {
                         id="register-page-login"
                         attributes["data-i18n"] = "login"; +"Login"

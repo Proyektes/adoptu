@@ -13,11 +13,11 @@ fun HTML.myPetsPage(navParams: NavParams = NavParams()) {
         main {
             h1 { attributes["data-i18n"] = "myPets"; +"My Pets" }
             div { id = "message"; +"" }
-            div { id = "adoption-requests-section"; style = "margin-bottom: 2rem;"
+            div { id = "adoption-requests-section"; classes = setOf("mb-2rem")
                 h2 { attributes["data-i18n"] = "adoptionRequests"; +"Adoption Requests" }
                 div { id = "adoption-requests"; +"" }
             }
-            div { id = "form-container"; style = "display:none"
+            div { id = "form-container"; classes = setOf("hidden")
                 h2 { id = "form-title"; attributes["data-i18n"] = "addPet"; +"Add Pet" }
                 form { id = "pet-form"
                     input(InputType.hidden) { id = "pet-id" }
@@ -69,9 +69,9 @@ fun HTML.myPetsPage(navParams: NavParams = NavParams()) {
                     label { htmlFor = "rescueDate"; attributes["data-i18n"] = "rescueDate"; +"Rescue Date" }; input(InputType.date) { id = "rescueDate" }
                     label { htmlFor = "specialNeeds"; attributes["data-i18n"] = "specialNeeds"; +"Special Needs" }; textArea { id = "specialNeeds" }
                     label { htmlFor = "adoptionFee"; attributes["data-i18n"] = "adoptionFee"; +"Adoption Fee" }; 
-                    div(classes = "fee-input-group") { style = "display: flex; gap: 0.5rem;"
-                        input(InputType.number) { id = "adoptionFee"; step = "0.01"; value = "0"; style = "flex: 3;"; this.min = "0" }
-                        select { id = "currency"; style = "flex: 1;"
+                    div(classes = "fee-input-group") {
+                        input(InputType.number) { id = "adoptionFee"; classes = setOf("fee-amount-wide"); step = "0.01"; value = "0"; this.min = "0" }
+                        select { id = "currency"
                             option { value = "USD"; +"$ USD" }
                             option { value = "EUR"; +"€ EUR" }
                             option { value = "GBP"; +"£ GBP" }
@@ -112,7 +112,7 @@ fun HTML.myPetsPage(navParams: NavParams = NavParams()) {
                 }
             }
             button(classes = "btn") { id = "add-btn"; attributes["data-i18n"] = "addPet"; +"Add Pet" }
-            div { id = "pets"; classes = setOf("pet-grid"); style = "margin-top: 2rem;"; +"" }
+            div { id = "pets"; classes = setOf("pet-grid", "mt-2rem"); +"" }
         }
         footer()
         commonScripts(navParams.isLoggedIn)

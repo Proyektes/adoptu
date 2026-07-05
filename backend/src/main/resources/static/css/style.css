@@ -1217,10 +1217,6 @@ form input:-webkit-autofill:active {
   color: var(--text);
 }
 
-.hidden {
-  display: none;
-}
-
 .mt-2rem {
   margin-top: 2rem;
 }
@@ -1270,6 +1266,10 @@ form input:-webkit-autofill:active {
   flex: 3;
 }
 
+.hidden {
+  display: none;
+}
+
 .privacy-highlight {
   background-color: #e8f5e9;
   border-left: 4px solid #4caf50;
@@ -1278,3 +1278,5 @@ form input:-webkit-autofill:active {
   border-radius: 4px;
   font-weight: 500;
 }
+
+/*# sourceMappingURL=style.css.map */

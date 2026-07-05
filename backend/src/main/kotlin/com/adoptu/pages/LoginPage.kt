@@ -11,9 +11,8 @@ fun HTML.loginPage(navParams: NavParams = NavParams()) {
             nav { commonNav(navParams.isLoggedIn, navParams.isAdmin, navParams.isRescuerOrAdmin, navParams.isTemporalHomeOrAdmin) }
         }
         main {
-            div(classes = "register-notification") {
+            div(classes = "register-notification hidden") {
                 id = "register-notification"
-                style = "display: none"
             }
 
             div(classes = "login-forms-grid") {
@@ -22,8 +21,8 @@ fun HTML.loginPage(navParams: NavParams = NavParams()) {
                     div(classes = "auth-form") {
                         h1 { attributes["data-i18n"] = "loginWithPasskey"; +"Login with Passkey" }
                         p { id = "passkey-message"; +"" }
-                        button(classes = "btn", type = ButtonType.button) { id = "login-btn"; attributes["data-i18n"] = "signInWithPasskey"; style = "width: 100%; display: block; margin-bottom: 8px;"; +"Sign in with Passkey" }
-                        button(classes = "btn btn-secondary", type = ButtonType.button) { id = "resend-btn"; attributes["data-i18n"] = "resendVerificationEmail"; style = "width: 100%; display: none;"; attributes["data-action"] = "hide-self"; +"Resend Verification Email" }
+                        button(classes = "btn full-width-btn", type = ButtonType.button) { id = "login-btn"; attributes["data-i18n"] = "signInWithPasskey"; +"Sign in with Passkey" }
+                        button(classes = "btn btn-secondary full-width-btn hidden", type = ButtonType.button) { id = "resend-btn"; attributes["data-i18n"] = "resendVerificationEmail"; attributes["data-action"] = "hide-self"; +"Resend Verification Email" }
                         p { small { attributes["data-i18n"] = "usesFido"; +"Uses FIDO2 / WebAuthn for secure passwordless authentication." } }
                     }
                 }

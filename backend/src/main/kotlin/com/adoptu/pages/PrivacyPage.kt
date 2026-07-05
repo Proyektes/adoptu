@@ -15,8 +15,7 @@ fun HTML.privacyPage(navParams: NavParams = NavParams()) {
                 h1 { attributes["data-i18n"] = "privacyPolicy"; +"Privacy Policy" }
                 p { +"Last updated: April 2025" }
                 
-                p(classes = "privacy-highlight") { 
-                    style = "background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; margin: 20px 0; border-radius: 4px; font-weight: 500;"
+                p(classes = "privacy-highlight") {
                     +"At Adopt-U, we believe in minimal data collection. We only collect your email address to enable communication between adopters and rescuers. We do not use your information for advertising, and we will never share your data with third parties for marketing purposes."
                 }
                 

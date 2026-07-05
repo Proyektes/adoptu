@@ -28,33 +28,33 @@ object RegisterPageModule {
         })
     }
 
-    private fun showError(messageEl: Element?, text: String) {
+    private fun showError(messageEl: HTMLElement?, text: String) {
         messageEl?.textContent = text
         messageEl?.setAttribute("class", "message error")
-        messageEl?.setAttribute("style", "display: block")
+        messageEl?.style?.display = "block"
     }
 
-    private fun showStatus(messageEl: Element?, text: String) {
+    private fun showStatus(messageEl: HTMLElement?, text: String) {
         messageEl?.textContent = text
         messageEl?.setAttribute("class", "message")
-        messageEl?.setAttribute("style", "display: block")
+        messageEl?.style?.display = "block"
     }
 
-    private fun hideMessage(messageEl: Element?) {
+    private fun hideMessage(messageEl: HTMLElement?) {
         messageEl?.setAttribute("class", "message")
-        messageEl?.setAttribute("style", "display: none")
+        messageEl?.style?.display = "none"
     }
 
     private fun setupMethodToggle() {
         val passkeyCheckbox = document.getElementById("method-passkey") as? HTMLInputElement
         val passwordCheckbox = document.getElementById("method-password") as? HTMLInputElement
 
-        val passwordFields = document.getElementById("password-fields")
+        val passwordFields = document.getElementById("password-fields") as? HTMLElement
 
         fun updateVisibility() {
             if (passwordFields != null) {
                 val showPassword = passwordCheckbox?.checked == true
-                passwordFields.setAttribute("style", "display: ${if (showPassword) "block" else "none"}")
+                passwordFields.style.display = if (showPassword) "block" else "none"
             }
         }
 
@@ -140,7 +140,7 @@ object RegisterPageModule {
         })
     }
 
-    private fun registerPasskey(email: String, displayName: String, messageEl: Element?) {
+    private fun registerPasskey(email: String, displayName: String, messageEl: HTMLElement?) {
         showStatus(messageEl, "Creating passkey...")
         WebAuthnModule.register(email, displayName)
             .then { _: dynamic ->
@@ -154,7 +154,7 @@ object RegisterPageModule {
             }
     }
 
-    private fun registerPassword(email: String, displayName: String, messageEl: Element?) {
+    private fun registerPassword(email: String, displayName: String, messageEl: HTMLElement?) {
         val passwordInput = document.getElementById("password") as? HTMLInputElement
         val confirmPasswordInput = document.getElementById("confirmPassword") as? HTMLInputElement
 
@@ -200,7 +200,7 @@ object RegisterPageModule {
             }
     }
 
-    private fun registerBoth(email: String, displayName: String, messageEl: Element?) {
+    private fun registerBoth(email: String, displayName: String, messageEl: HTMLElement?) {
         val passwordInput = document.getElementById("password") as? HTMLInputElement
         val confirmPasswordInput = document.getElementById("confirmPassword") as? HTMLInputElement
 

@@ -23,7 +23,7 @@ fun HTML.sheltersPage(navParams: NavParams = NavParams()) {
                     +"Search"
                 }
             }
-            div { id = "shelters-error"; classes = setOf("error-message"); style = "display:none" }
+            div { id = "shelters-error"; classes = setOf("error-message", "hidden") }
             div { id = "shelters"; classes = setOf("shelter-grid"); +"" }
         }
         footer()

@@ -53,9 +53,8 @@ fun HTML.adminSterilizationLocationsPage(navParams: NavParams = NavParams()) {
                 +"Add Location"
             }
             
-            div(classes = "form-modal") {
+            div(classes = "form-modal hidden") {
                 id = "form-modal"
-                style = "display: none;"
                 div(classes = "form-modal-content card-bg") {
                     h2 { attributes["data-i18n"] = "addEditLocation"; +"Add/Edit Location" }
                     form(classes = "auth-form") {

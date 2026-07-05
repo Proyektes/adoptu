@@ -31,18 +31,16 @@ fun HTML.adminPage(navParams: NavParams = NavParams()) {
                 div { id = "users-container"; +"" }
             }
             
-            div(classes = "admin-tab-content") {
+            div(classes = "admin-tab-content hidden") {
                 id = "pets-tab"
-                style = "display: none;"
                 p { attributes["data-i18n"] = "managePetsDescription"; +"Manage all pet pages. Add or remove pets." }
                 div { id = "message"; +"" }
                 a("/my-pets") { classes = setOf("btn"); attributes["data-i18n"] = "managePetsBtn"; +"Manage Pets" }
-                div { id = "pets"; classes = setOf("pet-grid"); style = "margin-top: 2rem;"; +"" }
+                div { id = "pets"; classes = setOf("pet-grid", "mt-2rem"); +"" }
             }
-            
-            div(classes = "form-modal") {
+
+            div(classes = "form-modal hidden") {
                 id = "ban-modal"
-                style = "display: none;"
                 div(classes = "form-modal-content card-bg") {
                     h2 { attributes["data-i18n"] = "banUser"; +"Ban User" }
                     p { id = "ban-user-name"; +"" }

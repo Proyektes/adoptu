@@ -50,32 +50,32 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
                     div(classes = "roles-section") {
                         div(classes = "checkbox-group") {
                             div {
-                                style = "display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0;"
+                                classes = setOf("checkbox-row")
                                 input(InputType.checkBox) { id = "role-adopter"; checked = true; disabled = true }
                                 span { attributes["data-i18n"] = "adopterRequired"; +"Adopter (required)" }
                             }
                             div {
-                                style = "display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0;"
+                                classes = setOf("checkbox-row")
                                 input(InputType.checkBox) { id = "role-rescuer" }
                                 span { attributes["data-i18n"] = "publishPets"; +"Rescuer - Publish pets for adoption" }
                             }
                             div {
-                                style = "display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0;"
+                                classes = setOf("checkbox-row")
                                 input(InputType.checkBox) { id = "role-photographer" }
                                 span { attributes["data-i18n"] = "offerPhotography"; +"Photographer - Offer photography services" }
                             }
                             div {
-                                style = "display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0;"
+                                classes = setOf("checkbox-row")
                                 input(InputType.checkBox) { id = "role-temporal-home" }
                                 span { attributes["data-i18n"] = "provideTemporaryHome"; +"Temporal Home - Provide temporary home for pets" }
                             }
                             div {
-                                style = "display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0;"
+                                classes = setOf("checkbox-row")
                                 input(InputType.checkBox) { id = "role-shelter" }
                                 span { attributes["data-i18n"] = "provideShelter"; +"Shelter - Manage an animal shelter" }
                             }
                             div {
-                                style = "display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0;"
+                                classes = setOf("checkbox-row")
                                 input(InputType.checkBox) { id = "role-sterilization" }
                                 span { attributes["data-i18n"] = "provideSterilization"; +"Sterilization Service - Provide sterilization services" }
                             }
@@ -84,7 +84,7 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
                 }
             }
 
-            div(classes = "card-bg profile-section shelter-section") { style = "display: none;"
+            div(classes = "card-bg profile-section shelter-section hidden") {
                 h2 { attributes["data-i18n"] = "shelterSettings"; +"Shelter Settings" }
                 div(classes = "form-row") {
                     label { htmlFor = "shelter-name"; attributes["data-i18n"] = "name"; +"Shelter Name" }
@@ -137,7 +137,7 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
                 }
             }
 
-            div(classes = "card-bg profile-section sterilization-section") { style = "display: none;"
+            div(classes = "card-bg profile-section sterilization-section hidden") {
                 h2 { attributes["data-i18n"] = "sterilizationSettings"; +"Sterilization Service Settings" }
                 div(classes = "form-row") {
                     label { htmlFor = "sterilization-name"; attributes["data-i18n"] = "name"; +"Name" }
@@ -190,7 +190,7 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
                 }
             }
 
-            div(classes = "card-bg profile-section photographer-section") { style = "display: none;"
+            div(classes = "card-bg profile-section photographer-section hidden") {
                 h2 { attributes["data-i18n"] = "photographerSettings"; +"Photographer Settings" }
                 div(classes = "form-row") {
                     label { htmlFor = "photographerCountry"; attributes["data-i18n"] = "countryLabel"; +"Country" }
@@ -217,7 +217,7 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
                 }
             }
 
-            div(classes = "card-bg profile-section temporal-home-section") { style = "display: none;"
+            div(classes = "card-bg profile-section temporal-home-section hidden") {
                 h2 { attributes["data-i18n"] = "temporalHomeSettings"; +"Temporal Home Settings" }
                 div(classes = "form-row") {
                     label { htmlFor = "th-alias"; attributes["data-i18n"] = "alias"; +"Alias" }

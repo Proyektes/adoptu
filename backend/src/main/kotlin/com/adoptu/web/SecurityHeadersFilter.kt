@@ -21,9 +21,13 @@ import io.helidon.webserver.http.RoutingResponse
  * allow and is intentionally omitted - it falls back to script-src per the CSP3 fallback list,
  * which is nonce-only and therefore blocks any inline handler that might get reintroduced.
  *
- * style-src keeps 'unsafe-inline' unconditionally (not nonce-based): inline style="..." attributes
- * are used throughout the page templates and, unlike onClick handlers, can't execute script.
- * Eliminating this would mean moving every inline style to a CSS class, a separate, larger effort.
+ * style-src has no 'unsafe-inline' either: every inline style="..." attribute across the page
+ * templates has been moved to a CSS class in style.scss (.hidden, .checkbox-row, .mt-2rem, etc).
+ * JS-side `element.style.property = value` assignments are untouched and still work fine -
+ * CSP only restricts the "style" content attribute (inline markup / setAttribute), not the
+ * CSSOM API, and an inline-set property always wins over a class rule in the cascade regardless
+ * of source order, so toggling visibility via `.style.display = "block"/"none"` still overrides
+ * classes like .hidden correctly.
  */
 class SecurityHeadersFilter : Filter {
     override fun filter(chain: FilterChain, req: RoutingRequest, res: RoutingResponse) {
@@ -49,7 +53,7 @@ class SecurityHeadersFilter : Filter {
         private fun buildCsp(nonce: String) = listOf(
             "default-src 'self'",
             "script-src 'self' 'nonce-$nonce'",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+            "style-src 'self' https://fonts.googleapis.com",
             "font-src 'self' https://fonts.gstatic.com",
             "img-src 'self' data: https://static.adopt-u.org https://*.amazonaws.com",
             "connect-src 'self'",

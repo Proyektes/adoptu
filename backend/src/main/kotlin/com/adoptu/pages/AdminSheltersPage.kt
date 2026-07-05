@@ -113,7 +113,7 @@ fun HTML.adminSheltersPage(navParams: NavParams = NavParams()) {
                 }
                 div(classes = "form-actions") {
                     button(type = ButtonType.submit) { id = "submit-btn"; classes = setOf("btn"); attributes["data-i18n"] = "addShelter"; +"Add Shelter" }
-                    button(type = ButtonType.button) { id = "cancel-btn"; classes = setOf("btn", "btn-secondary"); style = "display:none"; attributes["data-i18n"] = "cancel"; +"Cancel" }
+                    button(type = ButtonType.button) { id = "cancel-btn"; classes = setOf("btn", "btn-secondary", "hidden"); attributes["data-i18n"] = "cancel"; +"Cancel" }
                 }
             }
         }

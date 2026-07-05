@@ -596,10 +596,6 @@ form {
 
 // Utility classes replacing inline style="..." attributes - required to eliminate
 // 'unsafe-inline' from CSP style-src entirely (see SecurityHeadersFilter.kt).
-.hidden {
-    display: none;
-}
-
 .mt-2rem {
     margin-top: 2rem;
 }
@@ -652,6 +648,13 @@ form {
 // keeps the default flex: 2), so this actually overrides it instead of losing on specificity.
 .fee-input-group input.fee-amount-wide {
     flex: 3;
+}
+
+// Declared last in this section (equal specificity to every other single-class rule above,
+// e.g. .full-width-btn's display: block) so source order always makes .hidden win when both
+// are applied to the same element - that's the whole point of a "hidden" utility class.
+.hidden {
+    display: none;
 }
 
 .privacy-highlight {
