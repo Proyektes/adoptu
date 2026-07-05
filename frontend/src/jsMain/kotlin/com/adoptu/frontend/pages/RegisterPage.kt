@@ -22,10 +22,27 @@ object RegisterPageModule {
             console.log("RegisterPage.init() after i18n load")
             I18n.updatePage()
             val messageEl = document.getElementById("message") as? HTMLElement
-            messageEl?.setAttribute("style", "display: none")
+            hideMessage(messageEl)
             setupMethodToggle()
             setupForm()
         })
+    }
+
+    private fun showError(messageEl: Element?, text: String) {
+        messageEl?.textContent = text
+        messageEl?.setAttribute("class", "message error")
+        messageEl?.setAttribute("style", "display: block")
+    }
+
+    private fun showStatus(messageEl: Element?, text: String) {
+        messageEl?.textContent = text
+        messageEl?.setAttribute("class", "message")
+        messageEl?.setAttribute("style", "display: block")
+    }
+
+    private fun hideMessage(messageEl: Element?) {
+        messageEl?.setAttribute("class", "message")
+        messageEl?.setAttribute("style", "display: none")
     }
 
     private fun setupMethodToggle() {
@@ -70,7 +87,7 @@ object RegisterPageModule {
         form?.addEventListener("submit", { e ->
             console.log("RegisterPage form submitted")
             e.preventDefault()
-            messageEl?.setAttribute("style", "display: none")
+            hideMessage(messageEl)
 
             val emailInput = document.getElementById("email") as? HTMLInputElement
             val displayNameInput = document.getElementById("displayName") as? HTMLInputElement
@@ -83,14 +100,12 @@ object RegisterPageModule {
             val usePassword = passwordCheckbox?.checked == true
 
             if (email.isEmpty() || displayName.isEmpty()) {
-                messageEl?.textContent = "Please enter email and display name"
-                messageEl?.setAttribute("style", "display: block")
+                showError(messageEl, "Please enter email and display name")
                 return@addEventListener
             }
 
             if (!usePasskey && !usePassword) {
-                messageEl?.textContent = "Please select at least one login method"
-                messageEl?.setAttribute("style", "display: block")
+                showError(messageEl, "Please select at least one login method")
                 return@addEventListener
             }
 
@@ -102,20 +117,17 @@ object RegisterPageModule {
                 val confirmPassword = confirmPasswordInput?.value ?: ""
 
                 if (password.isEmpty()) {
-                    messageEl?.textContent = "Please enter a password"
-                    messageEl?.setAttribute("style", "display: block")
+                    showError(messageEl, "Please enter a password")
                     return@addEventListener
                 }
 
                 if (password != confirmPassword) {
-                    messageEl?.textContent = "Passwords do not match"
-                    messageEl?.setAttribute("style", "display: block")
+                    showError(messageEl, "Passwords do not match")
                     return@addEventListener
                 }
 
                 if (password.length < 8) {
-                    messageEl?.textContent = "Password must be at least 8 characters"
-                    messageEl?.setAttribute("style", "display: block")
+                    showError(messageEl, "Password must be at least 8 characters")
                     return@addEventListener
                 }
             }
@@ -129,8 +141,7 @@ object RegisterPageModule {
     }
 
     private fun registerPasskey(email: String, displayName: String, messageEl: Element?) {
-        messageEl?.textContent = "Creating passkey..."
-        messageEl?.setAttribute("style", "display: block")
+        showStatus(messageEl, "Creating passkey...")
         WebAuthnModule.register(email, displayName)
             .then { _: dynamic ->
                 console.log("Registration successful")
@@ -139,8 +150,7 @@ object RegisterPageModule {
             .catch { error: dynamic ->
                 console.log("Registration error: $error")
                 val errMsg = error?.message ?: error?.toString() ?: "Unknown error"
-                messageEl?.textContent = "$errMsg"
-                messageEl?.setAttribute("style", "display: block")
+                showError(messageEl, "$errMsg")
             }
     }
 
@@ -152,25 +162,21 @@ object RegisterPageModule {
         val confirmPassword = confirmPasswordInput?.value ?: ""
 
         if (password.isEmpty()) {
-            messageEl?.textContent = "Please enter a password"
-            messageEl?.setAttribute("style", "display: block")
+            showError(messageEl, "Please enter a password")
             return
         }
 
         if (password != confirmPassword) {
-            messageEl?.textContent = "Passwords do not match"
-            messageEl?.setAttribute("style", "display: block")
+            showError(messageEl, "Passwords do not match")
             return
         }
 
         if (password.length < 8) {
-            messageEl?.textContent = "Password must be at least 8 characters"
-            messageEl?.setAttribute("style", "display: block")
+            showError(messageEl, "Password must be at least 8 characters")
             return
         }
 
-        messageEl?.textContent = "Registering..."
-        messageEl?.setAttribute("style", "display: block")
+        showStatus(messageEl, "Registering...")
 
         RsaCryptoModule.getPublicKey()
             .then { publicKey ->
@@ -190,8 +196,7 @@ object RegisterPageModule {
             }
             .catch { error: dynamic ->
                 val errMsg = error?.message ?: error?.toString() ?: "Unknown error"
-                messageEl?.textContent = "$errMsg"
-                messageEl?.setAttribute("style", "display: block")
+                showError(messageEl, "$errMsg")
             }
     }
 
@@ -203,25 +208,21 @@ object RegisterPageModule {
         val confirmPassword = confirmPasswordInput?.value ?: ""
 
         if (password.isEmpty()) {
-            messageEl?.textContent = "Please enter a password"
-            messageEl?.setAttribute("style", "display: block")
+            showError(messageEl, "Please enter a password")
             return
         }
 
         if (password != confirmPassword) {
-            messageEl?.textContent = "Passwords do not match"
-            messageEl?.setAttribute("style", "display: block")
+            showError(messageEl, "Passwords do not match")
             return
         }
 
         if (password.length < 8) {
-            messageEl?.textContent = "Password must be at least 8 characters"
-            messageEl?.setAttribute("style", "display: block")
+            showError(messageEl, "Password must be at least 8 characters")
             return
         }
 
-        messageEl?.textContent = "Creating passkey and password..."
-        messageEl?.setAttribute("style", "display: block")
+        showStatus(messageEl, "Creating passkey and password...")
 
         WebAuthnModule.register(email, displayName)
             .then<Unit> {
@@ -243,14 +244,12 @@ object RegisterPageModule {
                     }
                     .catch { error: dynamic ->
                         val errMsg = error?.message ?: error?.toString() ?: "Unknown error"
-                        messageEl?.textContent = "$errMsg"
-                        messageEl?.setAttribute("style", "display: block")
+                        showError(messageEl, "$errMsg")
                     }
             }
             .catch { error: dynamic ->
                 val errMsg = error?.message ?: error?.toString() ?: "Unknown error"
-                messageEl?.textContent = "$errMsg"
-                messageEl?.setAttribute("style", "display: block")
+                showError(messageEl, "$errMsg")
             }
     }
 
