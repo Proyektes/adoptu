@@ -1787,6 +1787,305 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-07-05T21:20:00.000Z"
+    },
+    {
+      "id": "bug-111",
+      "timestamp": "2026-07-05T21:43:03.718Z",
+      "error_message": "Incorrect value in code",
+      "file": "infra/terraform.tfvars",
+      "root_cause": "Had \"sha256:f3f8ee7cc14cd7e3d10ff027506249de88bc565557",
+      "fix": "Changed to \"sha256:1f48baf1b2519aca6d745253922d8a1737ecfe971c",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tfvars"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T21:43:03.718Z"
+    },
+    {
+      "id": "bug-112",
+      "timestamp": "2026-07-05T21:56:02.691Z",
+      "error_message": "CSS fix: padding, font-size, color",
+      "file": "backend/src/main/scss/style.scss",
+      "root_cause": "padding: 3rem \u2192 15px; font-size: 2.5rem \u2192 0.9rem; color: var(--text) \u2192 var(--text-muted)",
+      "fix": "Changed padding: 3rem \u2192 15px; font-size: 2.5rem \u2192 0.9rem; color: var(--text) \u2192 var(--text-muted)",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-07-05T21:56:45.539Z"
+    },
+    {
+      "id": "bug-113",
+      "timestamp": "2026-07-05T21:56:26.104Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt",
+      "root_cause": "Had \"invalidOrExpiredToken\"",
+      "fix": "Changed to \"invalidOrExpiredMagicLink\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 5,
+      "last_seen": "2026-07-05T21:56:57.990Z"
+    },
+    {
+      "id": "bug-114",
+      "timestamp": "2026-07-05T21:57:29.028Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/main/kotlin/com/adoptu/pages/LoginPage.kt",
+      "root_cause": "Had \"btn\"",
+      "fix": "Changed to \"btn full-width-btn\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T21:57:29.028Z"
+    },
+    {
+      "id": "bug-115",
+      "timestamp": "2026-07-05T21:58:16.010Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/IndexPage.kt",
+      "root_cause": "Had \"\n        filtersDiv?.style?.display = if (hasCoun",
+      "fix": "Changed to \"block\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-05T21:58:40.121Z"
+    },
+    {
+      "id": "bug-116",
+      "timestamp": "2026-07-05T21:59:13.066Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/main/kotlin/com/adoptu/pages/PetsPage.kt",
+      "root_cause": "Had \"display:none\"",
+      "fix": "Changed to \"hidden\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T21:59:13.066Z"
+    },
+    {
+      "id": "bug-117",
+      "timestamp": "2026-07-05T22:00:04.973Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/main/kotlin/com/adoptu/pages/SheltersPage.kt",
+      "root_cause": "Had \"display:none\"",
+      "fix": "Changed to \"hidden\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T22:00:04.973Z"
+    },
+    {
+      "id": "bug-118",
+      "timestamp": "2026-07-05T22:00:48.615Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/main/kotlin/com/adoptu/pages/MyPetsPage.kt",
+      "root_cause": "Had \"display: flex; gap: 0.5rem;\"",
+      "fix": "Changed to \"adoptionFee\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-05T22:01:49.547Z"
+    },
+    {
+      "id": "bug-119",
+      "timestamp": "2026-07-05T22:01:23.418Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/scss/style.scss",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 5\u21926 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T22:01:23.418Z"
+    },
+    {
+      "id": "bug-120",
+      "timestamp": "2026-07-05T22:02:04.450Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/main/kotlin/com/adoptu/pages/SterilizationLocationsPage.kt",
+      "root_cause": "Had \"form-modal\"",
+      "fix": "Changed to \"form-modal hidden\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T22:02:04.450Z"
+    },
+    {
+      "id": "bug-121",
+      "timestamp": "2026-07-05T22:02:19.191Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/main/kotlin/com/adoptu/pages/AdminSheltersPage.kt",
+      "root_cause": "Had \"display:none\"",
+      "fix": "Changed to \"hidden\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T22:02:19.191Z"
+    },
+    {
+      "id": "bug-122",
+      "timestamp": "2026-07-05T22:02:48.449Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/main/kotlin/com/adoptu/pages/ProfilePage.kt",
+      "root_cause": "Had \"display: flex; align-items: center; gap: 0.5rem; ",
+      "fix": "Changed to \"checkbox-row\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T22:02:48.449Z"
+    },
+    {
+      "id": "bug-123",
+      "timestamp": "2026-07-05T22:03:53.162Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/main/kotlin/com/adoptu/pages/RegisterPage.kt",
+      "root_cause": "Had \"margin-top: 1rem; text-align: center; width: 100%",
+      "fix": "Changed to \"login-link-row\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T22:03:53.162Z"
+    },
+    {
+      "id": "bug-124",
+      "timestamp": "2026-07-05T22:04:18.731Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 4\u21928 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T22:04:18.731Z"
+    },
+    {
+      "id": "bug-125",
+      "timestamp": "2026-07-05T22:04:24.631Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt",
+      "root_cause": "Had 'unsafe-inline'",
+      "fix": "Changed to ' https://fonts.googleapis.com\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T22:04:24.631Z"
+    },
+    {
+      "id": "bug-126",
+      "timestamp": "2026-07-05T22:21:07.911Z",
+      "error_message": "Incorrect value in code",
+      "file": "infra/terraform.tfvars",
+      "root_cause": "Had \"sha256:1f48baf1b2519aca6d745253922d8a1737ecfe971c",
+      "fix": "Changed to \"sha256:63792a098559a62d17d51e2ed2a12caf661c1e3658",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tfvars"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T22:21:07.911Z"
+    },
+    {
+      "id": "bug-127",
+      "timestamp": "2026-07-05T22:25:00.000Z",
+      "error_message": "The /verify (email verification) page shows \"Invalid or expired magic link. Please request a new one.\" for a broken/expired email-verification token - wrong context, confusing wording",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt",
+      "root_cause": "I18n.kt defined the key \"invalidOrExpiredToken\" TWICE within the same language object literal in every one of the 5 languages: once correctly for EmailVerificationPage.kt's data-i18n=\"invalidOrExpiredToken\" (\"The verification link is invalid or has expired.\"), and again a few lines later with magic-link-specific wording (\"Invalid or expired magic link...\"). A JS object literal with a duplicate key keeps only the last value, so the magic-link wording silently won for every consumer of the key, including the /verify page which has nothing to do with magic links. Found while testing the login/email-verification flows end-to-end on production per user request.",
+      "fix": "Renamed the second (magic-link-specific) definition to invalidOrExpiredMagicLink in all 5 languages, restoring the correct text on /verify. Verified live on production via Playwright: /verify?token=invalid-test-token now shows \"The verification link is invalid or has expired.\"",
+      "tags": [
+        "i18n",
+        "email-verification",
+        "duplicate-key",
+        "kt",
+        "frontend",
+        "production-bug"
+      ],
+      "related_bugs": [
+        "bug-128"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T22:25:00.000Z"
+    },
+    {
+      "id": "bug-128",
+      "timestamp": "2026-07-05T22:25:00.000Z",
+      "error_message": "Clicking an invalid, expired, or already-banned-account magic login link silently redirects to a plain /login page with zero feedback - user has no idea why nothing happened",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt",
+      "root_cause": "AuthRoutes.kt's GET /api/auth/magic-link-login redirects to /login?error=invalid_token, /login?error=invalid_or_expired, /login?error=not_verified[&resent=true|false], or /login?error=banned depending on outcome, but LoginPageModule.init() never read window.location.search for an error param at all - only showRegistrationNotification() existed, checking solely for registered=true. All 4 error variants were completely silent. Found while testing the login flow end-to-end on production per user request, by directly navigating to each /login?error=... redirect target.",
+      "fix": "Added showMagicLinkErrorNotification() to LoginPageModule, parsing the error/resent query params via URLSearchParams and mapping each of the 4 cases to its already-existing i18n message (invalidToken/invalidOrExpiredMagicLink/accountBanned/emailNotVerifiedLogin or verificationEmailResent when resent=true), displayed via the existing register-notification banner with a new red .error CSS variant (matching the app's established red/green .message convention). Verified live on production for all 4 error variants via Playwright.",
+      "tags": [
+        "login",
+        "magic-link",
+        "ux",
+        "kt",
+        "frontend",
+        "silent-failure",
+        "production-bug"
+      ],
+      "related_bugs": [
+        "bug-127"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T22:25:00.000Z"
     }
   ]
 }
