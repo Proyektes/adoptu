@@ -1174,7 +1174,7 @@ class PetsRoutesE2ETest {
     }
 
     @Test
-    fun `POST pets images multipart returns 500 for unparseable image data`() {
+    fun `POST pets images multipart returns 400 for unparseable image data`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
         val handle = startTestServer()
         try {
@@ -1187,8 +1187,28 @@ class PetsRoutesE2ETest {
             )
 
             val response = TestHttp.multipart("${handle.baseUrl}/api/pets/$petId/images", boundary, body, cookie)
-            assertEquals(500, response.statusCode())
-            assertTrue(response.body().contains("Failed to upload storage"))
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST pets images multipart returns 400 for disallowed content type`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+
+            val boundary = "----TestBoundary${System.nanoTime()}"
+            val body = buildMultipartBody(
+                boundary,
+                files = mapOf("file" to Triple("test.svg", "image/svg+xml", "<svg onload=alert(1)></svg>".toByteArray()))
+            )
+
+            val response = TestHttp.multipart("${handle.baseUrl}/api/pets/$petId/images", boundary, body, cookie)
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Unsupported image type"))
         } finally {
             handle.stop()
         }

@@ -127,12 +127,32 @@ class PetService(
             return ServiceResult.Forbidden
         }
 
-        val format = if (contentType.contains("png")) "png" else "jpg"
-        val compressedStream = ImageCompressor.compress(imageData.inputStream(), format)
-        val imageUrl = imageStorage.uploadImage(petId, imageName, contentType, compressedStream.toByteArray().inputStream())
+        // Client-controlled header - restrict to what ImageCompressor below can actually decode
+        // (javax.imageio has no webp/svg/etc. support here), or a spoofed content-type paired with
+        // a polyglot file could get stored and later served back as something other than an image.
+        val normalizedContentType = contentType.substringBefore(";").trim().lowercase()
+        if (normalizedContentType !in ALLOWED_IMAGE_CONTENT_TYPES) {
+            return ServiceResult.Error("Unsupported image type. Allowed: JPEG, PNG")
+        }
+        if (imageData.size > MAX_IMAGE_BYTES) {
+            return ServiceResult.Error("Image exceeds maximum size of ${MAX_IMAGE_BYTES / (1024 * 1024)}MB")
+        }
+
+        val format = if (normalizedContentType == "image/png") "png" else "jpg"
+        val compressedStream = try {
+            ImageCompressor.compress(imageData.inputStream(), format)
+        } catch (e: IllegalArgumentException) {
+            return ServiceResult.Error(e.message ?: "Invalid image data")
+        }
+        val imageUrl = imageStorage.uploadImage(petId, imageName, normalizedContentType, compressedStream.toByteArray().inputStream())
 
         val image = petRepository.addImage(petId, imageUrl, isPrimary)
         return ServiceResult.Success(image)
+    }
+
+    companion object {
+        private val ALLOWED_IMAGE_CONTENT_TYPES = setOf("image/jpeg", "image/png")
+        private const val MAX_IMAGE_BYTES = 10 * 1024 * 1024
     }
 
     suspend fun removeImage(petId: Int, imageId: Int, userId: Int, userRoles: Set<String>): ServiceResult<Unit> {
