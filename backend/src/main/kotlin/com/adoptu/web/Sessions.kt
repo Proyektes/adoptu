@@ -1,5 +1,6 @@
 package com.adoptu.web
 
+import com.adoptu.config.AppConfig
 import com.adoptu.services.auth.SessionUser
 import io.helidon.http.HeaderNames
 import io.helidon.webserver.http.ServerRequest
@@ -17,7 +18,17 @@ import javax.crypto.spec.SecretKeySpec
  */
 private const val COOKIE_NAME = "user_session"
 private const val MAX_AGE_SECONDS = 86400 * 7
-private val secretHashKey = "0123456789012345678901234567890123456789012345678901234567890123".toByteArray()
+
+// Must be overridden via ADOPTU_SESSION_SECRET in every real deployment (see application.conf) -
+// the checked-in default is dev-only and, unlike a per-deployment secret, forgeable by anyone
+// with repo access, which would let them mint a valid session cookie for any user.
+private val secretHashKey: ByteArray = run {
+    val configured = AppConfig.load().propertyOrNull("session.secretKey")?.getString()
+    require(!configured.isNullOrBlank()) { "session.secretKey must be configured (set ADOPTU_SESSION_SECRET)" }
+    val bytes = configured.toByteArray()
+    require(bytes.size >= 32) { "session.secretKey (ADOPTU_SESSION_SECRET) must be at least 32 bytes" }
+    bytes
+}
 private val hmacKey = SecretKeySpec(secretHashKey, "HmacSHA256")
 private val base64UrlEncoder: Base64.Encoder = Base64.getUrlEncoder().withoutPadding()
 private val base64UrlDecoder: Base64.Decoder = Base64.getUrlDecoder()

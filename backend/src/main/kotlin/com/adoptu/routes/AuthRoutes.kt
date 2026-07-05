@@ -38,6 +38,20 @@ private val logger = LoggerFactory.getLogger("AdoptU-Auth")
 data class EncryptedLoginRequest(val encryptedData: String)
 data class PasswordLoginRequest(val email: String, val encryptedPassword: String)
 
+// ADMIN is granted only via the admin.email bootstrap match below - never from client input,
+// or any authenticated caller could self-register with "roles=ADMIN" and gain full admin access.
+private val SELF_REGISTERABLE_ROLES = UserRole.entries.toSet() - UserRole.ADMIN
+
+private fun parseSelfRegisteredRoles(rolesStr: String?): Set<UserRole> =
+    rolesStr?.split(",")
+        ?.map { it.trim() }
+        ?.filter { it.isNotBlank() }
+        ?.mapNotNull { name -> UserRole.entries.find { it.name == name } }
+        ?.filter { it in SELF_REGISTERABLE_ROLES }
+        ?.toSet()
+        ?.ifEmpty { null }
+        ?: setOf(UserRole.ADOPTER)
+
 fun HttpRules.authRoutes() {
     val webAuthnService by Deps.inject<WebAuthnService>()
     val validationService by Deps.inject<AuthValidationService>()
@@ -81,12 +95,7 @@ fun HttpRules.authRoutes() {
             val registrationResponse = params["registrationResponse"]
                 ?: return@runBlocking res.respondError("registrationResponse required")
 
-            val roles = params["roles"]?.split(",")
-                ?.filter { it.isNotBlank() }
-                ?.map { it.trim() }
-                ?.map { UserRole.valueOf(it) }
-                ?.toSet()
-                ?: setOf(UserRole.ADOPTER)
+            val roles = parseSelfRegisteredRoles(params["roles"])
 
             val effectiveRoles = if (email.equals(adminEmail, ignoreCase = true)) {
                 roles + UserRole.ADMIN
@@ -109,16 +118,12 @@ fun HttpRules.authRoutes() {
             val email = json.get("email")?.asText() ?: return@runBlocking res.respondError("email required")
             val displayName = json.get("displayName")?.asText() ?: return@runBlocking res.respondError("displayName required")
             val encryptedPassword = json.get("encryptedPassword")?.asText() ?: return@runBlocking res.respondError("password required")
-            val rolesStr = json.get("roles")?.asText() ?: "ADOPTER"
+            val rolesStr = json.get("roles")?.asText()
 
             val emailRegex = Regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")
             if (!emailRegex.matches(email)) return@runBlocking res.respondError("invalid email format")
 
-            val roles = rolesStr.split(",")
-                .filter { it.isNotBlank() }
-                .map { it.trim() }
-                .map { UserRole.valueOf(it) }
-                .toSet()
+            val roles = parseSelfRegisteredRoles(rolesStr)
 
             val effectiveRoles = if (email.equals(adminEmail, ignoreCase = true)) {
                 roles + UserRole.ADMIN

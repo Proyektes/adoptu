@@ -418,6 +418,33 @@ class AuthRoutesE2ETest {
         }
     }
 
+    @Test
+    fun `POST register-password ignores self-assigned ADMIN role for non-admin email`() {
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/auth/register-password",
+                JsonSupport.objectMapper.writeValueAsString(
+                    mapOf(
+                        "email" to "attacker@example.com",
+                        "displayName" to "Attacker",
+                        "roles" to "ADOPTER,ADMIN",
+                        "encryptedPassword" to encryptValue("SecurePass123!")
+                    )
+                )
+            )
+            assertEquals(200, response.statusCode())
+            val userId = transaction { Users.selectAll().where { Users.username eq "attacker@example.com" }.first()[Users.id] }
+            val roles = transaction {
+                UserActiveRoles.selectAll().where { UserActiveRoles.userId eq userId }.map { it[UserActiveRoles.role] }
+            }
+            assertFalse(roles.contains("ADMIN"))
+            assertTrue(roles.contains("ADOPTER"))
+        } finally {
+            handle.stop()
+        }
+    }
+
     // ==================== GET /api/auth/has-passkey (authenticated) ====================
 
     @Test
