@@ -18,8 +18,11 @@ import io.helidon.webserver.http.RoutingResponse
  * browser. Every inline event-handler attribute (onClick=/onChange=, both server-rendered and in
  * JS-generated innerHTML) has been converted to a delegated `data-action`/`data-arg` click
  * listener (CommonModule.initClickActions() in Common.kt), so script-src-attr has nothing left to
- * allow and is intentionally omitted - it falls back to script-src per the CSP3 fallback list,
- * which is nonce-only and therefore blocks any inline handler that might get reintroduced.
+ * allow. It's set to 'none' explicitly rather than left to fall back to script-src per the CSP3
+ * fallback list - the effective result is identical (a nonce can't be applied to an attribute, so
+ * script-src's nonce-only policy already blocks every inline handler), but an explicit directive
+ * doesn't depend on every browser correctly implementing the fallback list, and reads unambiguously
+ * to both humans and automated CSP scanners.
  *
  * style-src has no 'unsafe-inline' either: every inline style="..." attribute across the page
  * templates has been moved to a CSS class in style.scss (.hidden, .checkbox-row, .mt-2rem, etc).
@@ -53,6 +56,7 @@ class SecurityHeadersFilter : Filter {
         private fun buildCsp(nonce: String) = listOf(
             "default-src 'self'",
             "script-src 'self' 'nonce-$nonce'",
+            "script-src-attr 'none'",
             "style-src 'self' https://fonts.googleapis.com",
             "font-src 'self' https://fonts.gstatic.com",
             "img-src 'self' data: https://static.adopt-u.org https://*.amazonaws.com",

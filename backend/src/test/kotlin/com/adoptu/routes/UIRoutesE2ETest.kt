@@ -171,6 +171,22 @@ class UIRoutesE2ETest {
     }
 
     @Test
+    fun `GET root CSP explicitly disallows inline event-handler attributes`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get(handle.baseUrl)
+            val csp = response.headers().firstValue("Content-Security-Policy").orElse(null)
+            assertTrue(csp != null, "Content-Security-Policy header missing")
+            assertTrue(
+                csp!!.split(";").map { it.trim() }.contains("script-src-attr 'none'"),
+                "Expected an explicit script-src-attr 'none' directive, not a fallback to script-src: $csp"
+            )
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `GET static asset is served from the classpath`() {
         val handle = startServer()
         try {
