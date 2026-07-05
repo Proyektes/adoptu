@@ -5,11 +5,14 @@ import com.adoptu.dto.input.UpdateUserShelterRequest
 import com.adoptu.dto.input.UserShelterDto
 import com.adoptu.ports.UserShelterRepositoryPort
 
-class UserShelterService(private val repository: UserShelterRepositoryPort) {
+class UserShelterService(
+    private val repository: UserShelterRepositoryPort,
+    private val profileEmailVerificationService: ProfileEmailVerificationService
+) {
 
     suspend fun getByUserId(userId: Int): UserShelterDto? = repository.getByUserId(userId)
 
-    suspend fun create(userId: Int, request: CreateUserShelterRequest): UserShelterDto {
+    suspend fun create(userId: Int, accountEmail: String, displayName: String, request: CreateUserShelterRequest): UserShelterDto {
         require(request.name.isNotBlank()) { "Name is required" }
         require(request.country.isNotBlank()) { "Country is required" }
         require(request.city.isNotBlank()) { "City is required" }
@@ -24,14 +27,32 @@ class UserShelterService(private val repository: UserShelterRepositoryPort) {
                 iban = request.iban, swiftBic = request.swiftBic, currency = request.currency,
                 description = request.description
             )
-            return repository.update(userId, updateRequest) ?: throw Exception("Failed to update shelter")
+            return when (val result = update(userId, accountEmail, displayName, updateRequest)) {
+                is ServiceResult.Success -> result.data
+                is ServiceResult.Error -> throw IllegalArgumentException(result.message)
+                else -> throw Exception("Failed to update shelter")
+            }
         }
-        return repository.create(userId, request)
+        val emailVerified = profileEmailVerificationService.handleProfileEmail(
+            userId, VerifiableProfileType.SHELTER, accountEmail, request.email, displayName
+        )
+        return repository.create(userId, request, emailVerified)
     }
 
-    suspend fun update(userId: Int, request: UpdateUserShelterRequest): ServiceResult<UserShelterDto> {
+    suspend fun update(userId: Int, accountEmail: String, displayName: String, request: UpdateUserShelterRequest): ServiceResult<UserShelterDto> {
         val existing = repository.getByUserId(userId) ?: return ServiceResult.NotFound
-        val updated = repository.update(userId, request)
+        val emailVerifiedOverride = if (request.email != null && request.email != existing.email) {
+            try {
+                profileEmailVerificationService.handleProfileEmail(
+                    userId, VerifiableProfileType.SHELTER, accountEmail, request.email, displayName
+                )
+            } catch (e: IllegalArgumentException) {
+                return ServiceResult.Error(e.message ?: "Invalid email")
+            }
+        } else {
+            null
+        }
+        val updated = repository.update(userId, request, emailVerifiedOverride)
         return if (updated != null) ServiceResult.Success(updated) else ServiceResult.NotFound
     }
 

@@ -451,33 +451,4 @@ class TemporalHomesValidationServiceTest {
         assertEquals(ValidationConstants.INVALID_TEMPORAL_HOME_ID, result.message)
         Unit
     }
-
-    // validateRescuerId
-
-    @Test
-    fun `validateRescuerId returns Success for valid numeric id`() = runBlocking {
-        val result = service.validateRescuerId("13")
-
-        assertIs<ServiceResult.Success<Int>>(result)
-        assertEquals(13, result.data)
-        Unit
-    }
-
-    @Test
-    fun `validateRescuerId returns Error for null id`() = runBlocking {
-        val result = service.validateRescuerId(null)
-
-        assertIs<ServiceResult.Error<Int>>(result)
-        assertEquals(ValidationConstants.INVALID_RESCUER_ID, result.message)
-        Unit
-    }
-
-    @Test
-    fun `validateRescuerId returns Error for non-numeric id`() = runBlocking {
-        val result = service.validateRescuerId("nope")
-
-        assertIs<ServiceResult.Error<Int>>(result)
-        assertEquals(ValidationConstants.INVALID_RESCUER_ID, result.message)
-        Unit
-    }
 }

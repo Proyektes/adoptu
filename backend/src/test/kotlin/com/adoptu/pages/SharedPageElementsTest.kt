@@ -51,6 +51,6 @@ class SharedPageElementsTest {
         val html = createHTML().html { magicLinkLoginPage() }
         assertTrue(html.contains("Email Link Login"))
         assertTrue(html.contains("Verifying"))
-        assertTrue(html.contains("magic-link-login.js"))
+        assertTrue(html.contains("common.js"))
     }
 }

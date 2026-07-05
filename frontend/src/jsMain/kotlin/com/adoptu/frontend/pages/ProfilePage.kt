@@ -39,6 +39,7 @@ object ProfilePageModule {
         (document.getElementById("email") as? HTMLInputElement)?.value = user.email ?: ""
         (document.getElementById("displayName") as? HTMLInputElement)?.value = user.displayName ?: ""
         (document.getElementById("language") as? HTMLSelectElement)?.value = user.language ?: "en"
+        (document.getElementById("country") as? HTMLSelectElement)?.value = user.country ?: ""
 
         currentRoles = (user.activeRoles as? Array<*>)?.map { it.toString() } ?: emptyList()
 
@@ -164,8 +165,18 @@ object ProfilePageModule {
                 (document.getElementById("shelter-email") as? HTMLInputElement)?.value = shelter.email ?: ""
                 (document.getElementById("shelter-website") as? HTMLInputElement)?.value = shelter.website ?: ""
                 (document.getElementById("shelter-description") as? HTMLTextAreaElement)?.value = shelter.description ?: ""
+                updateEmailPendingStatus("shelter-email-status", shelter.email as? String, shelter.emailVerified == true)
             }
             undefined
+        }
+    }
+
+    private fun updateEmailPendingStatus(elementId: String, email: String?, verified: Boolean) {
+        val statusEl = document.getElementById(elementId) as? HTMLElement ?: return
+        statusEl.textContent = if (!email.isNullOrEmpty() && !verified) {
+            "Pending verification - this listing won't be published until you confirm this email via the link we sent it"
+        } else {
+            ""
         }
     }
 
@@ -182,6 +193,7 @@ object ProfilePageModule {
                 (document.getElementById("sterilization-email") as? HTMLInputElement)?.value = loc.email ?: ""
                 (document.getElementById("sterilization-website") as? HTMLInputElement)?.value = loc.website ?: ""
                 (document.getElementById("sterilization-description") as? HTMLTextAreaElement)?.value = loc.description ?: ""
+                updateEmailPendingStatus("sterilization-email-status", loc.email as? String, loc.emailVerified == true)
             }
             undefined
         }
@@ -199,6 +211,7 @@ object ProfilePageModule {
         val msg = document.getElementById("message") as? HTMLElement ?: return
         val displayName = (document.getElementById("displayName") as? HTMLInputElement)?.value ?: ""
         val language = (document.getElementById("language") as? HTMLSelectElement)?.value ?: "en"
+        val country = (document.getElementById("country") as? HTMLSelectElement)?.value?.ifEmpty { null }
 
         clearFieldErrors()
 
@@ -216,16 +229,14 @@ object ProfilePageModule {
 
         showMessage(msg, "", I18n.t("saving"))
 
-        ApiClientModule.updateProfile(displayName).then<Unit> {
+        ApiClientModule.updateProfile(displayName, country).then<Unit> {
             ApiClientModule.updateLanguage(language)
             undefined
         }.then<Unit> {
             saveRoles(msg)
             undefined
         }.catch { error: dynamic ->
-            msg.className = "message error"
-            msg.textContent = error.message ?: "Failed to save profile"
-            msg.style.display = "block"
+            showMessage(msg, "error", error.message ?: "Failed to save profile")
         }
     }
 
@@ -317,6 +328,25 @@ object ProfilePageModule {
         msg.className = "message $type"
         msg.textContent = text
         msg.style.display = "block"
+        if (type == "error") {
+            scrollToFirstError(msg)
+            window.setTimeout({
+                msg.style.display = "none"
+                msg.textContent = ""
+            }, 3000)
+        }
+    }
+
+    private fun scrollToFirstError(fallback: HTMLElement) {
+        val errors = document.querySelectorAll(".field-error")
+        for (i in 0 until errors.length) {
+            val el = errors.item(i) as? HTMLElement
+            if (!el?.textContent.isNullOrEmpty()) {
+                el.asDynamic().scrollIntoView(js("({behavior: 'smooth', block: 'center'})"))
+                return
+            }
+        }
+        fallback.asDynamic()?.scrollIntoView(js("({behavior: 'smooth', block: 'center'})"))
     }
 
     private fun clearFieldErrors() {

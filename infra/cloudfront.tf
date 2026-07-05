@@ -10,6 +10,31 @@ data "aws_cloudfront_origin_request_policy" "all_viewer" {
   name = "Managed-AllViewer"
 }
 
+# Same forwarding as Managed-AllViewer, plus the CloudFront-Viewer-Country header.
+# That header isn't a real viewer-sent header - CloudFront injects it itself from the
+# viewer's IP - so it has to be explicitly whitelisted via allViewerAndWhitelistCloudFront;
+# Managed-AllViewer alone does not forward it. Used by GET /api/detect-country
+# (CountryRoutes.kt) to pre-select the pet-search country dropdown for visitors who
+# haven't set one on their profile. Applied only to default_cache_behavior (below) -
+# the public listing endpoints don't need it, so they keep plain Managed-AllViewer.
+resource "aws_cloudfront_origin_request_policy" "all_viewer_plus_country" {
+  name    = "adoptu-all-viewer-plus-viewer-country"
+  comment = "Managed-AllViewer plus the CloudFront-Viewer-Country header, for GET /api/detect-country"
+
+  cookies_config {
+    cookie_behavior = "all"
+  }
+  headers_config {
+    header_behavior = "allViewerAndWhitelistCloudFront"
+    headers {
+      items = ["CloudFront-Viewer-Country"]
+    }
+  }
+  query_strings_config {
+    query_string_behavior = "all"
+  }
+}
+
 # Shared by every public, unauthenticated listing endpoint (pets, shelters,
 # sterilization-locations, photographers, temporal-homes). Load testing
 # GET /api/pets showed origin CPU (JSON serialization + DB query) is the
@@ -157,7 +182,7 @@ resource "aws_cloudfront_distribution" "app" {
     cached_methods           = ["GET", "HEAD"]
     compress                 = true
     cache_policy_id          = data.aws_cloudfront_cache_policy.caching_disabled.id
-    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.all_viewer.id
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.all_viewer_plus_country.id
   }
 
   # Exact path match only (no wildcard) - PetsRoutes.kt defines no mutating

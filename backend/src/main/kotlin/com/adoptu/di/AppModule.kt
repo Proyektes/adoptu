@@ -3,17 +3,17 @@ package com.adoptu.di
 import com.adoptu.adapters.db.repositories.*
 import com.adoptu.adapters.notification.SesEmailAdapter
 import com.adoptu.adapters.storage.S3ImageStorageAdapter
+import com.adoptu.config.AppConfig
 import com.adoptu.ports.*
 import com.adoptu.services.*
 import com.adoptu.services.auth.WebAuthnService
 import com.adoptu.services.validation.*
-import io.ktor.server.config.*
 import org.koin.dsl.module
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-fun appModule(config: ApplicationConfig) = module {
+fun appModule(config: AppConfig) = module {
     single { config }
     single<Clock> { Clock.System }
     single { WebAuthnService(get(), get(), get(), get(), get(), config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com", config.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost", config.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption", getOrigins(config)) }
@@ -31,9 +31,10 @@ fun appModule(config: ApplicationConfig) = module {
     single<PhotographerService> { PhotographerService(get(), get(), get(), get()) }
     single<UserService> { UserService(get()) }
     single<PetService> { PetService(get(), get(), get(), get()) }
-    single<TemporalHomeService> { TemporalHomeService(get(), get(), get(), get()) }
-    single { UserShelterService(get()) }
-    single { UserSterilizationLocationService(get()) }
+    single<TemporalHomeService> { TemporalHomeService(get(), get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
+    single { ProfileEmailVerificationService(get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
+    single { UserShelterService(get(), get()) }
+    single { UserSterilizationLocationService(get(), get()) }
     single { ShelterService(get()) }
     single { SterilizationLocationService(get()) }
     single { EmailVerificationService(get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
@@ -49,15 +50,20 @@ fun appModule(config: ApplicationConfig) = module {
     single { AuthValidationService() }
 }
 
-private fun getOrigins(config: ApplicationConfig): List<String> {
-    val originsList = config.propertyOrNull("webauthn.origins")?.getList()
+private fun getOrigins(config: AppConfig): List<String> {
+    // Comma-separated string, not a HOCON list - see application.conf's
+    // webauthn.origins comment for why.
+    val originsList = config.propertyOrNull("webauthn.origins")?.getString()
+        ?.split(",")
+        ?.map { it.trim() }
+        ?.filter { it.isNotEmpty() }
     if (!originsList.isNullOrEmpty()) {
         return originsList
     }
     return listOf("http://localhost:80")
 }
 
-internal fun createImageStorageAdapter(config: ApplicationConfig): ImageStoragePort {
+internal fun createImageStorageAdapter(config: AppConfig): ImageStoragePort {
     val env = config.propertyOrNull("env")?.getString() ?: "prod"
     val prefix = "storage.$env"
 

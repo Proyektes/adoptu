@@ -134,12 +134,12 @@ object RegisterPageModule {
         WebAuthnModule.register(email, displayName)
             .then { _: dynamic ->
                 console.log("Registration successful")
-                window.location.href = "/login?registered=true"
+                window.location.href = postRegisterRedirect()
             }
             .catch { error: dynamic ->
                 console.log("Registration error: $error")
                 val errMsg = error?.message ?: error?.toString() ?: "Unknown error"
-                messageEl?.textContent = "Error: $errMsg"
+                messageEl?.textContent = "$errMsg"
                 messageEl?.setAttribute("style", "display: block")
             }
     }
@@ -182,11 +182,11 @@ object RegisterPageModule {
                 apiFetch("/api/auth/register-password", js("({method: 'POST', body: JSON.stringify(body)})"))
             }
             .then { _: dynamic ->
-                window.location.href = "/login?registered=true"
+                window.location.href = postRegisterRedirect()
             }
             .catch { error: dynamic ->
                 val errMsg = error?.message ?: error?.toString() ?: "Unknown error"
-                messageEl?.textContent = "Error: $errMsg"
+                messageEl?.textContent = "$errMsg"
             }
     }
 
@@ -234,14 +234,25 @@ object RegisterPageModule {
                     }
                     .catch { error: dynamic ->
                         val errMsg = error?.message ?: error?.toString() ?: "Unknown error"
-                        messageEl?.textContent = "Error: $errMsg"
+                        messageEl?.textContent = "$errMsg"
                     }
             }
             .catch { error: dynamic ->
                 val errMsg = error?.message ?: error?.toString() ?: "Unknown error"
-                messageEl?.textContent = "Error: $errMsg"
+                messageEl?.textContent = "$errMsg"
             }
     }
+
+    // Photographer/temporal-home/shelter/sterilization accounts have role-specific
+    // fields to fill in on /profile; plain adopter/rescuer accounts don't, so they
+    // go through the normal verify-then-login flow instead.
+    private fun needsProfileCompletion(): Boolean {
+        val ids = listOf("role-photographer", "role-temporal-home", "role-shelter", "role-sterilization")
+        return ids.any { (document.getElementById(it) as? HTMLInputElement)?.checked == true }
+    }
+
+    private fun postRegisterRedirect(): String =
+        if (needsProfileCompletion()) "/profile" else "/login?registered=true"
 
     private fun getRoles(): String {
         val roles = mutableListOf("ADOPTER")

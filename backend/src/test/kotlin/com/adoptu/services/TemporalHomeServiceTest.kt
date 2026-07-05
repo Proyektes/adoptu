@@ -34,6 +34,7 @@ class TemporalHomeServiceTest {
     private lateinit var service: TemporalHomeService
     private lateinit var userService: UserService
     private lateinit var mockNotificationAdapter: MockNotificationAdapter
+    private lateinit var temporalHomeRepository: TemporalHomeRepositoryImpl
     private val clock = TestClock(Instant.parse("2024-01-15T10:00:00Z"))
 
     @BeforeEach
@@ -42,7 +43,7 @@ class TemporalHomeServiceTest {
         val userRepository = UserRepository(clock)
         userService = UserService(userRepository)
         val petRepository = PetRepositoryImpl(clock)
-        val temporalHomeRepository = TemporalHomeRepositoryImpl(petRepository, userRepository, clock)
+        temporalHomeRepository = TemporalHomeRepositoryImpl(petRepository, userRepository, clock)
         mockNotificationAdapter = MockNotificationAdapter()
         service = TemporalHomeService(
             temporalHomeRepository = temporalHomeRepository,
@@ -329,6 +330,36 @@ class TemporalHomeServiceTest {
 
         val result = service.blockRescuer(homeUserId, rescuerId)
 
+        assertFalse(result)
+    }
+
+    @Test
+    fun `blockRescuerByToken blocks the rescuer named by a valid token`() = runBlocking {
+        val homeUserId = createTestUser("home@test.com", "Home User")
+        createTemporalHome(homeUserId, "My Home", "United States", "California", "LA")
+        val rescuerId = createTestUser("rescuer@test.com", "Rescuer", "RESCUER")
+        val token = temporalHomeRepository.createSpamReportToken(homeUserId, rescuerId)
+
+        val result = service.blockRescuerByToken(token)
+
+        assertTrue(result)
+        assertTrue(service.isBlocked(homeUserId, rescuerId))
+    }
+
+    @Test
+    fun `blockRescuerByToken is single-use`() = runBlocking {
+        val homeUserId = createTestUser("home@test.com", "Home User")
+        createTemporalHome(homeUserId, "My Home", "United States", "California", "LA")
+        val rescuerId = createTestUser("rescuer@test.com", "Rescuer", "RESCUER")
+        val token = temporalHomeRepository.createSpamReportToken(homeUserId, rescuerId)
+
+        assertTrue(service.blockRescuerByToken(token))
+        assertFalse(service.blockRescuerByToken(token))
+    }
+
+    @Test
+    fun `blockRescuerByToken returns false for an unknown token`() = runBlocking {
+        val result = service.blockRescuerByToken("not-a-real-token")
         assertFalse(result)
     }
 

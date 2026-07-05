@@ -3,32 +3,25 @@ package com.adoptu.routes
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.UserShelters
 import com.adoptu.adapters.db.Users
+import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.adapters.db.repositories.UserShelterRepository
 import com.adoptu.dto.input.CreateUserShelterRequest
 import com.adoptu.dto.input.UpdateUserShelterRequest
+import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestDatabase
-import com.adoptu.plugins.configureSerialization
-import com.adoptu.plugins.configureSessions
+import com.adoptu.ports.NotificationPort
+import com.adoptu.ports.UserRepositoryPort
 import com.adoptu.ports.UserShelterRepositoryPort
+import com.adoptu.services.ProfileEmailVerificationService
 import com.adoptu.services.UserShelterService
-import com.adoptu.services.auth.SessionUser
-import io.ktor.client.HttpClient
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.config.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
-import io.ktor.server.testing.*
-import kotlinx.serialization.json.Json
+import com.adoptu.testsupport.TestHttp
+import com.adoptu.testsupport.TestServer
+import com.adoptu.web.JsonSupport
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.koin.dsl.module
-import org.koin.ktor.plugin.Koin
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Clock
@@ -38,6 +31,18 @@ import kotlin.time.ExperimentalTime
 class UserShelterRoutesE2ETest {
 
     private val clock = Clock.System
+
+    private val testModules = listOf(
+        module {
+            single<Clock> { Clock.System }
+            single { MockNotificationAdapter() }
+            single<NotificationPort> { get<MockNotificationAdapter>() }
+            single<UserRepositoryPort> { UserRepository(get()) }
+            single { ProfileEmailVerificationService(get(), get(), get()) }
+            single<UserShelterRepositoryPort> { UserShelterRepository(get()) }
+            single { UserShelterService(get(), get()) }
+        }
+    )
 
     @BeforeEach
     fun setup() {
@@ -89,47 +94,7 @@ class UserShelterRoutesE2ETest {
         }
     }
 
-    private fun TestApplicationBuilder.setupApp() {
-        val config = MapApplicationConfig(
-            "env" to "test",
-            "ktor.deployment.port" to "80"
-        )
-
-        val testModules = module {
-            single<kotlin.time.Clock> { kotlin.time.Clock.System }
-            single<UserShelterRepositoryPort> { UserShelterRepository(get()) }
-            single { UserShelterService(get()) }
-        }
-
-        environment {
-            this.config = config
-        }
-
-        application {
-            install(Koin) {
-                modules(testModules)
-            }
-            configureSerialization()
-            configureSessions()
-            routing {
-                userShelterRoutes()
-                // Test-only helper to establish a real, correctly-signed session cookie
-                // without re-implementing the production login flow.
-                post("/test/login/{userId}") {
-                    val userId = call.parameters["userId"]!!.toInt()
-                    call.sessions.set(SessionUser(userId, "user$userId@test.com", "Test User $userId"))
-                    call.respondText("OK")
-                }
-            }
-        }
-    }
-
-    private suspend fun HttpClient.loginAs(userId: Int): String {
-        val response = post("/test/login/$userId")
-        val setCookie = response.headers[HttpHeaders.SetCookie]
-            ?: error("No session cookie returned from test login")
-        return setCookie.substringBefore(";")
-    }
+    private fun startServer() = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
 
     private fun createShelterInDb(userId: Int, country: String = "United States", state: String? = "CA", city: String = "LA") {
         transaction {
@@ -145,6 +110,12 @@ class UserShelterRoutesE2ETest {
                 it[UserShelters.createdAt] = now
                 it[UserShelters.updatedAt] = now
             }
+            try {
+                UserActiveRoles.insert {
+                    it[UserActiveRoles.userId] = userId
+                    it[UserActiveRoles.role] = "SHELTER"
+                }
+            } catch (e: Exception) { }
         }
     }
 
@@ -152,9 +123,8 @@ class UserShelterRoutesE2ETest {
 
     @Test
     fun `POST users shelter returns 401 when no session`() {
-        testApplication {
-            setupApp()
-
+        val handle = startServer()
+        try {
             val request = CreateUserShelterRequest(
                 name = "My Shelter",
                 country = "United States",
@@ -162,21 +132,23 @@ class UserShelterRoutesE2ETest {
                 address = "123 Main St"
             )
 
-            val response = client.post("/api/users/shelter") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateUserShelterRequest.serializer(), request))
-            }
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/shelter",
+                JsonSupport.objectMapper.writeValueAsString(request)
+            )
 
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
-            assertTrue(response.bodyAsText().contains("Unauthorized"))
+            assertEquals(401, response.statusCode())
+            assertTrue(response.body().contains("Unauthorized"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST users shelter creates shelter when authenticated`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
             val request = CreateUserShelterRequest(
                 name = "My Shelter",
@@ -185,24 +157,26 @@ class UserShelterRoutesE2ETest {
                 address = "123 Main St"
             )
 
-            val response = client.post("/api/users/shelter") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateUserShelterRequest.serializer(), request))
-            }
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/shelter",
+                JsonSupport.objectMapper.writeValueAsString(request),
+                cookie
+            )
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("My Shelter"))
             assertTrue(body.contains("\"userId\": 1"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST users shelter twice updates existing shelter instead of failing`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
             val firstRequest = CreateUserShelterRequest(
                 name = "First Name",
@@ -210,11 +184,11 @@ class UserShelterRoutesE2ETest {
                 city = "LA",
                 address = "123 Main St"
             )
-            client.post("/api/users/shelter") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateUserShelterRequest.serializer(), firstRequest))
-            }
+            TestHttp.postJson(
+                "${handle.baseUrl}/api/users/shelter",
+                JsonSupport.objectMapper.writeValueAsString(firstRequest),
+                cookie
+            )
 
             val secondRequest = CreateUserShelterRequest(
                 name = "Second Name",
@@ -222,23 +196,25 @@ class UserShelterRoutesE2ETest {
                 city = "LA",
                 address = "456 Other St"
             )
-            val response = client.post("/api/users/shelter") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateUserShelterRequest.serializer(), secondRequest))
-            }
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/shelter",
+                JsonSupport.objectMapper.writeValueAsString(secondRequest),
+                cookie
+            )
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Second Name"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST users shelter returns 400 for blank name`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
             val request = CreateUserShelterRequest(
                 name = "",
@@ -247,14 +223,16 @@ class UserShelterRoutesE2ETest {
                 address = "123 Main St"
             )
 
-            val response = client.post("/api/users/shelter") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateUserShelterRequest.serializer(), request))
-            }
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/shelter",
+                JsonSupport.objectMapper.writeValueAsString(request),
+                cookie
+            )
 
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("Name is required"))
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Name is required"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -262,25 +240,27 @@ class UserShelterRoutesE2ETest {
 
     @Test
     fun `GET users shelter returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/users/shelter")
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/users/shelter")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET users shelter returns 404 when not found`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.get("/api/users/shelter") {
-                header(HttpHeaders.Cookie, cookie)
-            }
+            val response = TestHttp.get("${handle.baseUrl}/api/users/shelter", cookie)
 
-            assertEquals(HttpStatusCode.NotFound, response.status)
-            assertTrue(response.bodyAsText().contains("Shelter profile not found"))
+            assertEquals(404, response.statusCode())
+            assertTrue(response.body().contains("Shelter profile not found"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -288,16 +268,16 @@ class UserShelterRoutesE2ETest {
     fun `GET users shelter returns shelter when it exists`() {
         createShelterInDb(1)
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.get("/api/users/shelter") {
-                header(HttpHeaders.Cookie, cookie)
-            }
+            val response = TestHttp.get("${handle.baseUrl}/api/users/shelter", cookie)
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("Shelter 1"))
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("Shelter 1"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -305,32 +285,35 @@ class UserShelterRoutesE2ETest {
 
     @Test
     fun `PUT users shelter returns 401 when no session`() {
-        testApplication {
-            setupApp()
+        val handle = startServer()
+        try {
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/shelter",
+                JsonSupport.objectMapper.writeValueAsString(UpdateUserShelterRequest(name = "New"))
+            )
 
-            val response = client.put("/api/users/shelter") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdateUserShelterRequest.serializer(), UpdateUserShelterRequest(name = "New")))
-            }
-
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT users shelter returns 404 when shelter does not exist`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.put("/api/users/shelter") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdateUserShelterRequest.serializer(), UpdateUserShelterRequest(name = "New")))
-            }
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/shelter",
+                JsonSupport.objectMapper.writeValueAsString(UpdateUserShelterRequest(name = "New")),
+                cookie
+            )
 
-            assertEquals(HttpStatusCode.NotFound, response.status)
-            assertTrue(response.bodyAsText().contains("Not found"))
+            assertEquals(404, response.statusCode())
+            assertTrue(response.body().contains("Not found"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -338,18 +321,20 @@ class UserShelterRoutesE2ETest {
     fun `PUT users shelter updates shelter when it exists`() {
         createShelterInDb(1)
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.put("/api/users/shelter") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdateUserShelterRequest.serializer(), UpdateUserShelterRequest(name = "Updated Shelter")))
-            }
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/shelter",
+                JsonSupport.objectMapper.writeValueAsString(UpdateUserShelterRequest(name = "Updated Shelter")),
+                cookie
+            )
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("Updated Shelter"))
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("Updated Shelter"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -357,24 +342,26 @@ class UserShelterRoutesE2ETest {
 
     @Test
     fun `DELETE users shelter returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.delete("/api/users/shelter")
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.delete("${handle.baseUrl}/api/users/shelter")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `DELETE users shelter returns 404 when shelter does not exist`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.delete("/api/users/shelter") {
-                header(HttpHeaders.Cookie, cookie)
-            }
+            val response = TestHttp.delete("${handle.baseUrl}/api/users/shelter", cookie)
 
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -382,20 +369,18 @@ class UserShelterRoutesE2ETest {
     fun `DELETE users shelter deletes shelter when it exists`() {
         createShelterInDb(1)
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.delete("/api/users/shelter") {
-                header(HttpHeaders.Cookie, cookie)
-            }
+            val response = TestHttp.delete("${handle.baseUrl}/api/users/shelter", cookie)
 
-            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(200, response.statusCode())
 
-            val followUp = client.get("/api/users/shelter") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.NotFound, followUp.status)
+            val followUp = TestHttp.get("${handle.baseUrl}/api/users/shelter", cookie)
+            assertEquals(404, followUp.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -403,20 +388,24 @@ class UserShelterRoutesE2ETest {
 
     @Test
     fun `GET user-shelters returns 400 when country is missing`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/user-shelters")
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("Country is required"))
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/user-shelters")
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Country is required"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET user-shelters returns 400 when country is blank`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/user-shelters?country=")
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/user-shelters?country=")
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -424,11 +413,13 @@ class UserShelterRoutesE2ETest {
     fun `GET user-shelters returns matching shelters`() {
         createShelterInDb(3, country = "United States", state = "CA", city = "LA")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/user-shelters?country=United%20States&state=CA&city=LA")
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("Shelter 3"))
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/user-shelters?country=United%20States&state=CA&city=LA")
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("Shelter 3"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -436,11 +427,13 @@ class UserShelterRoutesE2ETest {
     fun `GET user-shelters returns empty list for non-matching country`() {
         createShelterInDb(3, country = "United States")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/user-shelters?country=Canada")
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals("[]", response.bodyAsText())
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/user-shelters?country=Canada")
+            assertEquals(200, response.statusCode())
+            assertEquals("[]", response.body())
+        } finally {
+            handle.stop()
         }
     }
 }

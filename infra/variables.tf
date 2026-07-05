@@ -74,8 +74,21 @@ variable "db_identifier" {
 }
 
 variable "db_name" {
-  type    = string
-  default = "adoptu"
+  description = "RDS-level initial database name. Live instance has this unset (null) - the 'adoptu' database was created manually via SQL after the fact, not via this parameter. Setting this to a non-null value forces DB replacement (immutable post-creation), so it must stay null."
+  type        = string
+  default     = null
+}
+
+variable "db_app_database_name" {
+  description = "Actual Postgres database name the app connects to (used in the JDBC URL). Distinct from db_name, which is the RDS-level init parameter and must stay null - see db_name."
+  type        = string
+  default     = "adoptu"
+}
+
+variable "legacy_ecs_task_sg_id" {
+  description = "Security group ID of the old hand-managed 'Adopt-u-ipv6' ECS service (cluster 'default'), temporarily allowed into the new RDS security group so that service keeps DB connectivity until it's decommissioned (README Step 4). Set to null once that service is deleted."
+  type        = string
+  default     = "sg-0b2d64479930a2ce1"
 }
 
 variable "db_username" {
@@ -141,9 +154,16 @@ variable "admin_username" {
   default = "adopt-u@adopt-u.org"
 }
 
-variable "webauthn_origin" {
-  type    = string
-  default = "https://www.adopt-u.org"
+variable "base_url" {
+  description = "Public base URL used to build links in outbound emails (password reset, magic-link login, email/profile-email verification, temporal-home spam-report). Never wired to ADOPTU_BASE_URL before this - every such link defaulted to application.conf's http://localhost:80 in production."
+  type        = string
+  default     = "https://www.adopt-u.org"
+}
+
+variable "webauthn_origins" {
+  description = "Comma-separated list of accepted WebAuthn origins. application.conf reads this as a plain string and splits it in Kotlin (AppModule.kt's getOrigins) - a HOCON list type can't be produced by substituting an env var (env var substitution is always a string, even if it looks like JSON/HOCON array syntax, which throws ConfigException.WrongType at first use)."
+  type        = string
+  default     = "https://www.adopt-u.org,https://adopt-u.org"
 }
 
 variable "webauthn_rp_id" {

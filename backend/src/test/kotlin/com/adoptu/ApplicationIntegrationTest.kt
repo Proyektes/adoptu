@@ -3,39 +3,25 @@ package com.adoptu
 import com.adoptu.adapters.db.*
 import com.adoptu.adapters.notification.SesEmailAdapter
 import com.adoptu.adapters.storage.S3ImageStorageAdapter
-import com.adoptu.di.appModule
+import com.adoptu.config.AppConfig
 import com.adoptu.mocks.TestClock
-import com.adoptu.plugins.configureRouting
-import com.adoptu.plugins.configureSerialization
-import com.adoptu.plugins.configureSessions
-import com.adoptu.plugins.configureWebAuthn
 import com.adoptu.ports.*
 import com.adoptu.services.*
 import com.adoptu.services.auth.WebAuthnService
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.config.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import kotlinx.coroutines.runBlocking
+import com.adoptu.testsupport.TestHttp
+import com.adoptu.testsupport.TestServer
+import com.adoptu.testsupport.TestServerHandle
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.junit.jupiter.api.*
 import org.koin.dsl.module
-import org.koin.ktor.plugin.Koin
-import org.koin.logger.slf4jLogger
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
-import java.net.InetAddress
-import java.net.ServerSocket
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Clock
@@ -61,21 +47,12 @@ class ApplicationIntegrationTest {
     }
 
     private val testClock: Clock = TestClock()
-    private var serverPort: Int = 0
-    private lateinit var baseUrl: String
-    private val httpClient = HttpClient(OkHttp)
-    private var server: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>? = null
+    private var handle: TestServerHandle? = null
+    private val baseUrl: String get() = handle!!.baseUrl
 
-    private fun findAvailablePort(): Int {
-        ServerSocket(0).use { socket ->
-            return socket.localPort
-        }
-    }
-
-    private fun createTestConfig(): MapApplicationConfig {
-        return MapApplicationConfig(
+    private fun createTestConfig(): Map<String, Any> {
+        return mapOf(
             "env" to "test",
-            "ktor.deployment.port" to serverPort.toString(),
             "db.test.postgres.driver" to "org.postgresql.Driver",
             "db.test.postgres.url" to postgresContainer.jdbcUrl,
             "db.test.postgres.user" to postgresContainer.username,
@@ -92,7 +69,7 @@ class ApplicationIntegrationTest {
         )
     }
 
-    private fun initDatabase(config: ApplicationConfig) {
+    private fun initDatabase(config: AppConfig) {
         val driverClassName = config.property("db.test.postgres.driver").getString()
         val jdbcURL = config.property("db.test.postgres.url").getString()
         val user = config.property("db.test.postgres.user").getString()
@@ -143,13 +120,13 @@ class ApplicationIntegrationTest {
     @BeforeEach
     fun setUp(testInfo: TestInfo) {
         println("Starting test: ${testInfo.displayName}")
-        
-        serverPort = findAvailablePort()
-        val config = createTestConfig()
+
+        val configOverrides = createTestConfig()
+        val config = AppConfig.fromMap(configOverrides)
         initDatabase(config)
 
         val testModules = module {
-            single<ApplicationConfig> { config }
+            single { config }
             single<Clock> { testClock }
             single { WebAuthnService(get(), get(), get(), get(), get(), config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com", config.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost", config.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption", listOf(config.propertyOrNull("webauthn.origin")?.getString() ?: "http://localhost:80")) }
             single<UserRepositoryPort> { com.adoptu.adapters.db.repositories.UserRepository(get()) }
@@ -176,34 +153,15 @@ class ApplicationIntegrationTest {
             single { EmailVerificationService(get(), get(), get(), "http://localhost:80") }
         }
 
-        server = embeddedServer(Netty, port = serverPort) {
-            install(Koin) {
-                slf4jLogger()
-                modules(appModule(config), testModules)
-            }
-            configureSerialization()
-            configureSessions()
-            configureWebAuthn()
-            configureRouting()
-        }
+        handle = TestServer.start(configOverrides = configOverrides, modules = listOf(testModules), initDatabase = false)
 
-        server!!.start()
-
-        baseUrl = "http://${InetAddress.getLoopbackAddress().hostAddress}:$serverPort"
-
-        println("Server started on port: $serverPort")
-        println("Base URL: $baseUrl")
+        println("Server started, base URL: $baseUrl")
     }
 
     @AfterEach
     fun tearDown() {
-        server?.stop(1000, 5000)
-        server = null
-    }
-
-    @AfterAll
-    fun tearDownAll() {
-        httpClient.close()
+        handle?.stop()
+        handle = null
     }
 
     @Test
@@ -214,113 +172,94 @@ class ApplicationIntegrationTest {
 
     @Test
     fun `server is listening on configured port`() {
-        assertTrue(serverPort > 0, "Server should be listening on a port, was: $serverPort")
+        val port = handle!!.server.port()
+        assertTrue(port > 0, "Server should be listening on a port, was: $port")
     }
 
     @Test
     fun `root endpoint responds with HTTP 200`() = runTestWithRetry {
-        runBlocking {
-            val response = httpClient.get("$baseUrl/")
-            assertTrue(
-                response.status in listOf(HttpStatusCode.OK, HttpStatusCode.NotFound, HttpStatusCode.Found),
-                "Root endpoint should respond with valid status, got: ${response.status}"
-            )
-        }
+        val response = TestHttp.get("$baseUrl/")
+        assertTrue(
+            response.statusCode() in listOf(200, 404, 302),
+            "Root endpoint should respond with valid status, got: ${response.statusCode()}"
+        )
     }
 
     @Test
     fun `health endpoint responds`() = runTestWithRetry {
-        runBlocking {
-            val response = httpClient.get("$baseUrl/health")
-            assertTrue(
-                response.status in listOf(HttpStatusCode.OK, HttpStatusCode.NotFound),
-                "Health endpoint should respond with valid status, got: ${response.status}"
-            )
-        }
+        val response = TestHttp.get("$baseUrl/health")
+        assertTrue(
+            response.statusCode() in listOf(200, 404),
+            "Health endpoint should respond with valid status, got: ${response.statusCode()}"
+        )
     }
 
     @Test
     fun `login page is accessible`() = runTestWithRetry {
-        runBlocking {
-            val response = httpClient.get("$baseUrl/login")
-            assertTrue(
-                response.status in listOf(HttpStatusCode.OK, HttpStatusCode.Found),
-                "Login page should be accessible, got: ${response.status}"
-            )
-        }
+        val response = TestHttp.get("$baseUrl/login")
+        assertTrue(
+            response.statusCode() in listOf(200, 302),
+            "Login page should be accessible, got: ${response.statusCode()}"
+        )
     }
 
     @Test
     fun `register page is accessible`() = runTestWithRetry {
-        runBlocking {
-            val response = httpClient.get("$baseUrl/register")
-            assertTrue(
-                response.status in listOf(HttpStatusCode.OK, HttpStatusCode.Found),
-                "Register page should be accessible, got: ${response.status}"
-            )
-        }
+        val response = TestHttp.get("$baseUrl/register")
+        assertTrue(
+            response.statusCode() in listOf(200, 302),
+            "Register page should be accessible, got: ${response.statusCode()}"
+        )
     }
 
     @Test
     fun `api pets endpoint returns valid response`() = runTestWithRetry {
-        runBlocking {
-            val response = httpClient.get("$baseUrl/api/pets")
-            assertTrue(
-                response.status.value < 500,
-                "Pets API should not return 5xx error, got: ${response.status}"
-            )
-        }
+        val response = TestHttp.get("$baseUrl/api/pets")
+        assertTrue(
+            response.statusCode() < 500,
+            "Pets API should not return 5xx error, got: ${response.statusCode()}"
+        )
     }
 
     @Test
     fun `api photographers endpoint returns valid response`() = runTestWithRetry {
-        runBlocking {
-            val response = httpClient.get("$baseUrl/api/photographers")
-            assertTrue(
-                response.status.value < 500,
-                "Photographers API should not return 5xx error, got: ${response.status}"
-            )
-        }
+        val response = TestHttp.get("$baseUrl/api/photographers")
+        assertTrue(
+            response.statusCode() < 500,
+            "Photographers API should not return 5xx error, got: ${response.statusCode()}"
+        )
     }
 
     @Test
     fun `api auth me endpoint responds`() = runTestWithRetry {
-        runBlocking {
-            val response = httpClient.get("$baseUrl/api/auth/me")
-            assertTrue(
-                response.status in listOf(HttpStatusCode.OK, HttpStatusCode.Unauthorized),
-                "Auth me endpoint should respond, got: ${response.status}"
-            )
-        }
+        val response = TestHttp.get("$baseUrl/api/auth/me")
+        assertTrue(
+            response.statusCode() in listOf(200, 401),
+            "Auth me endpoint should respond, got: ${response.statusCode()}"
+        )
     }
 
     @Test
     fun `unknown route returns 404`() = runTestWithRetry {
-        runBlocking {
-            val response = httpClient.get("$baseUrl/api/nonexistent-route-xyz")
-            assertEquals(HttpStatusCode.NotFound, response.status, "Unknown route should return 404")
-        }
+        val response = TestHttp.get("$baseUrl/api/nonexistent-route-xyz")
+        assertEquals(404, response.statusCode(), "Unknown route should return 404")
     }
 
     @Test
     fun `application responds within reasonable time`() = runTestWithRetry {
-        runBlocking {
-            val startTime = System.currentTimeMillis()
-            val response = httpClient.get("$baseUrl/")
-            val duration = System.currentTimeMillis() - startTime
-            assertTrue(duration < 5000, "Application should respond within 5 seconds, took: ${duration}ms")
-        }
+        val startTime = System.currentTimeMillis()
+        val response = TestHttp.get("$baseUrl/")
+        val duration = System.currentTimeMillis() - startTime
+        assertTrue(duration < 5000, "Application should respond within 5 seconds, took: ${duration}ms")
     }
 
     @Test
     fun `static resources are served`() = runTestWithRetry {
-        runBlocking {
-            val response = httpClient.get("$baseUrl/style.css")
-            assertTrue(
-                response.status in listOf(HttpStatusCode.OK, HttpStatusCode.NotFound),
-                "Static CSS should be accessible, got: ${response.status}"
-            )
-        }
+        val response = TestHttp.get("$baseUrl/style.css")
+        assertTrue(
+            response.statusCode() in listOf(200, 404),
+            "Static CSS should be accessible, got: ${response.statusCode()}"
+        )
     }
 
     private fun runTestWithRetry(block: () -> Unit) {

@@ -1,10 +1,13 @@
 package com.adoptu.services
 
+import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.UserShelters
 import com.adoptu.adapters.db.Users
+import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.adapters.db.repositories.UserShelterRepository
 import com.adoptu.dto.input.CreateUserShelterRequest
 import com.adoptu.dto.input.UpdateUserShelterRequest
+import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestClock
 import com.adoptu.mocks.TestDatabase
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -31,8 +34,12 @@ class UserShelterServiceTest {
     fun setup() {
         TestDatabase.initH2()
         val userShelterRepository = UserShelterRepository(clock)
-        userShelterService = UserShelterService(userShelterRepository)
+        val profileEmailVerificationService = ProfileEmailVerificationService(UserRepository(clock), MockNotificationAdapter(), clock)
+        userShelterService = UserShelterService(userShelterRepository, profileEmailVerificationService)
     }
+
+    private val accountEmail = "account@test.com"
+    private val displayName = "Test User"
 
     @Test
     fun `getByUserId returns null when no shelter exists`() = runBlocking {
@@ -84,7 +91,7 @@ class UserShelterServiceTest {
             description = "A test shelter"
         )
 
-        val result = userShelterService.create(userId, request)
+        val result = userShelterService.create(userId, accountEmail, displayName, request)
 
         assertEquals(userId, result.userId)
         assertEquals("Carol's Shelter", result.name)
@@ -122,7 +129,7 @@ class UserShelterServiceTest {
             address = "456 Oak Ave"
         )
 
-        val result = userShelterService.create(userId, request)
+        val result = userShelterService.create(userId, accountEmail, displayName, request)
 
         assertEquals(userId, result.userId)
         assertEquals("Minimal Shelter", result.name)
@@ -143,7 +150,7 @@ class UserShelterServiceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            userShelterService.create(userId, request)
+            userShelterService.create(userId, accountEmail, displayName, request)
         }
         assertEquals("Name is required", exception.message)
         Unit
@@ -160,7 +167,7 @@ class UserShelterServiceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            userShelterService.create(userId, request)
+            userShelterService.create(userId, accountEmail, displayName, request)
         }
         assertEquals("Country is required", exception.message)
         Unit
@@ -177,7 +184,7 @@ class UserShelterServiceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            userShelterService.create(userId, request)
+            userShelterService.create(userId, accountEmail, displayName, request)
         }
         assertEquals("City is required", exception.message)
         Unit
@@ -194,7 +201,7 @@ class UserShelterServiceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            userShelterService.create(userId, request)
+            userShelterService.create(userId, accountEmail, displayName, request)
         }
         assertEquals("Address is required", exception.message)
         Unit
@@ -218,10 +225,10 @@ class UserShelterServiceTest {
             address = "456 Queen St"
         )
 
-        val firstResult = userShelterService.create(userId, firstRequest)
+        val firstResult = userShelterService.create(userId, accountEmail, displayName, firstRequest)
         assertEquals("First Shelter", firstResult.name)
 
-        val secondResult = userShelterService.create(userId, secondRequest)
+        val secondResult = userShelterService.create(userId, accountEmail, displayName, secondRequest)
 
         assertEquals(userId, secondResult.userId)
         assertEquals("Second Shelter", secondResult.name)
@@ -245,7 +252,7 @@ class UserShelterServiceTest {
         val userId = createTestUser("judy")
         createTestUserShelter(userId, name = "Old Name", country = "United States", state = "NY", city = "New York")
 
-        val result = userShelterService.update(userId, UpdateUserShelterRequest(
+        val result = userShelterService.update(userId, accountEmail, displayName, UpdateUserShelterRequest(
             name = "Updated Name",
             city = "Brooklyn"
         ))
@@ -262,7 +269,7 @@ class UserShelterServiceTest {
     fun `update returns not found for user without shelter`() = runBlocking {
         val userId = createTestUser("kevin")
 
-        val result = userShelterService.update(userId, UpdateUserShelterRequest(name = "New Name"))
+        val result = userShelterService.update(userId, accountEmail, displayName, UpdateUserShelterRequest(name = "New Name"))
 
         assertTrue(result is ServiceResult.NotFound)
         Unit
@@ -276,7 +283,7 @@ class UserShelterServiceTest {
             phone = "555-0000", email = "old@test.com"
         )
 
-        val result = userShelterService.update(userId, UpdateUserShelterRequest(name = "Updated"))
+        val result = userShelterService.update(userId, accountEmail, displayName, UpdateUserShelterRequest(name = "Updated"))
 
         assertTrue(result is ServiceResult.Success)
         val updated = result.data
@@ -477,6 +484,10 @@ class UserShelterServiceTest {
                 it[UserShelters.description] = description
                 it[UserShelters.createdAt] = clock.now().toEpochMilliseconds()
                 it[UserShelters.updatedAt] = clock.now().toEpochMilliseconds()
+            }
+            UserActiveRoles.insert {
+                it[UserActiveRoles.userId] = userId
+                it[UserActiveRoles.role] = "SHELTER"
             }
         }
     }

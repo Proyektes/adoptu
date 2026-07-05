@@ -1,0 +1,38 @@
+label: graalvm-native-image-pets-retest
+endpoint: /pets
+duration_s: 30
+concurrency: 20
+cgroup: --cpus=0.5 --memory=1024m (ECS Fargate equivalent)
+binary: backend/build/native/nativeCompile/adoptu-backend (136MB, built from merged adoptu branch incl. HikariCP pooling + dedicated DB dispatcher + N+1 fix, on top of this branch's native-image work)
+baseline_for_comparison: scripts/benchmark-results/20260703T185035Z_graalvm-native-pets.txt (127.79 RPS, pre-HikariCP-merge binary)
+---
+Running 30s test @ http://host.docker.internal:18099/pets
+  20 threads and 20 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   163.22ms  130.98ms   1.10s    74.98%
+    Req/Sec     8.58      4.77    30.00     74.31%
+  4104 requests in 30.09s, 44.58MB read
+Requests/sec:    136.38
+Transfer/sec:      1.48MB
+--- container memory samples during load (CPU% MemUsage MemPerc) ---
+41.56% 135.3MiB / 1GiB 13.21%
+51.77% 134.6MiB / 1GiB 13.15%
+52.25% 131.9MiB / 1GiB 12.89%
+52.34% 129.6MiB / 1GiB 12.66%
+50.41% 125.6MiB / 1GiB 12.27%
+53.06% 126.2MiB / 1GiB 12.32%
+50.78% 127.2MiB / 1GiB 12.43%
+53.39% 123.4MiB / 1GiB 12.05%
+52.53% 121.8MiB / 1GiB 11.90%
+51.88% 113.3MiB / 1GiB 11.06%
+54.33% 115.1MiB / 1GiB 11.24%
+50.80% 109.9MiB / 1GiB 10.74%
+51.60% 112.4MiB / 1GiB 10.98%
+36.63% 116.1MiB / 1GiB 11.34%
+0.06% 116.1MiB / 1GiB 11.33%
+0.06% 116.1MiB / 1GiB 11.33%
+0.10% 116.1MiB / 1GiB 11.33%
+0.07% 116.1MiB / 1GiB 11.33%
+0.06% 116.1MiB / 1GiB 11.33%
+0.08% 116.1MiB / 1GiB 11.33%
+0.06% 116.1MiB / 1GiB 11.33%

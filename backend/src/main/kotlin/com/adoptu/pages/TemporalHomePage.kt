@@ -19,7 +19,6 @@ fun HTML.temporalHomeProfilePage(navParams: NavParams = NavParams()) {
         }
         footer()
         commonScripts(navParams.isLoggedIn)
-        script(src = "/static/js/temporal-home-profile.js") {}
     }
 }
 
@@ -46,6 +45,21 @@ fun HTML.temporalHomesSearchPage(navParams: NavParams = NavParams()) {
         }
         footer()
         commonScripts(navParams.isLoggedIn)
-        script(src = "/static/js/temporal-home-search.js") {}
+    }
+}
+
+fun HTML.temporalHomeDetailPage(navParams: NavParams = NavParams()) {
+    commonHead("Temporal Home Details - Adopt-U", "temporal-home.css")
+    body {
+        header {
+            a("/") { commonLogo() }
+            nav { commonNav(navParams.isLoggedIn, navParams.isAdmin, navParams.isRescuerOrAdmin, navParams.isTemporalHomeOrAdmin) }
+        }
+        main {
+            div { id = "temporal-home-detail"; classes = setOf("temporal-home-detail"); +"" }
+            div { id = "message"; +"" }
+        }
+        footer()
+        commonScripts(navParams.isLoggedIn)
     }
 }

@@ -3,31 +3,32 @@ package com.adoptu.routes
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.repositories.PetRepositoryImpl
+import com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl
 import com.adoptu.adapters.db.repositories.UserRepository
+import com.adoptu.config.AppConfig
 import com.adoptu.dto.input.AcceptTermsRequest
 import com.adoptu.dto.input.BanUserRequest
 import com.adoptu.dto.input.RoleActivationRequest
 import com.adoptu.mocks.MockImageStorage
 import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestDatabase
-import com.adoptu.plugins.SuccessResponse
-import com.adoptu.plugins.configureLogging
-import com.adoptu.plugins.configureSerialization
-import com.adoptu.plugins.configureSessions
 import com.adoptu.ports.ImageStoragePort
-import com.adoptu.services.auth.SessionUser
+import com.adoptu.ports.NotificationPort
+import com.adoptu.ports.PetRepositoryPort
+import com.adoptu.ports.PhotographerRepositoryPort
+import com.adoptu.ports.UserRepositoryPort
+import com.adoptu.services.EmailChangeService
+import com.adoptu.services.PasswordService
+import com.adoptu.services.PetService
+import com.adoptu.services.PhotographerService
+import com.adoptu.services.ProfileEmailVerificationService
+import com.adoptu.services.UserService
 import com.adoptu.services.auth.WebAuthnService
-import io.ktor.client.HttpClient
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.config.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
-import io.ktor.server.testing.*
-import kotlinx.serialization.json.Json
+import com.adoptu.testsupport.TestHttp
+import com.adoptu.testsupport.TestServer
+import com.adoptu.testsupport.TestServerHandle
+import com.adoptu.web.JsonSupport
+import com.adoptu.web.SuccessResponse
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -35,8 +36,8 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.koin.core.module.Module
 import org.koin.dsl.module
-import org.koin.ktor.plugin.Koin
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -76,6 +77,10 @@ class UsersRoutesE2ETest {
                     it[Users.username] = "adopter@test.com"
                     it[Users.displayName] = "Test Adopter"
                     it[Users.createdAt] = clock.now().toEpochMilliseconds()
+                    // Verified so the temporal-home/photographer/shelter/sterilization
+                    // "activates when authenticated" tests below can publish a profile -
+                    // publishing now requires a verified account email.
+                    it[Users.isEmailVerified] = true
                 } get Users.id
                 UserActiveRoles.insert {
                     it[UserActiveRoles.userId] = adopterId
@@ -111,135 +116,114 @@ class UsersRoutesE2ETest {
         }
     }
 
-    private fun TestApplicationBuilder.setupApp() {
-        val config = MapApplicationConfig(
-            "env" to "test",
-            "ktor.deployment.port" to "80"
-        )
+    /** Verbatim port of the old Ktor test's inline `module { ... }` block of mocked adapters. */
+    private fun buildTestModules(): List<Module> {
+        val config = AppConfig.fromMap(mapOf("env" to "test", "admin.email" to "admin@adopt-u.com"))
+        val mockNotificationAdapter = MockNotificationAdapter()
 
-        val testModules = module {
-            single<io.ktor.server.config.ApplicationConfig> { config }
-            single<kotlin.time.Clock> { kotlin.time.Clock.System }
-            single { WebAuthnService(get(), get(), get(), get(), get(), config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com", config.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost", config.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption", listOf(config.propertyOrNull("webauthn.origin")?.getString() ?: "http://localhost:80")) }
+        return listOf(module {
+            single { config }
+            single<Clock> { Clock.System }
+            single {
+                WebAuthnService(
+                    get(), get(), get(), get(), get(),
+                    config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com",
+                    config.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost",
+                    config.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption",
+                    listOf(config.propertyOrNull("webauthn.origin")?.getString() ?: "http://localhost:80")
+                )
+            }
             single<ImageStoragePort> { MockImageStorage() }
-            single { MockNotificationAdapter() }
-            single<com.adoptu.ports.NotificationPort> { get<MockNotificationAdapter>() }
-            single<com.adoptu.ports.PetRepositoryPort> { PetRepositoryImpl(get()) }
-            single<com.adoptu.ports.UserRepositoryPort> { UserRepository(get()) }
-            single<com.adoptu.ports.PhotographerRepositoryPort> { com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl(get(), get(), get()) }
-            single { com.adoptu.services.PhotographerService(get(), get(), get(), get()) }
-            single { com.adoptu.services.UserService(get()) }
-            single { com.adoptu.services.PetService(get(), get(), get(), get()) }
-            single { com.adoptu.services.PasswordService(get(), get(), get(), "http://localhost:80") }
-            single { com.adoptu.services.EmailChangeService(get(), get(), get(), "http://localhost:80") }
-        }
-
-        environment {
-            this.config = config
-        }
-
-        application {
-            install(Koin) {
-                modules(testModules)
-            }
-            configureLogging()
-            configureSerialization()
-            configureSessions()
-            routing {
-                usersRoutes()
-                adminUsersRoutes()
-                // Test-only helper to establish a real, correctly-signed session cookie
-                // without re-implementing the production login flow.
-                post("/test/login/{userId}") {
-                    val userId = call.parameters["userId"]!!.toInt()
-                    call.sessions.set(SessionUser(userId, "user$userId@test.com", "Test User $userId"))
-                    call.respondText("OK")
-                }
-            }
-        }
+            single { mockNotificationAdapter }
+            single<NotificationPort> { mockNotificationAdapter }
+            single<PetRepositoryPort> { PetRepositoryImpl(get()) }
+            single<UserRepositoryPort> { UserRepository(get()) }
+            single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
+            single { PhotographerService(get(), get(), get(), get()) }
+            single { UserService(get()) }
+            single { ProfileEmailVerificationService(get(), get(), get(), "http://localhost:80") }
+            single { PetService(get(), get(), get(), get()) }
+            single { PasswordService(get(), get(), get(), "http://localhost:80") }
+            single { EmailChangeService(get(), get(), get(), "http://localhost:80") }
+        })
     }
 
-    private suspend fun HttpClient.loginAs(userId: Int): String {
-        val response = post("/test/login/$userId")
-        val setCookie = response.headers[HttpHeaders.SetCookie]
-            ?: error("No session cookie returned from test login")
-        return setCookie.substringBefore(";")
-    }
+    /**
+     * Replaces `TestApplicationBuilder.setupApp()`: starts a real Helidon server through the
+     * production `configureRouting` route tree (which includes usersRoutes()/adminUsersRoutes())
+     * wired with the mocked Koin module above. `initDatabase = false` because this test manages
+     * its own H2 connection via TestDatabase in @BeforeEach. `withTestLogin = true` replaces the
+     * old test-only `/test/login/{userId}` route + `client.loginAs()` helper.
+     */
+    private fun startServer(): TestServerHandle =
+        TestServer.start(modules = buildTestModules(), initDatabase = false, withTestLogin = true)
 
     // ==================== POST /api/users/accept-terms ====================
 
     @Test
     fun `POST accept-terms returns 401 when no session`() {
-        testApplication {
-            setupApp()
-
+        val handle = startServer()
+        try {
             val request = AcceptTermsRequest(
                 acceptPrivacyPolicy = true,
                 acceptTermsAndConditions = false
             )
 
-            val response = client.post("/api/users/accept-terms") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(AcceptTermsRequest.serializer(), request))
-            }
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/accept-terms",
+                JsonSupport.objectMapper.writeValueAsString(request)
+            )
 
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
-            val body = response.bodyAsText()
-            assertTrue(body.contains("Unauthorized"))
+            assertEquals(401, response.statusCode())
+            assertTrue(response.body().contains("Unauthorized"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST accept-terms returns error for invalid content type`() {
-        testApplication {
-            setupApp()
-
-            val response = client.post("/api/users/accept-terms") {
-                contentType(ContentType.Text.Plain)
-                setBody("invalid body")
-            }
-
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.postForm("${handle.baseUrl}/api/users/accept-terms", "invalid body")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST accept-terms returns 404 for non-existent user`() {
-        testApplication {
-            setupApp()
-
-            val request = AcceptTermsRequest(
-                acceptPrivacyPolicy = true,
-                acceptTermsAndConditions = false
-            )
-
-            val response = client.post("/api/users/accept-terms") {
-                header("Cookie", "user_session=invalid_session")
-            }
-
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.post("${handle.baseUrl}/api/users/accept-terms", "user_session=invalid_session")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST accept-terms succeeds for authenticated user`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
             val request = AcceptTermsRequest(
                 acceptPrivacyPolicy = true,
                 acceptTermsAndConditions = true
             )
 
-            val response = client.post("/api/users/accept-terms") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(AcceptTermsRequest.serializer(), request))
-            }
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/accept-terms",
+                JsonSupport.objectMapper.writeValueAsString(request),
+                cookie
+            )
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("rescuer@test.com"))
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("rescuer@test.com"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -247,39 +231,41 @@ class UsersRoutesE2ETest {
 
     @Test
     fun `GET admin users returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/admin/users")
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/users")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET admin users returns 403 for non-admin user`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1) // rescuer
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer
 
-            val response = client.get("/api/admin/users") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.Forbidden, response.status)
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/users", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET admin users returns list for admin`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(3) // admin
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
 
-            val response = client.get("/api/admin/users") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/users", cookie)
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("rescuer@test.com"))
             assertTrue(body.contains("adopter@test.com"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -287,64 +273,66 @@ class UsersRoutesE2ETest {
 
     @Test
     fun `GET admin users by id returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/admin/users/1")
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/users/1")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET admin users by id returns 403 for non-admin user`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2) // adopter
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter
 
-            val response = client.get("/api/admin/users/1") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.Forbidden, response.status)
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/users/1", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET admin users by id returns 400 for invalid id`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(3) // admin
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
 
-            val response = client.get("/api/admin/users/not-a-number") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/users/not-a-number", cookie)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET admin users by id returns 404 for non-existent user`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(3) // admin
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
 
-            val response = client.get("/api/admin/users/9999") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/users/9999", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET admin users by id returns user for admin`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(3) // admin
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
 
-            val response = client.get("/api/admin/users/1") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/users/1", cookie)
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("rescuer@test.com"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -352,81 +340,91 @@ class UsersRoutesE2ETest {
 
     @Test
     fun `POST admin users ban returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.post("/api/admin/users/4/ban") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(BanUserRequest.serializer(), BanUserRequest("spam")))
-            }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/admin/users/4/ban",
+                JsonSupport.objectMapper.writeValueAsString(BanUserRequest("spam"))
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST admin users ban returns 403 for non-admin user`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1) // rescuer
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer
 
-            val response = client.post("/api/admin/users/4/ban") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(BanUserRequest.serializer(), BanUserRequest("spam")))
-            }
-            assertEquals(HttpStatusCode.Forbidden, response.status)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/admin/users/4/ban",
+                JsonSupport.objectMapper.writeValueAsString(BanUserRequest("spam")),
+                cookie
+            )
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST admin users ban returns 400 for invalid id`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(3) // admin
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
 
-            val response = client.post("/api/admin/users/not-a-number/ban") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(BanUserRequest.serializer(), BanUserRequest("spam")))
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/admin/users/not-a-number/ban",
+                JsonSupport.objectMapper.writeValueAsString(BanUserRequest("spam")),
+                cookie
+            )
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST admin users ban returns 400 when banning self`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(3) // admin
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
 
-            val response = client.post("/api/admin/users/3/ban") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(BanUserRequest.serializer(), BanUserRequest("spam")))
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("Cannot ban yourself"))
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/admin/users/3/ban",
+                JsonSupport.objectMapper.writeValueAsString(BanUserRequest("spam")),
+                cookie
+            )
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Cannot ban yourself"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST admin users ban returns 404 for non-existent target`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(3) // admin
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
 
-            val response = client.post("/api/admin/users/9999/ban") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(BanUserRequest.serializer(), BanUserRequest("spam")))
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/admin/users/9999/ban",
+                JsonSupport.objectMapper.writeValueAsString(BanUserRequest("spam")),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST admin users ban returns 400 when target is admin`() {
-        testApplication {
-            setupApp()
+        val handle = startServer()
+        try {
             // Create a second admin to ban
             transaction {
                 val secondAdminId = Users.insert {
@@ -440,35 +438,39 @@ class UsersRoutesE2ETest {
                     it[UserActiveRoles.role] = "ADMIN"
                 }
             }
-            val cookie = client.loginAs(3) // admin
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
 
-            val response = client.post("/api/admin/users/5/ban") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(BanUserRequest.serializer(), BanUserRequest("spam")))
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("Cannot ban an admin"))
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/admin/users/5/ban",
+                JsonSupport.objectMapper.writeValueAsString(BanUserRequest("spam")),
+                cookie
+            )
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Cannot ban an admin"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST admin users ban succeeds for valid target`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(3) // admin
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
 
-            val response = client.post("/api/admin/users/4/ban") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(BanUserRequest.serializer(), BanUserRequest("repeated spam reports")))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = Json.decodeFromString<SuccessResponse>(response.bodyAsText())
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/admin/users/4/ban",
+                JsonSupport.objectMapper.writeValueAsString(BanUserRequest("repeated spam reports")),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+            val body = JsonSupport.objectMapper.readValue(response.body(), SuccessResponse::class.java)
             assertTrue(body.success)
 
             val banned = transaction { Users.selectAll().where { Users.id eq 4 }.first()[Users.isBanned] }
             assertTrue(banned)
+        } finally {
+            handle.stop()
         }
     }
 
@@ -476,69 +478,71 @@ class UsersRoutesE2ETest {
 
     @Test
     fun `POST admin users unban returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.post("/api/admin/users/4/unban")
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/users/4/unban")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST admin users unban returns 403 for non-admin user`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1) // rescuer
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer
 
-            val response = client.post("/api/admin/users/4/unban") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.Forbidden, response.status)
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/users/4/unban", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST admin users unban returns 400 for invalid id`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(3) // admin
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
 
-            val response = client.post("/api/admin/users/not-a-number/unban") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/users/not-a-number/unban", cookie)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST admin users unban returns 500 for non-existent target`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(3) // admin
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
 
-            val response = client.post("/api/admin/users/9999/unban") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.InternalServerError, response.status)
-            assertTrue(response.bodyAsText().contains("Failed to unban user"))
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/users/9999/unban", cookie)
+            assertEquals(500, response.statusCode())
+            assertTrue(response.body().contains("Failed to unban user"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST admin users unban succeeds for previously banned user`() {
-        testApplication {
-            setupApp()
+        val handle = startServer()
+        try {
             transaction { Users.update({ Users.id eq 4 }) { it[Users.isBanned] = true; it[Users.banReason] = "test" } }
-            val cookie = client.loginAs(3) // admin
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
 
-            val response = client.post("/api/admin/users/4/unban") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = Json.decodeFromString<SuccessResponse>(response.bodyAsText())
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/users/4/unban", cookie)
+            assertEquals(200, response.statusCode())
+            val body = JsonSupport.objectMapper.readValue(response.body(), SuccessResponse::class.java)
             assertTrue(body.success)
 
             val banned = transaction { Users.selectAll().where { Users.id eq 4 }.first()[Users.isBanned] }
             assertFalse(banned)
+        } finally {
+            handle.stop()
         }
     }
 
@@ -546,44 +550,50 @@ class UsersRoutesE2ETest {
 
     @Test
     fun `PUT profile returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.put("/api/users/profile") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdateProfileRequest.serializer(), UpdateProfileRequest("New Name")))
-            }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/profile",
+                JsonSupport.objectMapper.writeValueAsString(UpdateProfileRequest("New Name"))
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT profile updates display name when authenticated`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.put("/api/users/profile") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdateProfileRequest.serializer(), UpdateProfileRequest("New Name")))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("New Name"))
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/profile",
+                JsonSupport.objectMapper.writeValueAsString(UpdateProfileRequest("New Name")),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("New Name"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT profile accepts language query parameter`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.put("/api/users/profile?language=es") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdateProfileRequest.serializer(), UpdateProfileRequest("Nombre Nuevo")))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/profile?language=es",
+                JsonSupport.objectMapper.writeValueAsString(UpdateProfileRequest("Nombre Nuevo")),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -591,43 +601,49 @@ class UsersRoutesE2ETest {
 
     @Test
     fun `PUT language returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.put("/api/users/language") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdateLanguageRequest.serializer(), UpdateLanguageRequest("fr")))
-            }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/language",
+                JsonSupport.objectMapper.writeValueAsString(UpdateLanguageRequest("fr"))
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT language updates language when authenticated`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.put("/api/users/language") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdateLanguageRequest.serializer(), UpdateLanguageRequest("fr")))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/language",
+                JsonSupport.objectMapper.writeValueAsString(UpdateLanguageRequest("fr")),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT language returns 400 for blank language`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.put("/api/users/language") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdateLanguageRequest.serializer(), UpdateLanguageRequest("")))
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/language",
+                JsonSupport.objectMapper.writeValueAsString(UpdateLanguageRequest("")),
+                cookie
+            )
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -635,11 +651,13 @@ class UsersRoutesE2ETest {
 
     @Test
     fun `GET rescuers returns rescuer list without auth`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/users/rescuers")
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("rescuer@test.com"))
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/users/rescuers")
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("rescuer@test.com"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -647,43 +665,49 @@ class UsersRoutesE2ETest {
 
     @Test
     fun `POST rescuer-profile returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.post("/api/users/rescuer-profile") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(true)))
-            }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/rescuer-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true))
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST rescuer-profile activates when authenticated`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2) // adopter
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter
 
-            val response = client.post("/api/users/rescuer-profile") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(true)))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/rescuer-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST rescuer-profile deactivates when authenticated`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1) // already a rescuer
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // already a rescuer
 
-            val response = client.post("/api/users/rescuer-profile") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(false)))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/rescuer-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(false)),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -691,50 +715,56 @@ class UsersRoutesE2ETest {
 
     @Test
     fun `POST temporal-home-profile returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.post("/api/users/temporal-home-profile") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(true)))
-            }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/temporal-home-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true))
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST temporal-home-profile activates and deactivates when authenticated`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
 
-            val activate = client.post("/api/users/temporal-home-profile") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(true)))
-            }
-            assertEquals(HttpStatusCode.OK, activate.status)
+            val activate = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/temporal-home-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(200, activate.statusCode())
 
-            val deactivate = client.post("/api/users/temporal-home-profile") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(false)))
-            }
-            assertEquals(HttpStatusCode.OK, deactivate.status)
+            val deactivate = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/temporal-home-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(false)),
+                cookie
+            )
+            assertEquals(200, deactivate.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST temporal-home-profile returns 404 for session user that does not exist`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(9999)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
 
-            val response = client.post("/api/users/temporal-home-profile") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(true)))
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/temporal-home-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -742,28 +772,32 @@ class UsersRoutesE2ETest {
 
     @Test
     fun `PUT photographer-settings returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.put("/api/users/photographer-settings") {
-                contentType(ContentType.Application.Json)
-                setBody("""{"photographerFee":50.0,"photographerCurrency":"USD","country":"United States","state":"NY"}""")
-            }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/photographer-settings",
+                """{"photographerFee":50.0,"photographerCurrency":"USD","country":"United States","state":"NY"}"""
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT photographer-settings returns 404 when no photographer profile exists`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
 
-            val response = client.put("/api/users/photographer-settings") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody("""{"photographerFee":50.0,"photographerCurrency":"USD","country":"United States","state":"NY"}""")
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/photographer-settings",
+                """{"photographerFee":50.0,"photographerCurrency":"USD","country":"United States","state":"NY"}""",
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -771,35 +805,39 @@ class UsersRoutesE2ETest {
 
     @Test
     fun `POST photographer-profile returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.post("/api/users/photographer-profile") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(true)))
-            }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/photographer-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true))
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST photographer-profile activates and deactivates when authenticated`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
 
-            val activate = client.post("/api/users/photographer-profile") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(true)))
-            }
-            assertEquals(HttpStatusCode.OK, activate.status)
+            val activate = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/photographer-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(200, activate.statusCode())
 
-            val deactivate = client.post("/api/users/photographer-profile") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(false)))
-            }
-            assertEquals(HttpStatusCode.OK, deactivate.status)
+            val deactivate = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/photographer-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(false)),
+                cookie
+            )
+            assertEquals(200, deactivate.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -807,50 +845,56 @@ class UsersRoutesE2ETest {
 
     @Test
     fun `POST shelter-profile returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.post("/api/users/shelter-profile") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(true)))
-            }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/shelter-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true))
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST shelter-profile activates and deactivates when authenticated`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
 
-            val activate = client.post("/api/users/shelter-profile") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(true)))
-            }
-            assertEquals(HttpStatusCode.OK, activate.status)
+            val activate = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/shelter-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(200, activate.statusCode())
 
-            val deactivate = client.post("/api/users/shelter-profile") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(false)))
-            }
-            assertEquals(HttpStatusCode.OK, deactivate.status)
+            val deactivate = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/shelter-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(false)),
+                cookie
+            )
+            assertEquals(200, deactivate.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST shelter-profile returns 404 for session user that does not exist`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(9999)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
 
-            val response = client.post("/api/users/shelter-profile") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(true)))
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/shelter-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -858,50 +902,56 @@ class UsersRoutesE2ETest {
 
     @Test
     fun `POST sterilization-profile returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.post("/api/users/sterilization-profile") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(true)))
-            }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/sterilization-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true))
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST sterilization-profile activates and deactivates when authenticated`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(2)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
 
-            val activate = client.post("/api/users/sterilization-profile") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(true)))
-            }
-            assertEquals(HttpStatusCode.OK, activate.status)
+            val activate = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/sterilization-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(200, activate.statusCode())
 
-            val deactivate = client.post("/api/users/sterilization-profile") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(false)))
-            }
-            assertEquals(HttpStatusCode.OK, deactivate.status)
+            val deactivate = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/sterilization-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(false)),
+                cookie
+            )
+            assertEquals(200, deactivate.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST sterilization-profile returns 404 for session user that does not exist`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(9999)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
 
-            val response = client.post("/api/users/sterilization-profile") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(true)))
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/sterilization-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -909,24 +959,26 @@ class UsersRoutesE2ETest {
 
     @Test
     fun `GET has-password returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/users/has-password")
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/users/has-password")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET has-password returns false when no password set`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.get("/api/users/has-password") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("\"hasPassword\":false") || response.bodyAsText().contains("\"hasPassword\": false"))
+            val response = TestHttp.get("${handle.baseUrl}/api/users/has-password", cookie)
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("\"hasPassword\":false") || response.body().contains("\"hasPassword\": false"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -941,46 +993,52 @@ class UsersRoutesE2ETest {
 
     @Test
     fun `POST password returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.post("/api/users/password") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(SetPasswordRequest.serializer(), SetPasswordRequest(encryptedCredential("user1@test.com:ValidPass123!"))))
-            }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/password",
+                JsonSupport.objectMapper.writeValueAsString(SetPasswordRequest(encryptedCredential("user1@test.com:ValidPass123!")))
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST password succeeds for a strong password`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.post("/api/users/password") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(SetPasswordRequest.serializer(), SetPasswordRequest(encryptedCredential("user1@test.com:ValidPass123!"))))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = Json.decodeFromString<SuccessResponse>(response.bodyAsText())
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/password",
+                JsonSupport.objectMapper.writeValueAsString(SetPasswordRequest(encryptedCredential("user1@test.com:ValidPass123!"))),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+            val body = JsonSupport.objectMapper.readValue(response.body(), SuccessResponse::class.java)
             assertTrue(body.success)
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST password fails for a weak password`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.post("/api/users/password") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(SetPasswordRequest.serializer(), SetPasswordRequest(encryptedCredential("user1@test.com:weak"))))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("\"success\":false") || response.bodyAsText().contains("\"success\": false"))
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/password",
+                JsonSupport.objectMapper.writeValueAsString(SetPasswordRequest(encryptedCredential("user1@test.com:weak"))),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("\"success\":false") || response.body().contains("\"success\": false"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -988,46 +1046,58 @@ class UsersRoutesE2ETest {
 
     @Test
     fun `PUT password returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.put("/api/users/password") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(ChangePasswordRequest.serializer(), ChangePasswordRequest(encryptedCredential("user1@test.com:Old123!@"), encryptedCredential("user1@test.com:New456!@"))))
-            }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/password",
+                JsonSupport.objectMapper.writeValueAsString(
+                    ChangePasswordRequest(encryptedCredential("user1@test.com:Old123!@"), encryptedCredential("user1@test.com:New456!@"))
+                )
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT password succeeds when no existing password is set`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.put("/api/users/password") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(ChangePasswordRequest.serializer(), ChangePasswordRequest(encryptedCredential("user1@test.com:Whatever123!"), encryptedCredential("user1@test.com:New456!@"))))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = Json.decodeFromString<SuccessResponse>(response.bodyAsText())
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/password",
+                JsonSupport.objectMapper.writeValueAsString(
+                    ChangePasswordRequest(encryptedCredential("user1@test.com:Whatever123!"), encryptedCredential("user1@test.com:New456!@"))
+                ),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+            val body = JsonSupport.objectMapper.readValue(response.body(), SuccessResponse::class.java)
             assertTrue(body.success)
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT password fails when new password is weak`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.put("/api/users/password") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(ChangePasswordRequest.serializer(), ChangePasswordRequest(encryptedCredential("user1@test.com:Whatever123!"), encryptedCredential("user1@test.com:weak"))))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("\"success\":false") || response.bodyAsText().contains("\"success\": false"))
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/password",
+                JsonSupport.objectMapper.writeValueAsString(
+                    ChangePasswordRequest(encryptedCredential("user1@test.com:Whatever123!"), encryptedCredential("user1@test.com:weak"))
+                ),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("\"success\":false") || response.body().contains("\"success\": false"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1035,43 +1105,49 @@ class UsersRoutesE2ETest {
 
     @Test
     fun `POST request-email-change returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.post("/api/users/request-email-change") {
-                contentType(ContentType.Application.Json)
-                setBody("""{"newEmail":"new@test.com"}""")
-            }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/request-email-change",
+                """{"newEmail":"new@test.com"}"""
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST request-email-change returns 400 for invalid email format`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.post("/api/users/request-email-change") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody("""{"newEmail":"not-an-email"}""")
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/request-email-change",
+                """{"newEmail":"not-an-email"}""",
+                cookie
+            )
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST request-email-change succeeds for a valid new email`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.post("/api/users/request-email-change") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody("""{"newEmail":"brand-new@test.com"}""")
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/request-email-change",
+                """{"newEmail":"brand-new@test.com"}""",
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -1079,20 +1155,24 @@ class UsersRoutesE2ETest {
 
     @Test
     fun `GET verify-email-change returns 400 when token missing`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/users/verify-email-change")
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/users/verify-email-change")
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET verify-email-change returns failure message for invalid token`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/users/verify-email-change?token=nonexistent")
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("\"success\":false") || response.bodyAsText().contains("\"success\": false"))
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/users/verify-email-change?token=nonexistent")
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("\"success\":false") || response.body().contains("\"success\": false"))
+        } finally {
+            handle.stop()
         }
     }
 }

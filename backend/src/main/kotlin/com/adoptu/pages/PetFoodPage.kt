@@ -159,6 +159,5 @@ fun HTML.petFoodPage(navParams: NavParams = NavParams()) {
         }
         footer()
         commonScripts(navParams.isLoggedIn)
-        script(src = "/static/js/pet-food.js") {}
     }
 }

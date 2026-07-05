@@ -1,8 +1,6 @@
 package com.adoptu.dto.input
 
-import kotlinx.serialization.Serializable
 
-@Serializable
 data class AdoptionRequestDto(
     val id: Int,
     val petId: Int,
@@ -12,7 +10,6 @@ data class AdoptionRequestDto(
     val createdAt: Long
 )
 
-@Serializable
 data class CreateAdoptionRequestRequest(
     val message: String = ""
 )

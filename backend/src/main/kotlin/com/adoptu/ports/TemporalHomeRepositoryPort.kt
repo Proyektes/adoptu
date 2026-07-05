@@ -15,4 +15,7 @@ interface TemporalHomeRepositoryPort {
     suspend fun isBlocked(temporalHomeId: Int, rescuerId: Int): Boolean
     suspend fun blockRescuer(temporalHomeId: Int, rescuerId: Int): Boolean
     suspend fun getMyRequests(userId: Int): List<TemporalHomeRequestDto>
+    suspend fun createSpamReportToken(temporalHomeId: Int, rescuerId: Int): String
+    /** Returns (temporalHomeId, rescuerId) and marks the token used, or null if invalid/expired/already used. */
+    suspend fun consumeSpamReportToken(token: String): Pair<Int, Int>?
 }

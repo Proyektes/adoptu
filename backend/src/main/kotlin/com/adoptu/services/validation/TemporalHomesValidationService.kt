@@ -92,10 +92,4 @@ class TemporalHomesValidationService : KoinComponent {
         return if (parsedId != null) ServiceResult.Success(parsedId)
         else ServiceResult.Error(ValidationConstants.INVALID_TEMPORAL_HOME_ID)
     }
-
-    fun validateRescuerId(id: String?): ServiceResult<Int> {
-        val parsedId = id?.toIntOrNull()
-        return if (parsedId != null) ServiceResult.Success(parsedId)
-        else ServiceResult.Error(ValidationConstants.INVALID_RESCUER_ID)
-    }
 }

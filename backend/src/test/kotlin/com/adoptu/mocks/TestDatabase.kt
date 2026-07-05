@@ -23,8 +23,10 @@ object TestDatabase {
                     EmailVerificationAttempts,
                     EmailVerificationTokens,
                     EmailChangeTokens,
+                    ProfileEmailVerificationTokens,
                     PasswordResetTokens,
                     MagicLinkTokens,
+                    SpamReportTokens,
                     PetImages,
                     AdoptionRequests,
                     PhotographyRequests,
@@ -50,8 +52,10 @@ object TestDatabase {
                 EmailVerificationAttempts,
                 EmailVerificationTokens,
                 EmailChangeTokens,
+                ProfileEmailVerificationTokens,
                 PasswordResetTokens,
                 MagicLinkTokens,
+                SpamReportTokens,
                 UserPasswords,
                 WebAuthnCredentials,
                 UserActiveRoles,
@@ -76,8 +80,10 @@ object TestDatabase {
             exec("DELETE FROM email_verification_attempts")
             exec("DELETE FROM email_verification_tokens")
             exec("DELETE FROM email_change_tokens")
+            exec("DELETE FROM profile_email_verification_tokens")
             exec("DELETE FROM password_reset_tokens")
             exec("DELETE FROM magic_link_tokens")
+            exec("DELETE FROM spam_report_tokens")
             exec("DELETE FROM user_passwords")
             exec("DELETE FROM temporal_home_requests")
             exec("DELETE FROM blocked_rescuers")

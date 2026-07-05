@@ -1,12 +1,8 @@
 package com.adoptu
 
-import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.server.config.*
-import io.ktor.server.testing.*
+import com.adoptu.testsupport.TestHttp
+import com.adoptu.testsupport.TestServer
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.condition.DisabledOnOs
-import org.junit.jupiter.api.condition.OS
 import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
 import org.testcontainers.containers.PostgreSQLContainer
@@ -27,10 +23,9 @@ class ApplicationContainerTest {
             .withPassword("Ad0ptU")
     }
 
-    private fun testAppConfig(): ApplicationConfig {
-        return MapApplicationConfig(
+    private fun testAppConfig(): Map<String, Any> {
+        return mapOf(
             "env" to "prod",
-            "ktor.deployment.port" to "80",
             "db.prod.postgres.driver" to "org.postgresql.Driver",
             "db.prod.postgres.url" to postgresContainer.jdbcUrl,
             "db.prod.postgres.user" to postgresContainer.username,
@@ -46,59 +41,47 @@ class ApplicationContainerTest {
     @Test
     fun `application starts with PostgreSQL container`() {
         assertTrue(postgresContainer.isRunning, "PostgreSQL container should be running")
-        
-        testApplication {
-            environment {
-                config = testAppConfig()
-            }
-            application {
-                module()
-            }
 
-            val response = client.get("/")
+        val handle = TestServer.start(configOverrides = testAppConfig())
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/")
             assertTrue(
-                response.status == HttpStatusCode.OK ||
-                response.status == HttpStatusCode.NotFound ||
-                response.status == HttpStatusCode.Found,
+                response.statusCode() == 200 ||
+                response.statusCode() == 404 ||
+                response.statusCode() == 302,
                 "Application should respond"
             )
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `application connects to PostgreSQL container and creates tables`() {
         assertTrue(postgresContainer.isRunning, "PostgreSQL container should be running")
-        
-        testApplication {
-            environment {
-                config = testAppConfig()
-            }
-            application {
-                module()
-            }
 
-            val response = client.get("/api/v1/pets")
+        val handle = TestServer.start(configOverrides = testAppConfig())
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/v1/pets")
             assertTrue(
-                response.status != HttpStatusCode.InternalServerError,
+                response.statusCode() != 500,
                 "Application should handle database connection"
             )
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `application handles requests with PostgreSQL container`() {
         assertTrue(postgresContainer.isRunning, "PostgreSQL container should be running")
-        
-        testApplication {
-            environment {
-                config = testAppConfig()
-            }
-            application {
-                module()
-            }
 
-            val response = client.get("/unknown-route-xyz-123")
-            assertEquals(HttpStatusCode.NotFound, response.status)
+        val handle = TestServer.start(configOverrides = testAppConfig())
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/unknown-route-xyz-123")
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 }

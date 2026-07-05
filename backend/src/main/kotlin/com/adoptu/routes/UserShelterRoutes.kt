@@ -2,76 +2,81 @@ package com.adoptu.routes
 
 import com.adoptu.dto.input.CreateUserShelterRequest
 import com.adoptu.dto.input.UpdateUserShelterRequest
-import com.adoptu.plugins.respondData
-import com.adoptu.plugins.respondError
-import com.adoptu.plugins.respondUnauthorized
-import com.adoptu.services.ServiceResult
 import com.adoptu.services.UserShelterService
-import com.adoptu.services.auth.SessionUser
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
-import org.koin.ktor.ext.inject
+import com.adoptu.web.Deps
+import com.adoptu.web.getSession
+import com.adoptu.web.queryParam
+import com.adoptu.web.receiveJson
+import com.adoptu.web.respondData
+import com.adoptu.web.respondError
+import com.adoptu.web.respondUnauthorized
+import io.helidon.webserver.http.Handler
+import io.helidon.webserver.http.HttpRules
+import kotlinx.coroutines.runBlocking
+import org.koin.core.component.inject
 
-fun Route.userShelterRoutes() {
-    val service by inject<UserShelterService>()
+fun HttpRules.userShelterRoutes() {
+    val service by Deps.inject<UserShelterService>()
 
-    route("/api/users") {
-        post("/shelter") {
-            val session = call.sessions.get<SessionUser>()
-                ?: return@post call.respondUnauthorized()
+    post("/api/users/shelter", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
 
-            val body = call.receive<CreateUserShelterRequest>()
+        runBlocking {
+            val body = req.receiveJson<CreateUserShelterRequest>()
             try {
-                val shelter = service.create(session.userId, body)
-                call.respond(shelter)
+                val shelter = service.create(session.userId, session.email, session.displayName, body)
+                res.send(shelter)
             } catch (e: IllegalArgumentException) {
-                call.respondError(e.message ?: "Invalid request", 400)
+                res.respondError(e.message ?: "Invalid request", 400)
             } catch (e: Exception) {
-                call.respondError(e.message ?: "Failed to create shelter", 500)
+                res.respondError(e.message ?: "Failed to create shelter", 500)
             }
         }
+    })
 
-        get("/shelter") {
-            val session = call.sessions.get<SessionUser>()
-                ?: return@get call.respondUnauthorized()
+    get("/api/users/shelter", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
 
+        runBlocking {
             val shelter = service.getByUserId(session.userId)
             if (shelter == null) {
-                call.respondError("Shelter profile not found", 404)
+                res.respondError("Shelter profile not found", 404)
             } else {
-                call.respond(shelter)
+                res.send(shelter)
             }
         }
+    })
 
-        put("/shelter") {
-            val session = call.sessions.get<SessionUser>()
-                ?: return@put call.respondUnauthorized()
+    put("/api/users/shelter", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
 
-            val body = call.receive<UpdateUserShelterRequest>()
-            call.respondData(service.update(session.userId, body))
+        runBlocking {
+            val body = req.receiveJson<UpdateUserShelterRequest>()
+            res.respondData(service.update(session.userId, session.email, session.displayName, body))
         }
+    })
 
-        delete("/shelter") {
-            val session = call.sessions.get<SessionUser>()
-                ?: return@delete call.respondUnauthorized()
+    delete("/api/users/shelter", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
 
-            call.respondData(service.delete(session.userId))
+        runBlocking {
+            res.respondData(service.delete(session.userId))
         }
-    }
+    })
 
-    route("/api/user-shelters") {
-        get {
-            val country = call.request.queryParameters["country"]
-            if (country.isNullOrBlank()) {
-                return@get call.respondError("Country is required", 400)
-            }
-            val state = call.request.queryParameters["state"]
-            val city = call.request.queryParameters["city"]
-            val zip = call.request.queryParameters["zip"]
-            val shelters = service.search(country, state, city, zip)
-            call.respond(shelters)
+    get("/api/user-shelters", Handler { req, res ->
+        val country = req.queryParam("country")
+        if (country.isNullOrBlank()) {
+            return@Handler res.respondError("Country is required", 400)
         }
-    }
+        val state = req.queryParam("state")
+        val city = req.queryParam("city")
+        val neighborhood = req.queryParam("neighborhood")
+        val zip = req.queryParam("zip")
+
+        runBlocking {
+            val shelters = service.search(country, state, city, neighborhood, zip)
+            res.send(shelters)
+        }
+    })
 }

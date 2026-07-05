@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-02T05:12:13.321Z
-> Files: 832 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-05T16:32:50.063Z
+> Files: 1042 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -19,6 +19,14 @@
 
 - `migrate_country.sql` (~554 tok)
 
+## ../../.claude/jobs/e14108f5/tmp/
+
+- `shot.mjs` — Declares browser (~205 tok)
+
+## ../../.claude/jobs/e8703a86/tmp/
+
+- `rps_test.py` — worker, main, pct (~578 tok)
+
 ## ../../.claude/plans/
 
 - `enumerated-yawning-cloud.md` — Country enum as single source of truth (~1699 tok)
@@ -31,14 +39,15 @@
 ## ./
 
 - `.dockerignore` — Docker ignore rules (~22 tok)
-- `.gitignore` — Git ignore rules (~180 tok)
+- `.gitignore` — Git ignore rules (~246 tok)
+- `.tmp_shot.mjs` — Declares browser (~205 tok)
 - `AGENTS.md` — Adopt-U - Agent Guidelines (~1284 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~2307 tok)
 - `buildspec.yml` — CodeBuild spec: logs into ECR, builds/tags/pushes the image, emits imagedefinitions.json for ECS deploy (~520 tok)
 - `CLAUDE.md` — OpenWolf (~57 tok)
 - `docker-compose.test.yml` — Docker Compose: 1 services (~251 tok)
 - `docker-compose.yml` — Docker Compose services (~241 tok)
-- `Dockerfile` — Multi-stage build: musl-based Corretto 25 builder (Shadow-plugin fat jar) -> jdeps-derived jlink minimal JRE on Alpine, no dead Sass step, container-aware JVM flags (~520 tok)
+- `Dockerfile` — Docker container definition (~743 tok)
 - `gradle.properties` (~159 tok)
 - `gradlew` — you may not use this file except in compliance with the License. (~2292 tok)
 - `gradlew.bat` (~748 tok)
@@ -427,7 +436,7 @@
 ## .claude/worktrees/country-detect/backend/src/main/resources/static/js/
 
 - `api.js` — Declares api (~2546 tok)
-- `index.js` — emoji: updateCountryHint, loadPets, initCountry (~1192 tok)
+- `index.js` — emoji: updateCountryHint, showEmptyState, hideEmptyState + 6 more (~1997 tok)
 
 ## .claude/worktrees/country-detect/infra/
 
@@ -475,6 +484,76 @@
 
 - `LocationSearchFilters.kt` — DIV (~927 tok)
 
+## .claude/worktrees/country-selector-default-persist/backend/src/main/kotlin/com/adoptu/dto/output/
+
+- `AuthResponses.kt` — Data class: AuthMeResponse (~439 tok)
+
+## .claude/worktrees/country-selector-default-persist/backend/src/main/kotlin/com/adoptu/routes/
+
+- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~6922 tok)
+
+## .claude/worktrees/country-selector-default-persist/frontend/src/jsMain/kotlin/com/adoptu/frontend/
+
+- `Common.kt` — NodeList, onCountryChange, initI18n, initDropdowns, checkProfileCompletion (~1464 tok)
+
+## .claude/worktrees/country-selector-default-persist/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
+
+- `IndexPage.kt` — init, loadPets, updateCountryHint, showEmptyState, hideEmptyState (~2200 tok)
+- `PhotographersPage.kt` — init, search, load, render, createRequestModal (~1706 tok)
+- `SheltersPage.kt` — init, search, renderShelters (~1292 tok)
+- `SterilizationLocationsPage.kt` — init, search, render, locationCard, init (~2634 tok)
+- `TemporalHomePage.kt` — init, search, displayResults, init, loadRequests (~1344 tok)
+
+## .claude/worktrees/e2e-verify-expand/.claude/skills/
+
+- `e2e-verify.md` — E2E Verification Skill (~593 tok)
+
+## .claude/worktrees/e2e-verify-expand/.wolf/
+
+- `buglog.json` — Declares constant (~2533 tok)
+- `cerebrum.md` — Cerebrum (~10900 tok)
+- `memory.md` — Memory (~26210 tok)
+
+## .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/common/
+
+- `Country.kt` — Country: fromDisplayName, normalize (~1532 tok)
+
+## .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/dto/input/
+
+- `PetDto.kt` — Data class: Gender (~1025 tok)
+
+## .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/dto/output/
+
+- `AuthResponses.kt` — Data class: AuthMeResponse (~439 tok)
+
+## .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/pages/
+
+- `LocationSearchFilters.kt` — DIV (~1089 tok)
+- `MyPetsPage.kt` — HTML (~2581 tok)
+- `ProfilePage.kt` — HTML (~4809 tok)
+
+## .claude/worktrees/e2e-verify-expand/backend/src/main/kotlin/com/adoptu/routes/
+
+- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~6925 tok)
+
+## .claude/worktrees/e2e-verify-expand/backend/src/main/resources/static/js/
+
+- `index.js` — emoji: updateCountryHint, loadPets, initCountry (~1215 tok)
+- `temporal-home-search.js` — params: executedFunction (~664 tok)
+
+## .claude/worktrees/e2e-verify-expand/frontend/src/jsMain/kotlin/com/adoptu/frontend/
+
+- `ApiClient.kt` — apiFetch, me, logout, getPets, getPet (~1668 tok)
+- `I18n.kt` (~20865 tok)
+
+## .claude/worktrees/e2e-verify-expand/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
+
+- `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~9647 tok)
+
+## .claude/worktrees/e2e-verify-expand/frontend/src/tests/
+
+- `e2e-verify.spec.ts` — Adoptu — End-to-End Verification Suite (~12989 tok)
+
 ## .claude/worktrees/elegant-coalescing-kurzweil/
 
 - `docker-compose.yml` — Docker Compose services (~118 tok)
@@ -500,6 +579,10 @@
 ## .claude/worktrees/filter-country-hint/frontend/src/jsMain/kotlin/com/adoptu/frontend/
 
 - `I18n.kt` (~17510 tok)
+
+## .claude/worktrees/fix-country-i18n-typo/backend/src/main/kotlin/com/adoptu/common/
+
+- `Country.kt` — Country: fromDisplayName, normalize (~1532 tok)
 
 ## .claude/worktrees/fix-fido-cancel-error/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
 
@@ -934,10 +1017,60 @@
 
 - `I18n.kt` (~17715 tok)
 
+## .claude/worktrees/fix-photographers-i18n/.wolf/
+
+- `cerebrum.md` — Cerebrum (~9950 tok)
+
+## .claude/worktrees/fix-photographers-i18n/frontend/src/jsMain/kotlin/com/adoptu/frontend/
+
+- `I18n.kt` (~20376 tok)
+
 ## .claude/worktrees/fix-sterilization-js-syntax/backend/src/main/resources/static/js/
 
 - `sterilization-locations.js` — escapeHtml: loadCountries, loadLocations, showForm + 3 more (~1318 tok)
 - `sterilization.js` — country: executedFunction (~957 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/.wolf/
+
+- `cerebrum.md` — Cerebrum (~10713 tok)
+- `memory.md` — Memory (~30223 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/backend/src/main/kotlin/com/adoptu/pages/
+
+- `TemporalHomePage.kt` — HTML, HTML, HTML (~639 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/backend/src/main/kotlin/com/adoptu/routes/
+
+- `TemporalHomeRoutes.kt` — Route (~2579 tok)
+- `UIRoutes.kt` — Data class: NavParams (~2523 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/backend/src/main/scss/
+
+- `temporal-home.scss` — Styles: 12 rules (~627 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/backend/src/test/kotlin/com/adoptu/routes/
+
+- `TemporalHomeRoutesE2ETest.kt` — E2E tests for [temporalHomeRoutes]. (~7352 tok)
+- `UIRoutesE2ETest.kt` — End-to-end tests for [uiRoutes]: mounts the real route tree in a Ktor (~6074 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/
+
+- `ApiClient.kt` — apiFetch, me, logout, getPets, getPet (~2447 tok)
+- `I18n.kt` (~20914 tok)
+- `Main.kt` — main (~1138 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details-v2/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
+
+- `TemporalHomePage.kt` — init, search, displayResults, init, render (~2408 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details/backend/src/main/kotlin/com/adoptu/pages/
+
+- `TemporalHomePage.kt` — HTML, HTML, HTML (~639 tok)
+
+## .claude/worktrees/fix-temporal-home-view-details/backend/src/main/kotlin/com/adoptu/routes/
+
+- `TemporalHomeRoutes.kt` — Route (~2579 tok)
+- `UIRoutes.kt` — Data class: NavParams (~2523 tok)
 
 ## .claude/worktrees/fix-test-task/
 
@@ -994,6 +1127,134 @@
 
 - `Shared.kt` — HTML, A, BODY, DIV, NAV (~3184 tok)
 
+## .claude/worktrees/graalvm-native-image/
+
+- `settings.gradle.kts` (~105 tok)
+
+## .claude/worktrees/graalvm-native-image/.wolf/
+
+- `anatomy.md` — anatomy.md (~21873 tok)
+- `buglog.json` — Declares putPromise (~13876 tok)
+- `cerebrum.md` — Cerebrum (~14431 tok)
+- `memory.md` — Memory (~33272 tok)
+
+## .claude/worktrees/graalvm-native-image/backend/
+
+- `build.gradle.kts` (~2709 tok)
+
+## .claude/worktrees/graalvm-native-image/backend/src/main/kotlin/com/adoptu/
+
+- `ApplicationNative.kt` — main (~148 tok)
+
+## .claude/worktrees/graalvm-native-image/backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/
+
+- `native-image.properties` (~368 tok)
+
+## .claude/worktrees/graalvm-native-image/scripts/
+
+- `build-native-image.sh` — Builds the GraalVM native-image executable for the backend using the (~273 tok)
+
+## .claude/worktrees/graalvm-native-image/scripts/benchmark-results/
+
+- `20260703T211336Z_graalvm-native-home-retest.txt` (~410 tok)
+- `20260703T211336Z_graalvm-native-pets-retest.txt` (~378 tok)
+
+## .claude/worktrees/helidon-nima-migration/.wolf/
+
+- `anatomy.md` — anatomy.md (~22897 tok)
+- `buglog.json` — Declares putPromise (~6694 tok)
+- `cerebrum.md` — Cerebrum (~15780 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/
+
+- `build.gradle.kts` (~2220 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/
+
+- `Application.kt` — main, configureRouting (~770 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/adapters/db/
+
+- `DatabaseFactory.kt` — init, createDefaultAdmin (~1424 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/adapters/notification/
+
+- `SesEmailAdapter.kt` — SesEmailAdapter: sendEmail, sendEmailViaSmtp, sendEmailViaSes, sendPhotographerRequest (~2156 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/config/
+
+- `AppConfig.kt` — Drop-in replacement for Ktor's `io.ktor.server.config.ApplicationConfig` (same (~341 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/di/
+
+- `AppModule.kt` — appModule, getOrigins, createImageStorageAdapter (~1109 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/routes/
+
+- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~6722 tok)
+- `PetsRoutes.kt` — HttpRules (~3723 tok)
+- `PhotographerRoutes.kt` — HttpRules, validateUser (~2267 tok)
+- `ShelterRoutes.kt` — HttpRules, HttpRules (~1219 tok)
+- `SterilizationLocationRoutes.kt` — HttpRules, HttpRules (~1338 tok)
+- `TemporalHomeRoutes.kt` — HttpRules (~2688 tok)
+- `UIRoutes.kt` — Data class: NavParams (~2378 tok)
+- `UserShelterRoutes.kt` — HttpRules (~728 tok)
+- `UsersRoutes.kt` — Data class: UpdateProfileRequest (~3552 tok)
+- `UserSterilizationLocationRoutes.kt` — HttpRules (~782 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/main/kotlin/com/adoptu/web/
+
+- `AccessLogFilter.kt` — Replaces Ktor's `install(CallLogging) { ... }` (plugins/Logging.kt). (~261 tok)
+- `Deps.kt` — Replaces Ktor's `org.koin.ktor.ext.inject` (which resolved via the Application's attached (~122 tok)
+- `Html.kt` — Replaces Ktor's `call.respondHtml { ... }` (ktor-server-html-builder). (~157 tok)
+- `JsonSupport.kt` — Jackson's DefaultPrettyPrinter differs from kotlinx.serialization's prettyPrint - what every (~650 tok)
+- `RequestExtensions.kt` — Path template parameter, e.g. `req.pathParam("id")` for a route registered as `"/pets/{id}"`. (~673 tok)
+- `Responses.kt` — Sends [result].data as JSON on success, or the matching error status otherwise. (~516 tok)
+- `Sessions.kt` — Replaces Ktor's `install(Sessions) { cookie<SessionUser>(...) }` (plugins/Sessions.kt). (~756 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/
+
+- `ApplicationContainerTest.kt` — ApplicationContainerTest: testAppConfig (~818 tok)
+- `ApplicationIntegrationTest.kt` — ApplicationIntegrationTest: createTestConfig, initDatabase, setUpAll, setUp (~3018 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/adapters/db/
+
+- `DatabaseFactoryInitIT.kt` — DatabaseFactoryInitIT: startContainer, stopContainer, createConfig (~1983 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/e2e/
+
+- `BaseE2ETest.kt` — BaseE2ETest: getBaseUrl, setupServer, startTestServer, setupBrowser (~865 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/plugins/
+
+- `RoutingTest.kt` — Exercises the real production route wiring in configureRouting() -- every other E2E test (~435 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/routes/
+
+- `ApplicationTestcontainersIT.kt` — ApplicationTestcontainersIT: createConfigOverrides, initDatabase, startTestServer, setUp (~2374 tok)
+- `AuthRoutesE2ETest.kt` — Covers endpoints/branches in AuthRoutes.kt not already exercised by (~13460 tok)
+- `EmailVerificationRoutesE2ETest.kt` — EmailVerificationRoutesE2ETest: setup, testModules, startTestServer, createVerifiedUser (~1699 tok)
+- `PasswordRegistrationRoutesE2ETest.kt` — PasswordRegistrationRoutesE2ETest: setup, testModules, startServer, encryptPassword (~2804 tok)
+- `PetsRoutesE2ETest.kt` — PetsRoutesE2ETest: setup, createTestUsers, startTestServer, generateTestImageBytes (~16362 tok)
+- `PhotographerRoutesE2ETest.kt` — E2E tests for [photographerRoutes]. (~7394 tok)
+- `ShelterRoutesE2ETest.kt` — ShelterRoutesE2ETest: setup, createShelterInDb (~3971 tok)
+- `SheltersRoutesE2ETest.kt` — Ported from the old Ktor test-application + Testcontainers (Postgres/LocalStack) harness to (~4276 tok)
+- `SterilizationLocationRoutesE2ETest.kt` — SterilizationLocationRoutesE2ETest: setup, testModules, startServer, createLocationInDb (~4742 tok)
+- `TemporalHomeRoutesE2ETest.kt` — E2E tests for [temporalHomeRoutes]. (~6909 tok)
+- `UIRoutesE2ETest.kt` — End-to-end tests for [uiRoutes]: starts a real Helidon Nima [TestServer] mounting the full (~6247 tok)
+- `UserShelterRoutesE2ETest.kt` — UserShelterRoutesE2ETest: setup, createTestUsers, startServer, createShelterInDb (~3676 tok)
+- `UsersRoutesE2ETest.kt` — Verbatim port of the old Ktor test's inline `module { ... }` block of mocked adapters. (~10985 tok)
+- `UserSterilizationLocationRoutesE2ETest.kt` — UserSterilizationLocationRoutesE2ETest: setup, createTestUsers, createLocationInDb (~4221 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/services/auth/
+
+- `SessionUserTest.kt` — Data class: SessionUserTest (~510 tok)
+
+## .claude/worktrees/helidon-nima-migration/backend/src/test/kotlin/com/adoptu/testsupport/
+
+- `TestHttp.kt` — Thin java.net.http.HttpClient helpers replacing Ktor's test HttpClient, for use against a (~1172 tok)
+- `TestServer.kt` — Replaces Ktor's `testApplication { ... }` / `embeddedServer(Netty, ...)` test bootstrapping. (~1334 tok)
+
 ## .claude/worktrees/idempotent-juggling-orbit/backend/src/main/kotlin/com/adoptu/pages/
 
 - `LocationSearchFilters.kt` — DIV (~699 tok)
@@ -1021,6 +1282,55 @@
 ## .claude/worktrees/imperative-roaming-starfish/backend/src/main/resources/
 
 - `logback.xml` (~230 tok)
+
+## .claude/worktrees/implement-perf-lessons/
+
+- `.gitignore` — Git ignore rules (~200 tok)
+
+## .claude/worktrees/implement-perf-lessons/.wolf/
+
+- `anatomy.md` — anatomy.md (~18890 tok)
+- `buglog.json` (~1317 tok)
+- `cerebrum.md` — Cerebrum (~11509 tok)
+- `memory.md` — Memory (~27107 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/
+
+- `build.gradle.kts` (~2384 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/adapters/db/
+
+- `DatabaseFactory.kt` — init, createDefaultAdmin (~1427 tok)
+- `DbDispatcher.kt` — Shared, bounded dispatcher for repository DB calls. (~705 tok)
+- `PoolSizing.kt` — Single source of truth for how many DB-bound worker threads/connections this (~365 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/adapters/db/repositories/
+
+- `PetRepository.kt` — PetRepositoryImpl: buildPetDto, rowToPetDto, getPetImages, getImagesForPetIds (~4766 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/routes/
+
+- `PetsRoutes.kt` — Route (~3731 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/
+
+- `EmailChangeService.kt` — EmailChangeService: requestEmailChange, verifyEmailChange, generateToken, getLocalizedEmailChangeCon (~1867 tok)
+- `MagicLinkService.kt` — Data class: MagicLinkService (~2743 tok)
+- `PasswordService.kt` — PasswordService: hasPassword, extractPassword, setPassword, changePassword (~3122 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/src/main/kotlin/com/adoptu/services/auth/
+
+- `WebAuthnService.kt` — Data class: WebAuthnService (~5649 tok)
+
+## .claude/worktrees/implement-perf-lessons/backend/src/test/kotlin/com/adoptu/services/
+
+- `MagicLinkServiceTest.kt` — MagicLinkServiceTest: setup, createTestUser, createMagicLinkToken, createExpiredMagicLinkToken (~3125 tok)
+- `PasswordServiceTest.kt` — PasswordServiceTest: setup, encryptPassword, createTestUser, createPasswordResetToken (~3208 tok)
+- `WebAuthnServiceTest.kt` — WebAuthnServiceTest: setup, userService, encryptPassword, createTestUser (~2952 tok)
+
+## .claude/worktrees/implement-perf-lessons/scripts/
+
+- `benchmark.sh` — Load-tests the backend under the SAME resource ceiling as production (ECS Fargate), (~1530 tok)
 
 ## .claude/worktrees/layout-fix/backend/src/main/resources/static/css/
 
@@ -1508,23 +1818,45 @@
 
 - `workspace.xml` (~7543 tok)
 
+## backend/
+
+- `build.gradle.kts` (~2471 tok)
+
 ## backend/ (canonical)
 
 - `build.gradle.kts` — Backend Gradle module: Ktor/Exposed/AWS SDK deps, application plugin, com.gradleup.shadow 9.4.3 (fat jar -> *-all.jar), jvmToolchain(25) (~750 tok)
 
+## backend/src/main/kotlin/com/adoptu/
+
+- `Application.kt` — main, configureRouting (~900 tok)
+
+## backend/src/main/kotlin/com/adoptu/ (graalvm-native-image worktree)
+
+- `ApplicationNative.kt` — GraalVM native-image entry point: same Application.module() as production, Ktor CIO engine instead of Netty (unsupported under native-image) (~150 tok)
+
+## backend/src/main/kotlin/com/adoptu/ (helidon-nima-migration worktree)
+
+- `Application.kt` — `fun main()` (no more Ktor `EngineMain`): loads `AppConfig`, `startKoin`, `DatabaseFactory.init`, `CryptoService.initialize`, then `WebServer.builder().port(...).mediaContext(JsonSupport.mediaContext()).routing(::configureRouting).build().start()`. `internal fun configureRouting(routing: HttpRouting.Builder)` registers the `NotFoundException`→404 and `Throwable`→500 error handlers (order matters — specific before generic, see bug-038), `/static` (legacy `StaticContentService`), `/health`, and all 10 route groups; `internal` visibility so `testsupport/TestServer.kt` can reuse it directly (~400 tok)
+
 ## backend/src/main/kotlin/com/adoptu/adapters/db/
 
-- `Models.kt` (~3434 tok)
+- `DatabaseFactory.kt` — init, createDefaultAdmin (~1441 tok)
+- `Models.kt` (~3916 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/ (canonical)
 
-- `DbDispatcher.kt` — Shared bounded `dbDispatcher = Dispatchers.IO.limitedParallelism(4)`, reused by all 8 repositories' `withContext(...) { transaction {...} }` calls; bounded to avoid unbounded-Dispatchers.IO thread-thrashing under a cgroup-capped container (~150 tok)
+- `DatabaseFactory.kt` — `init()`: now opens a pooled `HikariDataSource` (was raw unpooled `Database.connect(url,...)`), closes any previous pool first (init can re-run in the same JVM, e.g. per-test in IT suites), sets Postgres prepared-statement caching properties; `createDefaultAdmin` unchanged (~950 tok)
+- `DbDispatcher.kt` — Shared `dbDispatcher`, now a dedicated daemon-thread `Executor.asCoroutineDispatcher()` (was `Dispatchers.IO.limitedParallelism(4)`) sized via `PoolSizing.computeSize()`, reused by all repository/service `withContext(dbDispatcher) { transaction {...} }` calls (~300 tok)
 - `Models.kt` — Exposed table defs; `country` columns on AnimalShelters, SterilizationLocations, UserShelters, UserSterilizationLocations, TemporalHomes, Photographers now use `enumerationByName("country", 100, Country::class)` instead of free-text varchar (~3300 tok)
+- `PoolSizing.kt` — Single source of truth for DB pool/dispatcher size: `cores * 4` floored at 4; used by both DbDispatcher and DatabaseFactory's Hikari `maximumPoolSize` so they stay coupled (~150 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/repositories/
 
 - `PetRepository.kt` — PetRepositoryImpl: rowToPetDto, getPetImages, getAll, getAllUnfiltered (~4397 tok)
-- `UserRepository.kt` — UserRepository: getActiveRolesForUser, getById, getByEmail, getAllUsers (~6264 tok)
+- `TemporalHomeRepository.kt` — Data class: TemporalHomeRepositoryImpl (~3509 tok)
+- `UserRepository.kt` — UserRepository: getActiveRolesForUser, getById, getByEmail, getAllUsers (~6321 tok)
+- `UserShelterRepository.kt` — UserShelterRepository: rowToDto, getByUserId, create, update (~2589 tok)
+- `UserSterilizationLocationRepository.kt` — UserSterilizationLocationRepository: rowToDto, getByUserId, create, update (~2404 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/repositories/ (canonical)
 
@@ -1533,38 +1865,97 @@
 
 - `Country.kt` — Country enum: canonical list of 112 countries (displayName + i18nKey), `fromDisplayName()` resolves exact/accent-insensitive/case-insensitive input to an enum value. Single source of truth for the country dropdown (Shared.kt), validation, and DB storage (~1700 tok)
 
+## backend/src/main/kotlin/com/adoptu/config/
+
+- `AppConfig.kt` — Drop-in replacement for Ktor's `io.ktor.server.config.ApplicationConfig` (same (~325 tok)
+
+## backend/src/main/kotlin/com/adoptu/config/ (helidon-nima-migration worktree)
+
+- `AppConfig.kt` — drop-in replacement for Ktor's `ApplicationConfig` (same `propertyOrNull(path)?.getString()`/`property(path).getString()`/`.getList()` shape), backed by `com.typesafe.config.Config` directly. `AppConfig.load()` reads `application.conf` unchanged; `AppConfig.fromMap(Map<String,Any>)` is the test-only equivalent of Ktor's `MapApplicationConfig` (~200 tok)
+
+## backend/src/main/kotlin/com/adoptu/di/
+
+- `AppModule.kt` — appModule, getOrigins, createImageStorageAdapter (~1223 tok)
+
 ## backend/src/main/kotlin/com/adoptu/dto/input/
 
 - `PetDto.kt` — Data class: Gender (~1025 tok)
+- `ShelterDto.kt` — Data class: ShelterDto (~1093 tok)
+- `SterilizationLocationDto.kt` — Data class: SterilizationLocationDto (~803 tok)
 - `UserDto.kt` — Data class: UserRole (~1119 tok)
 
 ## backend/src/main/kotlin/com/adoptu/pages/
 
+- `ForgotPasswordPage.kt` — HTML, HTML, HTML, HTML, HTML (~1164 tok)
 - `PetsPage.kt` — HTML (~644 tok)
-- `ProfilePage.kt` — HTML (~4822 tok)
+- `ProfilePage.kt` — HTML (~4878 tok)
 
 ## backend/src/main/kotlin/com/adoptu/pages/ (canonical)
 
 - `Shared.kt` — `countrySelect()` now renders `<option>`s from `Country.entries` instead of a hardcoded 112-line list (~3000 tok)
 
-## backend/src/main/kotlin/com/adoptu/plugins/
-
-- `Sessions.kt` — Application (~152 tok)
-
 ## backend/src/main/kotlin/com/adoptu/ports/
 
 - `PetRepositoryPort.kt` — getAll, getAllUnfiltered, getById, create, update (~682 tok)
+- `TemporalHomeRepositoryPort.kt` — Returns (temporalHomeId, rescuerId) and marks the token used, or null if invalid/expired/already use (~343 tok)
 - `UserRepositoryPort.kt` — getById, getByEmail, getAllUsers, getPhotographers, getRescuers (~614 tok)
+- `UserShelterRepositoryPort.kt` — getByUserId, create, update, delete, search (~182 tok)
+- `UserSterilizationLocationRepositoryPort.kt` — getByUserId, create, update, delete, search (~219 tok)
 
 ## backend/src/main/kotlin/com/adoptu/routes/
 
-- `PetsRoutes.kt` — Route (~3615 tok)
-- `UsersRoutes.kt` — Data class: UpdateProfileRequest (~3500 tok)
+- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~6777 tok)
+- `CountryRoutes.kt` — HttpRules, regionFromLocale (~320 tok)
+- `PhotographerRoutes.kt` — HttpRules, validateUser (~2385 tok)
+- `ShelterRoutes.kt` — HttpRules, HttpRules (~1627 tok)
+- `SterilizationLocationRoutes.kt` — HttpRules, HttpRules (~1754 tok)
+- `TemporalHomeRoutes.kt` — HttpRules (~2738 tok)
+- `UIRoutes.kt` — Data class: NavParams (~2628 tok)
+- `UserShelterRoutes.kt` — HttpRules (~767 tok)
+- `UsersRoutes.kt` — Data class: UpdateProfileRequest (~4298 tok)
+- `UserSterilizationLocationRoutes.kt` — HttpRules (~820 tok)
+
+## backend/src/main/kotlin/com/adoptu/routes/ (ported Ktor Route DSL → Helidon HttpRules/Handler, helidon-nima-migration worktree)
+
+- `PetsRoutes.kt` — `fun HttpRules.petsRoutes()`, flattened from Ktor's nested `route("/api/pets"){}`; multipart image upload via `req.receiveMultipart()`; literal `/mine`/`/my-adoption-requests` deliberately registered before `/{id}` (Helidon matches routes in registration order, unlike Ktor's specificity-first tree — see Key Learnings) (~3615 tok)
+- `UsersRoutes.kt` — `fun HttpRules.usersRoutes()`/`adminUsersRoutes()`; local request DTOs (UpdateProfileRequest etc.) now plain data classes, no `@Serializable` (~3500 tok)
 
 ## backend/src/main/kotlin/com/adoptu/services/
 
 - `PetService.kt` — PetService: getAll, getMine, getById, create (~3030 tok)
+- `ProfileEmailVerificationService.kt` — Shelter and sterilization-location profiles carry their own public "contact email", (~1823 tok)
+- `TemporalHomeService.kt` — Validates and consumes a spam-report token (see sendRequest), then blocks the rescuer it names. (~1332 tok)
 - `UserService.kt` — UserService: getById, getByEmail, getAllUsers, getRescuers (~892 tok)
+- `UserShelterService.kt` — UserShelterService: getByUserId, create, update, delete (~993 tok)
+- `UserSterilizationLocationService.kt` — UserSterilizationLocationService: getByUserId, create, update, delete (~976 tok)
+
+## backend/src/main/kotlin/com/adoptu/services/validation/
+
+- `TemporalHomesValidationService.kt` — TemporalHomesValidationService: validateSession, validateUserById, validateUser, validateId (~1127 tok)
+
+## backend/src/main/kotlin/com/adoptu/web/ (helidon-nima-migration worktree — replaces the deleted `plugins/` package)
+
+- `AccessLogFilter.kt` — Helidon `Filter` logging `METHOD path → status (ms)`, skipping `/health`/`/static`/`/css`/`/js`, replacing `plugins/Logging.kt`'s `CallLogging` (~150 tok)
+- `Deps.kt` — `object Deps : KoinComponent`, giving route files `by Deps.inject<T>()` as a drop-in for Ktor's `org.koin.ktor.ext.inject` (~80 tok)
+- `Html.kt` — `ServerResponse.respondHtml { }` rendering a kotlinx.html `HTML` builder to bytes, replacing Ktor's `ktor-server-html-builder` (~100 tok)
+- `JsonSupport.kt` — Jackson `ObjectMapper` (registerKotlinModule, ignore-unknown-properties) + a custom `DefaultPrettyPrinter` subclass fixing two Jackson-vs-kotlinx.serialization pretty-print formatting mismatches (empty `[]`/`{}` vs `[ ]`/`{ }`, `": "` vs `" : "` field separator — see bug-036); `mediaContext()` wires Jackson + multipart support into Helidon's `MediaContext` (~250 tok)
+- `RequestExtensions.kt` — `ServerRequest` extensions: `pathParam`/`queryParam`/`receiveJson<T>()`/`receiveText()` (defensive against empty/absent body, see bug-037)/`receiveFormParameters()`/`receiveMultipart()` (~300 tok)
+- `Responses.kt` — `ServerResponse` extensions: `respondError`/`respondUnauthorized`/`respondForbidden`/`respondNotFound`/`respondInvalidId`/`respondRedirect`/`respondData`/`respondSuccess`, replacing `plugins/Responses.kt` (dropped the confirmed-dead `DataResponder`/`SuccessResponder`/`CustomResponder` classes) (~250 tok)
+- `Sessions.kt` — HMAC-SHA256-signed cookie session (`getSession()`/`setSession()`/`clearSession()` on `ServerRequest`/`ServerResponse`), replacing Ktor's `Sessions` plugin; not wire-compatible with old Ktor session cookies (one-time silent logout on cutover, expected) (~350 tok)
+
+## backend/src/main/resources/
+
+- `application.conf` — Declares STRING (~753 tok)
+
+## backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/ (graalvm-native-image worktree)
+
+- `native-image.properties` — resource includes for static/js/css assets + ~30 logback classes requiring --initialize-at-build-time (Netty's own build-time-init classes transitively reach the app's live LoggerContext) (~300 tok)
+- `reachability-metadata.json` — agent-traced reflection/resource config from hitting real routes (pages, static assets, password-login/crypto path) against live Postgres with -agentlib:native-image-agent (~2000 tok)
+
+## backend/src/main/resources/static/css/
+
+- `sterilization.css` — Styles: 90 rules, 8 vars (~3731 tok)
+- `style.css` — Styles: 93 rules, 8 vars (~6463 tok)
 
 ## backend/src/main/resources/static/js/
 
@@ -1573,17 +1964,76 @@
 - `my-pets.js` — API routes: GET (2 endpoints) (~4244 tok)
 - `profile.js` — load: loadPhotographer, loadTemporalHome, loadShelter, loadSterilization (~9709 tok)
 
+## backend/src/main/scss/
+
+- `_base.scss` — Styles: 15 rules, 8 vars (~1200 tok)
+- `sterilization.scss` — Styles: 6 rules (~192 tok)
+- `style.scss` — Styles: 50 rules (~2843 tok)
+
+## backend/src/test/kotlin/com/adoptu/adapters/db/
+
+- `DatabaseFactoryTest.kt` — Declares DatabaseFactoryTest (~3390 tok)
+
+## backend/src/test/kotlin/com/adoptu/mocks/
+
+- `TestDatabase.kt` — initH2, clearAllData (~1008 tok)
+
 ## backend/src/test/kotlin/com/adoptu/routes/
 
-- `PetsRoutesE2ETest.kt` — Ktor routing (~16534 tok)
+- `PhotographerRoutesE2ETest.kt` — E2E tests for [photographerRoutes]. (~7449 tok)
+- `ShelterRoutesE2ETest.kt` — ShelterRoutesE2ETest: setup, createTestUsers, createShelterInDb (~5411 tok)
+- `SterilizationLocationRoutesE2ETest.kt` — SterilizationLocationRoutesE2ETest: setup, createTestUsers, testModules, startServer (~6084 tok)
+- `TemporalHomeRoutesE2ETest.kt` — E2E tests for [temporalHomeRoutes]. (~7291 tok)
+- `UIRoutesE2ETest.kt` — End-to-end tests for [uiRoutes]: starts a real Helidon Nima [TestServer] mounting the full (~6833 tok)
+- `UserShelterRoutesE2ETest.kt` — UserShelterRoutesE2ETest: setup, createTestUsers, startServer, createShelterInDb (~3875 tok)
+- `UsersRoutesE2ETest.kt` — Verbatim port of the old Ktor test's inline `module { ... }` block of mocked adapters. (~11108 tok)
+- `UserSterilizationLocationRoutesE2ETest.kt` — UserSterilizationLocationRoutesE2ETest: setup, createTestUsers, createLocationInDb (~4424 tok)
 
 ## backend/src/test/kotlin/com/adoptu/services/
 
 - `PetServiceTest.kt` — PetServiceTest: setup (~7228 tok)
+- `TemporalHomeServiceTest.kt` — TemporalHomeServiceTest: setup, cleanup (~4375 tok)
+- `UserShelterServiceTest.kt` — UserShelterServiceTest: setup (~4913 tok)
+- `UserSterilizationLocationServiceTest.kt` — UserSterilizationLocationServiceTest: setup (~4822 tok)
+
+## backend/src/test/kotlin/com/adoptu/services/validation/
+
+- `TemporalHomesValidationServiceTest.kt` — TemporalHomesValidationServiceTest: setup, tearDown, createTestUser, createTemporalHomeRequest (~3874 tok)
+
+## backend/src/test/kotlin/com/adoptu/testsupport/ (helidon-nima-migration worktree)
+
+- `TestHttp.kt` — `java.net.http.HttpClient`-based replacement for Ktor's test `HttpClient`: `get/delete/post/postJson/postForm/put/putJson/putForm(url, cookie)` returning `HttpResponse<String>` (use `.statusCode()`/`.body()`), `loginAs(baseUrl, userId)` hitting the harness's built-in `/test/login/{userId}` route, and `buildMultipartBody(boundary, fields, files)` for multipart upload tests (~400 tok)
+- `TestServer.kt` — replaces Ktor's `testApplication{}`/`embeddedServer(Netty,...)`. `TestServer.start(configOverrides, modules, initDatabase, withTestLogin)` starts a real Helidon `WebServer` on a random port through the same `configureRouting` production path, against H2 (`MODE=PostgreSQL`). Always appends a `single { config }` Koin fallback so route files that eagerly resolve `AppConfig` (namely `authRoutes()`) don't crash when a test supplies its own narrow custom module (see bug-035); cleans up Koin via `stopKoin()` both on `TestServerHandle.stop()` and on any startup failure (~600 tok)
+
+## frontend/src/jsMain/kotlin/com/adoptu/frontend/
+
+- `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~2600 tok)
+- `Common.kt` — NodeList, onCountryChange, initI18n, initDropdowns, checkProfileCompletion (~1820 tok)
+- `I18n.kt` (~22656 tok)
+- `Main.kt` — main (~1191 tok)
 
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
 
-- `IndexPage.kt` — init, loadPets, renderPets (~180 tok)
+- `AuthFlowPages.kt` — init, submit, init, tokenFromUrl, submit (~2350 tok)
+- `IndexPage.kt` — init, loadPets, updateCountryHint, showEmptyState, hideEmptyState (~2198 tok)
+- `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~9997 tok)
+- `RegisterPage.kt` — init, setupMethodToggle, updateVisibility, ensureAtLeastOne, setupForm (~2970 tok)
+- `SheltersPage.kt` — init, search, renderShelters (~1474 tok)
+- `SterilizationLocationsPage.kt` — init, search, render, locationCard, init (~2832 tok)
+- `TemporalHomePage.kt` — init, search, displayResults, init, render (~2447 tok)
+
+## infra/
+
+- `cloudfront.tf` (~2999 tok)
+- `data.tf` — Pre-existing resources this stack plugs into. These are read-only lookups; (~490 tok)
+- `dns_updater.tf` — Keeps backend.<domain> (route53.tf) pointed at whichever ECS task is (~986 tok)
+- `ecs.tf` — New, dedicated cluster rather than reusing the account's existing (~1289 tok)
+- `network.tf` — Dual-stack subnets for ECS Fargate tasks. Originally built pure (~619 tok)
+- `rds.tf` — Declares allocated_storage (~542 tok)
+- `route53.tf` — Only the records tied to resources this stack manages. The zone's other (~1137 tok)
+- `security_groups.tf` (~746 tok)
+- `terraform.tfvars` (~107 tok)
+- `variables.tf` — Declares can (~1629 tok)
 
 ## infra/ (OpenTofu - AWS deployment)
 
@@ -1608,3 +2058,12 @@
 - `terraform.tfvars.example` — sample values matching the live account (~60 tok)
 - `variables.tf` — all configurable inputs: region/profile, domain, container image/port, RDS sizing, db_app_password (sensitive, no default) (~700 tok)
 - `versions.tf` — OpenTofu/AWS+archive provider version pins, backend notes (local by default) (~170 tok)
+
+## infra/lambda/dns_updater/
+
+- `index.py` — handler (~1437 tok)
+
+## scripts/ (graalvm-native-image worktree)
+
+- `benchmark.sh` — Load-tests the backend in Docker under `--cpus=0.5 --memory=1024m` (matches ECS Fargate, same profile that produced the validated 18.2 RPS baseline in cerebrum.md). Prefers `hey`, falls back to `wrk`/`ab`/plain curl+xargs. Usage: `scripts/benchmark.sh <label> [endpoint] [duration_s] [concurrency]`; results land in `scripts/benchmark-results/`. Change one thing per run. (~650 tok)
+- `build-native-image.sh` — builds the native binary via ghcr.io/graalvm/native-image-community Docker image; runs :backend:jar and :backend:nativeCompile as two separate Gradle invocations to avoid an OOM (native-image's own JVM competing with the Kotlin-compile JVM for container memory) (~150 tok)

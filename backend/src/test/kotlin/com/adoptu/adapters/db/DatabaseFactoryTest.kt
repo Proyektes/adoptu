@@ -28,8 +28,8 @@ class DatabaseFactoryTest {
     }
 
     @Test
-    fun `DatabaseFactory has 19 tables`() {
-        assertEquals(21, DatabaseFactory.listOfTables.size)
+    fun `DatabaseFactory has 23 tables`() {
+        assertEquals(23, DatabaseFactory.listOfTables.size)
     }
 
     @Test
@@ -120,7 +120,9 @@ class DatabaseFactoryTest {
             UserShelters,
             UserSterilizationLocations,
             PasswordResetTokens,
-            EmailChangeTokens
+            EmailChangeTokens,
+            ProfileEmailVerificationTokens,
+            SpamReportTokens
         )
         
         assertEquals(expectedTables.size, DatabaseFactory.listOfTables.size)

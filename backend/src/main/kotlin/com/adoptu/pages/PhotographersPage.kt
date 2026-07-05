@@ -30,6 +30,5 @@ fun HTML.photographersPage(navParams: NavParams = NavParams()) {
         }
         footer()
         commonScripts(navParams.isLoggedIn)
-        script(src = "/static/js/photographers.js") {}
     }
 }

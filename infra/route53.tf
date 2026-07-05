@@ -31,6 +31,22 @@ resource "aws_route53_record" "backend" {
   }
 }
 
+# CloudFront cannot resolve a pure IPv6 (AAAA-only) custom origin - it falls
+# back to an A record and connects over IPv4 (discovered the hard way during
+# cutover: 502s until this record existed). The dns_updater Lambda keeps
+# this current alongside the AAAA record above on every deploy.
+resource "aws_route53_record" "backend_a" {
+  zone_id = data.aws_route53_zone.primary.zone_id
+  name    = "backend.${var.domain_name}"
+  type    = "A"
+  ttl     = 60
+  records = ["100.31.136.205"] # seeded from the current live task; the dns_updater Lambda takes over from here
+
+  lifecycle {
+    ignore_changes = [records]
+  }
+}
+
 resource "aws_route53_record" "app_a" {
   for_each = toset(local.app_hostnames)
 

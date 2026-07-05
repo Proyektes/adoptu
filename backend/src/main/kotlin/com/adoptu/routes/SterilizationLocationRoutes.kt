@@ -2,116 +2,150 @@ package com.adoptu.routes
 
 import com.adoptu.dto.input.CreateSterilizationLocationRequest
 import com.adoptu.dto.input.UpdateSterilizationLocationRequest
-import com.adoptu.plugins.respondData
-import com.adoptu.plugins.respondError
-import com.adoptu.plugins.respondSuccess
-import com.adoptu.services.ServiceResult
+import com.adoptu.dto.input.UserRole
+import com.adoptu.ports.UserRepositoryPort
 import com.adoptu.services.SterilizationLocationService
 import com.adoptu.services.validation.ValidationConstants
-import io.ktor.http.HttpHeaders
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import org.koin.ktor.ext.inject
+import com.adoptu.web.Deps
+import com.adoptu.web.getSession
+import com.adoptu.web.pathParam
+import com.adoptu.web.queryParam
+import com.adoptu.web.receiveJson
+import com.adoptu.web.respondData
+import com.adoptu.web.respondError
+import com.adoptu.web.respondForbidden
+import com.adoptu.web.respondSuccess
+import com.adoptu.web.respondUnauthorized
+import io.helidon.http.HeaderNames
+import io.helidon.webserver.http.Handler
+import io.helidon.webserver.http.HttpRules
+import kotlinx.coroutines.runBlocking
+import org.koin.core.component.inject
 
-fun Route.sterilizationLocationRoutes() {
-    val service by inject<SterilizationLocationService>()
+fun HttpRules.sterilizationLocationRoutes() {
+    val service by Deps.inject<SterilizationLocationService>()
 
-    route("/api/sterilization-locations") {
-        get {
-            val country = call.request.queryParameters["country"]
-            val state = call.request.queryParameters["state"]
-            val city = call.request.queryParameters["city"]
-            val neighborhood = call.request.queryParameters["neighborhood"]
-            val zip = call.request.queryParameters["zip"]
-            val locations = service.getAll(country, state, city, neighborhood, zip)
-            // Public, unauthenticated listing - cached at the CDN edge (see
-            // infra/cloudfront.tf: ordered_cache_behavior for
-            // "/api/sterilization-locations*"). The admin variant lives under
-            // the separate /api/admin/sterilization-locations prefix, so this
-            // wildcard never touches an authenticated route.
-            call.response.header(HttpHeaders.CacheControl, "public, max-age=30")
-            call.respond(locations)
+    get("/api/sterilization-locations", Handler { req, res ->
+        val country = req.queryParam("country")
+        val state = req.queryParam("state")
+        val city = req.queryParam("city")
+        val neighborhood = req.queryParam("neighborhood")
+        val zip = req.queryParam("zip")
+        val locations = runBlocking { service.getAll(country, state, city, neighborhood, zip) }
+        // Public, unauthenticated listing - cached at the CDN edge (see
+        // infra/cloudfront.tf: ordered_cache_behavior for
+        // "/api/sterilization-locations*"). The admin variant lives under
+        // the separate /api/admin/sterilization-locations prefix, so this
+        // wildcard never touches an authenticated route.
+        res.header(HeaderNames.CACHE_CONTROL, "public, max-age=30")
+        res.send(locations)
+    })
+
+    get("/api/sterilization-locations/grouped", Handler { _, res ->
+        val locations = runBlocking { service.getGroupedByLocation() }
+        res.send(locations)
+    })
+
+    get("/api/sterilization-locations/countries", Handler { _, res ->
+        val countries = runBlocking { service.getCountries() }
+        res.send(mapOf("countries" to countries))
+    })
+
+    get("/api/sterilization-locations/countries/{country}/states", Handler { req, res ->
+        val country = req.pathParam("country")
+        val states = runBlocking { service.getStatesByCountry(country) }
+        res.send(mapOf("states" to states))
+    })
+
+    get("/api/sterilization-locations/countries/{country}/states/{state}/cities", Handler { req, res ->
+        val country = req.pathParam("country")
+        val state = req.pathParam("state")
+        val cities = runBlocking { service.getCitiesByCountryAndState(country, state) }
+        res.send(mapOf("cities" to cities))
+    })
+
+    get("/api/sterilization-locations/{id}", Handler { req, res ->
+        val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
+        val location = runBlocking { service.getById(id) }
+        if (location != null) {
+            res.send(location)
+        } else {
+            res.respondError(ValidationConstants.STERILIZATION_LOCATION_NOT_FOUND, 404)
         }
-
-        get("/grouped") {
-            val locations = service.getGroupedByLocation()
-            call.respond(locations)
-        }
-
-        get("/countries") {
-            val countries = service.getCountries()
-            call.respond(mapOf("countries" to countries))
-        }
-
-        get("/countries/{country}/states") {
-            val country = call.parameters["country"] ?: return@get call.respondError(ValidationConstants.COUNTRY_IS_REQUIRED, 400)
-            val states = service.getStatesByCountry(country)
-            call.respond(mapOf("states" to states))
-        }
-
-        get("/countries/{country}/states/{state}/cities") {
-            val country = call.parameters["country"] ?: return@get call.respondError(ValidationConstants.COUNTRY_IS_REQUIRED, 400)
-            val state = call.parameters["state"]
-            val cities = service.getCitiesByCountryAndState(country, state)
-            call.respond(mapOf("cities" to cities))
-        }
-
-        get("/{id}") {
-            val id = call.parameters["id"]?.toIntOrNull() ?: return@get call.respondError(ValidationConstants.INVALID_ID)
-            val location = service.getById(id)
-            if (location != null) {
-                call.respond(location)
-            } else {
-                call.respondError(ValidationConstants.STERILIZATION_LOCATION_NOT_FOUND, 404)
-            }
-        }
-    }
+    })
 }
 
-fun Route.adminSterilizationLocationRoutes() {
-    val service by inject<SterilizationLocationService>()
+fun HttpRules.adminSterilizationLocationRoutes() {
+    val service by Deps.inject<SterilizationLocationService>()
+    val userRepository by Deps.inject<UserRepositoryPort>()
 
-    route("/api/admin/sterilization-locations") {
-        get {
-            val country = call.request.queryParameters["country"]
-            val state = call.request.queryParameters["state"]
-            val city = call.request.queryParameters["city"]
-            val neighborhood = call.request.queryParameters["neighborhood"]
-            val zip = call.request.queryParameters["zip"]
-            val locations = service.getAll(country, state, city, neighborhood, zip)
-            call.respond(locations)
+    get("/api/admin/sterilization-locations", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        runBlocking {
+            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+                return@runBlocking res.respondForbidden()
+            }
+            val country = req.queryParam("country")
+            val state = req.queryParam("state")
+            val city = req.queryParam("city")
+            val neighborhood = req.queryParam("neighborhood")
+            val zip = req.queryParam("zip")
+            res.send(service.getAll(country, state, city, neighborhood, zip))
         }
+    })
 
-        get("/{id}") {
-            val id = call.parameters["id"]?.toIntOrNull() ?: return@get call.respondError(ValidationConstants.INVALID_ID)
+    get("/api/admin/sterilization-locations/{id}", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
+        runBlocking {
+            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+                return@runBlocking res.respondForbidden()
+            }
             val location = service.getById(id)
             if (location != null) {
-                call.respond(location)
+                res.send(location)
             } else {
-                call.respondError(ValidationConstants.STERILIZATION_LOCATION_NOT_FOUND, 404)
+                res.respondError(ValidationConstants.STERILIZATION_LOCATION_NOT_FOUND, 404)
             }
         }
+    })
 
-        post {
-            val request = call.receive<CreateSterilizationLocationRequest>()
+    post("/api/admin/sterilization-locations", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        runBlocking {
+            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+                return@runBlocking res.respondForbidden()
+            }
+            val request = req.receiveJson<CreateSterilizationLocationRequest>()
             try {
                 val location = service.create(request)
-                call.respond(location)
+                res.send(location)
             } catch (e: IllegalArgumentException) {
-                call.respondError(e.message ?: "Invalid request", 400)
+                res.respondError(e.message ?: "Invalid request", 400)
             }
         }
+    })
 
-        put("/{id}") {
-            val id = call.parameters["id"]?.toIntOrNull() ?: return@put call.respondError(ValidationConstants.INVALID_ID)
-            val request = call.receive<UpdateSterilizationLocationRequest>()
-            call.respondData(service.update(id, request))
+    put("/api/admin/sterilization-locations/{id}", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
+        runBlocking {
+            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+                return@runBlocking res.respondForbidden()
+            }
+            val request = req.receiveJson<UpdateSterilizationLocationRequest>()
+            res.respondData(service.update(id, request))
         }
+    })
 
-        delete("/{id}") {
-            val id = call.parameters["id"]?.toIntOrNull() ?: return@delete call.respondError(ValidationConstants.INVALID_ID)
-            call.respondSuccess(service.delete(id))
+    delete("/api/admin/sterilization-locations/{id}", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
+        runBlocking {
+            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+                return@runBlocking res.respondForbidden()
+            }
+            res.respondSuccess(service.delete(id))
         }
-    }
+    })
 }

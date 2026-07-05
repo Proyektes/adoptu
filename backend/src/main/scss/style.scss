@@ -550,6 +550,24 @@ form {
     }
 }
 
+.profile-header-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.75rem;
+
+    .message {
+        margin: 0;
+        padding: 0.4rem 0.75rem;
+        font-size: 0.9rem;
+
+        &:empty {
+            display: none;
+        }
+    }
+}
+
 .sticky-section {
     position: sticky;
     top: 90px;

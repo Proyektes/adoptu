@@ -2,6 +2,9 @@
 .gradle/
 build/
 
+# Local benchmark output (scripts/benchmark.sh)
+scripts/benchmark-results/
+
 # IDE
 .idea/
 *.iml
@@ -63,3 +66,7 @@ node_modules/
 
 # OpenWolf design QC screenshots (temporary, not for VCS)
 .wolf/designqc-captures/
+
+# Playwright MCP debug snapshots (temporary, not for VCS)
+.playwright-mcp/
+.tokensave

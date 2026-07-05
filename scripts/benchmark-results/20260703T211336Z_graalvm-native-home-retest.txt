@@ -1,0 +1,43 @@
+label: graalvm-native-image-home-retest
+endpoint: /
+duration_s: 30
+concurrency: 20
+cgroup: --cpus=0.5 --memory=1024m (ECS Fargate equivalent)
+binary: backend/build/native/nativeCompile/adoptu-backend (136MB, built from merged adoptu branch incl. HikariCP pooling + dedicated DB dispatcher + N+1 fix, on top of this branch's native-image work)
+baseline_for_comparison: scripts/benchmark-results/20260703T185035Z_graalvm-native-home.txt (143.09 RPS, pre-HikariCP-merge binary)
+---
+Running 30s test @ http://host.docker.internal:18099/
+  20 threads and 20 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   150.00ms  104.41ms 803.12ms   76.06%
+    Req/Sec     8.74      4.57    40.00     65.95%
+  4319 requests in 30.10s, 46.92MB read
+Requests/sec:    143.47
+Transfer/sec:      1.56MB
+--- container memory samples during load (CPU% MemUsage MemPerc) ---
+38.76% 140.5MiB / 1GiB 13.72%
+53.21% 141MiB / 1GiB 13.77%
+50.19% 145.3MiB / 1GiB 14.19%
+53.29% 140.7MiB / 1GiB 13.74%
+51.18% 138MiB / 1GiB 13.48%
+50.83% 139.3MiB / 1GiB 13.60%
+52.38% 140.8MiB / 1GiB 13.75%
+51.20% 140.7MiB / 1GiB 13.74%
+51.89% 142.9MiB / 1GiB 13.96%
+51.49% 142.3MiB / 1GiB 13.90%
+54.62% 142.9MiB / 1GiB 13.95%
+56.74% 131.6MiB / 1GiB 12.86%
+51.79% 135MiB / 1GiB 13.18%
+40.20% 134.5MiB / 1GiB 13.13%
+0.08% 134.5MiB / 1GiB 13.13%
+0.06% 134.4MiB / 1GiB 13.13%
+0.23% 134.4MiB / 1GiB 13.13%
+0.10% 134.4MiB / 1GiB 13.13%
+0.07% 134.4MiB / 1GiB 13.13%
+0.11% 134.4MiB / 1GiB 13.13%
+0.28% 134.4MiB / 1GiB 13.13%
+0.26% 134.4MiB / 1GiB 13.13%
+0.09% 134.4MiB / 1GiB 13.13%
+0.10% 134.4MiB / 1GiB 13.13%
+0.05% 134.4MiB / 1GiB 13.13%
+0.11% 134.4MiB / 1GiB 13.13%

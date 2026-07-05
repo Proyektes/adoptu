@@ -19,7 +19,8 @@ class TemporalHomeService(
     private val temporalHomeRepository: TemporalHomeRepositoryPort,
     private val notificationAdapter: NotificationPort,
     private val userService: UserService,
-    private val userRepository: UserRepositoryPort
+    private val userRepository: UserRepositoryPort,
+    private val baseUrl: String = "http://localhost:80"
 ) {
     private val scope = CoroutineScope(Dispatchers.IO)
 
@@ -59,8 +60,11 @@ class TemporalHomeService(
 
         val temporalHomeEmail = userService.getById(request.temporalHomeId)?.username
         if (temporalHomeEmail != null) {
-            val baseUrl = "https://adopt-u.com"
-            val spamReportLink = "$baseUrl/temporal-home/block/${request.temporalHomeId}?rescuer=$requesterId"
+            // A signed, single-use token rather than the raw temporalHomeId/rescuerId in
+            // the URL - this link must work without the recipient being logged in, and
+            // those IDs are guessable sequential integers with no secret component.
+            val token = temporalHomeRepository.createSpamReportToken(request.temporalHomeId, requesterId)
+            val spamReportLink = "$baseUrl/temporal-home/block?token=$token"
             val pet = if (request.petId != null) temporalHomeRepository.getTemporalHome(request.temporalHomeId) else null
 
             scope.launch {
@@ -83,6 +87,12 @@ class TemporalHomeService(
 
     suspend fun blockRescuer(temporalHomeId: Int, rescuerId: Int): Boolean =
         temporalHomeRepository.blockRescuer(temporalHomeId, rescuerId)
+
+    /** Validates and consumes a spam-report token (see sendRequest), then blocks the rescuer it names. */
+    suspend fun blockRescuerByToken(token: String): Boolean {
+        val (temporalHomeId, rescuerId) = temporalHomeRepository.consumeSpamReportToken(token) ?: return false
+        return temporalHomeRepository.blockRescuer(temporalHomeId, rescuerId)
+    }
 
     suspend fun getMyRequests(userId: Int): List<TemporalHomeRequestDto> =
         temporalHomeRepository.getMyRequests(userId)

@@ -17,12 +17,14 @@ resource "aws_db_instance" "postgres" {
   db_subnet_group_name   = data.aws_db_subnet_group.default.name
   vpc_security_group_ids = [aws_security_group.rds.id]
 
-  # IPv6-only ECS tasks have no IPv4 address at all, so the instance needs an
-  # IPv6 endpoint of its own to be reachable - same-VPC traffic over either
-  # protocol stays local (no NAT/IGW involved). Live instance is IPv4-only
-  # today; this is the one functional (not just security) change required to
-  # move the app to IPv6-only tasks.
-  network_type = "DUAL"
+  # No longer needed: ECS tasks ended up dual-stack (real private IPv4,
+  # not IPv6-only - see network.tf/security_groups.tf for why), so they
+  # already reach this IPv4-only instance directly within the VPC. A prior
+  # attempt to set this to "DUAL" for a pure-IPv6-only design never actually
+  # took effect anyway (AWS accepted the apply but PendingModifiedValues
+  # stayed empty and NetworkType stayed IPV4) and would just be a
+  # perpetually-drifting no-op now, so leaving it unmanaged/default (IPV4,
+  # matching the live instance).
 
   multi_az            = false
   publicly_accessible = false

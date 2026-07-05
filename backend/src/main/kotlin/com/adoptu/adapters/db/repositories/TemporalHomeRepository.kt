@@ -1,6 +1,7 @@
 package com.adoptu.adapters.db.repositories
 
 import com.adoptu.adapters.db.BlockedRescuers
+import com.adoptu.adapters.db.SpamReportTokens
 import com.adoptu.adapters.db.TemporalHomeRequests
 import com.adoptu.adapters.db.TemporalHomes
 import com.adoptu.common.Country
@@ -17,10 +18,13 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
+import java.security.SecureRandom
+import java.util.Base64
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -30,6 +34,9 @@ class TemporalHomeRepositoryImpl(
     private val userRepository: UserRepositoryPort,
     private val clock: Clock
 ) : TemporalHomeRepositoryPort {
+
+    private val secureRandom = SecureRandom()
+    private val spamReportTokenExpirationMs = 30 * 24 * 60 * 60 * 1000L
 
     private data class RawTemporalHomeRequest(
         val id: Int,
@@ -260,5 +267,45 @@ class TemporalHomeRepositoryImpl(
                 createdAt = raw.createdAt
             )
         }
+    }
+
+    override suspend fun createSpamReportToken(temporalHomeId: Int, rescuerId: Int): String = withContext(dbDispatcher) {
+        val token = generateToken()
+        val now = clock.now().toEpochMilliseconds()
+        transaction {
+            SpamReportTokens.insert {
+                it[SpamReportTokens.temporalHomeId] = temporalHomeId
+                it[SpamReportTokens.rescuerId] = rescuerId
+                it[SpamReportTokens.token] = token
+                it[SpamReportTokens.expiresAt] = now + spamReportTokenExpirationMs
+                it[SpamReportTokens.createdAt] = now
+            }
+        }
+        token
+    }
+
+    override suspend fun consumeSpamReportToken(token: String): Pair<Int, Int>? = withContext(dbDispatcher) {
+        val now = clock.now().toEpochMilliseconds()
+        transaction {
+            val row = SpamReportTokens.selectAll()
+                .where { (SpamReportTokens.token eq token) and (SpamReportTokens.usedAt.isNull()) }
+                .firstOrNull() ?: return@transaction null
+
+            if (row[SpamReportTokens.expiresAt] <= now) {
+                return@transaction null
+            }
+
+            SpamReportTokens.update({ SpamReportTokens.id eq row[SpamReportTokens.id] }) {
+                it[SpamReportTokens.usedAt] = now
+            }
+
+            row[SpamReportTokens.temporalHomeId] to row[SpamReportTokens.rescuerId]
+        }
+    }
+
+    private fun generateToken(): String {
+        val bytes = ByteArray(32)
+        secureRandom.nextBytes(bytes)
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
     }
 }

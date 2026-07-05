@@ -1,51 +1,49 @@
 package com.adoptu.routes
 
-import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.WebAuthnCredentials
+import com.adoptu.adapters.db.repositories.PetRepositoryImpl
+import com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl
 import com.adoptu.adapters.db.repositories.UserRepository
+import com.adoptu.config.AppConfig
 import com.adoptu.mocks.MockImageStorage
 import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestDatabase
-import com.adoptu.plugins.configureSerialization
-import com.adoptu.plugins.configureSessions
+import com.adoptu.ports.NotificationPort
+import com.adoptu.ports.PetRepositoryPort
+import com.adoptu.ports.PhotographerRepositoryPort
+import com.adoptu.ports.UserRepositoryPort
 import com.adoptu.services.EmailVerificationService
+import com.adoptu.services.MagicLinkService
 import com.adoptu.services.PasswordService
+import com.adoptu.services.PetService
+import com.adoptu.services.PhotographerService
+import com.adoptu.services.UserService
+import com.adoptu.services.auth.WebAuthnService
 import com.adoptu.services.crypto.CryptoService
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.config.*
-import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
-import io.ktor.server.testing.*
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
+import com.adoptu.testsupport.TestHttp
+import com.adoptu.testsupport.TestServer
+import com.adoptu.web.JsonSupport
+import com.fasterxml.jackson.databind.node.ObjectNode
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.koin.dsl.module
-import org.koin.ktor.plugin.Koin
-import com.adoptu.services.auth.SessionUser
-import kotlin.test.*
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import java.security.SecureRandom
 import java.util.Base64
-
-@Serializable
-private data class SuccessResponse(val success: Boolean, val error: String? = null)
-
-@Serializable
-private data class PasswordRegistrationResponse(val success: Boolean, val message: String? = null, val emailVerificationSent: Boolean = false)
 
 @OptIn(ExperimentalTime::class)
 class PasswordRegistrationRoutesE2ETest {
 
     private val clock = Clock.System
     private lateinit var mockNotificationAdapter: MockNotificationAdapter
+    private val testConfig = AppConfig.fromMap(mapOf("admin.email" to "admin@test.com"))
 
     @BeforeEach
     fun setup() {
@@ -55,158 +53,142 @@ class PasswordRegistrationRoutesE2ETest {
         CryptoService.initialize()
     }
 
-    private fun TestApplicationBuilder.setupApp() {
-        val config = MapApplicationConfig(
-            "env" to "test",
-            "ktor.deployment.port" to "80",
-            "admin.email" to "admin@test.com"
-        )
-
-        val testModules = module {
-            single<ApplicationConfig> { config }
-            single<kotlin.time.Clock> { kotlin.time.Clock.System }
-            single<com.adoptu.ports.UserRepositoryPort> { UserRepository(get()) }
-            single { com.adoptu.services.UserService(get()) }
-            single { EmailVerificationService(get(), get(), get(), "http://localhost:80") }
-            single { com.adoptu.services.PasswordService(get(), mockNotificationAdapter, get(), "http://localhost:80") }
-            single { com.adoptu.services.MagicLinkService(get(), mockNotificationAdapter, get(), "http://localhost:80", get()) }
-            single { com.adoptu.services.auth.WebAuthnService(get(), get(), get(), get(), get(), config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com", config.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost", config.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption",             listOf(config.propertyOrNull("webauthn.origin")?.getString() ?: "http://localhost:80")) }
-            single { MockImageStorage() }
-            single { mockNotificationAdapter }
-            single<com.adoptu.ports.NotificationPort> { mockNotificationAdapter }
-            single<com.adoptu.ports.PetRepositoryPort> { com.adoptu.adapters.db.repositories.PetRepositoryImpl(get()) }
-            single<com.adoptu.ports.PhotographerRepositoryPort> { com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl(get(), get(), get()) }
-            single { com.adoptu.services.PhotographerService(get(), get(), get(), get()) }
-            single { com.adoptu.services.PetService(get(), get(), get(), get()) }
+    private fun testModules() = module {
+        single { testConfig }
+        single<Clock> { Clock.System }
+        single<UserRepositoryPort> { UserRepository(get()) }
+        single { UserService(get()) }
+        single { EmailVerificationService(get(), get(), get(), "http://localhost:80") }
+        single { PasswordService(get(), mockNotificationAdapter, get(), "http://localhost:80") }
+        single { MagicLinkService(get(), mockNotificationAdapter, get(), "http://localhost:80", get()) }
+        single {
+            WebAuthnService(
+                get(), get(), get(), get(), get(),
+                testConfig.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com",
+                testConfig.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost",
+                testConfig.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption",
+                listOf(testConfig.propertyOrNull("webauthn.origin")?.getString() ?: "http://localhost:80")
+            )
         }
-
-        environment {
-            this.config = config
-        }
-
-        application {
-            configureSerialization()
-            configureSessions()
-            install(Koin) {
-                modules(testModules)
-            }
-            routing {
-                authRoutes()
-            }
-        }
+        single { MockImageStorage() }
+        single { mockNotificationAdapter }
+        single<NotificationPort> { mockNotificationAdapter }
+        single<PetRepositoryPort> { PetRepositoryImpl(get()) }
+        single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
+        single { PhotographerService(get(), get(), get(), get()) }
+        single { PetService(get(), get(), get(), get()) }
     }
+
+    private fun startServer() = TestServer.start(modules = listOf(testModules()), initDatabase = false)
 
     private fun encryptPassword(password: String): String {
         val publicKey = CryptoService.getPublicKey()
-        return CryptoService.encrypt(password, publicKey) 
+        return CryptoService.encrypt(password, publicKey)
             ?: throw IllegalStateException("Encryption failed")
     }
 
     @Test
     fun `POST register-password creates user with password`() {
-        testApplication {
-            setupApp()
-            
+        val handle = startServer()
+        try {
             val encryptedPassword = encryptPassword("SecurePass123!")
 
-            val response = client.post("/api/auth/register-password") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(
-                    mapOf(
-                        "email" to "newuser@example.com",
-                        "displayName" to "New User",
-                        "roles" to "ADOPTER",
-                        "encryptedPassword" to encryptedPassword
-                    )
-                ))
-            }
+            val body = JsonSupport.objectMapper.writeValueAsString(
+                mapOf(
+                    "email" to "newuser@example.com",
+                    "displayName" to "New User",
+                    "roles" to "ADOPTER",
+                    "encryptedPassword" to encryptedPassword
+                )
+            )
+            val response = TestHttp.postJson("${handle.baseUrl}/api/auth/register-password", body)
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = Json.decodeFromString<PasswordRegistrationResponse>(response.bodyAsText())
-            assertTrue(body.success)
-            assertTrue(body.emailVerificationSent)
+            assertEquals(200, response.statusCode())
+            val json = JsonSupport.objectMapper.readTree(response.body()) as ObjectNode
+            assertTrue(json.get("success").asBoolean())
+            assertTrue(json.get("emailVerificationSent").asBoolean())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST register-password with invalid email returns error`() {
-        testApplication {
-            setupApp()
-            
+        val handle = startServer()
+        try {
             val encryptedPassword = encryptPassword("SecurePass123!")
 
-            val response = client.post("/api/auth/register-password") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(
-                    mapOf(
-                        "email" to "invalid-email",
-                        "displayName" to "Test User",
-                        "roles" to "ADOPTER",
-                        "encryptedPassword" to encryptedPassword
-                    )
-                ))
-            }
+            val body = JsonSupport.objectMapper.writeValueAsString(
+                mapOf(
+                    "email" to "invalid-email",
+                    "displayName" to "Test User",
+                    "roles" to "ADOPTER",
+                    "encryptedPassword" to encryptedPassword
+                )
+            )
+            val response = TestHttp.postJson("${handle.baseUrl}/api/auth/register-password", body)
 
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST register-password with weak password returns error`() {
-        testApplication {
-            setupApp()
-            
+        val handle = startServer()
+        try {
             val encryptedPassword = encryptPassword("weak")
 
-            val response = client.post("/api/auth/register-password") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(
-                    mapOf(
-                        "email" to "weak@example.com",
-                        "displayName" to "Weak User",
-                        "roles" to "ADOPTER",
-                        "encryptedPassword" to encryptedPassword
-                    )
-                ))
-            }
+            val body = JsonSupport.objectMapper.writeValueAsString(
+                mapOf(
+                    "email" to "weak@example.com",
+                    "displayName" to "Weak User",
+                    "roles" to "ADOPTER",
+                    "encryptedPassword" to encryptedPassword
+                )
+            )
+            val response = TestHttp.postJson("${handle.baseUrl}/api/auth/register-password", body)
 
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST register-password assigns roles correctly`() {
-        testApplication {
-            setupApp()
-            
+        val handle = startServer()
+        try {
             val encryptedPassword = encryptPassword("SecurePass123!")
 
-            val response = client.post("/api/auth/register-password") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(
-                    mapOf(
-                        "email" to "roles@example.com",
-                        "displayName" to "Roles User",
-                        "roles" to "ADOPTER,RESCUER",
-                        "encryptedPassword" to encryptedPassword
-                    )
-                ))
-            }
+            val body = JsonSupport.objectMapper.writeValueAsString(
+                mapOf(
+                    "email" to "roles@example.com",
+                    "displayName" to "Roles User",
+                    "roles" to "ADOPTER,RESCUER",
+                    "encryptedPassword" to encryptedPassword
+                )
+            )
+            val response = TestHttp.postJson("${handle.baseUrl}/api/auth/register-password", body)
 
-            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET has-passkey returns false when no session`() {
-        testApplication {
-            setupApp()
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/auth/has-passkey")
 
-            val response = client.get("/api/auth/has-passkey")
-
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = Json.decodeFromString<SuccessResponse>(response.bodyAsText())
-            assertFalse(body.success)
+            assertEquals(200, response.statusCode())
+            val json = JsonSupport.objectMapper.readTree(response.body()) as ObjectNode
+            assertFalse(json.get("success").asBoolean())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -214,55 +196,51 @@ class PasswordRegistrationRoutesE2ETest {
     fun `GET has-passkey returns false for user without passkey`() {
         val userId = createTestUser("nopasskey@example.com", "No Passkey User")
 
-        testApplication {
-            setupApp()
-
-            val response = client.get("/api/auth/has-passkey") {
-                val session = SessionUser(userId, "nopasskey@example.com", "No Passkey User")
-                // Note: This test would need session management setup
-            }
-
+        val handle = startServer()
+        try {
             // Without session, returns failure
-            val body = Json.decodeFromString<SuccessResponse>(response.bodyAsText())
-            assertFalse(body.success)
+            val response = TestHttp.get("${handle.baseUrl}/api/auth/has-passkey")
+
+            val json = JsonSupport.objectMapper.readTree(response.body()) as ObjectNode
+            assertFalse(json.get("success").asBoolean())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST registration-options-for-user requires authentication`() {
-        testApplication {
-            setupApp()
+        val handle = startServer()
+        try {
+            val body = JsonSupport.objectMapper.writeValueAsString(
+                mapOf(
+                    "email" to "user@example.com",
+                    "displayName" to "Test User"
+                )
+            )
+            val response = TestHttp.postJson("${handle.baseUrl}/api/auth/registration-options-for-user", body)
 
-            val response = client.post("/api/auth/registration-options-for-user") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(
-                    mapOf(
-                        "email" to "user@example.com",
-                        "displayName" to "Test User"
-                    )
-                ))
-            }
-
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST register-passkey requires authentication`() {
-        testApplication {
-            setupApp()
+        val handle = startServer()
+        try {
+            val body = JsonSupport.objectMapper.writeValueAsString(
+                mapOf(
+                    "registrationResponse" to "{}",
+                    "passkeyName" to "Test Key"
+                )
+            )
+            val response = TestHttp.postJson("${handle.baseUrl}/api/auth/register-passkey", body)
 
-            val response = client.post("/api/auth/register-passkey") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(
-                    mapOf(
-                        "registrationResponse" to "{}",
-                        "passkeyName" to "Test Key"
-                    )
-                ))
-            }
-
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -282,7 +260,7 @@ class PasswordRegistrationRoutesE2ETest {
         val credentialId = ByteArray(32).also { SecureRandom().nextBytes(it) }
         val aaguid = ByteArray(16).also { SecureRandom().nextBytes(it) }
         val publicKey = ByteArray(65).also { SecureRandom().nextBytes(it) }
-        
+
         return transaction {
             WebAuthnCredentials.insert {
                 it[WebAuthnCredentials.userId] = userId

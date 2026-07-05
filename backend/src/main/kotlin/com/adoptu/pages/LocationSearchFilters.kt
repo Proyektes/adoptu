@@ -46,6 +46,9 @@ fun DIV.locationSearchFilters(
 window.onCountryChange = function() {
     var sel = document.getElementById('search-country');
     var hasCountry = sel && sel.value.length > 0;
+    if (hasCountry) {
+        try { localStorage.setItem('adoptuSelectedCountry', sel.value); } catch (e) {}
+    }
     var ids = ['search-state', 'search-city', 'search-zip', 'search-neighborhood'];
     ids.forEach(function(id) {
         var el = document.getElementById(id);
@@ -73,6 +76,18 @@ window.buildLocationSearchParams = function() {
     if (neighborhood) params.append('neighborhood', neighborhood);
     return params;
 };
+// Restore the last country picked on any search page (Shelters/Photographers/
+// Sterilization/TemporalHome all share this component), so switching pages
+// doesn't force re-selecting the same country.
+(function() {
+    var sel = document.getElementById('search-country');
+    if (sel && !sel.value) {
+        var saved = null;
+        try { saved = localStorage.getItem('adoptuSelectedCountry'); } catch (e) {}
+        if (saved) sel.value = saved;
+    }
+    window.onCountryChange();
+})();
 """)
             }
         }

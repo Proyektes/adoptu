@@ -72,7 +72,7 @@ main {
   font-weight: 500;
   color: var(--text);
 }
-.form-row input, .form-row select {
+.form-row input, .form-row select, .form-row textarea {
   width: 100%;
   padding: 0.5rem;
   border: 1px solid var(--border);
@@ -80,6 +80,12 @@ main {
   background: var(--bg);
   color: var(--text);
   box-sizing: border-box;
+}
+.form-row textarea {
+  font-family: inherit;
+  font-size: inherit;
+  resize: vertical;
+  min-height: 4.5rem;
 }
 .form-row input:disabled {
   color: lightgrey;
@@ -150,6 +156,25 @@ main {
 .message.success {
   background: #efe;
   color: #060;
+}
+
+.field-error {
+  color: #c00;
+  font-size: 0.85rem;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.field-hint {
+  color: #966400;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+.field-hint:empty {
+  display: none;
+}
+.field-hint:not(:empty) {
+  display: block;
 }
 
 .checkbox-group {
@@ -622,7 +647,7 @@ footer span {
     align-items: stretch;
   }
   .location-search-form .location-search-country select,
-  .location-search-form .location-search-filters {
+.location-search-form .location-search-filters {
     width: 100%;
   }
   .location-search-form .location-search-filters {
@@ -668,3 +693,5 @@ footer span {
   margin: 0.75rem 0;
   color: var(--text);
 }
+
+/*# sourceMappingURL=shelters.css.map */

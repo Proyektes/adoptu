@@ -28,8 +28,6 @@ fun HTML.forgotPasswordPage(navParams: NavParams = NavParams()) {
         }
         footer()
         commonScripts(navParams.isLoggedIn)
-        script(src = "/static/js/crypto.js") {}
-        script(src = "/static/js/forgot-password.js") {}
     }
 }
 
@@ -62,8 +60,6 @@ fun HTML.resetPasswordPage(navParams: NavParams = NavParams()) {
         }
         footer()
         commonScripts(navParams.isLoggedIn)
-        script(src = "/static/js/crypto.js") {}
-        script(src = "/static/js/reset-password.js") {}
     }
 }
 
@@ -84,7 +80,6 @@ fun HTML.magicLinkLoginPage(navParams: NavParams = NavParams()) {
         }
         footer()
         commonScripts(navParams.isLoggedIn)
-        script(src = "/static/js/magic-link-login.js") {}
     }
 }
 
@@ -105,6 +100,25 @@ fun HTML.emailChangeVerificationPage(navParams: NavParams = NavParams()) {
         }
         footer()
         commonScripts(navParams.isLoggedIn)
-        script(src = "/static/js/email-change-verification.js") {}
+    }
+}
+
+fun HTML.profileEmailVerificationPage(navParams: NavParams = NavParams()) {
+    commonHead("Verify Contact Email - Adopt-U")
+    body {
+        header {
+            a("/") { commonLogo() }
+            nav { commonNav(navParams.isLoggedIn, navParams.isAdmin, navParams.isRescuerOrAdmin, navParams.isTemporalHomeOrAdmin) }
+        }
+        main {
+            div {
+                id = "auth-form"
+                classes = setOf("auth-form")
+                h1 { +"Verify Contact Email" }
+                p { id = "message"; +"Verifying..." }
+            }
+        }
+        footer()
+        commonScripts(navParams.isLoggedIn)
     }
 }

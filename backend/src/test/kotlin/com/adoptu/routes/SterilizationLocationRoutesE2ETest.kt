@@ -1,27 +1,24 @@
 package com.adoptu.routes
 
 import com.adoptu.adapters.db.SterilizationLocations
+import com.adoptu.adapters.db.UserActiveRoles
+import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.repositories.SterilizationLocationRepository
+import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.dto.input.CreateSterilizationLocationRequest
 import com.adoptu.dto.input.UpdateSterilizationLocationRequest
 import com.adoptu.mocks.TestDatabase
-import com.adoptu.plugins.configureSerialization
 import com.adoptu.ports.SterilizationLocationRepositoryPort
+import com.adoptu.ports.UserRepositoryPort
 import com.adoptu.services.SterilizationLocationService
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.config.*
-import io.ktor.server.routing.*
-import io.ktor.server.testing.*
-import kotlinx.serialization.json.Json
+import com.adoptu.testsupport.TestHttp
+import com.adoptu.testsupport.TestServer
+import com.adoptu.web.JsonSupport
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.koin.dsl.module
-import org.koin.ktor.plugin.Koin
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Clock
@@ -36,35 +33,45 @@ class SterilizationLocationRoutesE2ETest {
     fun setup() {
         TestDatabase.initH2()
         TestDatabase.clearAllData()
+        createTestUsers()
     }
 
-    private fun TestApplicationBuilder.setupApp() {
-        val config = MapApplicationConfig(
-            "env" to "test",
-            "ktor.deployment.port" to "80"
-        )
+    private fun createTestUsers() {
+        transaction {
+            Users.insert {
+                it[Users.id] = 2
+                it[Users.username] = "adopter@test.com"
+                it[Users.displayName] = "Test Adopter"
+                it[Users.createdAt] = clock.now().toEpochMilliseconds()
+            }
+            UserActiveRoles.insert {
+                it[UserActiveRoles.userId] = 2
+                it[UserActiveRoles.role] = "ADOPTER"
+            }
 
-        val testModules = module {
-            single<kotlin.time.Clock> { kotlin.time.Clock.System }
+            Users.insert {
+                it[Users.id] = 3
+                it[Users.username] = "admin@test.com"
+                it[Users.displayName] = "Test Admin"
+                it[Users.createdAt] = clock.now().toEpochMilliseconds()
+            }
+            UserActiveRoles.insert {
+                it[UserActiveRoles.userId] = 3
+                it[UserActiveRoles.role] = "ADMIN"
+            }
+        }
+    }
+
+    private fun testModules() = listOf(
+        module {
+            single<Clock> { Clock.System }
             single<SterilizationLocationRepositoryPort> { SterilizationLocationRepository(get()) }
             single { SterilizationLocationService(get()) }
+            single<UserRepositoryPort> { UserRepository(get()) }
         }
+    )
 
-        environment {
-            this.config = config
-        }
-
-        application {
-            install(Koin) {
-                modules(testModules)
-            }
-            configureSerialization()
-            routing {
-                sterilizationLocationRoutes()
-                adminSterilizationLocationRoutes()
-            }
-        }
-    }
+    private fun startServer() = TestServer.start(modules = testModules(), initDatabase = false, withTestLogin = true)
 
     private fun createLocationInDb(
         name: String = "Vet Clinic",
@@ -94,11 +101,13 @@ class SterilizationLocationRoutesE2ETest {
 
     @Test
     fun `GET sterilization-locations returns empty list when none exist`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/sterilization-locations")
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals("[]", response.bodyAsText())
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/sterilization-locations")
+            assertEquals(200, response.statusCode())
+            assertEquals("[]", response.body())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -107,13 +116,15 @@ class SterilizationLocationRoutesE2ETest {
         createLocationInDb(name = "Clinic A", country = "United States")
         createLocationInDb(name = "Clinic B", country = "Canada")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/sterilization-locations")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/sterilization-locations")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Clinic A"))
             assertTrue(body.contains("Clinic B"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -122,13 +133,15 @@ class SterilizationLocationRoutesE2ETest {
         createLocationInDb(name = "Clinic A", country = "United States")
         createLocationInDb(name = "Clinic B", country = "Canada")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/sterilization-locations?country=United%20States")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/sterilization-locations?country=United%20States")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Clinic A"))
             assertTrue(!body.contains("Clinic B"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -137,13 +150,15 @@ class SterilizationLocationRoutesE2ETest {
         createLocationInDb(name = "Clinic A", country = "United States", state = "CA", city = "LA", neighborhood = "Downtown", zip = "90001")
         createLocationInDb(name = "Clinic B", country = "United States", state = "CA", city = "LA", neighborhood = "Uptown", zip = "90002")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/sterilization-locations?country=United%20States&state=CA&city=LA&neighborhood=Downtown&zip=90001")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/sterilization-locations?country=United%20States&state=CA&city=LA&neighborhood=Downtown&zip=90001")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Clinic A"))
             assertTrue(!body.contains("Clinic B"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -153,23 +168,27 @@ class SterilizationLocationRoutesE2ETest {
     fun `GET sterilization-locations grouped returns grouped structure`() {
         createLocationInDb(name = "Clinic A", country = "United States", state = "CA", city = "LA")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/sterilization-locations/grouped")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/sterilization-locations/grouped")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("United States"))
             assertTrue(body.contains("Clinic A"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET sterilization-locations grouped returns empty list when none exist`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/sterilization-locations/grouped")
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals("[]", response.bodyAsText())
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/sterilization-locations/grouped")
+            assertEquals(200, response.statusCode())
+            assertEquals("[]", response.body())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -180,13 +199,15 @@ class SterilizationLocationRoutesE2ETest {
         createLocationInDb(name = "Clinic A", country = "United States")
         createLocationInDb(name = "Clinic B", country = "Canada")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/sterilization-locations/countries")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/sterilization-locations/countries")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("United States"))
             assertTrue(body.contains("Canada"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -197,13 +218,15 @@ class SterilizationLocationRoutesE2ETest {
         createLocationInDb(name = "Clinic A", country = "United States", state = "CA")
         createLocationInDb(name = "Clinic B", country = "United States", state = "NY")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/sterilization-locations/countries/United%20States/states")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/sterilization-locations/countries/United%20States/states")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("CA"))
             assertTrue(body.contains("NY"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -214,13 +237,15 @@ class SterilizationLocationRoutesE2ETest {
         createLocationInDb(name = "Clinic A", country = "United States", state = "CA", city = "LA")
         createLocationInDb(name = "Clinic B", country = "United States", state = "CA", city = "SF")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/sterilization-locations/countries/United%20States/states/CA/cities")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/sterilization-locations/countries/United%20States/states/CA/cities")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("LA"))
             assertTrue(body.contains("SF"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -230,45 +255,77 @@ class SterilizationLocationRoutesE2ETest {
     fun `GET sterilization-location by id returns location when it exists`() {
         val id = createLocationInDb(name = "Clinic A")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/sterilization-locations/$id")
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("Clinic A"))
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/sterilization-locations/$id")
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("Clinic A"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET sterilization-location by id returns 404 when not found`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/sterilization-locations/999")
-            assertEquals(HttpStatusCode.NotFound, response.status)
-            assertTrue(response.bodyAsText().contains("Sterilization location not found"))
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/sterilization-locations/999")
+            assertEquals(404, response.statusCode())
+            assertTrue(response.body().contains("Sterilization location not found"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET sterilization-location by id returns 400 for invalid id`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/sterilization-locations/abc")
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("Invalid ID"))
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/sterilization-locations/abc")
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Invalid ID"))
+        } finally {
+            handle.stop()
         }
     }
 
     // ==================== GET /api/admin/sterilization-locations ====================
 
     @Test
+    fun `GET admin sterilization-locations returns 401 when no session`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/sterilization-locations")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin sterilization-locations returns 403 when not admin`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/sterilization-locations", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `GET admin sterilization-locations returns all locations`() {
         createLocationInDb(name = "Clinic A", country = "United States")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/admin/sterilization-locations")
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("Clinic A"))
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/sterilization-locations", cookie)
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("Clinic A"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -277,55 +334,95 @@ class SterilizationLocationRoutesE2ETest {
         createLocationInDb(name = "Clinic A", country = "United States")
         createLocationInDb(name = "Clinic B", country = "Canada")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/admin/sterilization-locations?country=United%20States")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/sterilization-locations?country=United%20States", cookie)
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Clinic A"))
             assertTrue(!body.contains("Clinic B"))
+        } finally {
+            handle.stop()
         }
     }
 
     // ==================== GET /api/admin/sterilization-locations/{id} ====================
 
     @Test
+    fun `GET admin sterilization-location by id returns 401 when no session`() {
+        val id = createLocationInDb(name = "Clinic A")
+
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/sterilization-locations/$id")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `GET admin sterilization-location by id returns location when it exists`() {
         val id = createLocationInDb(name = "Clinic A")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/admin/sterilization-locations/$id")
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("Clinic A"))
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/sterilization-locations/$id", cookie)
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("Clinic A"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET admin sterilization-location by id returns 404 when not found`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/admin/sterilization-locations/999")
-            assertEquals(HttpStatusCode.NotFound, response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/sterilization-locations/999", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET admin sterilization-location by id returns 400 for invalid id`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/admin/sterilization-locations/abc")
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/sterilization-locations/abc", cookie)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     // ==================== POST /api/admin/sterilization-locations ====================
 
     @Test
-    fun `POST admin sterilization-locations creates location`() {
-        testApplication {
-            setupApp()
+    fun `POST admin sterilization-locations returns 401 when no session`() {
+        val handle = startServer()
+        try {
+            val request = CreateSterilizationLocationRequest(name = "New Clinic", country = "United States", city = "LA", address = "123 Main St")
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/admin/sterilization-locations",
+                JsonSupport.objectMapper.writeValueAsString(request)
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
 
+    @Test
+    fun `POST admin sterilization-locations creates location`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
             val request = CreateSterilizationLocationRequest(
                 name = "New Clinic",
                 country = "United States",
@@ -333,21 +430,24 @@ class SterilizationLocationRoutesE2ETest {
                 address = "123 Main St"
             )
 
-            val response = client.post("/api/admin/sterilization-locations") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateSterilizationLocationRequest.serializer(), request))
-            }
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/admin/sterilization-locations",
+                JsonSupport.objectMapper.writeValueAsString(request),
+                cookie
+            )
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("New Clinic"))
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("New Clinic"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST admin sterilization-locations returns 400 for blank name`() {
-        testApplication {
-            setupApp()
-
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
             val request = CreateSterilizationLocationRequest(
                 name = "",
                 country = "United States",
@@ -355,112 +455,163 @@ class SterilizationLocationRoutesE2ETest {
                 address = "123 Main St"
             )
 
-            val response = client.post("/api/admin/sterilization-locations") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateSterilizationLocationRequest.serializer(), request))
-            }
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/admin/sterilization-locations",
+                JsonSupport.objectMapper.writeValueAsString(request),
+                cookie
+            )
 
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("Name is required"))
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Name is required"))
+        } finally {
+            handle.stop()
         }
     }
 
     // ==================== PUT /api/admin/sterilization-locations/{id} ====================
 
     @Test
+    fun `PUT admin sterilization-location returns 401 when no session`() {
+        val id = createLocationInDb(name = "Old Name")
+
+        val handle = startServer()
+        try {
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/admin/sterilization-locations/$id",
+                JsonSupport.objectMapper.writeValueAsString(UpdateSterilizationLocationRequest(name = "New Name"))
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `PUT admin sterilization-location updates location when it exists`() {
         val id = createLocationInDb(name = "Old Name")
 
-        testApplication {
-            setupApp()
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/admin/sterilization-locations/$id",
+                JsonSupport.objectMapper.writeValueAsString(
+                    UpdateSterilizationLocationRequest(
+                        name = "New Name",
+                        country = "Canada",
+                        state = "ON",
+                        city = "Toronto",
+                        neighborhood = "Downtown",
+                        address = "456 Other St",
+                        zip = "M5V 2T6",
+                        phone = "555-1234",
+                        email = "location@example.com",
+                        website = "https://example.com",
+                        description = "Updated description"
+                    )
+                ),
+                cookie
+            )
 
-            val response = client.put("/api/admin/sterilization-locations/$id") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdateSterilizationLocationRequest.serializer(), UpdateSterilizationLocationRequest(
-                    name = "New Name",
-                    country = "Canada",
-                    state = "ON",
-                    city = "Toronto",
-                    neighborhood = "Downtown",
-                    address = "456 Other St",
-                    zip = "M5V 2T6",
-                    phone = "555-1234",
-                    email = "location@example.com",
-                    website = "https://example.com",
-                    description = "Updated description"
-                )))
-            }
-
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("New Name"))
             assertTrue(body.contains("Canada"))
             assertTrue(body.contains("Toronto"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT admin sterilization-location returns 404 when not found`() {
-        testApplication {
-            setupApp()
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/admin/sterilization-locations/999",
+                JsonSupport.objectMapper.writeValueAsString(UpdateSterilizationLocationRequest(name = "New Name")),
+                cookie
+            )
 
-            val response = client.put("/api/admin/sterilization-locations/999") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdateSterilizationLocationRequest.serializer(), UpdateSterilizationLocationRequest(name = "New Name")))
-            }
-
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT admin sterilization-location returns 400 for invalid id`() {
-        testApplication {
-            setupApp()
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/admin/sterilization-locations/abc",
+                JsonSupport.objectMapper.writeValueAsString(UpdateSterilizationLocationRequest(name = "New Name")),
+                cookie
+            )
 
-            val response = client.put("/api/admin/sterilization-locations/abc") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdateSterilizationLocationRequest.serializer(), UpdateSterilizationLocationRequest(name = "New Name")))
-            }
-
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     // ==================== DELETE /api/admin/sterilization-locations/{id} ====================
 
     @Test
+    fun `DELETE admin sterilization-location returns 401 when no session`() {
+        val id = createLocationInDb(name = "To Delete")
+
+        val handle = startServer()
+        try {
+            val response = TestHttp.delete("${handle.baseUrl}/api/admin/sterilization-locations/$id")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `DELETE admin sterilization-location deletes location when it exists`() {
         val id = createLocationInDb(name = "To Delete")
 
-        testApplication {
-            setupApp()
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+            val response = TestHttp.delete("${handle.baseUrl}/api/admin/sterilization-locations/$id", cookie)
 
-            val response = client.delete("/api/admin/sterilization-locations/$id")
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("\"success\": true"))
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("\"success\": true"))
-
-            val followUp = client.get("/api/admin/sterilization-locations/$id")
-            assertEquals(HttpStatusCode.NotFound, followUp.status)
+            val followUp = TestHttp.get("${handle.baseUrl}/api/admin/sterilization-locations/$id", cookie)
+            assertEquals(404, followUp.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `DELETE admin sterilization-location returns 404 when not found`() {
-        testApplication {
-            setupApp()
-            val response = client.delete("/api/admin/sterilization-locations/999")
-            assertEquals(HttpStatusCode.NotFound, response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+            val response = TestHttp.delete("${handle.baseUrl}/api/admin/sterilization-locations/999", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `DELETE admin sterilization-location returns 400 for invalid id`() {
-        testApplication {
-            setupApp()
-            val response = client.delete("/api/admin/sterilization-locations/abc")
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+            val response = TestHttp.delete("${handle.baseUrl}/api/admin/sterilization-locations/abc", cookie)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 }

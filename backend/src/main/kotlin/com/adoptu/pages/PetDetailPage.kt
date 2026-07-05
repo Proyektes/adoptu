@@ -16,6 +16,5 @@ fun HTML.petDetailPage(navParams: NavParams = NavParams()) {
         }
         footer()
         commonScripts(navParams.isLoggedIn)
-        script(src = "/static/js/pet-detail.js") {}
     }
 }

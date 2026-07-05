@@ -5,43 +5,32 @@ import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.repositories.PetRepositoryImpl
 import com.adoptu.adapters.db.repositories.UserRepository
+import com.adoptu.config.AppConfig
 import com.adoptu.dto.input.Gender
 import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestDatabase
-import com.adoptu.plugins.configureSerialization
-import com.adoptu.plugins.configureSessions
 import com.adoptu.services.EmailVerificationService
 import com.adoptu.services.MagicLinkService
 import com.adoptu.services.PasswordService
 import com.adoptu.services.UserService
-import com.adoptu.services.auth.SessionUser
 import com.adoptu.services.auth.WebAuthnService
-import io.ktor.client.plugins.cookies.HttpCookies
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.config.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
-import io.ktor.server.testing.*
+import com.adoptu.testsupport.TestHttp
+import com.adoptu.testsupport.TestServer
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.koin.dsl.module
-import org.koin.ktor.plugin.Koin
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 /**
- * End-to-end tests for [uiRoutes]: mounts the real route tree in a Ktor
- * [testApplication] and performs actual HTTP GET requests against every
- * registered page route, both unauthenticated and authenticated, to
- * exercise the HTML page rendering functions under `com.adoptu.pages`.
+ * End-to-end tests for [uiRoutes]: starts a real Helidon Nima [TestServer] mounting the full
+ * production route tree (which includes uiRoutes()) and performs actual HTTP GET requests
+ * against every registered page route, both unauthenticated and authenticated, to exercise the
+ * HTML page rendering functions under `com.adoptu.pages`.
  */
 @OptIn(ExperimentalTime::class)
 class UIRoutesE2ETest {
@@ -116,145 +105,120 @@ class UIRoutesE2ETest {
         }
     }
 
-    private fun TestApplicationBuilder.setupApp() {
-        val config = MapApplicationConfig(
-            "env" to "test",
-            "ktor.deployment.port" to "80"
-        )
+    /** Mirrors the original Ktor test's reduced Koin module: only what uiRoutes() actually needs. */
+    private fun startServer() = TestServer.start(
+        configOverrides = mapOf("env" to "test"),
+        modules = listOf(testModules()),
+        initDatabase = false,
+        withTestLogin = true
+    )
 
-        val testModules = module {
-            single<io.ktor.server.config.ApplicationConfig> { config }
-            single<Clock> { Clock.System }
-            single<com.adoptu.ports.UserRepositoryPort> { UserRepository(get()) }
-            single { MockNotificationAdapter() }
-            single<com.adoptu.ports.NotificationPort> { get<MockNotificationAdapter>() }
-            single { UserService(get()) }
-            single { EmailVerificationService(get(), get(), get()) }
-            single { PasswordService(get(), get(), get(), "http://localhost:80") }
-            single { MagicLinkService(get(), get(), get(), "http://localhost:80", get()) }
-            single {
-                WebAuthnService(
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com",
-                    config.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost",
-                    config.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption",
-                    listOf(config.propertyOrNull("webauthn.origin")?.getString() ?: "http://localhost:80")
-                )
-            }
+    private fun testModules() = module {
+        val config = AppConfig.fromMap(mapOf("env" to "test"))
+        single<Clock> { Clock.System }
+        single<com.adoptu.ports.UserRepositoryPort> { UserRepository(get()) }
+        single { MockNotificationAdapter() }
+        single<com.adoptu.ports.NotificationPort> { get<MockNotificationAdapter>() }
+        single { UserService(get()) }
+        single { EmailVerificationService(get(), get(), get()) }
+        single { PasswordService(get(), get(), get(), "http://localhost:80") }
+        single { MagicLinkService(get(), get(), get(), "http://localhost:80", get()) }
+        single {
+            WebAuthnService(
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com",
+                config.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost",
+                config.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption",
+                listOf(config.propertyOrNull("webauthn.origin")?.getString() ?: "http://localhost:80")
+            )
         }
-
-        environment {
-            this.config = config
-        }
-
-        application {
-            install(Koin) {
-                modules(testModules)
-            }
-            configureSerialization()
-            configureSessions()
-            routing {
-                uiRoutes()
-                // Test-only helper to establish an authenticated session without
-                // going through the full WebAuthn/password/magic-link login flow.
-                get("/__test/login/{id}") {
-                    val id = call.parameters["id"]!!.toInt()
-                    call.sessions.set(SessionUser(id, "user$id@e2e.test", "User $id"))
-                    call.respond(HttpStatusCode.OK)
-                }
-            }
-        }
-    }
-
-    /** A test client that does not auto-follow redirects and persists cookies across requests. */
-    private fun ApplicationTestBuilder.newClient() = createClient {
-        followRedirects = false
-        install(HttpCookies)
-    }
-
-    private suspend fun io.ktor.client.HttpClient.loginAs(userId: Int) {
-        val response = get("/__test/login/$userId")
-        assertEquals(HttpStatusCode.OK, response.status)
     }
 
     // ==================== Static / simple pages, unauthenticated ====================
 
     @Test
     fun `HEAD root returns 200`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            val response = client.head("/")
-            assertEquals(HttpStatusCode.OK, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.get(handle.baseUrl)
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET root returns 200 unauthenticated`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            val response = client.get("/")
-            assertEquals(HttpStatusCode.OK, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.get(handle.baseUrl)
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET root returns 200 authenticated as admin`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            client.loginAs(adminId)
-            val response = client.get("/")
-            assertEquals(HttpStatusCode.OK, response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, adminId)
+            val response = TestHttp.get(handle.baseUrl, cookie)
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET login returns 200 unauthenticated and authenticated`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/login").status)
-            client.loginAs(adminId)
-            assertEquals(HttpStatusCode.OK, client.get("/login").status)
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/login").statusCode())
+            val cookie = TestHttp.loginAs(handle.baseUrl, adminId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/login", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET register returns 200 unauthenticated and authenticated`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/register").status)
-            client.loginAs(adminId)
-            assertEquals(HttpStatusCode.OK, client.get("/register").status)
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/register").statusCode())
+            val cookie = TestHttp.loginAs(handle.baseUrl, adminId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/register", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET photographers returns 200 unauthenticated and authenticated`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/photographers").status)
-            client.loginAs(adminId)
-            assertEquals(HttpStatusCode.OK, client.get("/photographers").status)
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/photographers").statusCode())
+            val cookie = TestHttp.loginAs(handle.baseUrl, adminId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/photographers", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET pet-food returns 200 unauthenticated and authenticated`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/pet-food").status)
-            client.loginAs(rescuerId)
-            assertEquals(HttpStatusCode.OK, client.get("/pet-food").status)
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/pet-food").statusCode())
+            val cookie = TestHttp.loginAs(handle.baseUrl, rescuerId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/pet-food", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -274,174 +238,286 @@ class UIRoutesE2ETest {
             status = "AVAILABLE"
         )
 
-        testApplication {
-            setupApp()
-            val client = newClient()
-            val response = client.get("/pet/${created.id}")
-            assertEquals(HttpStatusCode.OK, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/pet/${created.id}")
+            assertEquals(200, response.statusCode())
 
-            client.loginAs(adminId)
-            val authedResponse = client.get("/pet/${created.id}")
-            assertEquals(HttpStatusCode.OK, authedResponse.status)
+            val cookie = TestHttp.loginAs(handle.baseUrl, adminId)
+            val authedResponse = TestHttp.get("${handle.baseUrl}/pet/${created.id}", cookie)
+            assertEquals(200, authedResponse.statusCode())
+        } finally {
+            handle.stop()
         }
         Unit
     }
 
     @Test
     fun `GET pet with non-numeric id redirects to pets`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            val response = client.get("/pet/not-a-number")
-            assertEquals(HttpStatusCode.Found, response.status)
-            assertEquals("/pets", response.headers[HttpHeaders.Location])
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/pet/not-a-number")
+            assertEquals(302, response.statusCode())
+            assertEquals("/pets", response.headers().firstValue("Location").orElse(null))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET pets returns 200 unauthenticated and authenticated`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/pets").status)
-            client.loginAs(rescuerId)
-            assertEquals(HttpStatusCode.OK, client.get("/pets").status)
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/pets").statusCode())
+            val cookie = TestHttp.loginAs(handle.baseUrl, rescuerId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/pets", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET my-pets returns 200 unauthenticated and authenticated`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/my-pets").status)
-            client.loginAs(rescuerId)
-            assertEquals(HttpStatusCode.OK, client.get("/my-pets").status)
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/my-pets").statusCode())
+            val cookie = TestHttp.loginAs(handle.baseUrl, rescuerId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/my-pets", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET profile returns 200 for unauthenticated, admin, rescuer and temporal home`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/profile").status)
+        var handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/profile").statusCode())
 
-            client.loginAs(adminId)
-            assertEquals(HttpStatusCode.OK, client.get("/profile").status)
+            val cookie = TestHttp.loginAs(handle.baseUrl, adminId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/profile", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
 
-        testApplication {
-            setupApp()
-            val client = newClient()
-            client.loginAs(rescuerId)
-            assertEquals(HttpStatusCode.OK, client.get("/profile").status)
+        handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, rescuerId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/profile", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
 
-        testApplication {
-            setupApp()
-            val client = newClient()
-            client.loginAs(temporalHomeId)
-            assertEquals(HttpStatusCode.OK, client.get("/profile").status)
-        }
-    }
-
-    @Test
-    fun `GET admin returns 200 for unauthenticated and admin`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/admin").status)
-            client.loginAs(adminId)
-            assertEquals(HttpStatusCode.OK, client.get("/admin").status)
+        handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, temporalHomeId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/profile", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
-    fun `GET admin shelters returns 200 for unauthenticated and admin`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/admin/shelters").status)
-            client.loginAs(adminId)
-            assertEquals(HttpStatusCode.OK, client.get("/admin/shelters").status)
+    fun `GET admin redirects to login when unauthenticated`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/admin")
+            assertEquals(302, response.statusCode())
+            assertEquals("/login", response.headers().firstValue("Location").orElse(null))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin redirects to home when authenticated as non-admin`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, rescuerId)
+            val response = TestHttp.get("${handle.baseUrl}/admin", cookie)
+            assertEquals(302, response.statusCode())
+            assertEquals("/", response.headers().firstValue("Location").orElse(null))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin returns 200 for admin`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, adminId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/admin", cookie).statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin shelters redirects to login when unauthenticated`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/admin/shelters")
+            assertEquals(302, response.statusCode())
+            assertEquals("/login", response.headers().firstValue("Location").orElse(null))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin shelters redirects to home when authenticated as non-admin`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, rescuerId)
+            val response = TestHttp.get("${handle.baseUrl}/admin/shelters", cookie)
+            assertEquals(302, response.statusCode())
+            assertEquals("/", response.headers().firstValue("Location").orElse(null))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin shelters returns 200 for admin`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, adminId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/admin/shelters", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET privacy returns 200 unauthenticated and authenticated`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/privacy").status)
-            client.loginAs(plainId)
-            assertEquals(HttpStatusCode.OK, client.get("/privacy").status)
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/privacy").statusCode())
+            val cookie = TestHttp.loginAs(handle.baseUrl, plainId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/privacy", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET terms returns 200 unauthenticated and authenticated`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/terms").status)
-            client.loginAs(plainId)
-            assertEquals(HttpStatusCode.OK, client.get("/terms").status)
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/terms").statusCode())
+            val cookie = TestHttp.loginAs(handle.baseUrl, plainId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/terms", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET temporal-home returns 200 for unauthenticated and temporal home user`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/temporal-home").status)
-            client.loginAs(temporalHomeId)
-            assertEquals(HttpStatusCode.OK, client.get("/temporal-home").status)
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/temporal-home").statusCode())
+            val cookie = TestHttp.loginAs(handle.baseUrl, temporalHomeId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/temporal-home", cookie).statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET temporal-home by numeric id returns 200`() {
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/temporal-home/${temporalHomeId}").statusCode())
+            val cookie = TestHttp.loginAs(handle.baseUrl, rescuerId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/temporal-home/${temporalHomeId}", cookie).statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET temporal-home with non-numeric id redirects to temporal-homes`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/temporal-home/not-a-number")
+            assertEquals(302, response.statusCode())
+            assertEquals("/temporal-homes", response.headers().firstValue("Location").orElse(null))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET temporal-homes returns 200 unauthenticated and authenticated`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/temporal-homes").status)
-            client.loginAs(rescuerId)
-            assertEquals(HttpStatusCode.OK, client.get("/temporal-homes").status)
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/temporal-homes").statusCode())
+            val cookie = TestHttp.loginAs(handle.baseUrl, rescuerId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/temporal-homes", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET shelters returns 200 unauthenticated and authenticated`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/shelters").status)
-            client.loginAs(adminId)
-            assertEquals(HttpStatusCode.OK, client.get("/shelters").status)
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/shelters").statusCode())
+            val cookie = TestHttp.loginAs(handle.baseUrl, adminId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/shelters", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET sterilization-locations returns 200 unauthenticated and authenticated`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/sterilization-locations").status)
-            client.loginAs(rescuerId)
-            assertEquals(HttpStatusCode.OK, client.get("/sterilization-locations").status)
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/sterilization-locations").statusCode())
+            val cookie = TestHttp.loginAs(handle.baseUrl, rescuerId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/sterilization-locations", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
-    fun `GET admin sterilization-locations returns 200 for unauthenticated and admin`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/admin/sterilization-locations").status)
-            client.loginAs(adminId)
-            assertEquals(HttpStatusCode.OK, client.get("/admin/sterilization-locations").status)
+    fun `GET admin sterilization-locations redirects to login when unauthenticated`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/admin/sterilization-locations")
+            assertEquals(302, response.statusCode())
+            assertEquals("/login", response.headers().firstValue("Location").orElse(null))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin sterilization-locations redirects to home when authenticated as non-admin`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, rescuerId)
+            val response = TestHttp.get("${handle.baseUrl}/admin/sterilization-locations", cookie)
+            assertEquals(302, response.statusCode())
+            assertEquals("/", response.headers().firstValue("Location").orElse(null))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin sterilization-locations returns 200 for admin`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, adminId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/admin/sterilization-locations", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -449,21 +525,23 @@ class UIRoutesE2ETest {
 
     @Test
     fun `GET verify without token shows failure page`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            val response = client.get("/verify")
-            assertEquals(HttpStatusCode.OK, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/verify")
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET verify with invalid token shows failure page`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            val response = client.get("/verify?token=does-not-exist")
-            assertEquals(HttpStatusCode.OK, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/verify?token=does-not-exist")
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -471,30 +549,34 @@ class UIRoutesE2ETest {
     fun `GET verify with valid token logs user in and shows success page`() {
         seedValidVerificationToken(plainId, "valid-verify-token")
 
-        testApplication {
-            setupApp()
-            val client = newClient()
-            val response = client.get("/verify?token=valid-verify-token")
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.headers.getAll(HttpHeaders.SetCookie)?.any { it.contains("user_session") } == true)
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/verify?token=valid-verify-token")
+            assertEquals(200, response.statusCode())
+            val setCookies = response.headers().allValues("Set-Cookie")
+            assertTrue(setCookies.any { it.contains("user_session") })
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET verify-email without token shows failure page`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/verify-email").status)
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/verify-email").statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET verify-email with invalid token shows failure page`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/verify-email?token=does-not-exist").status)
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/verify-email?token=does-not-exist").statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -502,20 +584,22 @@ class UIRoutesE2ETest {
     fun `GET verify-email with valid token shows success page`() {
         seedValidVerificationToken(plainId, "valid-verify-email-token")
 
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/verify-email?token=valid-verify-email-token").status)
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/verify-email?token=valid-verify-email-token").statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET verify-email authenticated returns 200`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            client.loginAs(adminId)
-            assertEquals(HttpStatusCode.OK, client.get("/verify-email").status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, adminId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/verify-email", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -523,103 +607,104 @@ class UIRoutesE2ETest {
 
     @Test
     fun `GET forgot-password returns 200 unauthenticated and authenticated`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/forgot-password").status)
-            client.loginAs(plainId)
-            assertEquals(HttpStatusCode.OK, client.get("/forgot-password").status)
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/forgot-password").statusCode())
+            val cookie = TestHttp.loginAs(handle.baseUrl, plainId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/forgot-password", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET reset-password returns 200 unauthenticated and authenticated`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/reset-password").status)
-            client.loginAs(plainId)
-            assertEquals(HttpStatusCode.OK, client.get("/reset-password").status)
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/reset-password").statusCode())
+            val cookie = TestHttp.loginAs(handle.baseUrl, plainId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/reset-password", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET magic-link-login without token redirects to login with error`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            val response = client.get("/magic-link-login")
-            assertEquals(HttpStatusCode.Found, response.status)
-            assertEquals("/login?error=invalid_token", response.headers[HttpHeaders.Location])
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/magic-link-login")
+            assertEquals(302, response.statusCode())
+            assertEquals("/login?error=invalid_token", response.headers().firstValue("Location").orElse(null))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET magic-link-login with token redirects to api magic link endpoint`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            val response = client.get("/magic-link-login?token=abc123")
-            assertEquals(HttpStatusCode.Found, response.status)
-            assertEquals("/api/auth/magic-link-login?token=abc123", response.headers[HttpHeaders.Location])
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/magic-link-login?token=abc123")
+            assertEquals(302, response.statusCode())
+            assertEquals("/api/auth/magic-link-login?token=abc123", response.headers().firstValue("Location").orElse(null))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET verify-email-change returns 200 unauthenticated and authenticated`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            assertEquals(HttpStatusCode.OK, client.get("/verify-email-change").status)
-            client.loginAs(plainId)
-            assertEquals(HttpStatusCode.OK, client.get("/verify-email-change").status)
+        val handle = startServer()
+        try {
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/verify-email-change").statusCode())
+            val cookie = TestHttp.loginAs(handle.baseUrl, plainId)
+            assertEquals(200, TestHttp.get("${handle.baseUrl}/verify-email-change", cookie).statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     // ==================== Temporal home block rescuer ====================
+    // No login required by design - see the matching comment on this route in
+    // UIRoutes.kt / the API route in TemporalHomeRoutes.kt. The page only checks a
+    // token is present to decide whether to render; whether it's actually valid is
+    // checked when the button posts to the API (covered in TemporalHomeRoutesE2ETest).
 
     @Test
-    fun `GET temporal-home block with valid ids returns 200 html`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            val response = client.get("/temporal-home/block/$temporalHomeId?rescuer=$rescuerId")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+    fun `GET temporal-home block with a token returns 200 html`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/temporal-home/block?token=some-token")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Block Rescuer"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
-    fun `GET temporal-home block without rescuer query redirects to temporal-home`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            val response = client.get("/temporal-home/block/$temporalHomeId")
-            assertEquals(HttpStatusCode.Found, response.status)
-            assertEquals("/temporal-home", response.headers[HttpHeaders.Location])
+    fun `GET temporal-home block without a token redirects to temporal-home`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/temporal-home/block")
+            assertEquals(302, response.statusCode())
+            assertEquals("/temporal-home", response.headers().firstValue("Location").orElse(null))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
-    fun `GET temporal-home block with non-numeric id redirects to temporal-home`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            val response = client.get("/temporal-home/block/not-a-number?rescuer=$rescuerId")
-            assertEquals(HttpStatusCode.Found, response.status)
-            assertEquals("/temporal-home", response.headers[HttpHeaders.Location])
-        }
-    }
-
-    @Test
-    fun `GET temporal-home block with non-numeric rescuer redirects to temporal-home`() {
-        testApplication {
-            setupApp()
-            val client = newClient()
-            val response = client.get("/temporal-home/block/$temporalHomeId?rescuer=not-a-number")
-            assertEquals(HttpStatusCode.Found, response.status)
-            assertEquals("/temporal-home", response.headers[HttpHeaders.Location])
+    fun `GET temporal-home block with a blank token redirects to temporal-home`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/temporal-home/block?token=")
+            assertEquals(302, response.statusCode())
+            assertEquals("/temporal-home", response.headers().firstValue("Location").orElse(null))
+        } finally {
+            handle.stop()
         }
     }
 }

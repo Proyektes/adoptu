@@ -14,34 +14,21 @@ import com.adoptu.dto.input.RoleActivationRequest
 import com.adoptu.dto.input.UpdatePhotographyRequestRequest
 import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestDatabase
-import com.adoptu.plugins.configureSerialization
-import com.adoptu.plugins.configureSessions
 import com.adoptu.ports.NotificationPort
 import com.adoptu.ports.PetRepositoryPort
 import com.adoptu.ports.PhotographerRepositoryPort
 import com.adoptu.ports.UserRepositoryPort
 import com.adoptu.services.PhotographerService
 import com.adoptu.services.UserService
-import com.adoptu.services.auth.SessionUser
 import com.adoptu.services.validation.PhotographersValidationService
-import io.ktor.client.HttpClient
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.config.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
-import io.ktor.server.testing.*
-import kotlinx.serialization.json.Json
+import com.adoptu.testsupport.TestHttp
+import com.adoptu.testsupport.TestServer
+import com.adoptu.web.JsonSupport
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.koin.dsl.module
-import org.koin.ktor.plugin.Koin
 import java.math.BigDecimal
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -89,6 +76,9 @@ class PhotographerRoutesE2ETest {
                 it[Users.username] = "rescuer@test.com"
                 it[Users.displayName] = "Test Rescuer"
                 it[Users.createdAt] = clock.now().toEpochMilliseconds()
+                // Verified so "POST profile activates photographer role" can publish -
+                // publishing now requires a verified account email.
+                it[Users.isEmailVerified] = true
             }
             UserActiveRoles.insert {
                 it[UserActiveRoles.userId] = 1
@@ -159,57 +149,23 @@ class PhotographerRoutesE2ETest {
         }
     }
 
-    private fun TestApplicationBuilder.setupApp() {
-        val config = MapApplicationConfig(
-            "env" to "test",
-            "ktor.deployment.port" to "80"
-        )
-
-        val testModules = module {
-            single<io.ktor.server.config.ApplicationConfig> { config }
-            single<Clock> { Clock.System }
-            single { MockNotificationAdapter() }
-            single<NotificationPort> { get<MockNotificationAdapter>() }
-            single<PetRepositoryPort> { PetRepositoryImpl(get()) }
-            single<UserRepositoryPort> { UserRepository(get()) }
-            single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
-            single { PhotographerService(get(), get(), get(), get()) }
-            single { UserService(get()) }
-            single { PhotographersValidationService() }
-        }
-
-        environment {
-            this.config = config
-        }
-
-        application {
-            install(Koin) {
-                modules(testModules)
-            }
-            configureSerialization()
-            configureSessions()
-            routing {
-                photographerRoutes()
-                // test-only helper to mint a real, signed session cookie without going through the
-                // WebAuthn login flow (which is unrelated to these routes).
-                post("/test-login") {
-                    val body = call.receive<SessionUser>()
-                    call.sessions.set(body)
-                    call.respond(HttpStatusCode.OK)
-                }
-            }
-        }
+    private val testModules = module {
+        single<Clock> { Clock.System }
+        single { MockNotificationAdapter() }
+        single<NotificationPort> { get<MockNotificationAdapter>() }
+        single<PetRepositoryPort> { PetRepositoryImpl(get()) }
+        single<UserRepositoryPort> { UserRepository(get()) }
+        single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
+        single { PhotographerService(get(), get(), get(), get()) }
+        single { UserService(get()) }
+        single { PhotographersValidationService() }
     }
 
-    private suspend fun loginCookie(client: HttpClient, userId: Int, email: String = "user$userId@test.com", displayName: String = "User $userId"): String {
-        val response = client.post("/test-login") {
-            contentType(ContentType.Application.Json)
-            setBody(Json.encodeToString(SessionUser.serializer(), SessionUser(userId, email, displayName)))
-        }
-        val setCookie = response.headers[HttpHeaders.SetCookie]
-            ?: error("Expected Set-Cookie header from /test-login, got none")
-        return setCookie.substringBefore(";")
-    }
+    private fun startServer() = TestServer.start(
+        modules = listOf(testModules),
+        initDatabase = false,
+        withTestLogin = true
+    )
 
     private fun createPhotographyRequestInDb(
         photographerId: Int,
@@ -232,9 +188,9 @@ class PhotographerRoutesE2ETest {
     }
 
     /** See class-level doc comment: tolerate the known heterogeneous-map serialization issue. */
-    private fun assertOkOrKnownSerializationFailure(status: HttpStatusCode) {
+    private fun assertOkOrKnownSerializationFailure(status: Int) {
         assertTrue(
-            status == HttpStatusCode.OK || status == HttpStatusCode.InternalServerError,
+            status == 200 || status == 500,
             "Expected 200 or the known serialization-failure 500, got $status"
         )
     }
@@ -244,45 +200,53 @@ class PhotographerRoutesE2ETest {
     @Test
     fun `GET photographers returns empty list when no photographers`() {
         TestDatabase.clearAllData()
-        testApplication {
-            setupApp()
-            val response = client.get("/api/photographers")
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals("[]", response.bodyAsText())
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/photographers")
+            assertEquals(200, response.statusCode())
+            assertEquals("[]", response.body())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET photographers returns all photographers`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/photographers")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/photographers")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Test Photographer"))
             assertTrue(body.contains("Second Photographer"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET photographers filters by country and state`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/photographers?country=United%20States&state=NY")
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/photographers?country=United%20States&state=NY")
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Second Photographer"))
             assertTrue(!body.contains("Test Photographer"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET photographers filters out non-matching state`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/photographers?country=United%20States&state=TX")
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals("[]", response.bodyAsText())
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/photographers?country=United%20States&state=TX")
+            assertEquals(200, response.statusCode())
+            assertEquals("[]", response.body())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -290,56 +254,64 @@ class PhotographerRoutesE2ETest {
 
     @Test
     fun `POST profile returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.post("/api/photographers/profile") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(activate = true)))
-            }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/photographers/profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(activate = true))
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST profile activates photographer role`() {
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 1)
-            val response = client.post("/api/photographers/profile") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(activate = true)))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("PHOTOGRAPHER"))
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/photographers/profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(activate = true)),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("PHOTOGRAPHER"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST profile deactivates photographer role`() {
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 2)
-            val response = client.post("/api/photographers/profile") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(activate = false)))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/photographers/profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(activate = false)),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST profile returns 404 when session user does not exist`() {
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 9999)
-            val response = client.post("/api/photographers/profile") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(RoleActivationRequest.serializer(), RoleActivationRequest(activate = true)))
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/photographers/profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(activate = true)),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -347,72 +319,82 @@ class PhotographerRoutesE2ETest {
 
     @Test
     fun `PUT settings returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.put("/api/photographers/settings") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(PhotographerSettingsRequest.serializer(), PhotographerSettingsRequest(10.0, "USD")))
-            }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/photographers/settings",
+                JsonSupport.objectMapper.writeValueAsString(PhotographerSettingsRequest(10.0, "USD"))
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT settings returns 404 when session user does not exist`() {
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 9999)
-            val response = client.put("/api/photographers/settings") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(PhotographerSettingsRequest.serializer(), PhotographerSettingsRequest(10.0, "USD")))
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/photographers/settings",
+                JsonSupport.objectMapper.writeValueAsString(PhotographerSettingsRequest(10.0, "USD")),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT settings returns 403 when user is not a photographer or admin`() {
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 1) // rescuer only
-            val response = client.put("/api/photographers/settings") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(PhotographerSettingsRequest.serializer(), PhotographerSettingsRequest(10.0, "USD")))
-            }
-            assertEquals(HttpStatusCode.Forbidden, response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer only
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/photographers/settings",
+                JsonSupport.objectMapper.writeValueAsString(PhotographerSettingsRequest(10.0, "USD")),
+                cookie
+            )
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT settings returns 400 for negative fee`() {
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 2) // photographer
-            val response = client.put("/api/photographers/settings") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(PhotographerSettingsRequest.serializer(), PhotographerSettingsRequest(-5.0, "USD")))
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // photographer
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/photographers/settings",
+                JsonSupport.objectMapper.writeValueAsString(PhotographerSettingsRequest(-5.0, "USD")),
+                cookie
+            )
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT settings succeeds for a photographer`() {
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 2)
-            val response = client.put("/api/photographers/settings") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(PhotographerSettingsRequest.serializer(), PhotographerSettingsRequest(99.0, "EUR", "Spain", "Madrid")))
-            }
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/photographers/settings",
+                JsonSupport.objectMapper.writeValueAsString(PhotographerSettingsRequest(99.0, "EUR", "Spain", "Madrid")),
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("EUR"))
             assertTrue(body.contains("Madrid"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -421,15 +403,17 @@ class PhotographerRoutesE2ETest {
         // validateRole(user, "PHOTOGRAPHER") allows ADMIN through even without the PHOTOGRAPHER role
         // active (covering that OR-branch), but PhotographerRepositoryImpl.getPhotographerById still
         // requires an active PHOTOGRAPHER role to return a profile, so the route 404s afterwards.
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 3) // admin, no PHOTOGRAPHER role required thanks to ADMIN bypass
-            val response = client.put("/api/photographers/settings") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(PhotographerSettingsRequest.serializer(), PhotographerSettingsRequest(0.0, "USD")))
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin, no PHOTOGRAPHER role required thanks to ADMIN bypass
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/photographers/settings",
+                JsonSupport.objectMapper.writeValueAsString(PhotographerSettingsRequest(0.0, "USD")),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -437,27 +421,31 @@ class PhotographerRoutesE2ETest {
 
     @Test
     fun `POST requests returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.post("/api/photographers/requests") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreatePhotographyRequestRequest.serializer(), CreatePhotographyRequestRequest(2, null, "hi")))
-            }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/photographers/requests",
+                JsonSupport.objectMapper.writeValueAsString(CreatePhotographyRequestRequest(2, null, "hi"))
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST requests creates a single photography request`() {
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 1)
-            val response = client.post("/api/photographers/requests") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreatePhotographyRequestRequest.serializer(), CreatePhotographyRequestRequest(2, null, "Please come shoot photos")))
-            }
-            assertOkOrKnownSerializationFailure(response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/photographers/requests",
+                JsonSupport.objectMapper.writeValueAsString(CreatePhotographyRequestRequest(2, null, "Please come shoot photos")),
+                cookie
+            )
+            assertOkOrKnownSerializationFailure(response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -465,78 +453,85 @@ class PhotographerRoutesE2ETest {
 
     @Test
     fun `POST requests multiple returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.post("/api/photographers/requests/multiple") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateMultiPhotographerRequestRequest.serializer(), CreateMultiPhotographerRequestRequest(listOf(2), null, "hi")))
-            }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/photographers/requests/multiple",
+                JsonSupport.objectMapper.writeValueAsString(CreateMultiPhotographerRequestRequest(listOf(2), null, "hi"))
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST requests multiple returns 400 when no photographers selected`() {
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 1)
-            val response = client.post("/api/photographers/requests/multiple") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateMultiPhotographerRequestRequest.serializer(), CreateMultiPhotographerRequestRequest(emptyList(), null, "hi")))
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("At least one photographer"))
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/photographers/requests/multiple",
+                JsonSupport.objectMapper.writeValueAsString(CreateMultiPhotographerRequestRequest(emptyList(), null, "hi")),
+                cookie
+            )
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("At least one photographer"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST requests multiple returns 400 when more than three photographers selected`() {
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 1)
-            val response = client.post("/api/photographers/requests/multiple") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(
-                    Json.encodeToString(
-                        CreateMultiPhotographerRequestRequest.serializer(),
-                        CreateMultiPhotographerRequestRequest(listOf(2, 5, 2, 5), null, "hi")
-                    )
-                )
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("Maximum 3"))
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/photographers/requests/multiple",
+                JsonSupport.objectMapper.writeValueAsString(
+                    CreateMultiPhotographerRequestRequest(listOf(2, 5, 2, 5), null, "hi")
+                ),
+                cookie
+            )
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Maximum 3"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST requests multiple returns 400 when rate limited`() {
         createPhotographyRequestInDb(photographerId = 2, requesterId = 1)
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 1)
-            val response = client.post("/api/photographers/requests/multiple") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateMultiPhotographerRequestRequest.serializer(), CreateMultiPhotographerRequestRequest(listOf(5), null, "hi")))
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("once per week"))
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/photographers/requests/multiple",
+                JsonSupport.objectMapper.writeValueAsString(CreateMultiPhotographerRequestRequest(listOf(5), null, "hi")),
+                cookie
+            )
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("once per week"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST requests multiple succeeds for valid photographers`() {
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 1)
-            val response = client.post("/api/photographers/requests/multiple") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateMultiPhotographerRequestRequest.serializer(), CreateMultiPhotographerRequestRequest(listOf(2, 5), null, "hi")))
-            }
-            assertOkOrKnownSerializationFailure(response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/photographers/requests/multiple",
+                JsonSupport.objectMapper.writeValueAsString(CreateMultiPhotographerRequestRequest(listOf(2, 5), null, "hi")),
+                cookie
+            )
+            assertOkOrKnownSerializationFailure(response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -544,48 +539,50 @@ class PhotographerRoutesE2ETest {
 
     @Test
     fun `GET requests returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/photographers/requests")
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/photographers/requests")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET requests returns 404 when session user does not exist`() {
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 9999)
-            val response = client.get("/api/photographers/requests") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+            val response = TestHttp.get("${handle.baseUrl}/api/photographers/requests", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET requests succeeds for a requester (non-photographer)`() {
         createPhotographyRequestInDb(photographerId = 2, requesterId = 1)
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 1)
-            val response = client.get("/api/photographers/requests") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertOkOrKnownSerializationFailure(response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.get("${handle.baseUrl}/api/photographers/requests", cookie)
+            assertOkOrKnownSerializationFailure(response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET requests succeeds for a photographer`() {
         createPhotographyRequestInDb(photographerId = 2, requesterId = 1)
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 2)
-            val response = client.get("/api/photographers/requests") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertOkOrKnownSerializationFailure(response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
+            val response = TestHttp.get("${handle.baseUrl}/api/photographers/requests", cookie)
+            assertOkOrKnownSerializationFailure(response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -593,116 +590,132 @@ class PhotographerRoutesE2ETest {
 
     @Test
     fun `PUT requests by id returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.put("/api/photographers/requests/1") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdatePhotographyRequestRequest.serializer(), UpdatePhotographyRequestRequest(status = "CANCELLED")))
-            }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = startServer()
+        try {
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/photographers/requests/1",
+                JsonSupport.objectMapper.writeValueAsString(UpdatePhotographyRequestRequest(status = "CANCELLED"))
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT requests by id returns 400 for invalid id`() {
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 1)
-            val response = client.put("/api/photographers/requests/abc") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdatePhotographyRequestRequest.serializer(), UpdatePhotographyRequestRequest(status = "CANCELLED")))
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/photographers/requests/abc",
+                JsonSupport.objectMapper.writeValueAsString(UpdatePhotographyRequestRequest(status = "CANCELLED")),
+                cookie
+            )
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT requests by id returns 404 when request does not exist`() {
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 1)
-            val response = client.put("/api/photographers/requests/999") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdatePhotographyRequestRequest.serializer(), UpdatePhotographyRequestRequest(status = "CANCELLED")))
-            }
-            assertEquals(HttpStatusCode.NotFound, response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/photographers/requests/999",
+                JsonSupport.objectMapper.writeValueAsString(UpdatePhotographyRequestRequest(status = "CANCELLED")),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT requests by id returns 403 when user is unrelated to the request`() {
         val requestId = createPhotographyRequestInDb(photographerId = 2, requesterId = 1)
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 4) // unrelated adopter
-            val response = client.put("/api/photographers/requests/$requestId") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdatePhotographyRequestRequest.serializer(), UpdatePhotographyRequestRequest(status = "CANCELLED")))
-            }
-            assertEquals(HttpStatusCode.Forbidden, response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 4) // unrelated adopter
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/photographers/requests/$requestId",
+                JsonSupport.objectMapper.writeValueAsString(UpdatePhotographyRequestRequest(status = "CANCELLED")),
+                cookie
+            )
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT requests by id returns 400 for an invalid status transition`() {
         val requestId = createPhotographyRequestInDb(photographerId = 2, requesterId = 1, status = "PENDING")
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 1) // requester can only CANCEL, not APPROVE
-            val response = client.put("/api/photographers/requests/$requestId") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdatePhotographyRequestRequest.serializer(), UpdatePhotographyRequestRequest(status = "APPROVED")))
-            }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // requester can only CANCEL, not APPROVE
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/photographers/requests/$requestId",
+                JsonSupport.objectMapper.writeValueAsString(UpdatePhotographyRequestRequest(status = "APPROVED")),
+                cookie
+            )
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT requests by id succeeds when requester cancels a pending request`() {
         val requestId = createPhotographyRequestInDb(photographerId = 2, requesterId = 1, status = "PENDING")
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 1)
-            val response = client.put("/api/photographers/requests/$requestId") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdatePhotographyRequestRequest.serializer(), UpdatePhotographyRequestRequest(status = "CANCELLED")))
-            }
-            assertOkOrKnownSerializationFailure(response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/photographers/requests/$requestId",
+                JsonSupport.objectMapper.writeValueAsString(UpdatePhotographyRequestRequest(status = "CANCELLED")),
+                cookie
+            )
+            assertOkOrKnownSerializationFailure(response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT requests by id succeeds when admin approves a pending request`() {
         val requestId = createPhotographyRequestInDb(photographerId = 2, requesterId = 1, status = "PENDING")
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 3) // admin
-            val response = client.put("/api/photographers/requests/$requestId") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdatePhotographyRequestRequest.serializer(), UpdatePhotographyRequestRequest(status = "APPROVED")))
-            }
-            assertOkOrKnownSerializationFailure(response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/photographers/requests/$requestId",
+                JsonSupport.objectMapper.writeValueAsString(UpdatePhotographyRequestRequest(status = "APPROVED")),
+                cookie
+            )
+            assertOkOrKnownSerializationFailure(response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT requests by id succeeds when photographer updates scheduled date only`() {
         val requestId = createPhotographyRequestInDb(photographerId = 2, requesterId = 1, status = "PENDING")
-        testApplication {
-            setupApp()
-            val cookie = loginCookie(client, 2) // photographer, no status change
-            val response = client.put("/api/photographers/requests/$requestId") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdatePhotographyRequestRequest.serializer(), UpdatePhotographyRequestRequest(scheduledDate = 123456789L)))
-            }
-            assertOkOrKnownSerializationFailure(response.status)
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // photographer, no status change
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/photographers/requests/$requestId",
+                JsonSupport.objectMapper.writeValueAsString(UpdatePhotographyRequestRequest(scheduledDate = 123456789L)),
+                cookie
+            )
+            assertOkOrKnownSerializationFailure(response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 }

@@ -3,32 +3,25 @@ package com.adoptu.routes
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.UserSterilizationLocations
 import com.adoptu.adapters.db.Users
+import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.adapters.db.repositories.UserSterilizationLocationRepository
 import com.adoptu.dto.input.CreateUserSterilizationLocationRequest
 import com.adoptu.dto.input.UpdateUserSterilizationLocationRequest
+import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestDatabase
-import com.adoptu.plugins.configureSerialization
-import com.adoptu.plugins.configureSessions
+import com.adoptu.ports.NotificationPort
+import com.adoptu.ports.UserRepositoryPort
 import com.adoptu.ports.UserSterilizationLocationRepositoryPort
+import com.adoptu.services.ProfileEmailVerificationService
 import com.adoptu.services.UserSterilizationLocationService
-import com.adoptu.services.auth.SessionUser
-import io.ktor.client.HttpClient
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.config.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
-import io.ktor.server.testing.*
-import kotlinx.serialization.json.Json
+import com.adoptu.testsupport.TestHttp
+import com.adoptu.testsupport.TestServer
+import com.adoptu.web.JsonSupport
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.koin.dsl.module
-import org.koin.ktor.plugin.Koin
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Clock
@@ -38,6 +31,18 @@ import kotlin.time.ExperimentalTime
 class UserSterilizationLocationRoutesE2ETest {
 
     private val clock = Clock.System
+
+    private val testModules = listOf(
+        module {
+            single<Clock> { Clock.System }
+            single { MockNotificationAdapter() }
+            single<NotificationPort> { get<MockNotificationAdapter>() }
+            single<UserRepositoryPort> { UserRepository(get()) }
+            single { ProfileEmailVerificationService(get(), get(), get()) }
+            single<UserSterilizationLocationRepositoryPort> { UserSterilizationLocationRepository(get()) }
+            single { UserSterilizationLocationService(get(), get()) }
+        }
+    )
 
     @BeforeEach
     fun setup() {
@@ -89,48 +94,6 @@ class UserSterilizationLocationRoutesE2ETest {
         }
     }
 
-    private fun TestApplicationBuilder.setupApp() {
-        val config = MapApplicationConfig(
-            "env" to "test",
-            "ktor.deployment.port" to "80"
-        )
-
-        val testModules = module {
-            single<kotlin.time.Clock> { kotlin.time.Clock.System }
-            single<UserSterilizationLocationRepositoryPort> { UserSterilizationLocationRepository(get()) }
-            single { UserSterilizationLocationService(get()) }
-        }
-
-        environment {
-            this.config = config
-        }
-
-        application {
-            install(Koin) {
-                modules(testModules)
-            }
-            configureSerialization()
-            configureSessions()
-            routing {
-                userSterilizationLocationRoutes()
-                // Test-only helper to establish a real, correctly-signed session cookie
-                // without re-implementing the production login flow.
-                post("/test/login/{userId}") {
-                    val userId = call.parameters["userId"]!!.toInt()
-                    call.sessions.set(SessionUser(userId, "user$userId@test.com", "Test User $userId"))
-                    call.respondText("OK")
-                }
-            }
-        }
-    }
-
-    private suspend fun HttpClient.loginAs(userId: Int): String {
-        val response = post("/test/login/$userId")
-        val setCookie = response.headers[HttpHeaders.SetCookie]
-            ?: error("No session cookie returned from test login")
-        return setCookie.substringBefore(";")
-    }
-
     private fun createLocationInDb(userId: Int, country: String = "United States", state: String? = "CA", city: String = "LA") {
         transaction {
             val now = clock.now().toEpochMilliseconds()
@@ -144,6 +107,12 @@ class UserSterilizationLocationRoutesE2ETest {
                 it[UserSterilizationLocations.createdAt] = now
                 it[UserSterilizationLocations.updatedAt] = now
             }
+            try {
+                UserActiveRoles.insert {
+                    it[UserActiveRoles.userId] = userId
+                    it[UserActiveRoles.role] = "STERILIZATION_SERVICE"
+                }
+            } catch (e: Exception) { }
         }
     }
 
@@ -151,9 +120,8 @@ class UserSterilizationLocationRoutesE2ETest {
 
     @Test
     fun `POST users sterilization-location returns 401 when no session`() {
-        testApplication {
-            setupApp()
-
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
             val request = CreateUserSterilizationLocationRequest(
                 name = "My Location",
                 country = "United States",
@@ -161,21 +129,23 @@ class UserSterilizationLocationRoutesE2ETest {
                 address = "123 Main St"
             )
 
-            val response = client.post("/api/users/sterilization-location") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateUserSterilizationLocationRequest.serializer(), request))
-            }
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/sterilization-location",
+                JsonSupport.objectMapper.writeValueAsString(request)
+            )
 
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
-            assertTrue(response.bodyAsText().contains("Unauthorized"))
+            assertEquals(401, response.statusCode())
+            assertTrue(response.body().contains("Unauthorized"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST users sterilization-location creates location when authenticated`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
             val request = CreateUserSterilizationLocationRequest(
                 name = "My Location",
@@ -184,24 +154,26 @@ class UserSterilizationLocationRoutesE2ETest {
                 address = "123 Main St"
             )
 
-            val response = client.post("/api/users/sterilization-location") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateUserSterilizationLocationRequest.serializer(), request))
-            }
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/sterilization-location",
+                JsonSupport.objectMapper.writeValueAsString(request),
+                cookie
+            )
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("My Location"))
             assertTrue(body.contains("\"userId\": 1"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST users sterilization-location twice updates existing location instead of failing`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
             val firstRequest = CreateUserSterilizationLocationRequest(
                 name = "First Name",
@@ -209,11 +181,11 @@ class UserSterilizationLocationRoutesE2ETest {
                 city = "LA",
                 address = "123 Main St"
             )
-            client.post("/api/users/sterilization-location") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateUserSterilizationLocationRequest.serializer(), firstRequest))
-            }
+            TestHttp.postJson(
+                "${handle.baseUrl}/api/users/sterilization-location",
+                JsonSupport.objectMapper.writeValueAsString(firstRequest),
+                cookie
+            )
 
             val secondRequest = CreateUserSterilizationLocationRequest(
                 name = "Second Name",
@@ -221,23 +193,25 @@ class UserSterilizationLocationRoutesE2ETest {
                 city = "LA",
                 address = "456 Other St"
             )
-            val response = client.post("/api/users/sterilization-location") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateUserSterilizationLocationRequest.serializer(), secondRequest))
-            }
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/sterilization-location",
+                JsonSupport.objectMapper.writeValueAsString(secondRequest),
+                cookie
+            )
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
+            assertEquals(200, response.statusCode())
+            val body = response.body()
             assertTrue(body.contains("Second Name"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `POST users sterilization-location returns 400 for blank name`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
             val request = CreateUserSterilizationLocationRequest(
                 name = "",
@@ -246,14 +220,16 @@ class UserSterilizationLocationRoutesE2ETest {
                 address = "123 Main St"
             )
 
-            val response = client.post("/api/users/sterilization-location") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(CreateUserSterilizationLocationRequest.serializer(), request))
-            }
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/sterilization-location",
+                JsonSupport.objectMapper.writeValueAsString(request),
+                cookie
+            )
 
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("Name is required"))
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Name is required"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -261,25 +237,27 @@ class UserSterilizationLocationRoutesE2ETest {
 
     @Test
     fun `GET users sterilization-location returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/users/sterilization-location")
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/users/sterilization-location")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET users sterilization-location returns 404 when not found`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.get("/api/users/sterilization-location") {
-                header(HttpHeaders.Cookie, cookie)
-            }
+            val response = TestHttp.get("${handle.baseUrl}/api/users/sterilization-location", cookie)
 
-            assertEquals(HttpStatusCode.NotFound, response.status)
-            assertTrue(response.bodyAsText().contains("Sterilization location not found"))
+            assertEquals(404, response.statusCode())
+            assertTrue(response.body().contains("Sterilization location not found"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -287,16 +265,16 @@ class UserSterilizationLocationRoutesE2ETest {
     fun `GET users sterilization-location returns location when it exists`() {
         createLocationInDb(1)
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.get("/api/users/sterilization-location") {
-                header(HttpHeaders.Cookie, cookie)
-            }
+            val response = TestHttp.get("${handle.baseUrl}/api/users/sterilization-location", cookie)
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("Location 1"))
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("Location 1"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -304,32 +282,35 @@ class UserSterilizationLocationRoutesE2ETest {
 
     @Test
     fun `PUT users sterilization-location returns 401 when no session`() {
-        testApplication {
-            setupApp()
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/sterilization-location",
+                JsonSupport.objectMapper.writeValueAsString(UpdateUserSterilizationLocationRequest(name = "New"))
+            )
 
-            val response = client.put("/api/users/sterilization-location") {
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdateUserSterilizationLocationRequest.serializer(), UpdateUserSterilizationLocationRequest(name = "New")))
-            }
-
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `PUT users sterilization-location returns 404 when location does not exist`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.put("/api/users/sterilization-location") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdateUserSterilizationLocationRequest.serializer(), UpdateUserSterilizationLocationRequest(name = "New")))
-            }
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/sterilization-location",
+                JsonSupport.objectMapper.writeValueAsString(UpdateUserSterilizationLocationRequest(name = "New")),
+                cookie
+            )
 
-            assertEquals(HttpStatusCode.NotFound, response.status)
-            assertTrue(response.bodyAsText().contains("Not found"))
+            assertEquals(404, response.statusCode())
+            assertTrue(response.body().contains("Not found"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -337,18 +318,20 @@ class UserSterilizationLocationRoutesE2ETest {
     fun `PUT users sterilization-location updates location when it exists`() {
         createLocationInDb(1)
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.put("/api/users/sterilization-location") {
-                header(HttpHeaders.Cookie, cookie)
-                contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(UpdateUserSterilizationLocationRequest.serializer(), UpdateUserSterilizationLocationRequest(name = "Updated Location")))
-            }
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/sterilization-location",
+                JsonSupport.objectMapper.writeValueAsString(UpdateUserSterilizationLocationRequest(name = "Updated Location")),
+                cookie
+            )
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("Updated Location"))
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("Updated Location"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -356,24 +339,26 @@ class UserSterilizationLocationRoutesE2ETest {
 
     @Test
     fun `DELETE users sterilization-location returns 401 when no session`() {
-        testApplication {
-            setupApp()
-            val response = client.delete("/api/users/sterilization-location")
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
+            val response = TestHttp.delete("${handle.baseUrl}/api/users/sterilization-location")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `DELETE users sterilization-location returns 404 when location does not exist`() {
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.delete("/api/users/sterilization-location") {
-                header(HttpHeaders.Cookie, cookie)
-            }
+            val response = TestHttp.delete("${handle.baseUrl}/api/users/sterilization-location", cookie)
 
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -381,20 +366,18 @@ class UserSterilizationLocationRoutesE2ETest {
     fun `DELETE users sterilization-location deletes location when it exists`() {
         createLocationInDb(1)
 
-        testApplication {
-            setupApp()
-            val cookie = client.loginAs(1)
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
 
-            val response = client.delete("/api/users/sterilization-location") {
-                header(HttpHeaders.Cookie, cookie)
-            }
+            val response = TestHttp.delete("${handle.baseUrl}/api/users/sterilization-location", cookie)
 
-            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(200, response.statusCode())
 
-            val followUp = client.get("/api/users/sterilization-location") {
-                header(HttpHeaders.Cookie, cookie)
-            }
-            assertEquals(HttpStatusCode.NotFound, followUp.status)
+            val followUp = TestHttp.get("${handle.baseUrl}/api/users/sterilization-location", cookie)
+            assertEquals(404, followUp.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -402,20 +385,24 @@ class UserSterilizationLocationRoutesE2ETest {
 
     @Test
     fun `GET user-sterilization-locations returns 400 when country is missing`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/user-sterilization-locations")
-            assertEquals(HttpStatusCode.BadRequest, response.status)
-            assertTrue(response.bodyAsText().contains("Country is required"))
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/user-sterilization-locations")
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Country is required"))
+        } finally {
+            handle.stop()
         }
     }
 
     @Test
     fun `GET user-sterilization-locations returns 400 when country is blank`() {
-        testApplication {
-            setupApp()
-            val response = client.get("/api/user-sterilization-locations?country=")
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/user-sterilization-locations?country=")
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
         }
     }
 
@@ -423,11 +410,13 @@ class UserSterilizationLocationRoutesE2ETest {
     fun `GET user-sterilization-locations returns matching locations`() {
         createLocationInDb(3, country = "United States", state = "CA", city = "LA")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/user-sterilization-locations?country=United%20States&state=CA&city=LA")
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(response.bodyAsText().contains("Location 3"))
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/user-sterilization-locations?country=United%20States&state=CA&city=LA")
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("Location 3"))
+        } finally {
+            handle.stop()
         }
     }
 
@@ -435,11 +424,13 @@ class UserSterilizationLocationRoutesE2ETest {
     fun `GET user-sterilization-locations returns empty list for non-matching country`() {
         createLocationInDb(3, country = "United States")
 
-        testApplication {
-            setupApp()
-            val response = client.get("/api/user-sterilization-locations?country=Canada")
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals("[]", response.bodyAsText())
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/user-sterilization-locations?country=Canada")
+            assertEquals(200, response.statusCode())
+            assertEquals("[]", response.body())
+        } finally {
+            handle.stop()
         }
     }
 }
