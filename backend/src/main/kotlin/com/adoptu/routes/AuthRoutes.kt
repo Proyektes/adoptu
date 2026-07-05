@@ -359,8 +359,8 @@ fun HttpRules.authRoutes() {
                 val now = System.currentTimeMillis()
 
                 if (latestToken == null || latestToken.expiresAt <= now) {
-                    webAuthnService.resendVerificationEmail(magicLinkResult.userId)
-                    res.respondRedirect("/login?error=not_verified&email=${magicLinkResult.username}&resent=true")
+                    val resent = webAuthnService.resendVerificationEmail(magicLinkResult.userId)
+                    res.respondRedirect("/login?error=not_verified&email=${magicLinkResult.username}&resent=$resent")
                 } else {
                     res.respondRedirect("/login?error=not_verified&email=${magicLinkResult.username}")
                 }
