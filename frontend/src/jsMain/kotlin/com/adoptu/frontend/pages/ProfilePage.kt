@@ -520,22 +520,13 @@ object ProfilePageModule {
 
         if (promises.isEmpty()) {
             showMessage(msg, "success", I18n.t("profileUpdated"))
-            window.location.reload()
+            window.setTimeout({ window.location.reload() }, 1500)
             return
         }
 
         Promise.all(promises.toTypedArray().unsafeCast<Array<Promise<dynamic>>>()).then<Unit> {
             showMessage(msg, "success", I18n.t("profileUpdated"))
-            window.location.reload()
-            undefined
-        }.catch { error: dynamic ->
-            showMessage(msg, "error", error.message ?: "Failed to save profile")
-        }
-
-        Promise.all(promises.toTypedArray().unsafeCast<Array<Promise<dynamic>>>()).then<Unit> {
-            msg.className = "message success"
-            msg.textContent = I18n.t("profileUpdated")
-            window.location.reload()
+            window.setTimeout({ window.location.reload() }, 1500)
             undefined
         }.catch { error: dynamic ->
             showMessage(msg, "error", error.message ?: "Failed to save profile")
