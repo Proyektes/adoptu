@@ -153,21 +153,25 @@ object RegisterPageModule {
 
         if (password.isEmpty()) {
             messageEl?.textContent = "Please enter a password"
+            messageEl?.setAttribute("style", "display: block")
             return
         }
 
         if (password != confirmPassword) {
             messageEl?.textContent = "Passwords do not match"
+            messageEl?.setAttribute("style", "display: block")
             return
         }
 
         if (password.length < 8) {
             messageEl?.textContent = "Password must be at least 8 characters"
+            messageEl?.setAttribute("style", "display: block")
             return
         }
 
         messageEl?.textContent = "Registering..."
-        
+        messageEl?.setAttribute("style", "display: block")
+
         RsaCryptoModule.getPublicKey()
             .then { publicKey ->
                 RsaCryptoModule.encrypt("$email:$password", publicKey)
@@ -187,6 +191,7 @@ object RegisterPageModule {
             .catch { error: dynamic ->
                 val errMsg = error?.message ?: error?.toString() ?: "Unknown error"
                 messageEl?.textContent = "$errMsg"
+                messageEl?.setAttribute("style", "display: block")
             }
     }
 
@@ -199,21 +204,25 @@ object RegisterPageModule {
 
         if (password.isEmpty()) {
             messageEl?.textContent = "Please enter a password"
+            messageEl?.setAttribute("style", "display: block")
             return
         }
 
         if (password != confirmPassword) {
             messageEl?.textContent = "Passwords do not match"
+            messageEl?.setAttribute("style", "display: block")
             return
         }
 
         if (password.length < 8) {
             messageEl?.textContent = "Password must be at least 8 characters"
+            messageEl?.setAttribute("style", "display: block")
             return
         }
 
         messageEl?.textContent = "Creating passkey and password..."
-        
+        messageEl?.setAttribute("style", "display: block")
+
         WebAuthnModule.register(email, displayName)
             .then<Unit> {
                 RsaCryptoModule.getPublicKey()
@@ -235,11 +244,13 @@ object RegisterPageModule {
                     .catch { error: dynamic ->
                         val errMsg = error?.message ?: error?.toString() ?: "Unknown error"
                         messageEl?.textContent = "$errMsg"
+                        messageEl?.setAttribute("style", "display: block")
                     }
             }
             .catch { error: dynamic ->
                 val errMsg = error?.message ?: error?.toString() ?: "Unknown error"
                 messageEl?.textContent = "$errMsg"
+                messageEl?.setAttribute("style", "display: block")
             }
     }
 
