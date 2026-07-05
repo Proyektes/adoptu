@@ -250,6 +250,33 @@ class AuthRoutesE2ETest {
         }
     }
 
+    @Test
+    fun `POST registration-options reports rate limit when daily verification emails exhausted`() {
+        val email = "registerratelimited@example.com"
+        val handle = startTestServer()
+        try {
+            val userId = handle.registerUnverifiedUser(email)
+            transaction {
+                EmailVerificationTokens.deleteWhere { EmailVerificationTokens.userId eq userId }
+                repeat(3) {
+                    EmailVerificationAttempts.insert {
+                        it[EmailVerificationAttempts.userId] = userId
+                        it[EmailVerificationAttempts.createdAt] = clock.now().toEpochMilliseconds()
+                    }
+                }
+            }
+
+            val response = TestHttp.postForm(
+                "${handle.baseUrl}/api/auth/registration-options",
+                formUrlEncode(listOf("email" to email, "displayName" to "Name"))
+            )
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("daily limit"))
+        } finally {
+            handle.stop()
+        }
+    }
+
     // ==================== POST /api/auth/register ====================
 
     @Test
@@ -993,6 +1020,36 @@ class AuthRoutesE2ETest {
             val body = JsonSupport.objectMapper.readValue(response.body(), SuccessWithErrorResponse::class.java)
             assertFalse(body.success)
             assertEquals("Invalid credentials", body.error)
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST login-with-password locks out after repeated failed attempts`() {
+        val email = "lockout@example.com"
+        val handle = startTestServer()
+        try {
+            handle.registerVerifiedUser(email)
+
+            repeat(5) {
+                val response = TestHttp.postJson(
+                    "${handle.baseUrl}/api/auth/login-with-password",
+                    JsonSupport.objectMapper.writeValueAsString(PasswordLoginRequest(email, encryptValue("WrongPass123!")))
+                )
+                val body = JsonSupport.objectMapper.readValue(response.body(), SuccessWithErrorResponse::class.java)
+                assertEquals("Invalid credentials", body.error)
+            }
+
+            // 6th attempt, even with the correct password, is locked out rather than checked.
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/auth/login-with-password",
+                JsonSupport.objectMapper.writeValueAsString(PasswordLoginRequest(email, encryptValue("StrongPass123!")))
+            )
+            assertEquals(200, response.statusCode())
+            val body = JsonSupport.objectMapper.readValue(response.body(), SuccessWithErrorResponse::class.java)
+            assertFalse(body.success)
+            assertEquals("Too many failed login attempts. Please try again in 15 minutes.", body.error)
         } finally {
             handle.stop()
         }

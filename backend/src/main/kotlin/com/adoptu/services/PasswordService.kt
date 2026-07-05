@@ -1,5 +1,6 @@
 package com.adoptu.services
 
+import com.adoptu.adapters.db.LoginAttempts
 import com.adoptu.adapters.db.PasswordResetTokens
 import com.adoptu.adapters.db.UserPasswords
 import com.adoptu.adapters.db.dbDispatcher
@@ -32,6 +33,35 @@ class PasswordService(
     private val secureRandom = SecureRandom()
     private val passwordResetExpirationMs = 15 * 60 * 1000L
     private val maxResetEmailsPerDay = 3
+    private val maxFailedLoginAttempts = 5
+    private val loginLockoutWindowMs = 15 * 60 * 1000L
+
+    // DB-backed (not in-memory) so the lockout is shared across every ECS task, not just
+    // whichever instance happened to handle a given request.
+    suspend fun isLoginRateLimited(email: String): Boolean = withContext(dbDispatcher) {
+        transaction {
+            val since = clock.now().toEpochMilliseconds() - loginLockoutWindowMs
+            LoginAttempts.selectAll()
+                .where {
+                    (LoginAttempts.email eq email.lowercase()) and
+                        (LoginAttempts.successful eq false) and
+                        (LoginAttempts.attemptedAt greaterEq since)
+                }
+                .count() >= maxFailedLoginAttempts
+        }
+    }
+
+    suspend fun recordLoginAttempt(email: String, successful: Boolean) {
+        withContext(dbDispatcher) {
+            transaction {
+                LoginAttempts.insert {
+                    it[LoginAttempts.email] = email.lowercase()
+                    it[LoginAttempts.successful] = successful
+                    it[LoginAttempts.attemptedAt] = clock.now().toEpochMilliseconds()
+                }
+            }
+        }
+    }
 
     suspend fun hasPassword(userId: Int): Boolean = withContext(dbDispatcher) {
         transaction {

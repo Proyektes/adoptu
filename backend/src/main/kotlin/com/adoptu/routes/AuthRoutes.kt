@@ -8,6 +8,7 @@ import com.adoptu.dto.output.AuthMeResponse
 import com.adoptu.dto.output.RegistrationResponse
 import com.adoptu.dto.output.SuccessWithErrorResponse
 import com.adoptu.dto.output.VerificationResponse
+import com.adoptu.services.PasswordService
 import com.adoptu.services.ServiceResult
 import com.adoptu.services.auth.SessionUser
 import com.adoptu.services.auth.WebAuthnService
@@ -55,6 +56,7 @@ private fun parseSelfRegisteredRoles(rolesStr: String?): Set<UserRole> =
 fun HttpRules.authRoutes() {
     val webAuthnService by Deps.inject<WebAuthnService>()
     val validationService by Deps.inject<AuthValidationService>()
+    val passwordService by Deps.inject<PasswordService>()
     val config by Deps.inject<AppConfig>()
     val adminEmail = config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com"
     val userRepository = UserRepository(clock = kotlin.time.Clock.System)
@@ -74,8 +76,10 @@ fun HttpRules.authRoutes() {
                 if (isVerified) {
                     return@runBlocking res.respondError(getLocalizedError("email already registered", language))
                 }
-                webAuthnService.resendVerificationEmail(existingUser.id)
-                return@runBlocking res.respondError(getLocalizedError("verification email sent", language))
+                val resent = webAuthnService.resendVerificationEmail(existingUser.id)
+                return@runBlocking res.respondError(
+                    getLocalizedError(if (resent) "verification email sent" else "verification email limit reached", language)
+                )
             }
 
             val options = webAuthnService.generateRegistrationOptions(email, displayName)
@@ -385,17 +389,25 @@ fun HttpRules.authRoutes() {
                 return@runBlocking res.respondError("Invalid request body", 400)
             }
 
+            if (passwordService.isLoginRateLimited(body.email)) {
+                res.send(SuccessWithErrorResponse(success = false, error = "Too many failed login attempts. Please try again in 15 minutes."))
+                return@runBlocking
+            }
+
             val userResult = validationService.validateEmailAndUser(body.email)
             if (userResult is ServiceResult.Error) {
+                passwordService.recordLoginAttempt(body.email, successful = false)
                 res.send(SuccessWithErrorResponse(success = false, error = "Invalid credentials"))
                 return@runBlocking
             }
             val user = (userResult as ServiceResult.Success).data
 
             if (!webAuthnService.verifyPassword(user.id, body.encryptedPassword)) {
+                passwordService.recordLoginAttempt(body.email, successful = false)
                 res.send(SuccessWithErrorResponse(success = false, error = "Invalid credentials"))
                 return@runBlocking
             }
+            passwordService.recordLoginAttempt(body.email, successful = true)
 
             val verifiedResult = validationService.validateVerified(user.id, body.email)
             if (verifiedResult is ServiceResult.Error) {
@@ -540,30 +552,35 @@ private fun getLocalizedError(key: String, language: String): String {
             "invalid email format" -> "formato de correo electrónico inválido"
             "email already registered" -> "correo electrónico ya registrado"
             "verification email sent" -> "correo de verificación enviado. Revisa tu bandeja de entrada."
+            "verification email limit reached" -> "No se pudo enviar el correo de verificación. Es posible que hayas alcanzado el límite diario (3 correos). Inténtalo de nuevo mañana."
             else -> key
         }
         "fr" -> when (key) {
             "invalid email format" -> "format d'email invalide"
             "email already registered" -> "email déjà enregistré"
             "verification email sent" -> "email de vérification envoyé. Vérifiez votre boîte de réception."
+            "verification email limit reached" -> "Impossible d'envoyer l'email de vérification. Vous avez peut-être atteint la limite quotidienne (3 emails). Veuillez réessayer demain."
             else -> key
         }
         "pt" -> when (key) {
             "invalid email format" -> "formato de email inválido"
             "email already registered" -> "email já registrado"
             "verification email sent" -> "e-mail de verificação enviado. Verifique sua caixa de entrada."
+            "verification email limit reached" -> "Não foi possível enviar o e-mail de verificação. Você pode ter atingido o limite diário (3 e-mails). Tente novamente amanhã."
             else -> key
         }
         "zh" -> when (key) {
             "invalid email format" -> "邮箱格式无效"
             "email already registered" -> "邮箱已被注册"
             "verification email sent" -> "验证邮件已发送。请检查您的收件箱。"
+            "verification email limit reached" -> "无法发送验证邮件。您可能已达到每日限额(3封邮件)。请明天再试。"
             else -> key
         }
         else -> when (key) {
             "invalid email format" -> "invalid email format"
             "email already registered" -> "email already registered"
             "verification email sent" -> "verification email sent. Check your inbox."
+            "verification email limit reached" -> "Unable to send verification email. You may have reached the daily limit (3 emails). Please try again tomorrow."
             else -> key
         }
     }

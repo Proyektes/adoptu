@@ -50,6 +50,15 @@ object MagicLinkTokens : Table("magic_link_tokens") {
     override val primaryKey = PrimaryKey(id)
 }
 
+object LoginAttempts : Table("login_attempts") {
+    val id = integer("id").autoIncrement()
+    val email = varchar("email", 255)
+    val successful = bool("successful")
+    val attemptedAt = long("attempted_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
 object PasswordResetTokens : Table("password_reset_tokens") {
     val id = integer("id").autoIncrement()
     val userId = integer("user_id").references(Users.id)

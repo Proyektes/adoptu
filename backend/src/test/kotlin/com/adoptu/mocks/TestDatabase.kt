@@ -20,6 +20,7 @@ object TestDatabase {
         transaction {
             try {
                 SchemaUtils.drop(
+                    LoginAttempts,
                     EmailVerificationAttempts,
                     EmailVerificationTokens,
                     EmailChangeTokens,
@@ -49,6 +50,7 @@ object TestDatabase {
             }
             SchemaUtils.create(
                 Users,
+                LoginAttempts,
                 EmailVerificationAttempts,
                 EmailVerificationTokens,
                 EmailChangeTokens,
@@ -77,6 +79,7 @@ object TestDatabase {
 
     fun clearAllData() {
         transaction {
+            exec("DELETE FROM login_attempts")
             exec("DELETE FROM email_verification_attempts")
             exec("DELETE FROM email_verification_tokens")
             exec("DELETE FROM email_change_tokens")

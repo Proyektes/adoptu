@@ -44,7 +44,8 @@ object DatabaseFactory {
         PasswordResetTokens,
         EmailChangeTokens,
         ProfileEmailVerificationTokens,
-        SpamReportTokens)
+        SpamReportTokens,
+        LoginAttempts)
     fun init(config: AppConfig) {
         val env = config.propertyOrNull("env")?.getString() ?: "prod"
         val prefix = "db.$env"
