@@ -2157,3 +2157,7 @@
 | 13:51 | Edited backend/src/test/kotlin/com/adoptu/routes/PetsRoutesE2ETest.kt | expanded (+20 lines) | ~428 |
 | 13:52 | Edited backend/src/test/kotlin/com/adoptu/routes/AuthRoutesE2ETest.kt | modified repeat() | ~408 |
 | 13:58 | Edited backend/src/test/kotlin/com/adoptu/routes/AuthRoutesE2ETest.kt | modified repeat() | ~351 |
+| 14:01 | Edited backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt | modified if() | ~84 |
+| 14:14 | Edited backend/src/main/kotlin/com/adoptu/Application.kt | added 1 import(s) | ~34 |
+| 14:14 | Edited backend/src/main/kotlin/com/adoptu/Application.kt | 1→4 lines | ~40 |
+| 14:16 | Edited backend/src/test/kotlin/com/adoptu/routes/UIRoutesE2ETest.kt | expanded (+11 lines) | ~101 |

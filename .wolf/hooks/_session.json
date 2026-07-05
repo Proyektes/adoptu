@@ -33,7 +33,7 @@
       "first_read": "2026-07-05T17:40:26.419Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt": {
-      "count": 7,
+      "count": 8,
       "tokens": 7261,
       "first_read": "2026-07-05T17:40:27.374Z"
     },
@@ -43,8 +43,8 @@
       "first_read": "2026-07-05T17:41:12.842Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/Application.kt": {
-      "count": 1,
-      "tokens": 900,
+      "count": 2,
+      "tokens": 925,
       "first_read": "2026-07-05T17:41:30.725Z"
     },
     "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt": {
@@ -146,6 +146,26 @@
       "count": 1,
       "tokens": 0,
       "first_read": "2026-07-05T19:51:42.241Z"
+    },
+    "/tmp/helidon-static-src/io/helidon/webserver/staticcontent/StaticContentService.java": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-07-05T20:13:41.939Z"
+    },
+    "/home/laf/Proyektes/adoptu/backend/src/test/kotlin/com/adoptu/routes/UIRoutesE2ETest.kt": {
+      "count": 1,
+      "tokens": 6833,
+      "first_read": "2026-07-05T20:15:51.316Z"
+    },
+    "/home/laf/Proyektes/adoptu/scripts/build-native-image.sh": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-07-05T20:19:47.457Z"
+    },
+    "/home/laf/Proyektes/adoptu/infra/dns_updater.tf": {
+      "count": 1,
+      "tokens": 986,
+      "first_read": "2026-07-05T20:20:06.243Z"
     }
   },
   "files_written": [
@@ -400,11 +420,35 @@
       "action": "edit",
       "tokens": 376,
       "at": "2026-07-05T19:58:51.795Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt",
+      "action": "edit",
+      "tokens": 90,
+      "at": "2026-07-05T20:01:19.787Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/Application.kt",
+      "action": "edit",
+      "tokens": 37,
+      "at": "2026-07-05T20:14:15.932Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/Application.kt",
+      "action": "edit",
+      "tokens": 43,
+      "at": "2026-07-05T20:14:20.577Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/test/kotlin/com/adoptu/routes/UIRoutesE2ETest.kt",
+      "action": "edit",
+      "tokens": 108,
+      "at": "2026-07-05T20:16:11.089Z"
     }
   ],
   "edit_counts": {
     "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt": 9,
-    "backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt": 8,
+    "backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt": 9,
     "backend/src/main/kotlin/com/adoptu/web/Sessions.kt": 1,
     "backend/src/main/resources/application.conf": 1,
     "backend/src/test/resources/application.conf": 1,
@@ -415,17 +459,18 @@
     "frontend/webpack.config.d/disable-concat-modules.js": 1,
     "backend/src/main/kotlin/com/adoptu/services/PetService.kt": 1,
     "backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt": 2,
-    "backend/src/main/kotlin/com/adoptu/Application.kt": 2,
+    "backend/src/main/kotlin/com/adoptu/Application.kt": 4,
     "backend/src/main/kotlin/com/adoptu/adapters/db/Models.kt": 1,
     "backend/src/main/kotlin/com/adoptu/adapters/db/DatabaseFactory.kt": 1,
     "backend/src/main/kotlin/com/adoptu/services/PasswordService.kt": 2,
     "backend/src/test/kotlin/com/adoptu/mocks/TestDatabase.kt": 3,
     "backend/src/test/kotlin/com/adoptu/adapters/db/DatabaseFactoryTest.kt": 2,
-    "backend/src/test/kotlin/com/adoptu/routes/PetsRoutesE2ETest.kt": 1
+    "backend/src/test/kotlin/com/adoptu/routes/PetsRoutesE2ETest.kt": 1,
+    "backend/src/test/kotlin/com/adoptu/routes/UIRoutesE2ETest.kt": 1
   },
-  "anatomy_hits": 13,
-  "anatomy_misses": 16,
-  "repeated_reads_warned": 21,
+  "anatomy_hits": 15,
+  "anatomy_misses": 18,
+  "repeated_reads_warned": 23,
   "cerebrum_warnings": 0,
   "stop_count": 6
 }
