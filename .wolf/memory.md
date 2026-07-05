@@ -2182,3 +2182,39 @@
 | 14:37 | Edited backend/src/test/kotlin/com/adoptu/pages/SharedPageElementsTest.kt | modified setNonce() | ~124 |
 | 14:37 | Edited backend/src/test/kotlin/com/adoptu/routes/UIRoutesE2ETest.kt | added optional chaining | ~297 |
 | 14:41 | Session end: 64 writes across 26 files (LoginPage.kt, AuthRoutes.kt, Sessions.kt, application.conf, AuthRoutesE2ETest.kt) | 41 reads | ~72000 tok |
+| 14:43 | Session end: 64 writes across 26 files (LoginPage.kt, AuthRoutes.kt, Sessions.kt, application.conf, AuthRoutesE2ETest.kt) | 41 reads | ~72000 tok |
+| 14:50 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | 23→25 lines | ~285 |
+| 14:50 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | modified if() | ~172 |
+| 14:50 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | modified if() | ~586 |
+| 14:50 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/Common.kt | added 1 condition(s) | ~391 |
+| 14:50 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/Main.kt | 3→5 lines | ~40 |
+| 14:51 | Edited backend/src/main/kotlin/com/adoptu/pages/AdminPage.kt | modified button() | ~173 |
+| 14:51 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminPage.kt | 3→3 lines | ~82 |
+| 14:51 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminPage.kt | modified if() | ~91 |
+| 14:51 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminPage.kt | inline fix | ~33 |
+| 14:51 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminSheltersPage.kt | 2→2 lines | ~52 |
+| 14:52 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminSheltersPage.kt | 2→2 lines | ~74 |
+| 14:52 | Edited backend/src/main/kotlin/com/adoptu/pages/SterilizationLocationsPage.kt | modified button() | ~56 |
+| 14:52 | Edited backend/src/main/kotlin/com/adoptu/pages/SterilizationLocationsPage.kt | modified button() | ~60 |
+| 14:52 | Edited backend/src/main/kotlin/com/adoptu/pages/SterilizationLocationsPage.kt | modified button() | ~92 |
+| 14:52 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SterilizationLocationsPage.kt | 2→2 lines | ~80 |
+| 14:53 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SterilizationLocationsPage.kt | 2→2 lines | ~53 |
+| 14:53 | Edited backend/src/main/kotlin/com/adoptu/pages/SheltersPage.kt | modified button() | ~58 |
+| 14:53 | Edited backend/src/main/kotlin/com/adoptu/pages/PhotographersPage.kt | modified button() | ~56 |
+| 14:53 | Edited backend/src/main/kotlin/com/adoptu/pages/LoginPage.kt | inline fix | ~73 |
+| 14:54 | Edited backend/src/main/kotlin/com/adoptu/pages/LocationSearchFilters.kt | 6→5 lines | ~50 |
+| 14:54 | Edited backend/src/main/kotlin/com/adoptu/pages/LocationSearchFilters.kt | 3→4 lines | ~59 |
+| 14:55 | Edited backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt | modified button() | ~67 |
+| 14:55 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/Main.kt | "/temporal-home/block/" → "/temporal-home/block" | ~24 |
+| 14:55 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/TemporalHomePage.kt | inline fix | ~30 |
+| 14:55 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/TemporalHomePage.kt | inline fix | ~38 |
+| 14:56 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/MyPetsPage.kt | 7→7 lines | ~187 |
+| 14:56 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/MyPetsPage.kt | 2→2 lines | ~69 |
+| 14:56 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/MyPetsPage.kt | 2→2 lines | ~75 |
+| 14:57 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/MyPetsPage.kt | 7→7 lines | ~180 |
+| 14:57 | Edited backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt | modified unconditionally() | ~309 |
+| 14:58 | Edited backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt | 3→2 lines | ~34 |
+| 15:08 | Edited infra/terraform.tfvars | "sha256:903935548cf83d100e" → "sha256:62bf58d307f7f817f9" | ~52 |
+| 15:11 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminPage.kt | inline fix | ~14 |
+| 15:19 | Edited infra/terraform.tfvars | "sha256:62bf58d307f7f817f9" → "sha256:f3f8ee7cc14cd7e3d1" | ~67 |
+| 21:20 | Fixed RegisterPage.kt registerPassword/registerBoth missing display:block on messages (bug-109); rebuilt+committed common.js (bug-110 process gap: Dockerfile doesn't rebuild frontend bundle); redeployed to production twice (first deploy shipped stale bundle, caught via jar-content grep, second deploy verified correct) | RegisterPage.kt, common.js/.js.map, buglog.json, cerebrum.md, infra/terraform.tfvars | large |
