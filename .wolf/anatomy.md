@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-05T20:37:54.064Z
-> Files: 1057 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-05T21:19:03.043Z
+> Files: 1065 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/jobs/34544b15/tmp/
 
@@ -1886,12 +1886,17 @@
 
 ## backend/src/main/kotlin/com/adoptu/pages/
 
+- `AdminPage.kt` — HTML (~806 tok)
 - `EmailVerificationPage.kt` — HTML (~1292 tok)
 - `ForgotPasswordPage.kt` — HTML, HTML, HTML, HTML, HTML (~1164 tok)
-- `LocationSearchFilters.kt` — DIV (~1112 tok)
+- `LocationSearchFilters.kt` — DIV (~1122 tok)
+- `LoginPage.kt` — HTML (~1025 tok)
 - `PetsPage.kt` — HTML (~644 tok)
+- `PhotographersPage.kt` — HTML (~330 tok)
 - `ProfilePage.kt` — HTML (~4878 tok)
 - `Shared.kt` — HTML, A, BODY, DIV, NAV (~2040 tok)
+- `SheltersPage.kt` — HTML (~353 tok)
+- `SterilizationLocationsPage.kt` — HTML, HTML (~1553 tok)
 
 ## backend/src/main/kotlin/com/adoptu/pages/ (canonical)
 
@@ -1913,7 +1918,7 @@
 - `ShelterRoutes.kt` — HttpRules, HttpRules (~1627 tok)
 - `SterilizationLocationRoutes.kt` — HttpRules, HttpRules (~1754 tok)
 - `TemporalHomeRoutes.kt` — HttpRules (~2738 tok)
-- `UIRoutes.kt` — Data class: NavParams (~2647 tok)
+- `UIRoutes.kt` — Data class: NavParams (~2664 tok)
 - `UserShelterRoutes.kt` — HttpRules (~767 tok)
 - `UsersRoutes.kt` — Data class: UpdateProfileRequest (~4298 tok)
 - `UserSterilizationLocationRoutes.kt` — HttpRules (~820 tok)
@@ -1940,7 +1945,7 @@
 ## backend/src/main/kotlin/com/adoptu/web/
 
 - `CspNonce.kt` — Per-request CSP nonce, set by [SecurityHeadersFilter] before the request reaches its handler (~298 tok)
-- `SecurityHeadersFilter.kt` — Adds baseline defense-in-depth headers to every response. CloudFront always terminates TLS (~946 tok)
+- `SecurityHeadersFilter.kt` — Adds baseline defense-in-depth headers to every response. CloudFront always terminates TLS (~900 tok)
 - `Sessions.kt` — Replaces Ktor's `install(Sessions) { cookie<SessionUser>(...) }` (plugins/Sessions.kt). (~917 tok)
 
 ## backend/src/main/kotlin/com/adoptu/web/ (helidon-nima-migration worktree — replaces the deleted `plugins/` package)
@@ -2028,20 +2033,23 @@
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/
 
 - `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~2600 tok)
-- `Common.kt` — NodeList, onCountryChange, initI18n, initDropdowns, checkProfileCompletion (~1820 tok)
+- `Common.kt` — NodeList, onCountryChange, initI18n, initClickActions, initDropdowns (~2205 tok)
 - `I18n.kt` (~22656 tok)
-- `Main.kt` — main (~1191 tok)
+- `Main.kt` — main (~1200 tok)
 
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
 
+- `AdminPage.kt` — init, switchTab, loadUsers, renderUsers, showBanModal (~1833 tok)
+- `AdminSheltersPage.kt` — init, loadShelters, renderShelters, showMessage, getFormData (~3002 tok)
 - `AuthFlowPages.kt` — init, submit, init, tokenFromUrl, submit (~2350 tok)
 - `IndexPage.kt` — init, loadPets, updateCountryHint, showEmptyState, hideEmptyState (~2198 tok)
 - `LoginPage.kt` — init, setupEnterKeySubmit, showRegistrationNotification, getPublicKey, setupPasskeyButton (~1758 tok)
+- `MyPetsPage.kt` — init, clampNonNegative, load, onPetsLoaded, renderPetCard (~5862 tok)
 - `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~9997 tok)
-- `RegisterPage.kt` — init, setupMethodToggle, updateVisibility, ensureAtLeastOne, setupForm (~2970 tok)
+- `RegisterPage.kt` — init, setupMethodToggle, updateVisibility, ensureAtLeastOne, setupForm (~3154 tok)
 - `SheltersPage.kt` — init, search, renderShelters (~1474 tok)
-- `SterilizationLocationsPage.kt` — init, search, render, locationCard, init (~2832 tok)
-- `TemporalHomePage.kt` — init, search, displayResults, init, render (~2447 tok)
+- `SterilizationLocationsPage.kt` — init, search, render, locationCard, init (~2853 tok)
+- `TemporalHomePage.kt` — init, search, displayResults, init, render (~2457 tok)
 
 ## frontend/webpack.config.d/
 
@@ -2059,7 +2067,7 @@
 - `route53.tf` — Only the records tied to resources this stack manages. The zone's other (~1137 tok)
 - `secrets.tf` — RDS master ("postgres" superuser) password - generated, never typed in by (~441 tok)
 - `security_groups.tf` (~746 tok)
-- `terraform.tfvars` (~122 tok)
+- `terraform.tfvars` (~127 tok)
 - `variables.tf` — Declares can (~1629 tok)
 
 ## infra/ (OpenTofu - AWS deployment)

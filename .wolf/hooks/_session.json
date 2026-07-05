@@ -53,7 +53,7 @@
       "first_read": "2026-07-05T17:41:36.433Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/LoginPage.kt": {
-      "count": 1,
+      "count": 2,
       "tokens": 0,
       "first_read": "2026-07-05T17:41:44.698Z"
     },
@@ -168,8 +168,8 @@
       "first_read": "2026-07-05T20:20:06.243Z"
     },
     "/home/laf/Proyektes/adoptu/infra/terraform.tfvars": {
-      "count": 1,
-      "tokens": 107,
+      "count": 3,
+      "tokens": 113,
       "first_read": "2026-07-05T20:29:22.448Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/web/Html.kt": {
@@ -188,24 +188,84 @@
       "first_read": "2026-07-05T20:33:04.549Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/LocationSearchFilters.kt": {
-      "count": 3,
-      "tokens": 1107,
+      "count": 4,
+      "tokens": 1112,
       "first_read": "2026-07-05T20:33:10.605Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt": {
-      "count": 1,
-      "tokens": 668,
+      "count": 2,
+      "tokens": 946,
       "first_read": "2026-07-05T20:34:33.078Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt": {
-      "count": 1,
-      "tokens": 2628,
+      "count": 2,
+      "tokens": 2647,
       "first_read": "2026-07-05T20:36:11.836Z"
     },
     "/home/laf/Proyektes/adoptu/backend/src/test/kotlin/com/adoptu/pages/SharedPageElementsTest.kt": {
       "count": 1,
       "tokens": 0,
       "first_read": "2026-07-05T20:37:01.430Z"
+    },
+    "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/Common.kt": {
+      "count": 1,
+      "tokens": 1820,
+      "first_read": "2026-07-05T20:46:28.817Z"
+    },
+    "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt": {
+      "count": 2,
+      "tokens": 3001,
+      "first_read": "2026-07-05T20:47:36.479Z"
+    },
+    "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/Main.kt": {
+      "count": 1,
+      "tokens": 1191,
+      "first_read": "2026-07-05T20:49:24.312Z"
+    },
+    "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/AdminPage.kt": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-07-05T20:50:53.703Z"
+    },
+    "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminPage.kt": {
+      "count": 2,
+      "tokens": 1832,
+      "first_read": "2026-07-05T20:51:08.057Z"
+    },
+    "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminSheltersPage.kt": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-07-05T20:51:44.791Z"
+    },
+    "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/SterilizationLocationsPage.kt": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-07-05T20:52:10.793Z"
+    },
+    "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SterilizationLocationsPage.kt": {
+      "count": 1,
+      "tokens": 2832,
+      "first_read": "2026-07-05T20:52:48.364Z"
+    },
+    "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/SheltersPage.kt": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-07-05T20:53:08.528Z"
+    },
+    "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/PhotographersPage.kt": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-07-05T20:53:18.841Z"
+    },
+    "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/TemporalHomePage.kt": {
+      "count": 1,
+      "tokens": 2447,
+      "first_read": "2026-07-05T20:55:23.597Z"
+    },
+    "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/MyPetsPage.kt": {
+      "count": 4,
+      "tokens": 5850,
+      "first_read": "2026-07-05T20:56:04.207Z"
     }
   },
   "files_written": [
@@ -592,6 +652,210 @@
       "action": "edit",
       "tokens": 318,
       "at": "2026-07-05T20:37:54.081Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt",
+      "action": "edit",
+      "tokens": 305,
+      "at": "2026-07-05T20:50:06.860Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt",
+      "action": "edit",
+      "tokens": 184,
+      "at": "2026-07-05T20:50:25.096Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt",
+      "action": "edit",
+      "tokens": 628,
+      "at": "2026-07-05T20:50:37.176Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/Common.kt",
+      "action": "edit",
+      "tokens": 419,
+      "at": "2026-07-05T20:50:41.821Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/Main.kt",
+      "action": "edit",
+      "tokens": 43,
+      "at": "2026-07-05T20:50:48.138Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/AdminPage.kt",
+      "action": "edit",
+      "tokens": 185,
+      "at": "2026-07-05T20:51:02.090Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminPage.kt",
+      "action": "edit",
+      "tokens": 88,
+      "at": "2026-07-05T20:51:20.783Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminPage.kt",
+      "action": "edit",
+      "tokens": 98,
+      "at": "2026-07-05T20:51:35.366Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminPage.kt",
+      "action": "edit",
+      "tokens": 35,
+      "at": "2026-07-05T20:51:40.412Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminSheltersPage.kt",
+      "action": "edit",
+      "tokens": 56,
+      "at": "2026-07-05T20:51:57.117Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminSheltersPage.kt",
+      "action": "edit",
+      "tokens": 80,
+      "at": "2026-07-05T20:52:04.915Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/SterilizationLocationsPage.kt",
+      "action": "edit",
+      "tokens": 60,
+      "at": "2026-07-05T20:52:21.965Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/SterilizationLocationsPage.kt",
+      "action": "edit",
+      "tokens": 65,
+      "at": "2026-07-05T20:52:27.585Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/SterilizationLocationsPage.kt",
+      "action": "edit",
+      "tokens": 99,
+      "at": "2026-07-05T20:52:33.497Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SterilizationLocationsPage.kt",
+      "action": "edit",
+      "tokens": 85,
+      "at": "2026-07-05T20:52:56.920Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SterilizationLocationsPage.kt",
+      "action": "edit",
+      "tokens": 57,
+      "at": "2026-07-05T20:53:02.535Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/SheltersPage.kt",
+      "action": "edit",
+      "tokens": 62,
+      "at": "2026-07-05T20:53:14.783Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/PhotographersPage.kt",
+      "action": "edit",
+      "tokens": 60,
+      "at": "2026-07-05T20:53:25.234Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/LoginPage.kt",
+      "action": "edit",
+      "tokens": 78,
+      "at": "2026-07-05T20:53:52.958Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/LocationSearchFilters.kt",
+      "action": "edit",
+      "tokens": 53,
+      "at": "2026-07-05T20:54:05.493Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/pages/LocationSearchFilters.kt",
+      "action": "edit",
+      "tokens": 64,
+      "at": "2026-07-05T20:54:11.401Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt",
+      "action": "edit",
+      "tokens": 72,
+      "at": "2026-07-05T20:55:05.382Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/Main.kt",
+      "action": "edit",
+      "tokens": 26,
+      "at": "2026-07-05T20:55:11.081Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/TemporalHomePage.kt",
+      "action": "edit",
+      "tokens": 32,
+      "at": "2026-07-05T20:55:30.215Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/TemporalHomePage.kt",
+      "action": "edit",
+      "tokens": 40,
+      "at": "2026-07-05T20:55:36.373Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/MyPetsPage.kt",
+      "action": "edit",
+      "tokens": 200,
+      "at": "2026-07-05T20:56:12.928Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/MyPetsPage.kt",
+      "action": "edit",
+      "tokens": 74,
+      "at": "2026-07-05T20:56:26.424Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/MyPetsPage.kt",
+      "action": "edit",
+      "tokens": 81,
+      "at": "2026-07-05T20:56:45.777Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/MyPetsPage.kt",
+      "action": "edit",
+      "tokens": 193,
+      "at": "2026-07-05T20:57:08.179Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt",
+      "action": "edit",
+      "tokens": 331,
+      "at": "2026-07-05T20:57:49.509Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt",
+      "action": "edit",
+      "tokens": 36,
+      "at": "2026-07-05T20:58:00.668Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/infra/terraform.tfvars",
+      "action": "edit",
+      "tokens": 56,
+      "at": "2026-07-05T21:08:21.530Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminPage.kt",
+      "action": "edit",
+      "tokens": 14,
+      "at": "2026-07-05T21:11:03.733Z"
+    },
+    {
+      "file": "/home/laf/Proyektes/adoptu/infra/terraform.tfvars",
+      "action": "edit",
+      "tokens": 71,
+      "at": "2026-07-05T21:19:03.069Z"
     }
   ],
   "edit_counts": {
@@ -606,7 +870,7 @@
     "infra/ecs.tf": 1,
     "frontend/webpack.config.d/disable-concat-modules.js": 1,
     "backend/src/main/kotlin/com/adoptu/services/PetService.kt": 1,
-    "backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt": 3,
+    "backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt": 5,
     "backend/src/main/kotlin/com/adoptu/Application.kt": 4,
     "backend/src/main/kotlin/com/adoptu/adapters/db/Models.kt": 1,
     "backend/src/main/kotlin/com/adoptu/adapters/db/DatabaseFactory.kt": 1,
@@ -615,17 +879,30 @@
     "backend/src/test/kotlin/com/adoptu/adapters/db/DatabaseFactoryTest.kt": 2,
     "backend/src/test/kotlin/com/adoptu/routes/PetsRoutesE2ETest.kt": 1,
     "backend/src/test/kotlin/com/adoptu/routes/UIRoutesE2ETest.kt": 2,
-    "infra/terraform.tfvars": 1,
+    "infra/terraform.tfvars": 3,
     "backend/src/main/kotlin/com/adoptu/web/CspNonce.kt": 1,
     "backend/src/main/kotlin/com/adoptu/pages/Shared.kt": 3,
     "backend/src/main/kotlin/com/adoptu/pages/EmailVerificationPage.kt": 3,
-    "backend/src/main/kotlin/com/adoptu/pages/LocationSearchFilters.kt": 3,
-    "backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt": 3,
-    "backend/src/test/kotlin/com/adoptu/pages/SharedPageElementsTest.kt": 2
+    "backend/src/main/kotlin/com/adoptu/pages/LocationSearchFilters.kt": 5,
+    "backend/src/main/kotlin/com/adoptu/routes/UIRoutes.kt": 4,
+    "backend/src/test/kotlin/com/adoptu/pages/SharedPageElementsTest.kt": 2,
+    "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt": 3,
+    "frontend/src/jsMain/kotlin/com/adoptu/frontend/Common.kt": 1,
+    "frontend/src/jsMain/kotlin/com/adoptu/frontend/Main.kt": 2,
+    "backend/src/main/kotlin/com/adoptu/pages/AdminPage.kt": 1,
+    "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminPage.kt": 4,
+    "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminSheltersPage.kt": 2,
+    "backend/src/main/kotlin/com/adoptu/pages/SterilizationLocationsPage.kt": 3,
+    "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/SterilizationLocationsPage.kt": 2,
+    "backend/src/main/kotlin/com/adoptu/pages/SheltersPage.kt": 1,
+    "backend/src/main/kotlin/com/adoptu/pages/PhotographersPage.kt": 1,
+    "backend/src/main/kotlin/com/adoptu/pages/LoginPage.kt": 1,
+    "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/TemporalHomePage.kt": 2,
+    "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/MyPetsPage.kt": 4
   },
-  "anatomy_hits": 18,
-  "anatomy_misses": 23,
-  "repeated_reads_warned": 27,
+  "anatomy_hits": 23,
+  "anatomy_misses": 30,
+  "repeated_reads_warned": 38,
   "cerebrum_warnings": 0,
-  "stop_count": 9
+  "stop_count": 11
 }
