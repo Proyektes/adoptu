@@ -2219,3 +2219,52 @@
 | 15:19 | Edited infra/terraform.tfvars | "sha256:62bf58d307f7f817f9" → "sha256:f3f8ee7cc14cd7e3d1" | ~67 |
 | 21:20 | Fixed RegisterPage.kt registerPassword/registerBoth missing display:block on messages (bug-109); rebuilt+committed common.js (bug-110 process gap: Dockerfile doesn't rebuild frontend bundle); redeployed to production twice (first deploy shipped stale bundle, caught via jar-content grep, second deploy verified correct) | RegisterPage.kt, common.js/.js.map, buglog.json, cerebrum.md, infra/terraform.tfvars | large |
 | 15:27 | Session end: 98 writes across 36 files (LoginPage.kt, AuthRoutes.kt, Sessions.kt, application.conf, AuthRoutesE2ETest.kt) | 53 reads | ~95311 tok |
+| 15:29 | Session end: 98 writes across 36 files (LoginPage.kt, AuthRoutes.kt, Sessions.kt, application.conf, AuthRoutesE2ETest.kt) | 53 reads | ~95311 tok |
+| 15:31 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | modified init() | ~283 |
+| 15:31 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | modified if() | ~553 |
+| 15:31 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | modified registerPasskey() | ~163 |
+| 15:31 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | modified if() | ~379 |
+| 15:31 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | modified if() | ~477 |
+| 15:40 | Session end: 103 writes across 36 files (LoginPage.kt, AuthRoutes.kt, Sessions.kt, application.conf, AuthRoutesE2ETest.kt) | 53 reads | ~97450 tok |
+| 15:43 | Edited infra/terraform.tfvars | "sha256:f3f8ee7cc14cd7e3d1" → "sha256:1f48baf1b2519aca6d" | ~52 |
+| 15:48 | Session end: 104 writes across 36 files (LoginPage.kt, AuthRoutes.kt, Sessions.kt, application.conf, AuthRoutesE2ETest.kt) | 54 reads | ~103983 tok |
+| 15:56 | Edited backend/src/main/scss/style.scss | expanded (+66 lines) | ~309 |
+| 15:56 | Edited backend/src/main/scss/style.scss | CSS: border-color | ~86 |
+| 15:56 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | "invalidOrExpiredToken" → "invalidOrExpiredMagicLink" | ~26 |
+| 15:56 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | "invalidOrExpiredToken" → "invalidOrExpiredMagicLink" | ~31 |
+| 15:56 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | "invalidOrExpiredToken" → "invalidOrExpiredMagicLink" | ~29 |
+| 15:56 | Edited backend/src/main/scss/style.scss | 4→4 lines | ~26 |
+| 15:56 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | "invalidOrExpiredToken" → "invalidOrExpiredMagicLink" | ~28 |
+| 15:56 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt | "invalidOrExpiredToken" → "invalidOrExpiredMagicLink" | ~16 |
+| 15:56 | Edited backend/src/main/kotlin/com/adoptu/pages/LoginPage.kt | modified div() | ~32 |
+| 15:57 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt | modified init() | ~72 |
+| 15:57 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt | added 1 condition(s) | ~402 |
+| 15:57 | Edited backend/src/main/kotlin/com/adoptu/pages/LoginPage.kt | modified button() | ~117 |
+| 15:58 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/IndexPage.kt | 2→2 lines | ~38 |
+| 15:58 | Edited backend/src/main/kotlin/com/adoptu/pages/IndexPage.kt | 2→2 lines | ~39 |
+| 15:59 | Edited backend/src/main/kotlin/com/adoptu/pages/IndexPage.kt | inline fix | ~20 |
+| 15:59 | Edited backend/src/main/kotlin/com/adoptu/pages/PetsPage.kt | 2→2 lines | ~39 |
+| 15:59 | Edited backend/src/main/kotlin/com/adoptu/pages/PetsPage.kt | inline fix | ~20 |
+| 15:59 | Edited backend/src/main/kotlin/com/adoptu/pages/AdminPage.kt | modified div() | ~145 |
+| 16:00 | Edited backend/src/main/kotlin/com/adoptu/pages/SheltersPage.kt | inline fix | ~23 |
+| 16:00 | Edited backend/src/main/kotlin/com/adoptu/pages/PrivacyPage.kt | modified p() | ~96 |
+| 16:00 | Edited backend/src/main/kotlin/com/adoptu/pages/MyPetsPage.kt | 5→5 lines | ~81 |
+| 16:00 | Edited backend/src/main/kotlin/com/adoptu/pages/MyPetsPage.kt | modified div() | ~68 |
+| 16:01 | Edited backend/src/main/scss/style.scss | 3→5 lines | ~63 |
+| 16:01 | Edited backend/src/main/scss/style.scss | 5→6 lines | ~88 |
+| 16:01 | Edited backend/src/main/kotlin/com/adoptu/pages/MyPetsPage.kt | inline fix | ~21 |
+| 16:02 | Edited backend/src/main/kotlin/com/adoptu/pages/SterilizationLocationsPage.kt | modified div() | ~22 |
+| 16:02 | Edited backend/src/main/kotlin/com/adoptu/pages/AdminSheltersPage.kt | inline fix | ~46 |
+| 16:02 | Edited backend/src/main/kotlin/com/adoptu/pages/ProfilePage.kt | 2→2 lines | ~26 |
+| 16:03 | Edited backend/src/main/kotlin/com/adoptu/pages/RegisterPage.kt | 5→5 lines | ~52 |
+| 16:03 | Edited backend/src/main/kotlin/com/adoptu/pages/RegisterPage.kt | modified input() | ~386 |
+| 16:03 | Edited backend/src/main/kotlin/com/adoptu/pages/RegisterPage.kt | modified div() | ~232 |
+| 16:03 | Edited backend/src/main/kotlin/com/adoptu/pages/RegisterPage.kt | "margin-top: 1rem; text-al" → "login-link-row" | ~37 |
+| 16:04 | Edited backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt | 4→8 lines | ~163 |
+| 16:04 | Edited backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt | inline fix | ~16 |
+| 16:12 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | modified showError() | ~155 |
+| 16:12 | Edited frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt | modified updateVisibility() | ~91 |
+| 16:17 | Edited backend/src/main/scss/style.scss | 7→3 lines | ~46 |
+| 16:17 | Edited backend/src/main/scss/style.scss | CSS: display, display | ~96 |
+| 16:21 | Edited infra/terraform.tfvars | "sha256:1f48baf1b2519aca6d" → "sha256:63792a098559a62d17" | ~67 |
+| 16:28 | Session end: 143 writes across 42 files (LoginPage.kt, AuthRoutes.kt, Sessions.kt, application.conf, AuthRoutesE2ETest.kt) | 67 reads | ~158701 tok |
