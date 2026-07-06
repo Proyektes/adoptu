@@ -2244,6 +2244,45 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-07-06T00:53:00.000Z"
+    },
+    {
+      "id": "bug-138",
+      "timestamp": "2026-07-06T01:13:30.161Z",
+      "error_message": "Incorrect value in code",
+      "file": "infra/terraform.tfvars",
+      "root_cause": "Had \"sha256:f254c29ea508e5fca8b09b3eef9813eca177750c32",
+      "fix": "Changed to \"sha256:4719472a85422a24fcfe982a1000bb8a4e72621a0c",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tfvars"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T01:13:30.161Z"
+    },
+    {
+      "id": "bug-139",
+      "timestamp": "2026-07-06T01:20:00.000Z",
+      "error_message": "Rescuer role activation and pet publishing had zero email-verification gate anywhere, unlike Shelter/Sterilization/Photographer/Temporal-Home which all correctly require isEmailVerified before activation",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/UsersRoutes.kt, PetsRoutes.kt, services/auth/WebAuthnService.kt",
+      "root_cause": "Rescuer was the one role type never given a verification gate at all (not a bypass of an existing control like the other 4 - it simply never had one). POST /api/users/rescuer-profile (activate=true) had no isEmailVerified check, registration inserted RESCUER into UserActiveRoles unconditionally, and POST /api/pets only checked activeRoles.contains('RESCUER'), never verification status. Combined, an unverified account (or one whose email will never be verified, e.g. impersonating someone else's address per bug-135) could become a Rescuer and publish pet listings immediately. Explicit user follow-up request after fixing bug-135/bug-137.",
+      "fix": "Added the same isEmailVerified check to POST /api/users/rescuer-profile (activate=true) that Shelter/Sterilization/Photographer/Temporal-Home already have. Added RESCUER to WebAuthnService's ROLES_REQUIRING_VERIFICATION_BEFORE_ACTIVATION so registration can't bypass it either. Additionally added a direct isEmailVerified check inside POST /api/pets itself (not just at activation time) as defense-in-depth for this flagship content-creation action, admin-exempt like the existing role check on the same endpoint. Marked the shared PetsRoutesE2ETest rescuer fixture (user id 1, used across 30+ tests) as verified since those tests assume a normal legitimate rescuer. Updated the prior registration test's RESCUER assertion from true to false. Added 3 new regression tests: rescuer-profile activation 403 for unverified user, pet creation 403 for unverified rescuer. Full AuthRoutesE2ETest/UsersRoutesE2ETest/PetsRoutesE2ETest suites pass. Deployed; live-verified the registration flow (with Rescuer selected) still completes normally end-to-end - direct reproduction of the old exploit is no longer possible via the UI at all now, since there's no way to reach an authenticated-but-unverified state after bug-135's fix, which is itself confirmation the gap is closed.",
+      "tags": [
+        "security",
+        "email-verification",
+        "role-activation",
+        "pet-publishing",
+        "kt",
+        "backend",
+        "production-bug"
+      ],
+      "related_bugs": [
+        "bug-135",
+        "bug-137"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T01:20:00.000Z"
     }
   ]
 }
