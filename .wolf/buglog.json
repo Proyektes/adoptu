@@ -2207,6 +2207,43 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-06T00:15:00.000Z"
+    },
+    {
+      "id": "bug-136",
+      "timestamp": "2026-07-06T00:47:38.975Z",
+      "error_message": "Incorrect value in code",
+      "file": "infra/terraform.tfvars",
+      "root_cause": "Had \"sha256:509baf00ed772f51f1a768ca5b895de9a1e7f70fb9",
+      "fix": "Changed to \"sha256:f254c29ea508e5fca8b09b3eef9813eca177750c32",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tfvars"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T00:47:38.975Z"
+    },
+    {
+      "id": "bug-137",
+      "timestamp": "2026-07-06T00:53:00.000Z",
+      "error_message": "Registration bypassed the isEmailVerified gate on Shelter/Photographer/Temporal-Home/Sterilization role activation - selecting one of these role checkboxes at sign-up activated the role immediately, with zero verification, even though POST /api/users/{role}-profile (activate=true) already correctly requires isEmailVerified for the exact same activation",
+      "file": "backend/src/main/kotlin/com/adoptu/services/auth/WebAuthnService.kt",
+      "root_cause": "registerWithPassword() and verifyAndRegister() inserted UserActiveRoles rows directly for every role selected at registration, going straight to the DB rather than through the gated POST /api/users/{role}-profile activation endpoint. Since a brand-new account is never verified yet at the moment of registration, this meant the 4 role types that DO have a verification gate elsewhere in the codebase had that gate completely skipped for anyone who selected the role at sign-up instead of activating it later from /profile. Follow-up to bug-135 (auto-login-before-verification), found while investigating that issue but fixed as a separate, explicitly-requested follow-up.",
+      "fix": "Added ROLES_REQUIRING_VERIFICATION_BEFORE_ACTIVATION = {PHOTOGRAPHER, TEMPORAL_HOME, SHELTER, STERILIZATION_SERVICE} and excluded it from the role set inserted at registration in both endpoints. Selecting one of these roles at sign-up now just records intent on the form; activation only happens via the already-gated /profile endpoint after the user verifies + logs in. Adopter/Rescuer/Admin are unaffected (they have no verification gate anywhere in the system - a separate, still-open issue). Added a regression test (POST register-password does not activate roles that require email verification) directly querying UserActiveRoles after registering with all 6 roles selected, confirming the 4 gated roles are absent while Adopter/Rescuer are present. Full registration suite (13 tests) passes. Deployed and confirmed the registration flow completes correctly on production; direct DB-level confirmation relies on the passing local E2E test since production DB credentials are appropriately access-gated from this session.",
+      "tags": [
+        "security",
+        "email-verification",
+        "role-activation",
+        "kt",
+        "backend",
+        "production-bug"
+      ],
+      "related_bugs": [
+        "bug-135"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T00:53:00.000Z"
     }
   ]
 }
