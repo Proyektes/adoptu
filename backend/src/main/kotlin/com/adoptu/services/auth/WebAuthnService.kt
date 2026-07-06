@@ -31,6 +31,15 @@ import java.util.*
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
+// Mirrors the isEmailVerified gate that POST /api/users/{role}-profile (activate=true)
+// already enforces for these role types (UsersRoutes.kt/PhotographerRoutes.kt) - a brand
+// new registration is never verified yet, so none of these can be granted at signup time.
+// Selecting one of these roles at registration just records intent on the form; the user
+// must activate it from /profile (through that already-gated endpoint) after verifying.
+private val ROLES_REQUIRING_VERIFICATION_BEFORE_ACTIVATION = setOf(
+    UserRole.PHOTOGRAPHER, UserRole.TEMPORAL_HOME, UserRole.SHELTER, UserRole.STERILIZATION_SERVICE
+)
+
 @OptIn(ExperimentalTime::class)
 class WebAuthnService(
     private val clock: Clock,
@@ -172,7 +181,7 @@ class WebAuthnService(
                     } else {
                         roles
                     }
-                    effectiveRoles.forEach { role ->
+                    (effectiveRoles - ROLES_REQUIRING_VERIFICATION_BEFORE_ACTIVATION).forEach { role ->
                         UserActiveRoles.insert {
                             it[UserActiveRoles.userId] = id
                             it[UserActiveRoles.role] = role.name
@@ -310,7 +319,7 @@ class WebAuthnService(
                         } else {
                             roles
                         }
-                        effectiveRoles.forEach { role ->
+                        (effectiveRoles - ROLES_REQUIRING_VERIFICATION_BEFORE_ACTIVATION).forEach { role ->
                             UserActiveRoles.insert {
                                 it[UserActiveRoles.userId] = id
                                 it[UserActiveRoles.role] = role.name

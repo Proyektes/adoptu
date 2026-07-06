@@ -472,6 +472,42 @@ class AuthRoutesE2ETest {
         }
     }
 
+    @Test
+    fun `POST register-password does not activate roles that require email verification`() {
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/auth/register-password",
+                JsonSupport.objectMapper.writeValueAsString(
+                    mapOf(
+                        "email" to "unverified-shelter@example.com",
+                        "displayName" to "Unverified Shelter",
+                        "roles" to "ADOPTER,RESCUER,SHELTER,PHOTOGRAPHER,TEMPORAL_HOME,STERILIZATION_SERVICE",
+                        "encryptedPassword" to encryptValue("SecurePass123!")
+                    )
+                )
+            )
+            assertEquals(200, response.statusCode())
+            val userId = transaction { Users.selectAll().where { Users.username eq "unverified-shelter@example.com" }.first()[Users.id] }
+            val roles = transaction {
+                UserActiveRoles.selectAll().where { UserActiveRoles.userId eq userId }.map { it[UserActiveRoles.role] }
+            }
+            // Adopter/Rescuer have no verification gate anywhere and register immediately;
+            // Shelter/Photographer/Temporal-Home/Sterilization mirror the isEmailVerified
+            // gate that POST /api/users/{role}-profile (activate=true) already enforces -
+            // a brand new registration is never verified yet, so none of them may be
+            // granted at signup. They must be activated from /profile after verifying.
+            assertTrue(roles.contains("ADOPTER"))
+            assertTrue(roles.contains("RESCUER"))
+            assertFalse(roles.contains("SHELTER"))
+            assertFalse(roles.contains("PHOTOGRAPHER"))
+            assertFalse(roles.contains("TEMPORAL_HOME"))
+            assertFalse(roles.contains("STERILIZATION_SERVICE"))
+        } finally {
+            handle.stop()
+        }
+    }
+
     // ==================== GET /api/auth/has-passkey (authenticated) ====================
 
     @Test
