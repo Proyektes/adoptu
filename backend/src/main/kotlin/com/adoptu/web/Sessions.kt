@@ -62,10 +62,10 @@ fun ServerResponse.setSession(session: SessionUser) {
     val value = "${base64UrlEncoder.encodeToString(payload)}.${base64UrlEncoder.encodeToString(signature)}"
     header(
         HeaderNames.SET_COOKIE,
-        "$COOKIE_NAME=$value; Path=/; Max-Age=$MAX_AGE_SECONDS; HttpOnly; SameSite=Lax"
+        "$COOKIE_NAME=$value; Path=/; Max-Age=$MAX_AGE_SECONDS; HttpOnly; Secure; SameSite=Lax"
     )
 }
 
 fun ServerResponse.clearSession() {
-    header(HeaderNames.SET_COOKIE, "$COOKIE_NAME=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax")
+    header(HeaderNames.SET_COOKIE, "$COOKIE_NAME=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax")
 }
