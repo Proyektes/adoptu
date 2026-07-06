@@ -492,13 +492,14 @@ class AuthRoutesE2ETest {
             val roles = transaction {
                 UserActiveRoles.selectAll().where { UserActiveRoles.userId eq userId }.map { it[UserActiveRoles.role] }
             }
-            // Adopter/Rescuer have no verification gate anywhere and register immediately;
-            // Shelter/Photographer/Temporal-Home/Sterilization mirror the isEmailVerified
-            // gate that POST /api/users/{role}-profile (activate=true) already enforces -
-            // a brand new registration is never verified yet, so none of them may be
-            // granted at signup. They must be activated from /profile after verifying.
+            // Adopter has no verification gate anywhere and registers immediately;
+            // Rescuer/Shelter/Photographer/Temporal-Home/Sterilization all mirror the
+            // isEmailVerified gate that their respective POST /api/users/{role}-profile
+            // (activate=true) endpoint already enforces - a brand new registration is
+            // never verified yet, so none of them may be granted at signup. They must be
+            // activated from /profile after verifying.
             assertTrue(roles.contains("ADOPTER"))
-            assertTrue(roles.contains("RESCUER"))
+            assertFalse(roles.contains("RESCUER"))
             assertFalse(roles.contains("SHELTER"))
             assertFalse(roles.contains("PHOTOGRAPHER"))
             assertFalse(roles.contains("TEMPORAL_HOME"))

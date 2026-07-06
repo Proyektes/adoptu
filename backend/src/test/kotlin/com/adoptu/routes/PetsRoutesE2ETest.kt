@@ -64,6 +64,9 @@ class PetsRoutesE2ETest {
                     it[Users.username] = "rescuer@test.com"
                     it[Users.displayName] = "Test Rescuer"
                     it[Users.createdAt] = clock.now().toEpochMilliseconds()
+                    // Verified so this fixture can publish pets - creating a pet listing
+                    // now requires a verified account email.
+                    it[Users.isEmailVerified] = true
                 }
                 UserActiveRoles.insert {
                     it[UserActiveRoles.userId] = 1
@@ -764,6 +767,35 @@ class PetsRoutesE2ETest {
             )
             assertEquals(200, response.statusCode())
             assertTrue(response.body().contains("Rover"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST pets returns 403 for unverified rescuer`() {
+        val handle = startTestServer()
+        try {
+            transaction {
+                Users.insert {
+                    it[Users.id] = 500
+                    it[Users.username] = "unverified-rescuer@example.com"
+                    it[Users.displayName] = "Unverified Rescuer"
+                    it[Users.createdAt] = clock.now().toEpochMilliseconds()
+                }
+                UserActiveRoles.insert {
+                    it[UserActiveRoles.userId] = 500
+                    it[UserActiveRoles.role] = "RESCUER"
+                }
+            }
+            val cookie = TestHttp.loginAs(handle.baseUrl, 500)
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/pets",
+                JsonSupport.objectMapper.writeValueAsString(CreatePetRequest(name = "Test", type = "DOG", country = "United States")),
+                cookie
+            )
+            assertEquals(403, response.statusCode())
         } finally {
             handle.stop()
         }

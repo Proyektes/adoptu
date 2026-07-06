@@ -37,7 +37,7 @@ import kotlin.time.ExperimentalTime
 // Selecting one of these roles at registration just records intent on the form; the user
 // must activate it from /profile (through that already-gated endpoint) after verifying.
 private val ROLES_REQUIRING_VERIFICATION_BEFORE_ACTIVATION = setOf(
-    UserRole.PHOTOGRAPHER, UserRole.TEMPORAL_HOME, UserRole.SHELTER, UserRole.STERILIZATION_SERVICE
+    UserRole.PHOTOGRAPHER, UserRole.TEMPORAL_HOME, UserRole.SHELTER, UserRole.STERILIZATION_SERVICE, UserRole.RESCUER
 )
 
 @OptIn(ExperimentalTime::class)

@@ -102,6 +102,12 @@ fun HttpRules.usersRoutes() {
 
         runBlocking {
             val body = req.receiveJson<RoleActivationRequest>()
+            if (body.activate) {
+                val existing = userService.getById(session.userId) ?: return@runBlocking res.respondNotFound()
+                if (!existing.isEmailVerified) {
+                    return@runBlocking res.respondError("Please verify your account email before publishing this profile", 403)
+                }
+            }
             val user = if (body.activate) {
                 userService.activateRescuerProfile(session.userId)
             } else {

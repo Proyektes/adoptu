@@ -97,6 +97,9 @@ fun HttpRules.petsRoutes() {
             val user = (userResult as ServiceResult.Success).data
             val activeRoles = user.activeRoles.map { it.name }
             if (!activeRoles.contains("RESCUER") && !activeRoles.contains("ADMIN")) return@runBlocking res.respondForbidden()
+            if (!user.isEmailVerified && !activeRoles.contains("ADMIN")) {
+                return@runBlocking res.respondError("Please verify your account email before publishing pets", 403)
+            }
 
             val request = req.receiveJson<CreatePetRequest>()
             try {

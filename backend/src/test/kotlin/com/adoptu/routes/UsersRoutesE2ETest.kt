@@ -711,6 +711,23 @@ class UsersRoutesE2ETest {
         }
     }
 
+    @Test
+    fun `POST rescuer-profile returns 403 when activating for unverified user`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 4) // bannable@test.com, not verified
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/rescuer-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
     // ==================== POST /api/users/temporal-home-profile ====================
 
     @Test
