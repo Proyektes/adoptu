@@ -2313,3 +2313,5 @@
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
 | 20:09 | Edited backend/src/main/kotlin/com/adoptu/web/Sessions.kt | modified clearSession() | ~78 |
+| 20:29 | Edited infra/terraform.tfvars | "sha256:4719472a85422a24fc" → "sha256:b3648c128442a34b14" | ~39 |
+| 20:36 | Deployed bug-141 (Secure flag on session cookie) to production: built in isolated worktree, verified `strings` on extracted SessionsKt.class before push, pushed to ECR, `tofu apply`, ECS rollout adoptu:19 reached COMPLETED steady state | Sessions.kt, infra/terraform.tfvars, buglog.json, cerebrum.md | Deployed and steady; live smoke check (GET /login → 200) passed | ~large |
