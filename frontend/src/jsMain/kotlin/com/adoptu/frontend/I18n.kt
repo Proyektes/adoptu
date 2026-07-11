@@ -180,7 +180,7 @@ private val englishTranslations = json(
     "emailVerifiedMessage" to "Your email has been verified. Your registration is now complete.",
     "redirectingIn" to "Redirecting to the main page in ",
     "canAlsoLogin" to "You can also ",
-    "loginNow" to "login now",
+    "loginNow" to "Login Now",
     "emailVerificationFailed" to "Verification Failed",
     "invalidOrExpiredToken" to "The verification link is invalid or has expired.",
     "tryRegisteringAgain" to "Please try registering again.",

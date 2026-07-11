@@ -119,6 +119,11 @@ graalvmNative {
             )
             buildArgs.add("--no-fallback")
             buildArgs.add("-H:+ReportExceptionStackTraces")
+            // Dynamically linked against glibc (the default) - the ghcr.io/graalvm/
+            // native-image-community builder image has no musl cross-toolchain installed,
+            // so --static --libc=musl fails with "x86_64-linux-musl-gcc not found". The
+            // runtime stage uses oraclelinux:10-slim, matching the builder's own OS/glibc
+            // (Oracle Linux 10.1, glibc 2.39) so the binary runs without ABI mismatches.
             quickBuild.set(true)
         }
     }

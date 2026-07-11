@@ -38,8 +38,10 @@ fun HTML.emailVerificationPage(success: Boolean, language: String = "en", navPar
                                 +"You can also "
                             }
                             a("/login") {
-                                attributes["data-i18n"] = "loginNow"
-                                +"login now"
+                                button(classes = "btn btn-secondary", type = ButtonType.button) {
+                                    attributes["data-i18n"] = "loginNow"
+                                    +"Login Now"
+                                }
                             }
                         }
                     }

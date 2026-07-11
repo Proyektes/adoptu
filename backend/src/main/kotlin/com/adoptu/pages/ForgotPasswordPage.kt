@@ -23,7 +23,7 @@ fun HTML.forgotPasswordPage(navParams: NavParams = NavParams()) {
                 p { id = "message"; +"" }
                 button(classes = "btn", type = ButtonType.button) { id = "submit-btn"; +"Send Reset Link" }
                 p { }
-                a(href = "/login") { +"Back to Login" }
+                a(href = "/login") { button(classes = "btn btn-secondary", type = ButtonType.button) { +"Back to Login" } }
             }
         }
         footer()
@@ -55,7 +55,7 @@ fun HTML.resetPasswordPage(navParams: NavParams = NavParams()) {
                 p { id = "message"; +"" }
                 button(classes = "btn", type = ButtonType.button) { id = "submit-btn"; +"Reset Password" }
                 p { }
-                a(href = "/login") { +"Back to Login" }
+                a(href = "/login") { button(classes = "btn btn-secondary", type = ButtonType.button) { +"Back to Login" } }
             }
         }
         footer()
