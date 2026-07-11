@@ -120,8 +120,9 @@ class SesEmailAdapter(config: AppConfig) : NotificationPort {
             .source(emailFrom)
             .build()
 
-        sesClient?.sendEmail(request)
-        return true
+        val client = sesClient ?: throw IllegalStateException("SES client is not initialized")
+        val response = client.sendEmail(request)
+        return response.messageId() != null
     }
 
     override suspend fun sendPhotographerRequest(

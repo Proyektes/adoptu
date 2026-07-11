@@ -11,6 +11,7 @@ import com.adoptu.dto.output.VerificationResponse
 import com.adoptu.services.PasswordService
 import com.adoptu.services.ServiceResult
 import com.adoptu.services.auth.SessionUser
+import com.adoptu.services.auth.VerificationResendOutcome
 import com.adoptu.services.auth.WebAuthnService
 import com.adoptu.services.crypto.CryptoService
 import com.adoptu.services.validation.AuthValidationService
@@ -76,10 +77,13 @@ fun HttpRules.authRoutes() {
                 if (isVerified) {
                     return@runBlocking res.respondError(getLocalizedError("email already registered", language))
                 }
-                val resent = webAuthnService.resendVerificationEmail(existingUser.id)
-                return@runBlocking res.respondError(
-                    getLocalizedError(if (resent) "verification email sent" else "verification email limit reached", language)
-                )
+                val outcome = webAuthnService.resendVerificationEmailDetailed(existingUser.id)
+                val messageKey = when (outcome) {
+                    VerificationResendOutcome.SENT -> "verification email sent"
+                    VerificationResendOutcome.RATE_LIMITED -> "verification email limit reached"
+                    else -> "verification email send failed"
+                }
+                return@runBlocking res.respondError(getLocalizedError(messageKey, language))
             }
 
             val options = webAuthnService.generateRegistrationOptions(email, displayName)
@@ -549,6 +553,7 @@ private fun getLocalizedError(key: String, language: String): String {
             "email already registered" -> "correo electrónico ya registrado"
             "verification email sent" -> "correo de verificación enviado. Revisa tu bandeja de entrada."
             "verification email limit reached" -> "No se pudo enviar el correo de verificación. Es posible que hayas alcanzado el límite diario (3 correos). Inténtalo de nuevo mañana."
+            "verification email send failed" -> "No se pudo enviar el correo de verificación debido a un error del servidor. Por favor, inténtalo de nuevo en unos minutos."
             else -> key
         }
         "fr" -> when (key) {
@@ -556,6 +561,7 @@ private fun getLocalizedError(key: String, language: String): String {
             "email already registered" -> "email déjà enregistré"
             "verification email sent" -> "email de vérification envoyé. Vérifiez votre boîte de réception."
             "verification email limit reached" -> "Impossible d'envoyer l'email de vérification. Vous avez peut-être atteint la limite quotidienne (3 emails). Veuillez réessayer demain."
+            "verification email send failed" -> "Impossible d'envoyer l'email de vérification en raison d'une erreur du serveur. Veuillez réessayer dans quelques minutes."
             else -> key
         }
         "pt" -> when (key) {
@@ -563,6 +569,7 @@ private fun getLocalizedError(key: String, language: String): String {
             "email already registered" -> "email já registrado"
             "verification email sent" -> "e-mail de verificação enviado. Verifique sua caixa de entrada."
             "verification email limit reached" -> "Não foi possível enviar o e-mail de verificação. Você pode ter atingido o limite diário (3 e-mails). Tente novamente amanhã."
+            "verification email send failed" -> "Não foi possível enviar o e-mail de verificação devido a um erro do servidor. Tente novamente em alguns minutos."
             else -> key
         }
         "zh" -> when (key) {
@@ -570,6 +577,7 @@ private fun getLocalizedError(key: String, language: String): String {
             "email already registered" -> "邮箱已被注册"
             "verification email sent" -> "验证邮件已发送。请检查您的收件箱。"
             "verification email limit reached" -> "无法发送验证邮件。您可能已达到每日限额(3封邮件)。请明天再试。"
+            "verification email send failed" -> "由于服务器错误,验证邮件发送失败。请几分钟后重试。"
             else -> key
         }
         else -> when (key) {
@@ -577,6 +585,7 @@ private fun getLocalizedError(key: String, language: String): String {
             "email already registered" -> "email already registered"
             "verification email sent" -> "verification email sent. Check your inbox."
             "verification email limit reached" -> "Unable to send verification email. You may have reached the daily limit (3 emails). Please try again tomorrow."
+            "verification email send failed" -> "Unable to send verification email due to a server error. Please try again in a few minutes."
             else -> key
         }
     }

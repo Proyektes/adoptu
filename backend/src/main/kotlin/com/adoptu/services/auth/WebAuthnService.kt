@@ -40,6 +40,8 @@ private val ROLES_REQUIRING_VERIFICATION_BEFORE_ACTIVATION = setOf(
     UserRole.PHOTOGRAPHER, UserRole.TEMPORAL_HOME, UserRole.SHELTER, UserRole.STERILIZATION_SERVICE, UserRole.RESCUER
 )
 
+enum class VerificationResendOutcome { SENT, ALREADY_VERIFIED, RATE_LIMITED, SEND_FAILED, USER_NOT_FOUND }
+
 @OptIn(ExperimentalTime::class)
 class WebAuthnService(
     private val clock: Clock,
@@ -440,21 +442,24 @@ class WebAuthnService(
         }
     }
 
-    suspend fun resendVerificationEmail(userId: Int): Boolean {
-        val user = userService.getById(userId) ?: return false
-        
+    suspend fun resendVerificationEmailDetailed(userId: Int): VerificationResendOutcome {
+        val user = userService.getById(userId) ?: return VerificationResendOutcome.USER_NOT_FOUND
+
         if (userService.isUserVerified(userId)) {
-            return false
+            return VerificationResendOutcome.ALREADY_VERIFIED
         }
 
         if (!emailVerificationService.canSendVerificationEmail(userId)) {
-            return false
+            return VerificationResendOutcome.RATE_LIMITED
         }
 
-        val email = user.email ?: return false
+        val email = user.email ?: return VerificationResendOutcome.USER_NOT_FOUND
         val result = emailVerificationService.resendVerificationEmail(userId, email, user.displayName, user.language)
-        return result.getOrDefault(false)
+        return if (result.getOrDefault(false)) VerificationResendOutcome.SENT else VerificationResendOutcome.SEND_FAILED
     }
+
+    suspend fun resendVerificationEmail(userId: Int): Boolean =
+        resendVerificationEmailDetailed(userId) == VerificationResendOutcome.SENT
 
     suspend fun resendVerificationEmailByEmail(email: String): Boolean {
         val user = userService.getByEmail(email) ?: return false

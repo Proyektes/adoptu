@@ -123,10 +123,13 @@ class EmailVerificationService(
         val verificationUrl = "$baseUrl/verify?token=$token"
         
         val (subject, body) = getLocalizedContent(language, displayName, verificationUrl)
-        
-        userRepository.recordVerificationAttempt(userId)
-        
-        return Result.success(notificationPort.sendEmail(email, subject, body))
+
+        val sent = notificationPort.sendEmail(email, subject, body)
+        if (sent) {
+            userRepository.recordVerificationAttempt(userId)
+        }
+
+        return Result.success(sent)
     }
 
     suspend fun verifyToken(token: String): Boolean {
