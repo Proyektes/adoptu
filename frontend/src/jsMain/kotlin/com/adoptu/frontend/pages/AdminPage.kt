@@ -1,6 +1,5 @@
 package com.adoptu.frontend.pages
 
-import com.adoptu.frontend.ApiClientModule
 import com.adoptu.frontend.CommonModule
 import kotlinx.browser.document
 import kotlinx.browser.window
@@ -18,7 +17,7 @@ object AdminPageModule {
         window.asDynamic().hideBanModal = { hideBanModal() }
         window.asDynamic().banUser = { id: dynamic, name: dynamic -> showBanModal(id.toString().toInt(), name.toString()) }
         window.asDynamic().unbanUser = { id: dynamic -> unbanUser(id.toString().toInt()) }
-        window.asDynamic().deletePet = { id: dynamic -> deletePet(id.toString().toInt()) }
+        window.asDynamic().resetPassword = { id: dynamic, email: dynamic -> resetPassword(id.toString().toInt(), email.toString()) }
 
         document.getElementById("tab-users")?.addEventListener("click", { switchTab("users") })
         document.getElementById("tab-pets")?.addEventListener("click", { switchTab("pets") })
@@ -43,7 +42,6 @@ object AdminPageModule {
             petsTab?.style?.display = "block"
             usersBtn?.classList?.remove("active")
             petsBtn?.classList?.add("active")
-            loadPets()
         }
     }
 
@@ -63,20 +61,27 @@ object AdminPageModule {
             container?.innerHTML = "<p>No users found.</p>"
             return
         }
-        container?.innerHTML = "<table class=\"admin-table\"><thead><tr><th>Email</th><th>Name</th><th>Roles</th><th>Status</th><th>Actions</th></tr></thead><tbody>" +
+        container?.innerHTML = "<div class=\"admin-table-wrap\"><table class=\"admin-table\"><thead><tr><th>Email</th><th>Name</th><th>Roles</th><th>Status</th><th>Actions</th></tr></thead><tbody>" +
             list.joinToString("") { u ->
-                val roles = (u.activeRoles as? Array<dynamic>)?.joinToString(", ") ?: ""
+                // Each role as its own pill instead of a comma-joined string; ADMIN gets the
+                // accent color so admins stand out at a glance in a long user list.
+                val roles = (u.activeRoles as? Array<dynamic>)?.joinToString(" ") { role ->
+                    val roleStr = role.toString()
+                    val badgeClass = if (roleStr == "ADMIN") "badge badge-role badge-role-admin" else "badge badge-role"
+                    "<span class=\"$badgeClass\">$roleStr</span>"
+                } ?: ""
                 val isBanned = u.isBanned == true
                 val name = CommonModule.escapeHtml(u.displayName?.toString() ?: "")
                 val email = CommonModule.escapeHtml(u.email?.toString() ?: "")
                 val statusBadge = if (isBanned) "<span class=\"status-banned\">Banned</span>" else "<span class=\"status-active\">Active</span>"
-                val action = if (isBanned) {
-                    "<button class=\"btn btn-secondary\" data-action=\"unbanUser\" data-arg=\"${u.id}\">Unban</button>"
+                val banAction = if (isBanned) {
+                    "<button class=\"btn btn-secondary btn-small\" data-action=\"unbanUser\" data-arg=\"${u.id}\">Unban</button>"
                 } else {
-                    "<button class=\"btn btn-danger\" data-action=\"banUser\" data-arg=\"${u.id}\" data-arg2=\"$email\">Ban</button>"
+                    "<button class=\"btn btn-danger btn-small\" data-action=\"banUser\" data-arg=\"${u.id}\" data-arg2=\"$email\">Ban</button>"
                 }
-                "<tr><td>$email</td><td>$name</td><td>$roles</td><td>$statusBadge</td><td>$action</td></tr>"
-            } + "</tbody></table>"
+                val resetAction = "<button class=\"btn btn-secondary btn-small\" data-action=\"resetPassword\" data-arg=\"${u.id}\" data-arg2=\"$email\">Reset Password</button>"
+                "<tr><td>$email</td><td>$name</td><td>$roles</td><td>$statusBadge</td><td>$banAction $resetAction</td></tr>"
+            } + "</tbody></table></div>"
     }
 
     private fun showBanModal(id: Int, name: String) {
@@ -113,34 +118,16 @@ object AdminPageModule {
         }.catch { err: dynamic -> window.alert(err?.message?.toString() ?: "Failed to unban user") }
     }
 
-    private fun loadPets() {
-        val container = document.getElementById("pets").unsafeCast<HTMLElement?>()
-        val msg = document.getElementById("message")
-        ApiClientModule.getPets().then<Unit> { pets -> renderPets(pets, container) }
-            .catch { _: dynamic ->
-                msg?.className = "message error"
-                msg?.textContent = "Failed to load pets."
-            }
+    // Backend invalidates the target's password/passkeys and re-sends the forgot-password
+    // email (POST /api/admin/users/{id}/reset-password) - the confirm text mirrors exactly
+    // what that endpoint does so an admin can't trigger it by accident.
+    private fun resetPassword(id: Int, email: String) {
+        if (!window.confirm("This will invalidate $email's current password and passkeys and email them a reset link. Continue?")) return
+        window.asDynamic().fetch("/api/admin/users/$id/reset-password", js("({method: 'POST', credentials: 'include'})")).then { res: dynamic ->
+            if (res.ok != true) throw js("new Error('Failed to reset password')")
+            window.alert("Password reset email sent to $email.")
+            loadUsers()
+        }.catch { err: dynamic -> window.alert(err?.message?.toString() ?: "Failed to reset password") }
     }
 
-    private fun renderPets(data: dynamic, container: HTMLElement?) {
-        val list = (data as? Array<dynamic>) ?: arrayOf()
-        if (list.isEmpty()) {
-            container?.innerHTML = "<p>No pets found.</p>"
-            return
-        }
-        container?.innerHTML = list.joinToString("") { p ->
-            "<div class=\"pet-card\"><div class=\"pet-card-body\">" +
-                "<h3>${CommonModule.escapeHtml(p.name?.toString())}</h3><p class=\"pet-status\">${p.status}</p>" +
-                "<div class=\"pet-card-actions\"><a href=\"/pet/${p.id}\" class=\"btn\">View</a>" +
-                "<button class=\"btn btn-danger\" data-action=\"deletePet\" data-arg=\"${p.id}\">Delete</button></div>" +
-                "</div></div>"
-        }
-    }
-
-    private fun deletePet(id: Int) {
-        if (!window.confirm("Delete this pet?")) return
-        ApiClientModule.deletePet(id.toString()).then<Unit> { loadPets() }
-            .catch { err: dynamic -> window.alert(err?.message?.toString() ?: "Failed to delete pet") }
-    }
 }

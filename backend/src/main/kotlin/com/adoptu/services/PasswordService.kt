@@ -71,6 +71,17 @@ class PasswordService(
         }
     }
 
+    // Drops the row entirely rather than nulling/overwriting the hash - matches how
+    // WebAuthn-only accounts (never had a password) are represented, and is what
+    // hasPassword()/login-with-password rely on to tell "no password set" apart from
+    // "has a password". Used by WebAuthnService.forcePasswordReset for admin-triggered
+    // account recovery.
+    suspend fun invalidatePassword(userId: Int) = withContext(dbDispatcher) {
+        transaction {
+            UserPasswords.deleteWhere { UserPasswords.userId eq userId }
+        }
+    }
+
     // The frontend encrypts "email:password" — extract just the password part
     private fun extractPassword(decrypted: String): String {
         val colonIdx = decrypted.indexOf(':')

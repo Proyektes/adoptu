@@ -123,8 +123,11 @@ class WebAuthnServiceTest {
                 .toSet()
         }
         
+        // RESCUER requires email verification before activation (see
+        // ROLES_REQUIRING_VERIFICATION_BEFORE_ACTIVATION in WebAuthnService) - only
+        // ADOPTER is active immediately after registration.
         assertTrue(userRoles.contains("ADOPTER"))
-        assertTrue(userRoles.contains("RESCUER"))
+        assertFalse(userRoles.contains("RESCUER"))
     }
 
     @Test

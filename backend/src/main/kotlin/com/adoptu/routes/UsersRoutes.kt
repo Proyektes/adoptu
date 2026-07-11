@@ -13,6 +13,7 @@ import com.adoptu.services.PhotographerService
 import com.adoptu.services.ProfileEmailVerificationService
 import com.adoptu.services.UserService
 import com.adoptu.services.VerifiableProfileType
+import com.adoptu.services.auth.WebAuthnService
 import com.adoptu.services.validation.ValidationConstants
 import com.adoptu.web.Deps
 import com.adoptu.web.SuccessResponse
@@ -314,6 +315,7 @@ fun HttpRules.usersRoutes() {
 
 fun HttpRules.adminUsersRoutes() {
     val userService by Deps.inject<UserService>()
+    val webAuthnService by Deps.inject<WebAuthnService>()
 
     get("/api/admin/users", Handler { req, res ->
         val session = req.getSession() ?: return@Handler res.respondUnauthorized()
@@ -393,6 +395,38 @@ fun HttpRules.adminUsersRoutes() {
                 res.send(SuccessResponse(success = true))
             } else {
                 res.respondError("Failed to unban user", 500)
+            }
+        }
+    })
+
+    // Admin-triggered account recovery: invalidates the target's password/passkeys and
+    // re-sends the forgot-password email (see WebAuthnService.forcePasswordReset) - no
+    // account/profile/pet data is touched. Self-targeting is blocked so an admin can't
+    // accidentally lock themselves out via this endpoint.
+    post("/api/admin/users/{id}/reset-password", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+
+        runBlocking {
+            val admin = userService.getById(session.userId)
+            if (admin == null || !admin.activeRoles.contains(UserRole.ADMIN)) {
+                return@runBlocking res.respondForbidden()
+            }
+
+            val id = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondInvalidId(ValidationConstants.INVALID_ID)
+
+            if (id == session.userId) {
+                return@runBlocking res.respondError("Cannot reset your own password this way", 400)
+            }
+
+            if (userService.getById(id) == null) {
+                return@runBlocking res.respondNotFound()
+            }
+
+            val ok = webAuthnService.forcePasswordReset(id)
+            if (ok) {
+                res.send(SuccessResponse(success = true))
+            } else {
+                res.respondError("Failed to reset password", 500)
             }
         }
     })

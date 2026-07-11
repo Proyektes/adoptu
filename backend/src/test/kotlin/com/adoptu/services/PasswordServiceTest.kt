@@ -54,6 +54,27 @@ class PasswordServiceTest {
     }
 
     @Test
+    fun `invalidatePassword removes an existing password`() = runBlocking {
+        val userId = createTestUser("test@example.com", "Test User")
+        val encryptedPassword = encryptPassword("SecurePassword123!")
+        passwordService.setPassword(userId, encryptedPassword)
+        assertTrue(passwordService.hasPassword(userId))
+
+        passwordService.invalidatePassword(userId)
+
+        assertFalse(passwordService.hasPassword(userId))
+    }
+
+    @Test
+    fun `invalidatePassword is a no-op when no password is set`() = runBlocking {
+        val userId = createTestUser("test@example.com", "Test User")
+
+        passwordService.invalidatePassword(userId)
+
+        assertFalse(passwordService.hasPassword(userId))
+    }
+
+    @Test
     fun `setPassword rejects invalid password - too short`() = runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val encryptedPassword = encryptPassword("Short1!")

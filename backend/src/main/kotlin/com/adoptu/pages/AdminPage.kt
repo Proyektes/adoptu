@@ -31,12 +31,14 @@ fun HTML.adminPage(navParams: NavParams = NavParams()) {
                 div { id = "users-container"; +"" }
             }
             
+            // Links out to /my-pets rather than embedding a grid here: that page already
+            // does full pet CRUD via GET /api/pets/mine, which - unlike the public
+            // GET /api/pets - has no country filter and is open to ADMIN as well as RESCUER,
+            // so it's the correct "all pets" admin view without duplicating it.
             div(classes = "admin-tab-content hidden") {
                 id = "pets-tab"
                 p { attributes["data-i18n"] = "managePetsDescription"; +"Manage all pet pages. Add or remove pets." }
-                div { id = "message"; +"" }
                 a("/my-pets") { classes = setOf("btn"); attributes["data-i18n"] = "managePetsBtn"; +"Manage Pets" }
-                div { id = "pets"; classes = setOf("pet-grid", "mt-2rem"); +"" }
             }
 
             div(classes = "form-modal hidden") {

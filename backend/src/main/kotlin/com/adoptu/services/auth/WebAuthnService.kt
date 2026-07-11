@@ -22,6 +22,7 @@ import com.webauthn4j.data.client.challenge.DefaultChallenge
 import com.webauthn4j.server.ServerProperty
 import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
@@ -508,6 +509,23 @@ class WebAuthnService(
     suspend fun requestPasswordReset(email: String): Result<Boolean> {
         val language = userService.getByEmail(email)?.language ?: "en"
         return passwordService.requestPasswordReset(email, language)
+    }
+
+    // Admin-triggered account recovery: invalidates the user's current password and
+    // passkeys (no data deletion) and re-sends the same forgot-password email, so the
+    // emailed link is the re-proof of email ownership before any new credential can be set.
+    suspend fun forcePasswordReset(userId: Int): Boolean {
+        val user = userService.getById(userId) ?: return false
+        val email = user.email ?: return false
+
+        withContext(dbDispatcher) {
+            transaction {
+                WebAuthnCredentials.deleteWhere { WebAuthnCredentials.userId eq userId }
+            }
+        }
+        passwordService.invalidatePassword(userId)
+
+        return passwordService.requestPasswordReset(email, user.language).getOrDefault(false)
     }
 
     suspend fun resetPassword(token: String, encryptedNewPassword: String): Boolean {

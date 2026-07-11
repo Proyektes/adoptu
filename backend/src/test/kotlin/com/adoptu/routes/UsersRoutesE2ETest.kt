@@ -1,7 +1,9 @@
 package com.adoptu.routes
 
 import com.adoptu.adapters.db.UserActiveRoles
+import com.adoptu.adapters.db.UserPasswords
 import com.adoptu.adapters.db.Users
+import com.adoptu.adapters.db.WebAuthnCredentials
 import com.adoptu.adapters.db.repositories.PetRepositoryImpl
 import com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl
 import com.adoptu.adapters.db.repositories.UserRepository
@@ -145,6 +147,8 @@ class UsersRoutesE2ETest {
             single { PetService(get(), get(), get(), get()) }
             single { PasswordService(get(), get(), get(), "http://localhost:80") }
             single { EmailChangeService(get(), get(), get(), "http://localhost:80") }
+            single { com.adoptu.services.EmailVerificationService(get(), get(), get(), "http://localhost:80") }
+            single { com.adoptu.services.MagicLinkService(get(), get(), get(), "http://localhost:80", get()) }
         })
     }
 
@@ -541,6 +545,110 @@ class UsersRoutesE2ETest {
 
             val banned = transaction { Users.selectAll().where { Users.id eq 4 }.first()[Users.isBanned] }
             assertFalse(banned)
+        } finally {
+            handle.stop()
+        }
+    }
+
+    // ==================== POST /api/admin/users/{id}/reset-password ====================
+
+    @Test
+    fun `POST admin users reset-password returns 401 when no session`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/users/4/reset-password")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST admin users reset-password returns 403 for non-admin user`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer
+
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/users/4/reset-password", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST admin users reset-password returns 400 for invalid id`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/users/not-a-number/reset-password", cookie)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST admin users reset-password returns 400 when targeting self`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/users/3/reset-password", cookie)
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Cannot reset your own password"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST admin users reset-password returns 404 for non-existent target`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/users/9999/reset-password", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST admin users reset-password invalidates credentials without deleting the account`() {
+        val handle = startServer()
+        try {
+            transaction {
+                UserPasswords.insert {
+                    it[UserPasswords.userId] = 4
+                    it[UserPasswords.passwordHash] = "irrelevant-hash"
+                    it[UserPasswords.createdAt] = clock.now().toEpochMilliseconds()
+                    it[UserPasswords.updatedAt] = clock.now().toEpochMilliseconds()
+                }
+                WebAuthnCredentials.insert {
+                    it[WebAuthnCredentials.userId] = 4
+                    it[WebAuthnCredentials.credentialId] = "test-credential-id"
+                    it[WebAuthnCredentials.attestedCredentialDataBase64] = "dGVzdA=="
+                    it[WebAuthnCredentials.signCount] = 0
+                    it[WebAuthnCredentials.transports] = null
+                    it[WebAuthnCredentials.createdAt] = clock.now().toEpochMilliseconds()
+                }
+            }
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/users/4/reset-password", cookie)
+            assertEquals(200, response.statusCode())
+            val body = JsonSupport.objectMapper.readValue(response.body(), SuccessResponse::class.java)
+            assertTrue(body.success)
+
+            transaction {
+                assertTrue(UserPasswords.selectAll().where { UserPasswords.userId eq 4 }.empty())
+                assertTrue(WebAuthnCredentials.selectAll().where { WebAuthnCredentials.userId eq 4 }.empty())
+                val user = Users.selectAll().where { Users.id eq 4 }.first()
+                assertEquals("bannable@test.com", user[Users.username])
+            }
         } finally {
             handle.stop()
         }
