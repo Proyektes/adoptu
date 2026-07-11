@@ -273,6 +273,161 @@ class UsersRoutesE2ETest {
         }
     }
 
+    @Test
+    fun `GET admin users returns a paged envelope`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/users?pageSize=2", cookie)
+            assertEquals(200, response.statusCode())
+            val json = JsonSupport.objectMapper.readTree(response.body())
+            assertEquals(1, json.get("page").asInt())
+            assertEquals(2, json.get("pageSize").asInt())
+            assertEquals(2, json.get("items").size())
+            assertTrue(json.get("total").asInt() >= 2)
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin users excludes inactive users by default`() {
+        val handle = startServer()
+        try {
+            transaction { Users.update({ Users.id eq 4 }) { it[Users.deactivatedAt] = 123L; it[Users.deactivatedBy] = 3 } }
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/users", cookie)
+            assertFalse(response.body().contains("bannable@test.com"))
+
+            val withInactive = TestHttp.get("${handle.baseUrl}/api/admin/users?includeInactive=true", cookie)
+            assertTrue(withInactive.body().contains("bannable@test.com"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin users excludes banned users by default`() {
+        val handle = startServer()
+        try {
+            transaction { Users.update({ Users.id eq 4 }) { it[Users.isBanned] = true } }
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/users", cookie)
+            assertFalse(response.body().contains("bannable@test.com"))
+
+            val withBanned = TestHttp.get("${handle.baseUrl}/api/admin/users?includeBanned=true", cookie)
+            assertTrue(withBanned.body().contains("bannable@test.com"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin users filters by role`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/users?role=RESCUER", cookie)
+            assertTrue(response.body().contains("rescuer@test.com"))
+            assertFalse(response.body().contains("adopter@test.com"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin users search filters by email or name`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/users?search=rescuer", cookie)
+            assertTrue(response.body().contains("rescuer@test.com"))
+            assertFalse(response.body().contains("adopter@test.com"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    // ==================== POST /api/admin/users/{id}/deactivate, /reactivate ====================
+
+    @Test
+    fun `POST admin users deactivate returns 401 when no session`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/users/4/deactivate")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST admin users deactivate returns 403 for non-admin user`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer
+
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/users/4/deactivate", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST admin users deactivate returns 400 when targeting self`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/users/3/deactivate", cookie)
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("Cannot deactivate yourself"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST admin users deactivate returns 404 for non-existent target`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/users/9999/deactivate", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST admin users deactivate then reactivate round-trips deactivatedAt`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val deactivateResponse = TestHttp.post("${handle.baseUrl}/api/admin/users/4/deactivate", cookie)
+            assertEquals(200, deactivateResponse.statusCode())
+            val afterDeactivate = transaction { Users.selectAll().where { Users.id eq 4 }.first() }
+            assertEquals(3, afterDeactivate[Users.deactivatedBy])
+            assertTrue(afterDeactivate[Users.deactivatedAt] != null)
+
+            val reactivateResponse = TestHttp.post("${handle.baseUrl}/api/admin/users/4/reactivate", cookie)
+            assertEquals(200, reactivateResponse.statusCode())
+            val afterReactivate = transaction { Users.selectAll().where { Users.id eq 4 }.first() }
+            assertEquals(null, afterReactivate[Users.deactivatedAt])
+            assertEquals(null, afterReactivate[Users.deactivatedBy])
+        } finally {
+            handle.stop()
+        }
+    }
+
     // ==================== GET /api/admin/users/{id} ====================
 
     @Test

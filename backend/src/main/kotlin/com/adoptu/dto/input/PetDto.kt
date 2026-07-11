@@ -47,6 +47,8 @@ data class PetDto(
     val isUrgent: Boolean = false,
     val isPromoted: Boolean = false,
     val createdAt: Long,
+    val deactivatedAt: Long? = null,
+    val deactivatedBy: Int? = null,
     val images: List<PetImageDto> = emptyList()
 )
 

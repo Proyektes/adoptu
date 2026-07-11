@@ -28,17 +28,38 @@ fun HTML.adminPage(navParams: NavParams = NavParams()) {
             
             div(classes = "admin-tab-content") {
                 id = "users-tab"
+                div(classes = "admin-filter-bar") {
+                    select { id = "user-role-filter"
+                        option { value = ""; +"All roles" }
+                        option { value = "ADMIN"; +"ADMIN" }
+                        option { value = "RESCUER"; +"RESCUER" }
+                        option { value = "ADOPTER"; +"ADOPTER" }
+                        option { value = "PHOTOGRAPHER"; +"PHOTOGRAPHER" }
+                        option { value = "TEMPORAL_HOME"; +"TEMPORAL_HOME" }
+                        option { value = "SHELTER"; +"SHELTER" }
+                        option { value = "STERILIZATION_SERVICE"; +"STERILIZATION_SERVICE" }
+                    }
+                    input(InputType.search) { id = "user-search"; placeholder = "Search by email or name" }
+                    label { input(InputType.checkBox) { id = "user-show-inactive" }; +" Show inactive" }
+                    label { input(InputType.checkBox) { id = "user-show-banned" }; +" Show banned users" }
+                }
                 div { id = "users-container"; +"" }
+                div(classes = "admin-pagination") { id = "users-pagination" }
             }
-            
-            // Links out to /my-pets rather than embedding a grid here: that page already
-            // does full pet CRUD via GET /api/pets/mine, which - unlike the public
-            // GET /api/pets - has no country filter and is open to ADMIN as well as RESCUER,
-            // so it's the correct "all pets" admin view without duplicating it.
+
+            // Search/moderation overview, paginated via GET /api/admin/pets. Separate from
+            // the /my-pets link below (kept for full add/edit) - see adminPetsRoutes() in
+            // PetsRoutes.kt for why this doesn't reuse getMine()/getAllUnfiltered().
             div(classes = "admin-tab-content hidden") {
                 id = "pets-tab"
                 p { attributes["data-i18n"] = "managePetsDescription"; +"Manage all pet pages. Add or remove pets." }
                 a("/my-pets") { classes = setOf("btn"); attributes["data-i18n"] = "managePetsBtn"; +"Manage Pets" }
+                div(classes = "admin-filter-bar") {
+                    input(InputType.search) { id = "pet-search"; placeholder = "Search by pet name" }
+                    label { input(InputType.checkBox) { id = "pet-show-inactive" }; +" Show inactive" }
+                }
+                div { id = "pets-admin-container"; +"" }
+                div(classes = "admin-pagination") { id = "pets-pagination" }
             }
 
             div(classes = "form-modal hidden") {

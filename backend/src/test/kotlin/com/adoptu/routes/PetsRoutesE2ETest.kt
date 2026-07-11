@@ -33,6 +33,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
 import org.junit.jupiter.api.BeforeEach
@@ -40,6 +41,7 @@ import org.junit.jupiter.api.Test
 import org.koin.dsl.module
 import java.math.BigDecimal
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -1418,6 +1420,159 @@ class PetsRoutesE2ETest {
             )
             assertEquals(200, response.statusCode())
             assertTrue(response.body().contains("I want to adopt Buddy"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    // ==================== GET /api/admin/pets ====================
+
+    @Test
+    fun `GET admin pets returns 401 when no session`() {
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/pets")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin pets returns 403 for non-admin user`() {
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer
+
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/pets", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin pets returns a paged envelope for admin`() {
+        createPetInDb("Buddy", "DOG")
+        createPetInDb("Max", "CAT")
+
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/pets?pageSize=1", cookie)
+            assertEquals(200, response.statusCode())
+            val json = JsonSupport.objectMapper.readTree(response.body())
+            assertEquals(1, json.get("page").asInt())
+            assertEquals(1, json.get("pageSize").asInt())
+            assertEquals(1, json.get("items").size())
+            assertEquals(2, json.get("total").asInt())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin pets search filters by name`() {
+        createPetInDb("Buddy", "DOG")
+        createPetInDb("Max", "CAT")
+
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/pets?search=bud", cookie)
+            assertTrue(response.body().contains("Buddy"))
+            assertFalse(response.body().contains("Max"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET admin pets excludes deactivated pets by default`() {
+        val petId = createPetInDb("Buddy", "DOG")
+        transaction { Pets.update({ Pets.id eq petId }) { it[Pets.deactivatedAt] = 123L; it[Pets.deactivatedBy] = 3 } }
+
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/pets", cookie)
+            assertFalse(response.body().contains("Buddy"))
+
+            val withInactive = TestHttp.get("${handle.baseUrl}/api/admin/pets?includeInactive=true", cookie)
+            assertTrue(withInactive.body().contains("Buddy"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    // ==================== POST /api/admin/pets/{id}/deactivate, /reactivate ====================
+
+    @Test
+    fun `POST admin pets deactivate returns 401 when no session`() {
+        val petId = createPetInDb("Buddy", "DOG")
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/pets/$petId/deactivate")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST admin pets deactivate returns 403 for non-admin user`() {
+        val petId = createPetInDb("Buddy", "DOG")
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer
+
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/pets/$petId/deactivate", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST admin pets deactivate returns 404 for non-existent target`() {
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/pets/9999/deactivate", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST admin pets deactivate hides the pet from the public listing but not from my-pets`() {
+        val petId = createPetInDb("Buddy", "DOG", country = "United States")
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val deactivateResponse = TestHttp.post("${handle.baseUrl}/api/admin/pets/$petId/deactivate", cookie)
+            assertEquals(200, deactivateResponse.statusCode())
+            val afterDeactivate = transaction { Pets.selectAll().where { Pets.id eq petId }.first() }
+            assertEquals(3, afterDeactivate[Pets.deactivatedBy])
+            assertTrue(afterDeactivate[Pets.deactivatedAt] != null)
+
+            val publicListing = TestHttp.get("${handle.baseUrl}/api/pets?country=" + java.net.URLEncoder.encode("United States", "UTF-8"))
+            assertFalse(publicListing.body().contains("Buddy"))
+
+            val myPets = TestHttp.get("${handle.baseUrl}/api/pets/mine", cookie)
+            assertTrue(myPets.body().contains("Buddy"))
+
+            val reactivateResponse = TestHttp.post("${handle.baseUrl}/api/admin/pets/$petId/reactivate", cookie)
+            assertEquals(200, reactivateResponse.statusCode())
+            val afterReactivate = transaction { Pets.selectAll().where { Pets.id eq petId }.first() }
+            assertEquals(null, afterReactivate[Pets.deactivatedAt])
+            assertEquals(null, afterReactivate[Pets.deactivatedBy])
         } finally {
             handle.stop()
         }

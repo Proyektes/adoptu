@@ -13,6 +13,7 @@ import com.adoptu.dto.input.PetImageDto
 import com.adoptu.dto.input.Status
 import com.adoptu.dto.input.UpdatePetRequest
 import com.adoptu.dto.input.UserRole
+import com.adoptu.dto.output.PagedResult
 import com.adoptu.ports.PetRepositoryPort
 import com.adoptu.adapters.db.dbDispatcher
 import kotlinx.coroutines.withContext
@@ -64,6 +65,8 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
             isUrgent = row[Pets.isUrgent],
             isPromoted = row[Pets.isPromoted],
             createdAt = row[Pets.createdAt],
+            deactivatedAt = row[Pets.deactivatedAt],
+            deactivatedBy = row[Pets.deactivatedBy],
             images = images
         )
     }
@@ -113,7 +116,7 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
         transaction {
             val parsedCountry = Country.fromDisplayName(country) ?: return@transaction emptyList()
 
-            val baseCondition = (Pets.status eq "AVAILABLE") and (Pets.country eq parsedCountry)
+            val baseCondition = (Pets.status eq "AVAILABLE") and (Pets.country eq parsedCountry) and Pets.deactivatedAt.isNull()
             val finalCondition = if (type != null) {
                 if (showPromotedOnly) {
                     baseCondition and (Pets.type eq type.uppercase()) and (Pets.isPromoted eq true)
@@ -146,6 +149,29 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
                 .orderBy(Pets.createdAt, SortOrder.DESC)
                 .toList()
             rowsToPetDtos(rows)
+        }
+    }
+
+    override suspend fun getAllForAdmin(page: Int, pageSize: Int, search: String?, includeInactive: Boolean): PagedResult<PetDto> = withContext(dbDispatcher) {
+        transaction {
+            var condition: Op<Boolean> = Op.TRUE
+            if (!includeInactive) condition = condition and Pets.deactivatedAt.isNull()
+            if (!search.isNullOrBlank()) {
+                condition = condition and (Pets.name.lowerCase() like "%${search.trim().lowercase()}%")
+            }
+
+            val total = Pets.selectAll().where { condition }.count().toInt()
+
+            val safePage = page.coerceAtLeast(1)
+            val safePageSize = pageSize.coerceIn(1, 100)
+            val rows = Pets.selectAll()
+                .where { condition }
+                .orderBy(Pets.createdAt, SortOrder.DESC)
+                .limit(safePageSize)
+                .offset(((safePage - 1) * safePageSize).toLong())
+                .toList()
+
+            PagedResult(items = rowsToPetDtos(rows), total = total, page = safePage, pageSize = safePageSize)
         }
     }
 
@@ -271,6 +297,26 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
             exec("DELETE FROM pet_images WHERE pet_id = ?", listOf(IntegerColumnType() to petId))
             exec("DELETE FROM adoption_requests WHERE pet_id = ?", listOf(IntegerColumnType() to petId))
             exec("DELETE FROM pets WHERE id = ?", listOf(IntegerColumnType() to petId))
+        }
+    }
+
+    override suspend fun deactivatePet(petId: Int, deactivatedBy: Int): Boolean = withContext(dbDispatcher) {
+        transaction {
+            val rowsUpdated = Pets.update({ Pets.id eq petId }) {
+                it[Pets.deactivatedAt] = clock.now().toEpochMilliseconds()
+                it[Pets.deactivatedBy] = deactivatedBy
+            }
+            rowsUpdated > 0
+        }
+    }
+
+    override suspend fun reactivatePet(petId: Int): Boolean = withContext(dbDispatcher) {
+        transaction {
+            val rowsUpdated = Pets.update({ Pets.id eq petId }) {
+                it[Pets.deactivatedAt] = null
+                it[Pets.deactivatedBy] = null
+            }
+            rowsUpdated > 0
         }
     }
 

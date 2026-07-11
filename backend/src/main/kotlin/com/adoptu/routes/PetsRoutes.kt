@@ -6,9 +6,11 @@ import com.adoptu.dto.input.UpdatePetRequest
 import com.adoptu.dto.input.UserRole
 import com.adoptu.services.PetService
 import com.adoptu.services.ServiceResult
+import com.adoptu.services.UserService
 import com.adoptu.services.validation.PetsValidationService
 import com.adoptu.services.validation.ValidationConstants
 import com.adoptu.web.Deps
+import com.adoptu.web.SuccessResponse
 import com.adoptu.web.getSession
 import com.adoptu.web.pathParam
 import com.adoptu.web.queryParam
@@ -18,6 +20,7 @@ import com.adoptu.web.receiveMultipart
 import com.adoptu.web.respondData
 import com.adoptu.web.respondError
 import com.adoptu.web.respondForbidden
+import com.adoptu.web.respondInvalidId
 import com.adoptu.web.respondNotFound
 import com.adoptu.web.respondSuccess
 import com.adoptu.web.respondUnauthorized
@@ -300,6 +303,79 @@ fun HttpRules.petsRoutes() {
             val status = params["status"] ?: return@runBlocking res.respondError("status required")
 
             res.respondData(petService.updateAdoptionRequest(requestId, status, session.userId, activeRoles))
+        }
+    })
+}
+
+// Admin-only paginated/searchable pets overview, backing the Admin Panel's Manage Pets tab.
+// Deliberately separate from getMine()/"my pets" (rescuer self-service page, also usable by
+// admins for full add/edit) - that page has no pagination and this doesn't touch it.
+fun HttpRules.adminPetsRoutes() {
+    val petService by Deps.inject<PetService>()
+    val userService by Deps.inject<UserService>()
+
+    get("/api/admin/pets", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+
+        runBlocking {
+            val admin = userService.getById(session.userId)
+            if (admin == null || !admin.activeRoles.contains(UserRole.ADMIN)) {
+                return@runBlocking res.respondForbidden()
+            }
+
+            val page = req.queryParam("page")?.toIntOrNull() ?: 1
+            val pageSize = req.queryParam("pageSize")?.toIntOrNull() ?: 20
+            val search = req.queryParam("search")?.takeIf { it.isNotBlank() }
+            val includeInactive = req.queryParam("includeInactive")?.toBoolean() ?: false
+
+            val result = petService.getAllForAdmin(page, pageSize, search, includeInactive)
+            res.send(result)
+        }
+    })
+
+    post("/api/admin/pets/{id}/deactivate", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+
+        runBlocking {
+            val admin = userService.getById(session.userId)
+            if (admin == null || !admin.activeRoles.contains(UserRole.ADMIN)) {
+                return@runBlocking res.respondForbidden()
+            }
+
+            val id = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondInvalidId(ValidationConstants.INVALID_ID)
+            if (petService.getById(id) == null) {
+                return@runBlocking res.respondNotFound()
+            }
+
+            val deactivated = petService.deactivatePet(id, session.userId)
+            if (deactivated) {
+                res.send(SuccessResponse(success = true))
+            } else {
+                res.respondError("Failed to deactivate pet", 500)
+            }
+        }
+    })
+
+    post("/api/admin/pets/{id}/reactivate", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+
+        runBlocking {
+            val admin = userService.getById(session.userId)
+            if (admin == null || !admin.activeRoles.contains(UserRole.ADMIN)) {
+                return@runBlocking res.respondForbidden()
+            }
+
+            val id = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondInvalidId(ValidationConstants.INVALID_ID)
+            if (petService.getById(id) == null) {
+                return@runBlocking res.respondNotFound()
+            }
+
+            val reactivated = petService.reactivatePet(id)
+            if (reactivated) {
+                res.send(SuccessResponse(success = true))
+            } else {
+                res.respondError("Failed to reactivate pet", 500)
+            }
         }
     })
 }

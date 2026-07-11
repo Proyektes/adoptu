@@ -3,22 +3,34 @@ package com.adoptu.services
 import com.adoptu.dto.input.AcceptTermsRequest
 import com.adoptu.dto.input.UserDto
 import com.adoptu.dto.input.UserRole
+import com.adoptu.dto.output.PagedResult
 import com.adoptu.ports.UserRepositoryPort
 
 class UserService(
     private val userRepository: UserRepositoryPort
 ) {
     suspend fun getById(userId: Int): UserDto? = userRepository.getById(userId)
-    
+
     suspend fun getByEmail(email: String): UserDto? = userRepository.getByEmail(email)
-    
-    suspend fun getAllUsers(): List<UserDto> = userRepository.getAllUsers()
+
+    suspend fun getAllUsers(
+        page: Int = 1,
+        pageSize: Int = 20,
+        role: UserRole? = null,
+        search: String? = null,
+        includeInactive: Boolean = false,
+        includeBanned: Boolean = false
+    ): PagedResult<UserDto> = userRepository.getAllUsers(page, pageSize, role, search, includeInactive, includeBanned)
     
     suspend fun getRescuers(): List<UserDto> = userRepository.getRescuers()
     
     suspend fun banUser(userId: Int, reason: String? = null): Boolean = userRepository.banUser(userId, reason)
     
     suspend fun unbanUser(userId: Int): Boolean = userRepository.unbanUser(userId)
+
+    suspend fun deactivateUser(userId: Int, deactivatedBy: Int): Boolean = userRepository.deactivateUser(userId, deactivatedBy)
+
+    suspend fun reactivateUser(userId: Int): Boolean = userRepository.reactivateUser(userId)
     
     suspend fun isBanned(userId: Int): Boolean = userRepository.isBanned(userId)
     

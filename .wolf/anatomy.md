@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-11T01:37:13.679Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-11T21:09:30.851Z
 > Files: 513 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -181,6 +181,17 @@
 - `console-2026-07-06T00-13-01-715Z.log` (~99 tok)
 - `console-2026-07-06T00-51-59-680Z.log` (~457 tok)
 - `console-2026-07-06T01-18-00-579Z.log` (~457 tok)
+- `console-2026-07-11T19-50-01-740Z.log` (~203 tok)
+- `console-2026-07-11T19-50-14-063Z.log` (~203 tok)
+- `console-2026-07-11T20-02-04-390Z.log` (~28 tok)
+- `console-2026-07-11T20-06-31-165Z.log` (~28 tok)
+- `console-2026-07-11T20-39-04-121Z.log` (~31 tok)
+- `console-2026-07-11T20-39-29-886Z.log` (~31 tok)
+- `console-2026-07-11T20-40-06-374Z.log` (~29 tok)
+- `console-2026-07-11T20-40-33-595Z.log` (~28 tok)
+- `console-2026-07-11T20-41-09-350Z.log` (~28 tok)
+- `console-2026-07-11T20-41-34-293Z.log` (~28 tok)
+- `console-2026-07-11T20-41-49-599Z.log` (~29 tok)
 - `page-2026-07-04T03-48-37-804Z.yml` (~1272 tok)
 - `page-2026-07-04T03-49-36-751Z.yml` (~860 tok)
 - `page-2026-07-04T03-50-25-015Z.yml` (~581 tok)
@@ -383,6 +394,19 @@
 - `page-2026-07-06T01-18-47-343Z.yml` (~926 tok)
 - `page-2026-07-06T01-18-55-975Z.yml` (~923 tok)
 - `page-2026-07-06T01-19-21-372Z.yml` (~957 tok)
+- `page-2026-07-11T19-50-02-234Z.yml` (~786 tok)
+- `page-2026-07-11T19-50-14-214Z.yml` (~859 tok)
+- `page-2026-07-11T19-50-40-971Z.yml` (~1065 tok)
+- `page-2026-07-11T19-51-10-763Z.yml` (~859 tok)
+- `page-2026-07-11T20-02-05-242Z.yml` (~1337 tok)
+- `page-2026-07-11T20-06-31-471Z.yml` (~1337 tok)
+- `page-2026-07-11T20-39-06-827Z.yml` (~396 tok)
+- `page-2026-07-11T20-39-30-435Z.yml` (~410 tok)
+- `page-2026-07-11T20-40-07-192Z.yml` (~1202 tok)
+- `page-2026-07-11T20-40-33-844Z.yml` (~2631 tok)
+- `page-2026-07-11T20-41-10-082Z.yml` (~2234 tok)
+- `page-2026-07-11T20-41-34-708Z.yml` (~1340 tok)
+- `page-2026-07-11T20-41-49-724Z.yml` (~245 tok)
 
 ## .tokensave/
 
@@ -399,23 +423,23 @@
 
 ## backend/src/main/kotlin/com/adoptu/
 
-- `Application.kt` — main, configureRouting (~961 tok)
+- `Application.kt` — main, configureRouting (~980 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/
 
 - `DatabaseFactory.kt` — init, createDefaultAdmin (~1447 tok)
 - `DbDispatcher.kt` — Shared, bounded dispatcher for repository DB calls. (~705 tok)
-- `Models.kt` (~3986 tok)
+- `Models.kt` (~4239 tok)
 - `PoolSizing.kt` — Single source of truth for how many DB-bound worker threads/connections this (~365 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/repositories/
 
-- `PetRepository.kt` — PetRepositoryImpl: buildPetDto, rowToPetDto, getPetImages, getImagesForPetIds + 8 more (~4766 tok)
+- `PetRepository.kt` — PetRepositoryImpl: buildPetDto, rowToPetDto, getPetImages, getImagesForPetIds + 7 more (~5286 tok)
 - `PhotographerRepository.kt` — Data class: PhotographerRepositoryImpl (12 properties) (~3820 tok)
 - `ShelterRepository.kt` — ShelterRepository: rowToDto, getById, getAll, create + 4 more (~2132 tok)
 - `SterilizationLocationRepository.kt` — SterilizationLocationRepository: rowToDto, getById, getAll, create + 6 more (~2658 tok)
 - `TemporalHomeRepository.kt` — Data class: TemporalHomeRepositoryImpl (11 properties) (~3509 tok)
-- `UserRepository.kt` — UserRepository: getActiveRolesForUser, getById, getByEmail, getAllUsers + 10 more (~6321 tok)
+- `UserRepository.kt` — UserRepository: getActiveRolesForUser, getById, getByEmail, getActiveRolesForUserIds + 5 more (~7358 tok)
 - `UserShelterRepository.kt` — UserShelterRepository: rowToDto, getByUserId, create, update + 2 more (~2589 tok)
 - `UserSterilizationLocationRepository.kt` — UserSterilizationLocationRepository: rowToDto, getByUserId, create, update + 2 more (~2404 tok)
 
@@ -447,38 +471,39 @@
 
 - `AdoptionRequestDto.kt` — Data class: AdoptionRequestDto (7 properties) (~72 tok)
 - `AuthDto.kt` — Data class: AssertionOptionsDto (13 properties) (~145 tok)
-- `PetDto.kt` — Data class: Gender (94 properties) (~1001 tok)
+- `PetDto.kt` — Data class: Gender (96 properties) (~1020 tok)
 - `ShelterDto.kt` — Data class: ShelterDto (120 properties) (~1093 tok)
 - `SterilizationLocationDto.kt` — Data class: SterilizationLocationDto (82 properties) (~803 tok)
-- `UserDto.kt` — Data class: UserRole (95 properties) (~1037 tok)
+- `UserDto.kt` — Data class: UserRole (97 properties) (~1057 tok)
 
 ## backend/src/main/kotlin/com/adoptu/dto/output/
 
 - `AuthResponses.kt` — Data class: AuthMeResponse (37 properties) (~409 tok)
+- `PagedResult.kt` — Data class: PagedResult (4 properties) (~39 tok)
 
 ## backend/src/main/kotlin/com/adoptu/pages/
 
-- `AdminPage.kt` — HTML (~839 tok)
+- `AdminPage.kt` — HTML (~1218 tok)
 - `AdminSheltersPage.kt` — HTML (~1715 tok)
 - `EmailVerificationPage.kt` — HTML (~1330 tok)
-- `ForgotPasswordPage.kt` — HTML, HTML, HTML, HTML, HTML (~1200 tok)
+- `ForgotPasswordPage.kt` — HTML, HTML, HTML, HTML, HTML (~1401 tok)
 - `Icons.kt` — Declares val (~121 tok)
-- `IndexPage.kt` — HTML (~704 tok)
+- `IndexPage.kt` — HTML (~825 tok)
 - `LocationSearchFilters.kt` — DIV (~1122 tok)
 - `LoginPage.kt` — HTML (~999 tok)
-- `MyPetsPage.kt` — HTML (~2552 tok)
+- `MyPetsPage.kt` — HTML (~2564 tok)
 - `PetDetailPage.kt` — HTML (~165 tok)
-- `PetFoodPage.kt` — Data class: FoodCategory (7 properties) (~2063 tok)
-- `PetsPage.kt` — HTML (~704 tok)
+- `PetFoodPage.kt` — HTML (~655 tok)
+- `PetsPage.kt` — HTML (~824 tok)
 - `PhotographersPage.kt` — HTML (~330 tok)
-- `PrivacyPage.kt` — HTML (~2100 tok)
+- `PrivacyPage.kt` — UL, UL, HTML (~4200 tok)
 - `ProfilePage.kt` — HTML (~4786 tok)
-- `RegisterPage.kt` — HTML (~1566 tok)
+- `RegisterPage.kt` — HTML (~2128 tok)
 - `Shared.kt` — HTML, A, BODY, DIV, NAV (~2040 tok)
 - `SheltersPage.kt` — HTML (~349 tok)
 - `SterilizationLocationsPage.kt` — HTML, HTML (~1544 tok)
 - `TemporalHomePage.kt` — HTML, HTML, HTML (~639 tok)
-- `TermsPage.kt` — HTML (~1810 tok)
+- `TermsPage.kt` — UL, HTML (~3302 tok)
 
 ## backend/src/main/kotlin/com/adoptu/ports/
 
@@ -486,12 +511,12 @@
 - `EmailVerificationTokenInfo.kt` — Data class: EmailVerificationTokenInfo (3 properties) (~38 tok)
 - `ImageStoragePort.kt` — uploadImage, deleteImage, getImageUrl (~83 tok)
 - `NotificationPort.kt` — sendEmail, sendPhotographerRequest, sendAdoptionRequestNotification, sendTemporalHomeRequest (~219 tok)
-- `PetRepositoryPort.kt` — getAll, getAllUnfiltered, getById, create, update (~682 tok)
+- `PetRepositoryPort.kt` — getAll, getAllUnfiltered, getAllForAdmin, getById, deactivatePet (~851 tok)
 - `PhotographerRepositoryPort.kt` — canSendMessage, createPhotographyRequest, getMyRequests, getRequestsForPhotographer, getRequestById (~313 tok)
 - `ShelterRepositoryPort.kt` — getById, getAll, create, update, delete (~186 tok)
 - `SterilizationLocationRepositoryPort.kt` — getById, getAll, create, update, delete (~286 tok)
 - `TemporalHomeRepositoryPort.kt` — Returns (temporalHomeId, rescuerId) and marks the token used, or null if invalid/expired/already used. (~343 tok)
-- `UserRepositoryPort.kt` — getById, getByEmail, getAllUsers, getPhotographers, getRescuers (~614 tok)
+- `UserRepositoryPort.kt` — getById, getByEmail, getAllUsers, getPhotographers, getRescuers (~773 tok)
 - `UserShelterRepositoryPort.kt` — getByUserId, create, update, delete, search (~182 tok)
 - `UserSterilizationLocationRepositoryPort.kt` — getByUserId, create, update, delete, search (~219 tok)
 
@@ -499,14 +524,14 @@
 
 - `AuthRoutes.kt` — Data class: EncryptedLoginRequest (3 properties) (~7475 tok)
 - `CountryRoutes.kt` — HttpRules, regionFromLocale (~320 tok)
-- `PetsRoutes.kt` — HttpRules (~3777 tok)
+- `PetsRoutes.kt` — HttpRules (~4621 tok)
 - `PhotographerRoutes.kt` — HttpRules, validateUser (~2385 tok)
 - `ShelterRoutes.kt` — HttpRules, HttpRules (~1627 tok)
 - `SterilizationLocationRoutes.kt` — HttpRules, HttpRules (~1754 tok)
 - `TemporalHomeRoutes.kt` — HttpRules (~2738 tok)
 - `UIRoutes.kt` — Data class: NavParams (6 properties) (~2664 tok)
 - `UserShelterRoutes.kt` — HttpRules (~767 tok)
-- `UsersRoutes.kt` — Data class: UpdateProfileRequest (7 properties) (~4789 tok)
+- `UsersRoutes.kt` — Data class: UpdateProfileRequest (7 properties) (~5523 tok)
 - `UserSterilizationLocationRoutes.kt` — HttpRules (~820 tok)
 
 ## backend/src/main/kotlin/com/adoptu/services/
@@ -516,14 +541,14 @@
 - `ImageCompressor.kt` — compress, calculateDimensions (~536 tok)
 - `MagicLinkService.kt` — Data class: MagicLinkService (9 properties) (~2743 tok)
 - `PasswordService.kt` — PasswordService: isLoginRateLimited, recordLoginAttempt, hasPassword, invalidatePassword + 15 more (~3609 tok)
-- `PetService.kt` — PetService: getAll, getMine, getById, create + 12 more (~3312 tok)
+- `PetService.kt` — PetService: getAll, getMine, getAllForAdmin, deactivatePet + 15 more (~3440 tok)
 - `PhotographerService.kt` — PhotographerService: getPhotographers, getPhotographerById, updatePhotographerSettings, canSendMessage + 8 more (~2627 tok)
 - `ProfileEmailVerificationService.kt` — Shelter and sterilization-location profiles carry their own public "contact email", (~1823 tok)
 - `ServiceResult.kt` — Data class: ServiceResult (2 properties) (~82 tok)
 - `ShelterService.kt` — ShelterService: getAll, getById, create, update + 3 more (~507 tok)
 - `SterilizationLocationService.kt` — SterilizationLocationService: getAll, getById, create, update + 5 more (~604 tok)
 - `TemporalHomeService.kt` — Validates and consumes a spam-report token (see sendRequest), then blocks the rescuer it names. (~1332 tok)
-- `UserService.kt` — UserService: getById, getByEmail, getAllUsers, getRescuers + 18 more (~892 tok)
+- `UserService.kt` — UserService: getById, getByEmail, getAllUsers, getRescuers + 20 more (~1032 tok)
 - `UserShelterService.kt` — UserShelterService: getByUserId, create, update, delete + 1 more (~993 tok)
 - `UserSterilizationLocationService.kt` — UserSterilizationLocationService: getByUserId, create, update, delete + 1 more (~976 tok)
 
@@ -585,19 +610,19 @@
 - `shelters.css.map` (~825 tok)
 - `sterilization.css` — Styles: 94 rules, 8 vars, 3 media queries (~3802 tok)
 - `sterilization.css.map` (~826 tok)
-- `style.css` — Styles: 93 rules, 8 vars, 3 media queries (~7249 tok)
-- `style.css.map` (~1550 tok)
+- `style.css` — Styles: 93 rules, 8 vars, 3 media queries (~7746 tok)
+- `style.css.map` (~1656 tok)
 - `temporal-home.css` — Styles: 94 rules, 8 vars, 3 media queries (~4248 tok)
 - `temporal-home.css.map` (~915 tok)
 
 ## backend/src/main/resources/static/js/
 
-- `common.js` — N: F, D, j + 83 more (~78824 tok)
-- `common.js.map` (~158423 tok)
+- `common.js` — z: D, F, U + 83 more (~118265 tok)
+- `common.js.map` (~214151 tok)
 
 ## backend/src/main/scss/
 
-- `_admin.scss` — Styles: 10 rules (~657 tok)
+- `_admin.scss` — Styles: 14 rules (~972 tok)
 - `_base.scss` — Styles: 15 rules, 8 vars (~1285 tok)
 - `_layout.scss` — Styles: 13 rules, 2 media queries (~2162 tok)
 - `_location-search-form.scss` — Styles: 2 rules, 1 media queries (~629 tok)
@@ -607,55 +632,3 @@
 - `pet-food.scss` — Styles: 11 rules (~946 tok)
 - `photographers.scss` — Styles: 6 rules (~214 tok)
 - `policy.scss` — Styles: 5 rules (~129 tok)
-- `shelters.scss` — Styles: 6 rules (~208 tok)
-- `sterilization.scss` — Styles: 6 rules (~206 tok)
-- `style.scss` — Styles: 61 rules, 1 media queries, 1 animations (~3538 tok)
-- `temporal-home.scss` — Styles: 12 rules (~672 tok)
-
-## backend/src/test/kotlin/com/adoptu/
-
-- `ApplicationContainerTest.kt` — ApplicationContainerTest: testAppConfig (~818 tok)
-- `ApplicationIntegrationTest.kt` — ApplicationIntegrationTest: createTestConfig, initDatabase, setUpAll, setUp + 2 more (~3018 tok)
-
-## backend/src/test/kotlin/com/adoptu/adapters/db/
-
-- `DatabaseFactoryInitIT.kt` — DatabaseFactoryInitIT: startContainer, stopContainer, createConfig (~1983 tok)
-- `DatabaseFactoryTest.kt` — Declares DatabaseFactoryTest (~3397 tok)
-
-## backend/src/test/kotlin/com/adoptu/adapters/db/repositories/
-
-- `PetRepositoryIT.kt` (~0 tok)
-- `PhotographerRepositoryIT.kt` (~0 tok)
-- `ShelterRepositoryIT.kt` (~0 tok)
-- `TemporalHomeRepositoryIT.kt` (~0 tok)
-- `UserRepositoryIT.kt` (~0 tok)
-- `UserRepositoryTest.kt` — Direct repository-level tests for two UserRepository methods that exist to satisfy the (~1254 tok)
-
-## backend/src/test/kotlin/com/adoptu/adapters/dynamodb/
-
-- `DynamoDBAdapterTest.kt` — DynamoDBAdapterTest: setup (~13636 tok)
-
-## backend/src/test/kotlin/com/adoptu/adapters/notification/
-
-- `SesEmailAdapterIT.kt` (~0 tok)
-- `SesEmailAdapterTest.kt` — Declares SesEmailAdapterTest (~2891 tok)
-
-## backend/src/test/kotlin/com/adoptu/adapters/storage/
-
-- `ImageStorageIT.kt` — Integration test for [S3ImageStorageAdapter] backed by a real LocalStack S3 service. (~822 tok)
-- `S3ImageStorageAdapterTest.kt` — Declares S3ImageStorageAdapterTest (~385 tok)
-
-## backend/src/test/kotlin/com/adoptu/di/
-
-- `AppModuleTest.kt` — Declares AppModuleTest (~798 tok)
-
-## backend/src/test/kotlin/com/adoptu/e2e/
-
-- `BaseE2ETest.kt` — BaseE2ETest: getBaseUrl, setupServer, startTestServer, setupBrowser + 6 more (~865 tok)
-- `FrontendE2ETest.kt` — Declares FrontendE2ETest (~346 tok)
-
-## backend/src/test/kotlin/com/adoptu/mocks/
-
-- `MockImageStorage.kt` — MockImageStorage: setFailMode, uploadImage, deleteImage, getImageUrl + 2 more (~328 tok)
-- `MockNotificationAdapter.kt` — Data class: MockNotificationAdapter (4 properties) (~644 tok)
-- `MockNotificationAdapterTest.kt` — MockNotificationAdapterTest: setup (~1506 tok)

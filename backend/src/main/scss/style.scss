@@ -128,6 +128,13 @@ form {
     margin-bottom: 2rem;
 }
 
+// 20% wider than the shared .auth-form (400px) - the register form has more
+// fields (passkey/password choice, role checkboxes) that feel cramped at
+// the login-form width.
+.register-simple {
+    max-width: 480px;
+}
+
 .register-notification {
     margin: 1.5rem auto;
     max-width: 600px;
@@ -629,6 +636,48 @@ form {
         width: auto;
         height: auto;
         margin: 0;
+    }
+}
+
+.checkbox-row-with-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .checkbox-row {
+        flex: 1;
+    }
+}
+
+.info-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: bold;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+
+    &:hover {
+        background: var(--accent);
+        color: white;
+    }
+}
+
+.passkey-info-body p {
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+
+    &:last-child {
+        margin-bottom: 0;
     }
 }
 

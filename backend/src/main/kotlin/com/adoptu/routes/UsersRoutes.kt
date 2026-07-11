@@ -326,8 +326,17 @@ fun HttpRules.adminUsersRoutes() {
                 return@runBlocking res.respondForbidden()
             }
 
-            val users = userService.getAllUsers()
-            res.send(users)
+            val page = req.queryParam("page")?.toIntOrNull() ?: 1
+            val pageSize = req.queryParam("pageSize")?.toIntOrNull() ?: 20
+            val role = req.queryParam("role")?.let { roleParam ->
+                try { UserRole.valueOf(roleParam) } catch (e: Exception) { null }
+            }
+            val search = req.queryParam("search")?.takeIf { it.isNotBlank() }
+            val includeInactive = req.queryParam("includeInactive")?.toBoolean() ?: false
+            val includeBanned = req.queryParam("includeBanned")?.toBoolean() ?: false
+
+            val result = userService.getAllUsers(page, pageSize, role, search, includeInactive, includeBanned)
+            res.send(result)
         }
     })
 
@@ -395,6 +404,57 @@ fun HttpRules.adminUsersRoutes() {
                 res.send(SuccessResponse(success = true))
             } else {
                 res.respondError("Failed to unban user", 500)
+            }
+        }
+    })
+
+    // Deactivate/reactivate: independent of Ban/Unban (isBanned) - an auditable, non-punitive
+    // active/inactive state (deactivatedAt/deactivatedBy on Users), separate axis with its own
+    // "Show inactive" filter in the admin UI. Self-targeting is blocked, same as ban.
+    post("/api/admin/users/{id}/deactivate", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+
+        runBlocking {
+            val admin = userService.getById(session.userId)
+            if (admin == null || !admin.activeRoles.contains(UserRole.ADMIN)) {
+                return@runBlocking res.respondForbidden()
+            }
+
+            val id = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondInvalidId(ValidationConstants.INVALID_ID)
+
+            if (id == session.userId) {
+                return@runBlocking res.respondError("Cannot deactivate yourself", 400)
+            }
+
+            if (userService.getById(id) == null) {
+                return@runBlocking res.respondNotFound()
+            }
+
+            val deactivated = userService.deactivateUser(id, session.userId)
+            if (deactivated) {
+                res.send(SuccessResponse(success = true))
+            } else {
+                res.respondError("Failed to deactivate user", 500)
+            }
+        }
+    })
+
+    post("/api/admin/users/{id}/reactivate", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+
+        runBlocking {
+            val admin = userService.getById(session.userId)
+            if (admin == null || !admin.activeRoles.contains(UserRole.ADMIN)) {
+                return@runBlocking res.respondForbidden()
+            }
+
+            val id = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondInvalidId(ValidationConstants.INVALID_ID)
+
+            val reactivated = userService.reactivateUser(id)
+            if (reactivated) {
+                res.send(SuccessResponse(success = true))
+            } else {
+                res.respondError("Failed to reactivate user", 500)
             }
         }
     })

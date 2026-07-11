@@ -7,6 +7,7 @@ import com.adoptu.dto.input.PetImageDto
 import com.adoptu.dto.input.Status
 import com.adoptu.dto.input.UpdatePetRequest
 import com.adoptu.dto.input.UserRole
+import com.adoptu.dto.output.PagedResult
 import com.adoptu.ports.ImageStoragePort
 import com.adoptu.ports.NotificationPort
 import com.adoptu.ports.PetRepositoryPort
@@ -30,6 +31,13 @@ class PetService(
     // rescuer/admin "my pets" management page - it must keep showing legacy pets that have
     // no country set yet, which the country-required public getAll() above would hide.
     suspend fun getMine(): List<PetDto> = petRepository.getAllUnfiltered()
+
+    suspend fun getAllForAdmin(page: Int = 1, pageSize: Int = 20, search: String? = null, includeInactive: Boolean = false): PagedResult<PetDto> =
+        petRepository.getAllForAdmin(page, pageSize, search, includeInactive)
+
+    suspend fun deactivatePet(petId: Int, deactivatedBy: Int): Boolean = petRepository.deactivatePet(petId, deactivatedBy)
+
+    suspend fun reactivatePet(petId: Int): Boolean = petRepository.reactivatePet(petId)
 
     suspend fun getById(id: Int): PetDto? = petRepository.getById(id)
 

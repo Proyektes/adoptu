@@ -7,13 +7,21 @@ import com.adoptu.dto.input.PhotographerDto
 import com.adoptu.dto.input.PhotographerSettingsRequest
 import com.adoptu.dto.input.UserDto
 import com.adoptu.dto.input.UserRole
+import com.adoptu.dto.output.PagedResult
 import com.adoptu.ports.EmailVerificationTokenInfo
 import com.adoptu.ports.UserRepositoryPort
 import com.adoptu.adapters.db.dbDispatcher
 import kotlinx.coroutines.withContext
+import org.jetbrains.exposed.v1.core.Op
+import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.greaterEq
+import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.core.isNull
+import org.jetbrains.exposed.v1.core.like
+import org.jetbrains.exposed.v1.core.lowerCase
+import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -69,6 +77,8 @@ class UserRepository(private val clock: Clock) : UserRepositoryPort {
                         lastAcceptedTermsAndConditions = user[Users.lastAcceptedTermsAndConditions],
                         isBanned = user[Users.isBanned],
                         banReason = user[Users.banReason],
+                        deactivatedAt = user[Users.deactivatedAt],
+                        deactivatedBy = user[Users.deactivatedBy],
                         photographerFee = photographerSettings?.get(Photographers.photographerFee)?.toDouble(),
                         photographerCurrency = photographerSettings?.get(Photographers.photographerCurrency),
                         photographerCountry = photographerSettings?.get(Photographers.country)?.displayName,
@@ -97,32 +107,88 @@ class UserRepository(private val clock: Clock) : UserRepositoryPort {
                         lastAcceptedPrivacyPolicy = user[Users.lastAcceptedPrivacyPolicy],
                         lastAcceptedTermsAndConditions = user[Users.lastAcceptedTermsAndConditions],
                         isBanned = user[Users.isBanned],
-                        banReason = user[Users.banReason]
+                        banReason = user[Users.banReason],
+                        deactivatedAt = user[Users.deactivatedAt],
+                        deactivatedBy = user[Users.deactivatedBy]
                     )
                 }
         }
     }
 
-    override suspend fun getAllUsers(): List<UserDto> = withContext(dbDispatcher) {
+    // Batched (one query for the whole page) rather than getActiveRolesForUser() per row,
+    // same reasoning as PetRepository.getImagesForPetIds - avoids N+1 across a page of users.
+    private fun getActiveRolesForUserIds(userIds: List<Int>): Map<Int, Set<UserRole>> {
+        if (userIds.isEmpty()) return emptyMap()
+        return UserActiveRoles.selectAll()
+            .where { UserActiveRoles.userId inList userIds }
+            .mapNotNull { row ->
+                val role = try {
+                    UserRole.valueOf(row[UserActiveRoles.role])
+                } catch (e: Exception) {
+                    null
+                } ?: return@mapNotNull null
+                row[UserActiveRoles.userId] to role
+            }
+            .groupBy({ it.first }, { it.second })
+            .mapValues { it.value.toSet() }
+    }
+
+    override suspend fun getAllUsers(
+        page: Int,
+        pageSize: Int,
+        role: UserRole?,
+        search: String?,
+        includeInactive: Boolean,
+        includeBanned: Boolean
+    ): PagedResult<UserDto> = withContext(dbDispatcher) {
         transaction {
-            Users.selectAll()
-                .map { user ->
-                    val activeRoles = getActiveRolesForUser(user[Users.id])
-                    UserDto(
-                        id = user[Users.id],
-                        username = user[Users.username],
-                        email = user[Users.username],
-                        displayName = user[Users.displayName],
-                        language = user[Users.language],
-                        country = user[Users.country]?.displayName,
-                        isEmailVerified = user[Users.isEmailVerified],
-                        activeRoles = activeRoles,
-                        lastAcceptedPrivacyPolicy = user[Users.lastAcceptedPrivacyPolicy],
-                        lastAcceptedTermsAndConditions = user[Users.lastAcceptedTermsAndConditions],
-                        isBanned = user[Users.isBanned],
-                        banReason = user[Users.banReason]
-                    )
-                }
+            var condition: Op<Boolean> = Op.TRUE
+            if (!includeInactive) condition = condition and Users.deactivatedAt.isNull()
+            if (!includeBanned) condition = condition and (Users.isBanned eq false)
+            if (!search.isNullOrBlank()) {
+                val term = "%${search.trim().lowercase()}%"
+                condition = condition and (
+                    (Users.username.lowerCase() like term) or (Users.displayName.lowerCase() like term)
+                )
+            }
+            if (role != null) {
+                val userIdsWithRole = UserActiveRoles.selectAll()
+                    .where { UserActiveRoles.role eq role.name }
+                    .map { it[UserActiveRoles.userId] }
+                condition = condition and (Users.id inList userIdsWithRole)
+            }
+
+            val total = Users.selectAll().where { condition }.count().toInt()
+
+            val safePage = page.coerceAtLeast(1)
+            val safePageSize = pageSize.coerceIn(1, 100)
+            val rows = Users.selectAll()
+                .where { condition }
+                .orderBy(Users.id, SortOrder.ASC)
+                .limit(safePageSize)
+                .offset(((safePage - 1) * safePageSize).toLong())
+                .toList()
+
+            val rolesByUser = getActiveRolesForUserIds(rows.map { it[Users.id] })
+            val items = rows.map { user ->
+                UserDto(
+                    id = user[Users.id],
+                    username = user[Users.username],
+                    email = user[Users.username],
+                    displayName = user[Users.displayName],
+                    language = user[Users.language],
+                    country = user[Users.country]?.displayName,
+                    isEmailVerified = user[Users.isEmailVerified],
+                    activeRoles = rolesByUser[user[Users.id]] ?: emptySet(),
+                    lastAcceptedPrivacyPolicy = user[Users.lastAcceptedPrivacyPolicy],
+                    lastAcceptedTermsAndConditions = user[Users.lastAcceptedTermsAndConditions],
+                    isBanned = user[Users.isBanned],
+                    banReason = user[Users.banReason],
+                    deactivatedAt = user[Users.deactivatedAt],
+                    deactivatedBy = user[Users.deactivatedBy]
+                )
+            }
+            PagedResult(items = items, total = total, page = safePage, pageSize = safePageSize)
         }
     }
 
@@ -196,6 +262,30 @@ class UserRepository(private val clock: Clock) : UserRepositoryPort {
                 val rowsUpdated = Users.update({ Users.id eq userId }) {
                     it[Users.isBanned] = false
                     it[Users.banReason] = null
+                }
+                rowsUpdated > 0
+            }
+        }
+    }
+
+    override suspend fun deactivateUser(userId: Int, deactivatedBy: Int): Boolean {
+        return withContext(dbDispatcher) {
+            transaction {
+                val rowsUpdated = Users.update({ Users.id eq userId }) {
+                    it[Users.deactivatedAt] = clock.now().toEpochMilliseconds()
+                    it[Users.deactivatedBy] = deactivatedBy
+                }
+                rowsUpdated > 0
+            }
+        }
+    }
+
+    override suspend fun reactivateUser(userId: Int): Boolean {
+        return withContext(dbDispatcher) {
+            transaction {
+                val rowsUpdated = Users.update({ Users.id eq userId }) {
+                    it[Users.deactivatedAt] = null
+                    it[Users.deactivatedBy] = null
                 }
                 rowsUpdated > 0
             }

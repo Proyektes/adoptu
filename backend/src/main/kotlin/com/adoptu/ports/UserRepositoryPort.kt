@@ -5,15 +5,28 @@ import com.adoptu.dto.input.PhotographerDto
 import com.adoptu.dto.input.PhotographerSettingsRequest
 import com.adoptu.dto.input.UserDto
 import com.adoptu.dto.input.UserRole
+import com.adoptu.dto.output.PagedResult
 
 interface UserRepositoryPort {
     suspend fun getById(userId: Int): UserDto?
     suspend fun getByEmail(email: String): UserDto?
-    suspend fun getAllUsers(): List<UserDto>
+    // No default param values here: every call site is UserService.getAllUsers(), which
+    // already declares its own defaults and always passes explicit args through - defaults
+    // on this interface would just be unreachable synthetic dispatch bytecode.
+    suspend fun getAllUsers(
+        page: Int,
+        pageSize: Int,
+        role: UserRole?,
+        search: String?,
+        includeInactive: Boolean,
+        includeBanned: Boolean
+    ): PagedResult<UserDto>
     suspend fun getPhotographers(country: String? = null, state: String? = null): List<PhotographerDto>
     suspend fun getRescuers(): List<UserDto>
     suspend fun banUser(userId: Int, reason: String?): Boolean
     suspend fun unbanUser(userId: Int): Boolean
+    suspend fun deactivateUser(userId: Int, deactivatedBy: Int): Boolean
+    suspend fun reactivateUser(userId: Int): Boolean
     suspend fun isBanned(userId: Int): Boolean
     suspend fun isRoleActive(userId: Int, role: UserRole): Boolean
     suspend fun activateRescuerProfile(userId: Int): UserDto?

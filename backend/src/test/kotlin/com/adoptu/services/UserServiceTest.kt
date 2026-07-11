@@ -93,13 +93,15 @@ class UserServiceTest {
 
         val result = userService.getAllUsers()
 
-        assertEquals(2, result.size)
+        assertEquals(2, result.items.size)
+        assertEquals(2, result.total)
     }
 
     @Test
     fun `getAllUsers returns empty list when no users`() = runBlocking {
         val result = userService.getAllUsers()
-        assertTrue(result.isEmpty())
+        assertTrue(result.items.isEmpty())
+        assertEquals(0, result.total)
     }
 
     @Test

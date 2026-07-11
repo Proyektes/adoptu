@@ -18,6 +18,8 @@ data class UserDto(
     val lastAcceptedTermsAndConditions: Long? = null,
     val isBanned: Boolean = false,
     val banReason: String? = null,
+    val deactivatedAt: Long? = null,
+    val deactivatedBy: Int? = null,
     val photographerFee: Double? = null,
     val photographerCurrency: String? = null,
     val photographerCountry: String? = null,

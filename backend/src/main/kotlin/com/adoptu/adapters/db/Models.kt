@@ -16,6 +16,12 @@ object Users : Table("users") {
     val isEmailVerified = bool("is_email_verified").default(false)
     val isBanned = bool("is_banned").default(false)
     val banReason = varchar("ban_reason", 500).nullable()
+    // Auditable soft-deactivation, independent of isBanned - null deactivatedAt means
+    // active. Deliberately not a plain isActive boolean: reactivating without recording
+    // who/when deactivated a user would throw away the moderation trail. Mirrors the
+    // Auditable/deletedAt+deletedBy pattern, adapted to this app's actual verb.
+    val deactivatedAt = long("deactivated_at").nullable()
+    val deactivatedBy = integer("deactivated_by").references(id).nullable()
 
     override val primaryKey = PrimaryKey(id)
 }
@@ -188,6 +194,12 @@ object Pets : Table("pets") {
     val isUrgent = bool("is_urgent").default(false)
     val isPromoted = bool("is_promoted").default(false)
     val createdAt = long("created_at")
+    // Auditable soft-deactivation - a non-destructive alternative to the existing hard
+    // delete() (which cascades to pet_images/adoption_requests). Independent of `status`
+    // (AVAILABLE/PENDING/ADOPTED is adoption progress, not moderation state). See the
+    // matching fields on Users for the same pattern/rationale.
+    val deactivatedAt = long("deactivated_at").nullable()
+    val deactivatedBy = integer("deactivated_by").references(Users.id).nullable()
 
     override val primaryKey = PrimaryKey(id)
 }

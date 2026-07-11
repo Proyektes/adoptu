@@ -114,3 +114,65 @@
     background: #dc3545;
     color: white;
 }
+
+.status-inactive {
+    @extend .badge;
+    background: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+}
+
+.admin-deactivated-note {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    white-space: nowrap;
+}
+
+.admin-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+
+    select,
+    input[type="search"] {
+        width: auto;
+        padding: 0.5rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg);
+        color: var(--text);
+    }
+
+    input[type="search"] {
+        min-width: 220px;
+    }
+
+    label {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    input[type="checkbox"] {
+        width: auto;
+        height: auto;
+    }
+}
+
+.admin-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+
+    button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+}

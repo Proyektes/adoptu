@@ -3,6 +3,7 @@ package com.adoptu
 import com.adoptu.adapters.db.DatabaseFactory
 import com.adoptu.config.AppConfig
 import com.adoptu.di.appModule
+import com.adoptu.routes.adminPetsRoutes
 import com.adoptu.routes.adminShelterRoutes
 import com.adoptu.routes.adminSterilizationLocationRoutes
 import com.adoptu.routes.adminUsersRoutes
@@ -86,6 +87,7 @@ internal fun configureRouting(routing: HttpRouting.Builder) {
     routing.authRoutes()
     routing.countryRoutes()
     routing.petsRoutes()
+    routing.adminPetsRoutes()
     routing.usersRoutes()
     routing.adminUsersRoutes()
     routing.photographerRoutes()
