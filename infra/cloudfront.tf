@@ -185,18 +185,24 @@ resource "aws_cloudfront_distribution" "app" {
     origin_request_policy_id = aws_cloudfront_origin_request_policy.all_viewer_plus_country.id
   }
 
-  # Exact path match only (no wildcard) - PetsRoutes.kt defines no mutating
-  # method on the bare "/api/pets" path (POST/PUT/DELETE all live under
-  # sub-paths like /{id}, /{id}/adopt), and a wildcard like "/api/pets/*"
-  # would incorrectly sweep in authenticated, user-specific sub-routes like
+  # Exact path match only (no wildcard) - a wildcard like "/api/pets/*" would
+  # incorrectly sweep in authenticated, user-specific sub-routes like
   # /api/pets/my-adoption-requests - caching those at a shared edge cache
   # would leak one user's data to another. Everything else on this
   # distribution keeps CachingDisabled.
+  #
+  # POST is required here: PetsRoutes.kt's "post(\"/api/pets\", ...)" (create
+  # pet) lives directly on this bare path, not under a sub-path - the prior
+  # comment claiming otherwise was wrong, and with POST excluded from
+  # allowed_methods CloudFront rejected pet creation outright with a 403
+  # before it ever reached the origin (found 2026-07-12 while testing pet
+  # creation end-to-end; cached_methods stays GET/HEAD-only so POST is never
+  # cached, only forwarded).
   ordered_cache_behavior {
     path_pattern             = "/api/pets"
     target_origin_id         = "ecs-task"
     viewer_protocol_policy   = "redirect-to-https"
-    allowed_methods          = ["GET", "HEAD", "OPTIONS"]
+    allowed_methods          = ["GET", "HEAD", "OPTIONS", "POST"]
     cached_methods           = ["GET", "HEAD"]
     compress                 = true
     cache_policy_id          = aws_cloudfront_cache_policy.api_public_listings.id
