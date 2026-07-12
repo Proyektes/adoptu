@@ -101,7 +101,7 @@ fun HTML.myPetsPage(navParams: NavParams = NavParams()) {
                     label { attributes["data-i18n"] = "photos"; +"Photos (max 12)" }
                     div(classes = "storage-dropzone") {
                         id = "storage-dropzone"
-                        div { classes = setOf("dropzone-content"); +"Drop images here or click to browse" }
+                        div { classes = setOf("dropzone-content"); attributes["data-i18n"] = "dropImagesHint"; +"Drop images here or click to browse" }
                         input(InputType.file) { id = "pet-images"; accept = "storage/*"; multiple = true; classes = setOf("file-input") }
                     }
                     div { id = "storage-previews"; classes = setOf("storage-previews") }

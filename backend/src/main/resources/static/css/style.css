@@ -730,7 +730,7 @@ footer span {
   vertical-align: middle;
 }
 
-.badge, .status-banned, .status-active {
+.badge, .status-inactive, .status-banned, .status-active {
   display: inline-flex;
   align-items: center;
   padding: 0.2rem 0.65rem;
@@ -759,6 +759,62 @@ footer span {
 .status-banned {
   background: #dc3545;
   color: white;
+}
+
+.status-inactive {
+  background: rgba(255, 193, 7, 0.15);
+  color: #ffc107;
+}
+
+.admin-deactivated-note {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
+.admin-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.admin-filter-bar select,
+.admin-filter-bar input[type=search] {
+  width: auto;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+}
+.admin-filter-bar input[type=search] {
+  min-width: 220px;
+}
+.admin-filter-bar label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.admin-filter-bar input[type=checkbox] {
+  width: auto;
+  height: auto;
+}
+
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+.admin-pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 form {
@@ -871,6 +927,10 @@ form input:-webkit-autofill:active {
 
 .auth-form-container {
   margin-bottom: 2rem;
+}
+
+.register-simple {
+  max-width: 480px;
 }
 
 .register-notification {
@@ -1347,6 +1407,45 @@ form input:-webkit-autofill:active {
   width: auto;
   height: auto;
   margin: 0;
+}
+
+.checkbox-row-with-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.checkbox-row-with-info .checkbox-row {
+  flex: 1;
+}
+
+.info-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: bold;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+}
+.info-icon-btn:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.passkey-info-body p {
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+.passkey-info-body p:last-child {
+  margin-bottom: 0;
 }
 
 .hint-text {

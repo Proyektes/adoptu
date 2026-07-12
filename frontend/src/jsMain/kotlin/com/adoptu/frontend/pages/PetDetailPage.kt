@@ -57,50 +57,52 @@ object PetDetailPageModule {
         } else {
             sb.append("<div class=\"pet-detail-placeholder\">${emoji[pet.type.toString()] ?: "🐾"}</div>")
         }
+        val yesLabel = I18n.t("yes")
+        val noLabel = I18n.t("no")
         sb.append("<span class=\"pet-type\">${I18n.t(pet.type.toString().lowercase())}</span><h1>${pet.name}</h1>")
         if (pet.breed != null && pet.breed.toString().isNotEmpty()) sb.append("<p class=\"pet-breed\">${pet.breed}</p>")
-        sb.append("<p><strong>Weight:</strong> ${pet.weight} kg | <strong>Age:</strong> ${pet.ageYears}y ${pet.ageMonths}m | <strong>Sex:</strong> ${I18n.t(pet.sex.toString().lowercase())}</p>")
-        sb.append("<p><strong>Status:</strong> ${pet.status}</p></div>")
+        sb.append("<p><strong>${I18n.t("weight")}:</strong> ${pet.weight} kg | <strong>${I18n.t("age")}:</strong> ${pet.ageYears} ${I18n.t("years")} ${pet.ageMonths} ${I18n.t("months")} | <strong>${I18n.t("sex")}:</strong> ${I18n.t(pet.sex.toString().lowercase())}</p>")
+        sb.append("<p><strong>${I18n.t("status")}:</strong> ${petStatusLabel(pet.status)}</p></div>")
 
         sb.append("<div class=\"pet-detail-body\">")
         if (isOwner) {
-            sb.append("<div class=\"storage-management\"><h3>Photos</h3><div class=\"pet-images-grid\" id=\"pet-images\">${renderImages()}</div></div>")
+            sb.append("<div class=\"storage-management\"><h3>${I18n.t("photos")}</h3><div class=\"pet-images-grid\" id=\"pet-images\">${renderImages()}</div></div>")
         }
-        val description = pet.description?.toString()?.takeIf { it.isNotEmpty() } ?: "No description."
+        val description = pet.description?.toString()?.takeIf { it.isNotEmpty() } ?: I18n.t("noDescription")
         sb.append("<p>$description</p>")
 
         sb.append("<div class=\"pet-details-grid\">")
-        if (pet.color != null && pet.color.toString().isNotEmpty()) sb.append("<div class=\"detail-item\"><strong>Color:</strong> ${pet.color}</div>")
-        if (pet.size != null && pet.size.toString().isNotEmpty()) sb.append("<div class=\"detail-item\"><strong>Size:</strong> ${pet.size}</div>")
-        if (pet.temperament != null && pet.temperament.toString().isNotEmpty()) sb.append("<div class=\"detail-item\"><strong>Temperament:</strong> ${pet.temperament}</div>")
-        if (pet.energyLevel != null && pet.energyLevel.toString().isNotEmpty()) sb.append("<div class=\"detail-item\"><strong>Energy:</strong> ${pet.energyLevel}</div>")
+        if (pet.color != null && pet.color.toString().isNotEmpty()) sb.append("<div class=\"detail-item\"><strong>${I18n.t("color")}:</strong> ${pet.color}</div>")
+        if (pet.size != null && pet.size.toString().isNotEmpty()) sb.append("<div class=\"detail-item\"><strong>${I18n.t("size")}:</strong> ${I18n.t(pet.size.toString().lowercase())}</div>")
+        if (pet.temperament != null && pet.temperament.toString().isNotEmpty()) sb.append("<div class=\"detail-item\"><strong>${I18n.t("temperament")}:</strong> ${pet.temperament}</div>")
+        if (pet.energyLevel != null && pet.energyLevel.toString().isNotEmpty()) sb.append("<div class=\"detail-item\"><strong>${I18n.t("energyLevel")}:</strong> ${I18n.t(pet.energyLevel.toString().lowercase())}</div>")
         sb.append("</div>")
 
         sb.append("<div class=\"pet-details-grid\">")
-        sb.append("<div class=\"detail-item\"><strong>Sterilized:</strong> ${if (pet.isSterilized == true) "Yes" else "No"}</div>")
-        sb.append("<div class=\"detail-item\"><strong>Microchipped:</strong> ${if (pet.isMicrochipped == true) "Yes" else "No"}</div>")
-        if (pet.microchipId != null && pet.microchipId.toString().isNotEmpty()) sb.append("<div class=\"detail-item\"><strong>Microchip ID:</strong> ${pet.microchipId}</div>")
+        sb.append("<div class=\"detail-item\"><strong>${I18n.t("sterilized")}:</strong> ${if (pet.isSterilized == true) yesLabel else noLabel}</div>")
+        sb.append("<div class=\"detail-item\"><strong>${I18n.t("microchipped")}:</strong> ${if (pet.isMicrochipped == true) yesLabel else noLabel}</div>")
+        if (pet.microchipId != null && pet.microchipId.toString().isNotEmpty()) sb.append("<div class=\"detail-item\"><strong>${I18n.t("microchipId")}:</strong> ${pet.microchipId}</div>")
         sb.append("</div>")
 
         sb.append("<div class=\"pet-details-grid\">")
-        sb.append("<div class=\"detail-item\"><strong>Good with kids:</strong> ${if (pet.isGoodWithKids == true) "Yes" else "No"}</div>")
-        sb.append("<div class=\"detail-item\"><strong>Good with dogs:</strong> ${if (pet.isGoodWithDogs == true) "Yes" else "No"}</div>")
-        sb.append("<div class=\"detail-item\"><strong>Good with cats:</strong> ${if (pet.isGoodWithCats == true) "Yes" else "No"}</div>")
-        sb.append("<div class=\"detail-item\"><strong>House trained:</strong> ${if (pet.isHouseTrained == true) "Yes" else "No"}</div>")
+        sb.append("<div class=\"detail-item\"><strong>${I18n.t("goodWithKids")}:</strong> ${if (pet.isGoodWithKids == true) yesLabel else noLabel}</div>")
+        sb.append("<div class=\"detail-item\"><strong>${I18n.t("goodWithDogs")}:</strong> ${if (pet.isGoodWithDogs == true) yesLabel else noLabel}</div>")
+        sb.append("<div class=\"detail-item\"><strong>${I18n.t("goodWithCats")}:</strong> ${if (pet.isGoodWithCats == true) yesLabel else noLabel}</div>")
+        sb.append("<div class=\"detail-item\"><strong>${I18n.t("houseTrained")}:</strong> ${if (pet.isHouseTrained == true) yesLabel else noLabel}</div>")
         sb.append("</div>")
 
-        if (pet.vaccinations != null && pet.vaccinations.toString().isNotEmpty()) sb.append("<div class=\"detail-section\"><strong>Vaccinations:</strong><p>${pet.vaccinations}</p></div>")
-        if (pet.rescueLocation != null && pet.rescueLocation.toString().isNotEmpty()) sb.append("<div class=\"detail-section\"><strong>Rescue Location:</strong> ${pet.rescueLocation}</div>")
-        if (pet.specialNeeds != null && pet.specialNeeds.toString().isNotEmpty()) sb.append("<div class=\"detail-section\"><strong>Special Needs:</strong><p>${pet.specialNeeds}</p></div>")
+        if (pet.vaccinations != null && pet.vaccinations.toString().isNotEmpty()) sb.append("<div class=\"detail-section\"><strong>${I18n.t("vaccinations")}:</strong><p>${pet.vaccinations}</p></div>")
+        if (pet.rescueLocation != null && pet.rescueLocation.toString().isNotEmpty()) sb.append("<div class=\"detail-section\"><strong>${I18n.t("rescueLocation")}:</strong> ${pet.rescueLocation}</div>")
+        if (pet.specialNeeds != null && pet.specialNeeds.toString().isNotEmpty()) sb.append("<div class=\"detail-section\"><strong>${I18n.t("specialNeeds")}:</strong><p>${pet.specialNeeds}</p></div>")
         val adoptionFee = pet.adoptionFee?.unsafeCast<Double?>() ?: 0.0
-        if (adoptionFee > 0) sb.append("<div class=\"detail-section\"><strong>Adoption Fee:</strong> ${currencySymbols[pet.currency.toString()] ?: "$"}$adoptionFee ${pet.currency}</div>")
-        if (pet.isUrgent == true) sb.append("<div class=\"urgent-badge\">URGENT - Needs home soon!</div>")
+        if (adoptionFee > 0) sb.append("<div class=\"detail-section\"><strong>${I18n.t("adoptionFee")}:</strong> ${currencySymbols[pet.currency.toString()] ?: "$"}$adoptionFee ${pet.currency}</div>")
+        if (pet.isUrgent == true) sb.append("<div class=\"urgent-badge\">${I18n.t("urgentBadge")}</div>")
 
         if (canAdopt) {
-            sb.append("<form id=\"adopt-form\"><label for=\"msg\">Message (optional)</label><textarea id=\"msg\" name=\"message\"></textarea><button type=\"submit\" class=\"btn\">Request Adoption</button></form>")
+            sb.append("<form id=\"adopt-form\"><label for=\"msg\">${I18n.t("messageOptional")}</label><textarea id=\"msg\" name=\"message\"></textarea><button type=\"submit\" class=\"btn\">${I18n.t("requestAdoption")}</button></form>")
         }
         if (isOwner) {
-            sb.append("<a href=\"/my-pets?edit=${pet.id}\" class=\"btn\">Edit Pet</a>")
+            sb.append("<a href=\"/my-pets?edit=${pet.id}\" class=\"btn\">${I18n.t("editPet")}</a>")
         }
         sb.append("</div>")
 
@@ -117,24 +119,32 @@ object PetDetailPageModule {
             ApiClientModule.adoptPet(petId, msg).then<Unit> {
                 (document.getElementById("message") as? HTMLElement)?.let {
                     it.className = "message success"
-                    it.textContent = "Adoption request submitted!"
+                    it.textContent = I18n.t("adoptionRequestSubmitted")
                 }
                 form.unsafeCast<HTMLElement>().style.display = "none"
             }.catch { err: dynamic ->
                 (document.getElementById("message") as? HTMLElement)?.let {
                     it.className = "message error"
-                    it.textContent = err?.message?.toString() ?: "Failed to submit request"
+                    it.textContent = err?.message?.toString() ?: I18n.t("failedSubmitRequest")
                 }
             }
         })
     }
 
+    private fun petStatusLabel(status: dynamic): String = when (status.toString()) {
+        "AVAILABLE" -> I18n.t("petStatusAvailable")
+        "ADOPTED" -> I18n.t("petStatusAdopted")
+        "DISABLED" -> I18n.t("petStatusDisabled")
+        "PENDING" -> I18n.t("petStatusPending")
+        else -> status.toString()
+    }
+
     private fun renderImages(): String {
         val images = currentPet?.images as? Array<dynamic>
-        if (images == null || images.isEmpty()) return "<p>No photos yet.</p>"
+        if (images == null || images.isEmpty()) return "<p>${I18n.t("noPhotosYet")}</p>"
         return images.joinToString("") { img ->
             val primaryClass = if (img.isPrimary == true) " primary" else ""
-            val badge = if (img.isPrimary == true) "<span class=\"primary-badge\">Primary</span>" else ""
+            val badge = if (img.isPrimary == true) "<span class=\"primary-badge\">${I18n.t("primary")}</span>" else ""
             "<div class=\"pet-image-item$primaryClass\"><img src=\"${img.imageUrl}\" alt=\"Pet photo\">$badge</div>"
         }
     }

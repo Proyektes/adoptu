@@ -24,6 +24,7 @@ object RegisterPageModule {
             val messageEl = document.getElementById("message") as? HTMLElement
             hideMessage(messageEl)
             setupMethodToggle()
+            setupPasskeyInfoModal()
             setupForm()
         })
     }
@@ -77,6 +78,26 @@ object RegisterPageModule {
         })
 
         updateVisibility()
+    }
+
+    private fun setupPasskeyInfoModal() {
+        val modal = document.getElementById("passkey-info-modal") as? HTMLElement
+        val infoBtn = document.getElementById("passkey-info-btn") as? HTMLElement
+        val closeBtn = document.getElementById("passkey-info-close") as? HTMLElement
+
+        infoBtn?.addEventListener("click", { _ ->
+            modal?.style?.display = "flex"
+        })
+
+        closeBtn?.addEventListener("click", { _ ->
+            modal?.style?.display = "none"
+        })
+
+        modal?.addEventListener("click", { e ->
+            if (e.target == modal) {
+                modal.style.display = "none"
+            }
+        })
     }
 
     private fun setupForm() {

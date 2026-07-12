@@ -1,7 +1,17 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-11T21:09:30.851Z
-> Files: 513 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T00:55:14.718Z
+> Files: 544 tracked | Anatomy hits: 0 | Misses: 0
+
+## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/62863a52-3ff2-44ef-8f05-9c7af3c307ce/scratchpad/adoptu-authcov/backend/src/test/kotlin/com/adoptu/routes/
+
+- `AuthRoutesE2ETest.kt` — Covers endpoints/branches in AuthRoutes.kt not already exercised by (~22227 tok)
+- `CountryRoutesE2ETest.kt` — End-to-end tests for [countryRoutes]: GET /api/detect-country prefers the CloudFront-injected (~1835 tok)
+
+## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/674def1c-09ab-43c8-9e11-2d5f06b3f8f2/scratchpad/
+
+- `append_bugs.py` (~846 tok)
+- `ssm-exec-policy.json` (~97 tok)
 
 ## ./
 
@@ -419,11 +429,15 @@
 
 ## backend/
 
-- `build.gradle.kts` — Gradle Kotlin build configuration (~2590 tok)
+- `build.gradle.kts` — Declares minimum (~2654 tok)
 
 ## backend/src/main/kotlin/com/adoptu/
 
 - `Application.kt` — main, configureRouting (~980 tok)
+
+## backend/src/main/kotlin/com/adoptu/adapters/aws/
+
+- `EcsTaskCredentialsProvider.kt` — AWS SDK v2's own ContainerCredentialsProvider needs GraalVM native-image reflection/resource (~904 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/
 
@@ -449,11 +463,11 @@
 
 ## backend/src/main/kotlin/com/adoptu/adapters/notification/
 
-- `SesEmailAdapter.kt` — SesEmailAdapter: sendEmail, sendEmailViaSmtp, sendEmailViaSes, sendPhotographerRequest + 2 more (~2191 tok)
+- `SesEmailAdapter.kt` — SesEmailAdapter: sendEmail, sendEmailViaSmtp, sendEmailViaSes, sendPhotographerRequest (~2249 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/storage/
 
-- `S3ImageStorageAdapter.kt` — S3ImageStorageAdapter: uploadImage, uploadImage, createBucket, deleteImage + 2 more (~1204 tok)
+- `S3ImageStorageAdapter.kt` — S3ImageStorageAdapter: uploadImage, uploadImage, createBucket, deleteImage (~1262 tok)
 
 ## backend/src/main/kotlin/com/adoptu/common/
 
@@ -472,13 +486,13 @@
 - `AdoptionRequestDto.kt` — Data class: AdoptionRequestDto (7 properties) (~72 tok)
 - `AuthDto.kt` — Data class: AssertionOptionsDto (13 properties) (~145 tok)
 - `PetDto.kt` — Data class: Gender (96 properties) (~1020 tok)
-- `ShelterDto.kt` — Data class: ShelterDto (120 properties) (~1093 tok)
-- `SterilizationLocationDto.kt` — Data class: SterilizationLocationDto (82 properties) (~803 tok)
-- `UserDto.kt` — Data class: UserRole (97 properties) (~1057 tok)
+- `ShelterDto.kt` — Data class: ShelterDto (~1043 tok)
+- `SterilizationLocationDto.kt` — Data class: SterilizationLocationDto (~765 tok)
+- `UserDto.kt` — Data class: UserRole (~1023 tok)
 
 ## backend/src/main/kotlin/com/adoptu/dto/output/
 
-- `AuthResponses.kt` — Data class: AuthMeResponse (37 properties) (~409 tok)
+- `AuthResponses.kt` — Data class: AuthMeResponse (~294 tok)
 - `PagedResult.kt` — Data class: PagedResult (4 properties) (~39 tok)
 
 ## backend/src/main/kotlin/com/adoptu/pages/
@@ -513,10 +527,10 @@
 - `NotificationPort.kt` — sendEmail, sendPhotographerRequest, sendAdoptionRequestNotification, sendTemporalHomeRequest (~219 tok)
 - `PetRepositoryPort.kt` — getAll, getAllUnfiltered, getAllForAdmin, getById, deactivatePet (~851 tok)
 - `PhotographerRepositoryPort.kt` — canSendMessage, createPhotographyRequest, getMyRequests, getRequestsForPhotographer, getRequestById (~313 tok)
-- `ShelterRepositoryPort.kt` — getById, getAll, create, update, delete (~186 tok)
+- `ShelterRepositoryPort.kt` — getById, getAll, create, update, delete (~178 tok)
 - `SterilizationLocationRepositoryPort.kt` — getById, getAll, create, update, delete (~286 tok)
 - `TemporalHomeRepositoryPort.kt` — Returns (temporalHomeId, rescuerId) and marks the token used, or null if invalid/expired/already used. (~343 tok)
-- `UserRepositoryPort.kt` — getById, getByEmail, getAllUsers, getPhotographers, getRescuers (~773 tok)
+- `UserRepositoryPort.kt` — getById, getByEmail, getAllUsers, getPhotographers, getRescuers (~769 tok)
 - `UserShelterRepositoryPort.kt` — getByUserId, create, update, delete, search (~182 tok)
 - `UserSterilizationLocationRepositoryPort.kt` — getByUserId, create, update, delete, search (~219 tok)
 
@@ -539,7 +553,7 @@
 - `EmailChangeService.kt` — EmailChangeService: requestEmailChange, verifyEmailChange, generateToken, getLocalizedEmailChangeContent (~1867 tok)
 - `EmailVerificationService.kt` — EmailVerificationService: getLocalizedContent, generateAndSendVerificationEmail, verifyToken, verifyTokenAndGetLanguage + 4 more (~1784 tok)
 - `ImageCompressor.kt` — compress, calculateDimensions (~536 tok)
-- `MagicLinkService.kt` — Data class: MagicLinkService (9 properties) (~2743 tok)
+- `MagicLinkService.kt` — Data class: MagicLinkService (~2744 tok)
 - `PasswordService.kt` — PasswordService: isLoginRateLimited, recordLoginAttempt, hasPassword, invalidatePassword + 15 more (~3609 tok)
 - `PetService.kt` — PetService: getAll, getMine, getAllForAdmin, deactivatePet + 15 more (~3440 tok)
 - `PhotographerService.kt` — PhotographerService: getPhotographers, getPhotographerById, updatePhotographerSettings, canSendMessage + 8 more (~2627 tok)
@@ -632,3 +646,56 @@
 - `pet-food.scss` — Styles: 11 rules (~946 tok)
 - `photographers.scss` — Styles: 6 rules (~214 tok)
 - `policy.scss` — Styles: 5 rules (~129 tok)
+
+## backend/src/test/kotlin/com/adoptu/adapters/db/repositories/
+
+- `UserRepositoryTest.kt` — Direct repository-level tests for two UserRepository methods that exist to satisfy the (~1363 tok)
+
+## backend/src/test/kotlin/com/adoptu/adapters/notification/
+
+- `SesEmailAdapterTest.kt` — Declares SesEmailAdapterTest (~3818 tok)
+
+## backend/src/test/kotlin/com/adoptu/common/
+
+- `CountryTest.kt` — Declares CountryTest (~489 tok)
+
+## backend/src/test/kotlin/com/adoptu/di/
+
+- `AppModuleTest.kt` — Declares AppModuleTest (~1218 tok)
+
+## backend/src/test/kotlin/com/adoptu/pages/
+
+- `ForgotPasswordPageTest.kt` — Direct unit coverage for the auth-flow page builders in ForgotPasswordPage.kt. (~1012 tok)
+- `TermsPageTest.kt` — Direct unit coverage for termsPage(). The E2E route test only exercises the function through (~854 tok)
+
+## backend/src/test/kotlin/com/adoptu/routes/
+
+- `PetsRoutesE2ETest.kt` — PetsRoutesE2ETest: setup, createTestUsers, startTestServer, generateTestImageBytes (~19414 tok)
+- `PhotographerRoutesE2ETest.kt` — E2E tests for [photographerRoutes]. (~7601 tok)
+- `ShelterRoutesE2ETest.kt` — ShelterRoutesE2ETest: setup, createTestUsers, createShelterInDb (~6042 tok)
+- `SterilizationLocationRoutesE2ETest.kt` — SterilizationLocationRoutesE2ETest: setup, createTestUsers, testModules, startServer (~6704 tok)
+- `TemporalHomeRoutesE2ETest.kt` — E2E tests for [temporalHomeRoutes]. (~7458 tok)
+- `UIRoutesDataTest.kt` — UIRoutesDataTest: setup (~5104 tok)
+- `UserShelterRoutesE2ETest.kt` — UserShelterRoutesE2ETest: setup, createTestUsers, startServer, createShelterInDb (~4074 tok)
+- `UsersRoutesE2ETest.kt` — Verbatim port of the old Ktor test's inline `module { ... }` block of mocked adapters. (~17800 tok)
+- `UserSterilizationLocationRoutesE2ETest.kt` — UserSterilizationLocationRoutesE2ETest: setup, createTestUsers, createLocationInDb (~4654 tok)
+
+## backend/src/test/kotlin/com/adoptu/services/
+
+- `EmailChangeServiceTest.kt` — EmailChangeServiceTest: setup, createTestUser, createEmailChangeToken, createExpiredEmailChangeToken (~3234 tok)
+- `ImageCompressorTest.kt` — ImageCompressorTest: createTestImage (~1355 tok)
+- `MagicLinkServiceTest.kt` — MagicLinkServiceTest: setup (~4136 tok)
+- `PasswordServiceTest.kt` — PasswordServiceTest: setup (~3959 tok)
+- `ProfileEmailVerificationServiceTest.kt` — ProfileEmailVerificationServiceTest: setup (~4165 tok)
+- `UserShelterServiceTest.kt` — UserShelterServiceTest: setup (~5325 tok)
+- `UserSterilizationLocationServiceTest.kt` — UserSterilizationLocationServiceTest: setup (~5248 tok)
+- `WebAuthnServiceTest.kt` — Builds genuine (self-signed, attestation "none") WebAuthn4j registration/authentication (~8003 tok)
+
+## backend/src/test/kotlin/com/adoptu/web/
+
+- `HtmlTest.kt` — Unit test for [respondHtml]. Every production call site (see UIRoutes.kt) passes the `status` (~336 tok)
+
+## infra/
+
+- `ecs.tf` — New, dedicated cluster rather than reusing the account's existing (~1352 tok)
+- `iam.tf` (~1009 tok)

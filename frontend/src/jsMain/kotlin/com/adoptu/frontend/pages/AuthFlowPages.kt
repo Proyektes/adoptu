@@ -23,10 +23,10 @@ object ForgotPasswordPageModule {
         val email = emailInput?.value ?: ""
         if (email.isEmpty()) {
             msg?.className = "message error"
-            msg?.textContent = "Email is required"
+            msg?.textContent = I18n.t("emailRequired")
             return
         }
-        msg?.textContent = "Sending..."
+        msg?.textContent = I18n.t("sendingEllipsis")
         msg?.className = ""
 
         RsaCryptoModule.getPublicKey()
@@ -37,16 +37,16 @@ object ForgotPasswordPageModule {
             .then { result: dynamic ->
                 if (result.success == true) {
                     msg?.className = "message success"
-                    msg?.textContent = "Password reset link sent! Check your email."
+                    msg?.textContent = I18n.t("resetLinkSent")
                     emailInput?.value = ""
                 } else {
                     msg?.className = "message error"
-                    msg?.textContent = result.error?.toString() ?: "Failed to send reset link."
+                    msg?.textContent = result.error?.toString() ?: I18n.t("failedSendResetLink")
                 }
             }
             .catch { _: dynamic ->
                 msg?.className = "message error"
-                msg?.textContent = "Failed to send reset link."
+                msg?.textContent = I18n.t("failedSendResetLink")
             }
     }
 }
@@ -59,7 +59,7 @@ object ResetPasswordPageModule {
         if (token == null) {
             document.getElementById("message")?.let {
                 it.className = "message error"
-                it.textContent = "Invalid or missing token."
+                it.textContent = I18n.t("invalidOrMissingToken")
             }
             (document.getElementById("submit-btn") as? HTMLButtonElement)?.disabled = true
             return
@@ -82,14 +82,14 @@ object ResetPasswordPageModule {
             msg?.textContent = text
         }
 
-        if (password.length < 8) { fail(I18n.t("passwordTooShort").ifEmpty { "Password must be at least 8 characters." }); return }
-        if (!Regex("[A-Z]").containsMatchIn(password)) { fail(I18n.t("passwordNeedUppercase").ifEmpty { "Password needs at least 1 uppercase letter." }); return }
-        if (!Regex("[a-z]").containsMatchIn(password)) { fail(I18n.t("passwordNeedLowercase").ifEmpty { "Password needs at least 1 lowercase letter." }); return }
-        if (!Regex("[0-9]").containsMatchIn(password)) { fail(I18n.t("passwordNeedNumber").ifEmpty { "Password needs at least 1 number." }); return }
-        if (!Regex("[!@#\$%^&*(),.?\":{}|<>\\-_+=/\\[\\]\\\\|°º«»¿]").containsMatchIn(password)) { fail(I18n.t("passwordNeedSymbol").ifEmpty { "Password needs at least 1 symbol." }); return }
-        if (password != confirmPassword) { fail(I18n.t("passwordsDoNotMatch").ifEmpty { "Passwords do not match." }); return }
+        if (password.length < 8) { fail(I18n.t("passwordTooShort")); return }
+        if (!Regex("[A-Z]").containsMatchIn(password)) { fail(I18n.t("passwordNeedUppercase")); return }
+        if (!Regex("[a-z]").containsMatchIn(password)) { fail(I18n.t("passwordNeedLowercase")); return }
+        if (!Regex("[0-9]").containsMatchIn(password)) { fail(I18n.t("passwordNeedNumber")); return }
+        if (!Regex("[!@#\$%^&*(),.?\":{}|<>\\-_+=/\\[\\]\\\\|°º«»¿]").containsMatchIn(password)) { fail(I18n.t("passwordNeedSymbol")); return }
+        if (password != confirmPassword) { fail(I18n.t("passwordsDoNotMatch")); return }
 
-        msg?.textContent = "Resetting password..."
+        msg?.textContent = I18n.t("resettingPassword")
         msg?.className = ""
 
         RsaCryptoModule.getPublicKey()
@@ -103,14 +103,14 @@ object ResetPasswordPageModule {
             .then { result: dynamic ->
                 if (result.success == true) {
                     msg?.className = "message success"
-                    msg?.textContent = "Password reset successfully! You can now login."
+                    msg?.textContent = I18n.t("passwordResetSuccess")
                     (document.getElementById("password") as? HTMLInputElement)?.value = ""
                     (document.getElementById("confirm-password") as? HTMLInputElement)?.value = ""
                 } else {
-                    fail(result.error?.toString() ?: "Failed to reset password.")
+                    fail(result.error?.toString() ?: I18n.t("failedResetPassword"))
                 }
             }
-            .catch { _: dynamic -> fail("Failed to reset password.") }
+            .catch { _: dynamic -> fail(I18n.t("failedResetPassword")) }
     }
 }
 
@@ -123,23 +123,23 @@ object MagicLinkLoginPageModule {
         val msg = document.getElementById("message")
         if (token == null) {
             msg?.className = "message error"
-            msg?.textContent = "Invalid or missing token."
+            msg?.textContent = I18n.t("invalidOrMissingToken")
             return
         }
         window.asDynamic().fetch("/api/auth/magic-link-login?token=" + window.asDynamic().encodeURIComponent(token)).then { res: dynamic ->
             res.json().then { result: dynamic ->
                 if (result.success == true) {
                     msg?.className = "message success"
-                    msg?.textContent = "Login successful! Redirecting..."
+                    msg?.textContent = I18n.t("loginSuccessRedirecting")
                     window.setTimeout({ window.location.href = "/" }, 1000)
                 } else {
                     msg?.className = "message error"
-                    msg?.textContent = result.error?.toString() ?: "Login failed. The link may be invalid or expired."
+                    msg?.textContent = result.error?.toString() ?: I18n.t("loginFailedExpiredLink")
                 }
             }
         }.catch { _: dynamic ->
             msg?.className = "message error"
-            msg?.textContent = "Login failed."
+            msg?.textContent = I18n.t("loginFailed")
         }
     }
 }
@@ -153,22 +153,22 @@ object EmailChangeVerificationPageModule {
         val msg = document.getElementById("message")
         if (token == null) {
             msg?.className = "message error"
-            msg?.textContent = "Invalid or missing token."
+            msg?.textContent = I18n.t("invalidOrMissingToken")
             return
         }
         window.asDynamic().fetch("/api/users/verify-email-change?token=" + window.asDynamic().encodeURIComponent(token)).then { res: dynamic ->
             res.json().then { result: dynamic ->
                 if (result.success == true) {
                     msg?.className = "message success"
-                    msg?.textContent = result.message?.toString() ?: "Email changed successfully!"
+                    msg?.textContent = result.message?.toString() ?: I18n.t("emailChangedSuccess")
                 } else {
                     msg?.className = "message error"
-                    msg?.textContent = result.message?.toString() ?: "Failed to change email. The link may be invalid or expired."
+                    msg?.textContent = result.message?.toString() ?: I18n.t("failedChangeEmailExpired")
                 }
             }
         }.catch { _: dynamic ->
             msg?.className = "message error"
-            msg?.textContent = "Failed to change email."
+            msg?.textContent = I18n.t("failedChangeEmail")
         }
     }
 }
@@ -182,22 +182,22 @@ object ProfileEmailVerificationPageModule {
         val msg = document.getElementById("message")
         if (token == null) {
             msg?.className = "message error"
-            msg?.textContent = "Invalid or missing token."
+            msg?.textContent = I18n.t("invalidOrMissingToken")
             return
         }
         window.asDynamic().fetch("/api/users/verify-profile-email?token=" + window.asDynamic().encodeURIComponent(token)).then { res: dynamic ->
             res.json().then { result: dynamic ->
                 if (result.success == true) {
                     msg?.className = "message success"
-                    msg?.textContent = result.message?.toString() ?: "Email verified successfully!"
+                    msg?.textContent = result.message?.toString() ?: I18n.t("emailVerifiedSuccess")
                 } else {
                     msg?.className = "message error"
-                    msg?.textContent = result.message?.toString() ?: "Failed to verify email. The link may be invalid or expired."
+                    msg?.textContent = result.message?.toString() ?: I18n.t("failedVerifyEmailExpired")
                 }
             }
         }.catch { _: dynamic ->
             msg?.className = "message error"
-            msg?.textContent = "Failed to verify email."
+            msg?.textContent = I18n.t("failedVerifyEmail")
         }
     }
 }

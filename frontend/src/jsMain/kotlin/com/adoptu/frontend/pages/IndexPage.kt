@@ -126,7 +126,7 @@ object IndexPageModule {
             "<div class=\"pet-card-placeholder\">${emoji[p.type.toString()] ?: "🐾"}</div>"
         }
         val sexClass = if (p.sex == "MALE") "male" else "female"
-        val sizeHtml = if (p.size != null) "<span class=\"pet-size\">${p.size}</span>" else ""
+        val sizeHtml = if (p.size != null) "<span class=\"pet-size\">${I18n.t(p.size.toString().lowercase())}</span>" else ""
         val urgent = if (p.isUrgent == true) " ⚠️" else ""
         val breedHtml = if (p.breed != null) "<span class=\"pet-breed\">${p.breed}</span>" else ""
         val rescueDateHtml = if (p.rescueDate != null) {
@@ -138,9 +138,17 @@ object IndexPageModule {
             "<span class=\"pet-sex $sexClass\">${I18n.t(p.sex.toString().lowercase())}</span>$sizeHtml" +
             "<div class=\"pet-name\"><h3>${p.name}$urgent</h3>$breedHtml</div>" +
             "<p class=\"pet-info\"><span class=\"pet-age\"><span class=\"label\">${I18n.t("age")}</span>" +
-            "<span class=\"value\">${p.ageYears}${I18n.t("years")} ${p.ageMonths}${I18n.t("months")}</span></span>" +
+            "<span class=\"value\">${p.ageYears} ${I18n.t("years")} ${p.ageMonths} ${I18n.t("months")}</span></span>" +
             "<span class=\"pet-rescue-date\">$rescueDateHtml</span></p>" +
-            "<p class=\"pet-status\">${p.status}</p></div></a>"
+            "<p class=\"pet-status\">${petStatusLabel(p.status)}</p></div></a>"
+    }
+
+    private fun petStatusLabel(status: dynamic): String = when (status.toString()) {
+        "AVAILABLE" -> I18n.t("petStatusAvailable")
+        "ADOPTED" -> I18n.t("petStatusAdopted")
+        "DISABLED" -> I18n.t("petStatusDisabled")
+        "PENDING" -> I18n.t("petStatusPending")
+        else -> status.toString()
     }
 
     private fun updateSentinelState() {

@@ -54,16 +54,24 @@ fun HTML.registerPage(navParams: NavParams = NavParams()) {
                     
                     div(classes = "method-selection") {
                         p { classes = setOf("hint-text")
+                            attributes["data-i18n"] = "selectLoginMethods"
                             +"Select one or more login methods:" }
-                        label {
-                            classes = setOf("checkbox-row", "clickable")
-                            input(InputType.checkBox) { name = "method"; value = "passkey"; id = "method-passkey"; checked = true }
-                            +"Passkey (most secure, works on all your devices)"
+                        div(classes = "checkbox-row-with-info") {
+                            label {
+                                classes = setOf("checkbox-row", "clickable")
+                                input(InputType.checkBox) { name = "method"; value = "passkey"; id = "method-passkey"; checked = true }
+                                span { attributes["data-i18n"] = "registerPasskeyOption"; +"Passkey (most secure, works on all your devices)" }
+                            }
+                            button(type = ButtonType.button, classes = "info-icon-btn") {
+                                id = "passkey-info-btn"
+                                attributes["aria-label"] = "How passkeys work"
+                                +"?"
+                            }
                         }
                         label {
                             classes = setOf("checkbox-row", "clickable")
                             input(InputType.checkBox) { name = "method"; value = "password"; id = "method-password" }
-                            +"Password (less secure, use as backup only)"
+                            span { attributes["data-i18n"] = "registerPasswordOption"; +"Password (less secure, use as backup only)" }
                         }
                     }
                     
@@ -96,6 +104,29 @@ fun HTML.registerPage(navParams: NavParams = NavParams()) {
                         id="register-page-login"
                         attributes["data-i18n"] = "login"; +"Login"
                     } }
+                }
+
+                div(classes = "form-modal hidden") {
+                    id = "passkey-info-modal"
+                    div(classes = "form-modal-content card-bg") {
+                        h2 { attributes["data-i18n"] = "howPasskeysWorkTitle"; +"How does a passkey work?" }
+                        div(classes = "passkey-info-body") {
+                            p { attributes["data-i18n"] = "howPasskeysWorkIntro"
+                                +"A passkey replaces your password with your device's built-in security — fingerprint, face recognition, or screen lock PIN." }
+                            p { attributes["data-i18n"] = "howPasskeysWorkSecurity"
+                                +"It's stored only on your device, can't be phished or leaked in a data breach, and syncs automatically across your devices." }
+                            p { attributes["data-i18n"] = "howPasskeysWorkBackup"
+                                +"You can add a password too, but a passkey alone is enough to sign in — no password needed." }
+                        }
+                        div(classes = "form-actions") {
+                            button(type = ButtonType.button) {
+                                id = "passkey-info-close"
+                                classes = setOf("btn", "btn-secondary")
+                                attributes["data-i18n"] = "gotIt"
+                                +"Got it"
+                            }
+                        }
+                    }
                 }
             }
         }

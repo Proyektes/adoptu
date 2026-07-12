@@ -1,111 +1,112 @@
 package com.adoptu.frontend.pages
 
+import com.adoptu.frontend.I18n
 import com.adoptu.frontend.forEachElement
 import kotlinx.browser.document
 import org.w3c.dom.HTMLElement
 
-private data class FoodItem(val name: String, val detail: String, val description: String)
-private data class FoodCategory(val type: String, val title: String, val items: List<FoodItem>)
+private data class FoodItemKey(val nameKey: String, val detailKey: String, val descKey: String)
+private data class FoodCategoryKey(val titleKey: String, val items: List<FoodItemKey>)
 
-private val foodData: Map<String, List<FoodCategory>> = mapOf(
+private val foodDataKeys: Map<String, List<FoodCategoryKey>> = mapOf(
     "DOG" to listOf(
-        FoodCategory("safe", "Safe Foods", listOf(
-            FoodItem("Chicken", "Cooked, boneless", "Lean protein, easy to digest"),
-            FoodItem("Rice", "White or brown", "Good source of carbohydrates"),
-            FoodItem("Carrots", "Raw or cooked", "Low in calories, high in fiber"),
-            FoodItem("Apples", "Without seeds", "Rich in vitamins"),
-            FoodItem("Peanut Butter", "Unsalted, no xylitol", "Good protein source")
+        FoodCategoryKey("safeFoods", listOf(
+            FoodItemKey("food_dog_safe_chicken_name", "food_dog_safe_chicken_detail", "food_dog_safe_chicken_desc"),
+            FoodItemKey("food_dog_safe_rice_name", "food_dog_safe_rice_detail", "food_dog_safe_rice_desc"),
+            FoodItemKey("food_dog_safe_carrots_name", "food_dog_safe_carrots_detail", "food_dog_safe_carrots_desc"),
+            FoodItemKey("food_dog_safe_apples_name", "food_dog_safe_apples_detail", "food_dog_safe_apples_desc"),
+            FoodItemKey("food_dog_safe_peanutbutter_name", "food_dog_safe_peanutbutter_detail", "food_dog_safe_peanutbutter_desc")
         )),
-        FoodCategory("harmful", "Harmful Foods", listOf(
-            FoodItem("Grapes", "All varieties", "Can cause kidney failure"),
-            FoodItem("Onions", "All forms", "Damages red blood cells"),
-            FoodItem("Chocolate", "All types", "Toxic to dogs"),
-            FoodItem("Garlic", "All forms", "Causes anemia")
+        FoodCategoryKey("harmfulFoods", listOf(
+            FoodItemKey("food_dog_harmful_grapes_name", "food_dog_harmful_grapes_detail", "food_dog_harmful_grapes_desc"),
+            FoodItemKey("food_dog_harmful_onions_name", "food_dog_harmful_onions_detail", "food_dog_harmful_onions_desc"),
+            FoodItemKey("food_dog_harmful_chocolate_name", "food_dog_harmful_chocolate_detail", "food_dog_harmful_chocolate_desc"),
+            FoodItemKey("food_dog_harmful_garlic_name", "food_dog_harmful_garlic_detail", "food_dog_harmful_garlic_desc")
         )),
-        FoodCategory("cannot", "Cannot Eat", listOf(
-            FoodItem("Xylitol", "Artificial sweetener", "Highly toxic"),
-            FoodItem("Macadamia Nuts", "All forms", "Causes weakness"),
-            FoodItem("Avocado", "Pit, skin, all", "Contains persin"),
-            FoodItem("Alcohol", "All forms", "Highly toxic")
+        FoodCategoryKey("cannotEatFoods", listOf(
+            FoodItemKey("food_dog_cannot_xylitol_name", "food_dog_cannot_xylitol_detail", "food_dog_cannot_xylitol_desc"),
+            FoodItemKey("food_dog_cannot_macadamia_name", "food_dog_cannot_macadamia_detail", "food_dog_cannot_macadamia_desc"),
+            FoodItemKey("food_dog_cannot_avocado_name", "food_dog_cannot_avocado_detail", "food_dog_cannot_avocado_desc"),
+            FoodItemKey("food_dog_cannot_alcohol_name", "food_dog_cannot_alcohol_detail", "food_dog_cannot_alcohol_desc")
         ))
     ),
     "CAT" to listOf(
-        FoodCategory("safe", "Safe Foods", listOf(
-            FoodItem("Cooked Fish", "Without bones", "High in protein"),
-            FoodItem("Chicken", "Cooked, plain", "Good protein source"),
-            FoodItem("Pumpkin", "Plain, cooked", "Helps digestion"),
-            FoodItem("Eggs", "Cooked", "Complete protein")
+        FoodCategoryKey("safeFoods", listOf(
+            FoodItemKey("food_cat_safe_cookedfish_name", "food_cat_safe_cookedfish_detail", "food_cat_safe_cookedfish_desc"),
+            FoodItemKey("food_cat_safe_chicken_name", "food_cat_safe_chicken_detail", "food_cat_safe_chicken_desc"),
+            FoodItemKey("food_cat_safe_pumpkin_name", "food_cat_safe_pumpkin_detail", "food_cat_safe_pumpkin_desc"),
+            FoodItemKey("food_cat_safe_eggs_name", "food_cat_safe_eggs_detail", "food_cat_safe_eggs_desc")
         )),
-        FoodCategory("harmful", "Harmful Foods", listOf(
-            FoodItem("Raw Eggs", "With avidin", "Interferes with biotin"),
-            FoodItem("Raw Fish", "Contains thiaminase", "Breaks down B vitamins"),
-            FoodItem("Dog Food", "Any", "Lacks taurine"),
-            FoodItem("Milk", "Most cats", "Lactose intolerance")
+        FoodCategoryKey("harmfulFoods", listOf(
+            FoodItemKey("food_cat_harmful_raweggs_name", "food_cat_harmful_raweggs_detail", "food_cat_harmful_raweggs_desc"),
+            FoodItemKey("food_cat_harmful_rawfish_name", "food_cat_harmful_rawfish_detail", "food_cat_harmful_rawfish_desc"),
+            FoodItemKey("food_cat_harmful_dogfood_name", "food_cat_harmful_dogfood_detail", "food_cat_harmful_dogfood_desc"),
+            FoodItemKey("food_cat_harmful_milk_name", "food_cat_harmful_milk_detail", "food_cat_harmful_milk_desc")
         )),
-        FoodCategory("cannot", "Cannot Eat", listOf(
-            FoodItem("Chocolate", "All types", "Theobromine toxic"),
-            FoodItem("Onions/Garlic", "All forms", "Damages RBC"),
-            FoodItem("Grapes/Raisins", "All varieties", "Kidney damage"),
-            FoodItem("Alcohol", "All forms", "Very toxic")
+        FoodCategoryKey("cannotEatFoods", listOf(
+            FoodItemKey("food_cat_cannot_chocolate_name", "food_cat_cannot_chocolate_detail", "food_cat_cannot_chocolate_desc"),
+            FoodItemKey("food_cat_cannot_onionsgarlic_name", "food_cat_cannot_onionsgarlic_detail", "food_cat_cannot_onionsgarlic_desc"),
+            FoodItemKey("food_cat_cannot_grapesraisins_name", "food_cat_cannot_grapesraisins_detail", "food_cat_cannot_grapesraisins_desc"),
+            FoodItemKey("food_cat_cannot_alcohol_name", "food_cat_cannot_alcohol_detail", "food_cat_cannot_alcohol_desc")
         ))
     ),
     "BIRD" to listOf(
-        FoodCategory("safe", "Safe Foods", listOf(
-            FoodItem("Seeds", "Variety mix", "Good fat source"),
-            FoodItem("Fruits", "Most varieties", "Vitamins and minerals"),
-            FoodItem("Vegetables", "Leafy greens", "Essential nutrients"),
-            FoodItem("Pellets", "Quality formulated", "Complete nutrition")
+        FoodCategoryKey("safeFoods", listOf(
+            FoodItemKey("food_bird_safe_seeds_name", "food_bird_safe_seeds_detail", "food_bird_safe_seeds_desc"),
+            FoodItemKey("food_bird_safe_fruits_name", "food_bird_safe_fruits_detail", "food_bird_safe_fruits_desc"),
+            FoodItemKey("food_bird_safe_vegetables_name", "food_bird_safe_vegetables_detail", "food_bird_safe_vegetables_desc"),
+            FoodItemKey("food_bird_safe_pellets_name", "food_bird_safe_pellets_detail", "food_bird_safe_pellets_desc")
         )),
-        FoodCategory("harmful", "Harmful Foods", listOf(
-            FoodItem("Avocado", "All parts", "Persin toxic"),
-            FoodItem("Fruit Pits", "Apple, peach", "Cyanide traces"),
-            FoodItem("Salt", "Any form", "Toxic to birds"),
-            FoodItem("Caffeine", "Coffee, tea", "Heart issues")
+        FoodCategoryKey("harmfulFoods", listOf(
+            FoodItemKey("food_bird_harmful_avocado_name", "food_bird_harmful_avocado_detail", "food_bird_harmful_avocado_desc"),
+            FoodItemKey("food_bird_harmful_fruitpits_name", "food_bird_harmful_fruitpits_detail", "food_bird_harmful_fruitpits_desc"),
+            FoodItemKey("food_bird_harmful_salt_name", "food_bird_harmful_salt_detail", "food_bird_harmful_salt_desc"),
+            FoodItemKey("food_bird_harmful_caffeine_name", "food_bird_harmful_caffeine_detail", "food_bird_harmful_caffeine_desc")
         )),
-        FoodCategory("cannot", "Cannot Eat", listOf(
-            FoodItem("Chocolate", "All types", "Theobromine toxic"),
-            FoodItem("Onions", "All forms", "Damages RBC"),
-            FoodItem("Garlic", "All forms", "Toxic"),
-            FoodItem("Mushrooms", "Wild varieties", "Potential toxins")
+        FoodCategoryKey("cannotEatFoods", listOf(
+            FoodItemKey("food_bird_cannot_chocolate_name", "food_bird_cannot_chocolate_detail", "food_bird_cannot_chocolate_desc"),
+            FoodItemKey("food_bird_cannot_onions_name", "food_bird_cannot_onions_detail", "food_bird_cannot_onions_desc"),
+            FoodItemKey("food_bird_cannot_garlic_name", "food_bird_cannot_garlic_detail", "food_bird_cannot_garlic_desc"),
+            FoodItemKey("food_bird_cannot_mushrooms_name", "food_bird_cannot_mushrooms_detail", "food_bird_cannot_mushrooms_desc")
         ))
     ),
     "FISH" to listOf(
-        FoodCategory("safe", "Safe Foods", listOf(
-            FoodItem("Flakes", "Quality brands", "Complete fish food"),
-            FoodItem("Pellets", "Floating/sinking", "Balanced nutrition"),
-            FoodItem("Frozen Food", "Bloodworms, brine", "Protein source"),
-            FoodItem("Vegetables", "Blanched zucchini", "Fiber source")
+        FoodCategoryKey("safeFoods", listOf(
+            FoodItemKey("food_fish_safe_flakes_name", "food_fish_safe_flakes_detail", "food_fish_safe_flakes_desc"),
+            FoodItemKey("food_fish_safe_pellets_name", "food_fish_safe_pellets_detail", "food_fish_safe_pellets_desc"),
+            FoodItemKey("food_fish_safe_frozenfood_name", "food_fish_safe_frozenfood_detail", "food_fish_safe_frozenfood_desc"),
+            FoodItemKey("food_fish_safe_vegetables_name", "food_fish_safe_vegetables_detail", "food_fish_safe_vegetables_desc")
         )),
-        FoodCategory("harmful", "Harmful Foods", listOf(
-            FoodItem("Bread", "Any type", "No nutrition, fills up"),
-            FoodItem("Human Food", "Cooked meals", "Wrong nutrition"),
-            FoodItem("Live Feed", "Wild caught insects", "Potential parasites")
+        FoodCategoryKey("harmfulFoods", listOf(
+            FoodItemKey("food_fish_harmful_bread_name", "food_fish_harmful_bread_detail", "food_fish_harmful_bread_desc"),
+            FoodItemKey("food_fish_harmful_humanfood_name", "food_fish_harmful_humanfood_detail", "food_fish_harmful_humanfood_desc"),
+            FoodItemKey("food_fish_harmful_livefeed_name", "food_fish_harmful_livefeed_detail", "food_fish_harmful_livefeed_desc")
         )),
-        FoodCategory("cannot", "Cannot Eat", listOf(
-            FoodItem("Land Insect", "Crawling bugs", "Not natural food"),
-            FoodItem("Mammal Meat", "Chicken, beef", "Wrong for most fish"),
-            FoodItem("Dairy", "Any", "Cannot digest"),
-            FoodItem("Breadcrumbs", "Many contain garlic", "Harmful additives")
+        FoodCategoryKey("cannotEatFoods", listOf(
+            FoodItemKey("food_fish_cannot_landinsect_name", "food_fish_cannot_landinsect_detail", "food_fish_cannot_landinsect_desc"),
+            FoodItemKey("food_fish_cannot_mammalmeat_name", "food_fish_cannot_mammalmeat_detail", "food_fish_cannot_mammalmeat_desc"),
+            FoodItemKey("food_fish_cannot_dairy_name", "food_fish_cannot_dairy_detail", "food_fish_cannot_dairy_desc"),
+            FoodItemKey("food_fish_cannot_breadcrumbs_name", "food_fish_cannot_breadcrumbs_detail", "food_fish_cannot_breadcrumbs_desc")
         ))
     ),
     "RABBIT" to listOf(
-        FoodCategory("safe", "Safe Foods", listOf(
-            FoodItem("Hay", "Timothy grass", "80% of diet"),
-            FoodItem("Leafy Greens", "Romaine, cilantro", "Daily vitamins"),
-            FoodItem("Pellets", "Timothy-based", "Balanced nutrition"),
-            FoodItem("Carrots", "In moderation", "Treat")
+        FoodCategoryKey("safeFoods", listOf(
+            FoodItemKey("food_rabbit_safe_hay_name", "food_rabbit_safe_hay_detail", "food_rabbit_safe_hay_desc"),
+            FoodItemKey("food_rabbit_safe_leafygreens_name", "food_rabbit_safe_leafygreens_detail", "food_rabbit_safe_leafygreens_desc"),
+            FoodItemKey("food_rabbit_safe_pellets_name", "food_rabbit_safe_pellets_detail", "food_rabbit_safe_pellets_desc"),
+            FoodItemKey("food_rabbit_safe_carrots_name", "food_rabbit_safe_carrots_detail", "food_rabbit_safe_carrots_desc")
         )),
-        FoodCategory("harmful", "Harmful Foods", listOf(
-            FoodItem("Iceberg Lettuce", "No nutrition", "Can cause GI stasis"),
-            FoodItem("Beans", "All legumes", "Gas, digestive issues"),
-            FoodItem("Corn", "Any form", "Cannot digest"),
-            FoodItem("Potatoes", "Any form", "Wrong nutrients")
+        FoodCategoryKey("harmfulFoods", listOf(
+            FoodItemKey("food_rabbit_harmful_icebergletttuce_name", "food_rabbit_harmful_icebergletttuce_detail", "food_rabbit_harmful_icebergletttuce_desc"),
+            FoodItemKey("food_rabbit_harmful_beans_name", "food_rabbit_harmful_beans_detail", "food_rabbit_harmful_beans_desc"),
+            FoodItemKey("food_rabbit_harmful_corn_name", "food_rabbit_harmful_corn_detail", "food_rabbit_harmful_corn_desc"),
+            FoodItemKey("food_rabbit_harmful_potatoes_name", "food_rabbit_harmful_potatoes_detail", "food_rabbit_harmful_potatoes_desc")
         )),
-        FoodCategory("cannot", "Cannot Eat", listOf(
-            FoodItem("Chocolate", "All types", "Theobromine toxic"),
-            FoodItem("Onions", "All forms", "Very toxic"),
-            FoodItem("Garlic", "All forms", "Toxic"),
-            FoodItem("Avocado", "All parts", "Contains persin")
+        FoodCategoryKey("cannotEatFoods", listOf(
+            FoodItemKey("food_rabbit_cannot_chocolate_name", "food_rabbit_cannot_chocolate_detail", "food_rabbit_cannot_chocolate_desc"),
+            FoodItemKey("food_rabbit_cannot_onions_name", "food_rabbit_cannot_onions_detail", "food_rabbit_cannot_onions_desc"),
+            FoodItemKey("food_rabbit_cannot_garlic_name", "food_rabbit_cannot_garlic_detail", "food_rabbit_cannot_garlic_desc"),
+            FoodItemKey("food_rabbit_cannot_avocado_name", "food_rabbit_cannot_avocado_detail", "food_rabbit_cannot_avocado_desc")
         ))
     )
 )
@@ -120,6 +121,7 @@ object PetFoodPageModule {
                 document.querySelectorAll(".pet-type-btn").forEachElement { b -> b.unsafeCast<HTMLElement>().classList.remove("active") }
                 btn.classList.add("active")
                 val type = btn.asDynamic().dataset.type.toString()
+                document.getElementById("selected-pet-type")?.textContent = "${I18n.t(type.lowercase())} ${I18n.t("foodInformation")}"
                 showFoodInfo(type)
             })
         }
@@ -127,15 +129,17 @@ object PetFoodPageModule {
     }
 
     private fun showFoodInfo(petType: String) {
-        val data = foodData[petType] ?: return
+        val data = foodDataKeys[petType] ?: return
         val container = document.getElementById("food-info") ?: return
         val sb = StringBuilder()
         data.forEach { cat ->
-            sb.append("<div class=\"food-category\"><h3>${cat.title}</h3><ul class=\"food-list\">")
+            sb.append("<div class=\"food-category\"><h3>${I18n.t(cat.titleKey)}</h3><ul class=\"food-list\">")
             cat.items.forEach { item ->
-                sb.append("<li><strong>${item.name}</strong>")
-                if (item.detail.isNotEmpty()) sb.append(" <span class=\"food-detail\">(${item.detail})</span>")
-                if (item.description.isNotEmpty()) sb.append("<p class=\"food-desc\">${item.description}</p>")
+                sb.append("<li><strong>${I18n.t(item.nameKey)}</strong>")
+                val detail = I18n.t(item.detailKey)
+                if (detail.isNotEmpty()) sb.append(" <span class=\"food-detail\">($detail)</span>")
+                val desc = I18n.t(item.descKey)
+                if (desc.isNotEmpty()) sb.append("<p class=\"food-desc\">$desc</p>")
                 sb.append("</li>")
             }
             sb.append("</ul></div>")

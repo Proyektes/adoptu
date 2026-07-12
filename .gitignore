@@ -67,6 +67,14 @@ node_modules/
 # OpenWolf design QC screenshots (temporary, not for VCS)
 .wolf/designqc-captures/
 
+# OpenWolf live session-churn files (rewritten on nearly every tool call -
+# tracking them in git causes constant stash/merge conflicts across
+# sessions, branches, and worktrees; anatomy.md/buglog.json/cerebrum.md
+# stay tracked since those are durable cross-session knowledge, not churn)
+.wolf/hooks/_session.json
+.wolf/memory.md
+.wolf/token-ledger.json
+
 # Playwright MCP debug snapshots (temporary, not for VCS)
 .playwright-mcp/
 .tokensave

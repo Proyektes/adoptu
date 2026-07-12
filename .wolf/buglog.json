@@ -2378,9 +2378,435 @@
         "role-activation",
         "kt"
       ],
-      "related_bugs": ["bug-135", "bug-137", "bug-139"],
+      "related_bugs": [
+        "bug-135",
+        "bug-137",
+        "bug-139"
+      ],
       "occurrences": 1,
       "last_seen": "2026-07-11T01:38:33.000Z"
+    },
+    {
+      "id": "bug-146",
+      "timestamp": "2026-07-11T19:46:59.663Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/kotlin/com/adoptu/pages/RegisterPage.kt",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 14→22 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T19:46:59.663Z"
+    },
+    {
+      "id": "bug-147",
+      "timestamp": "2026-07-11T19:47:31.124Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/RegisterPage.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T19:47:31.124Z"
+    },
+    {
+      "id": "bug-148",
+      "timestamp": "2026-07-11T19:53:00.000Z",
+      "error_message": "Spanish (and all non-English) registration view: passkey/password method labels and login-method hint text not translated",
+      "file": "backend/src/main/kotlin/com/adoptu/pages/RegisterPage.kt",
+      "root_cause": "The passkey/password checkbox labels and the \"Select one or more login methods:\" hint were hardcoded raw English strings with no data-i18n attribute, unlike every other string on the page, so I18n.updatePage() never touched them regardless of preferredLanguage.",
+      "fix": "Wrapped the label text in its own <span data-i18n=...> (data-i18n cannot sit on the <label> itself since it wraps a checkbox and I18n.updatePage() does el.textContent = t(key), which would wipe the checkbox), added selectLoginMethods/registerPasskeyOption/registerPasswordOption i18n keys across all 5 languages, and added an informational modal (How does a passkey work?) triggered by a new info-icon-btn next to the Passkey option, reusing the existing form-modal/form-modal-content pattern from AdminPage.kt.",
+      "tags": [
+        "i18n",
+        "translation",
+        "register-page",
+        "passkey",
+        "ux"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T19:53:00.000Z"
+    },
+    {
+      "id": "bug-149",
+      "timestamp": "2026-07-11T19:57:12.007Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/kotlin/com/adoptu/pages/PetsPage.kt",
+      "root_cause": "7 lines replaced/restructured",
+      "fix": "Rewrote 14→18 lines (7 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T19:57:12.007Z"
+    },
+    {
+      "id": "bug-150",
+      "timestamp": "2026-07-11T19:57:21.656Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/kotlin/com/adoptu/pages/IndexPage.kt",
+      "root_cause": "7 lines replaced/restructured",
+      "fix": "Rewrote 14→18 lines (7 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T19:57:21.656Z"
+    },
+    {
+      "id": "bug-151",
+      "timestamp": "2026-07-11T20:07:00.000Z",
+      "error_message": "Pet browse page filter buttons (Dogs/Cats/Birds/Fish/All Sex/Male/Female) never translate; pet cards show raw English/enum text (age, rescued, years, months, SMALL, AVAILABLE) in every language",
+      "file": "backend/src/main/kotlin/com/adoptu/pages/PetsPage.kt, IndexPage.kt; frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/IndexPage.kt, MyPetsPage.kt",
+      "root_cause": "Same class of bug as bug-148 (RegisterPage): PetsPage.kt/IndexPage.kt filter buttons and sex <select><option>s had raw hardcoded English text with no data-i18n attribute. Separately, IndexPage.kt/MyPetsPage.kt petCardHtml() DID call I18n.t(\"age\")/I18n.t(\"rescued\")/I18n.t(\"years\")/I18n.t(\"months\") but those keys were never defined in I18n.kt (t() falls back to returning the raw key string when missing), and pet-size/pet-status badges used the raw ${p.size}/${p.status} enum value directly instead of I18n.t(...), so they showed literal DB values (SMALL, AVAILABLE) in every language including English.",
+      "fix": "Added data-i18n to filter buttons/options (wrapping emoji-prefixed button text in a child <span data-i18n> since data-i18n replaces textContent and would otherwise wipe the emoji or the sibling <input>). Added the missing age/rescued/years/months and new petStatusAvailable/Adopted/Disabled/Pending keys across all 5 languages. Routed pet-size through I18n.t(p.size.lowercase()) (small/medium/large keys already existed, just were not being used) and added a petStatusLabel() mapper for the 4-value Status enum.",
+      "tags": [
+        "i18n",
+        "translation",
+        "pets-page",
+        "index-page",
+        "my-pets-page",
+        "filters"
+      ],
+      "related_bugs": [
+        "bug-148"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T20:07:00.000Z"
+    },
+    {
+      "id": "bug-152",
+      "timestamp": "2026-07-11T20:12:00.632Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/kotlin/com/adoptu/pages/ForgotPasswordPage.kt",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 10→10 lines (5 removed) | Also: h1 { +\"Reset Password\" }; p { +\"Enter your new password below.\" }",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-11T20:12:08.240Z"
+    },
+    {
+      "id": "bug-153",
+      "timestamp": "2026-07-11T20:12:13.074Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/main/kotlin/com/adoptu/pages/ForgotPasswordPage.kt",
+      "root_cause": "Had \"Email Link Login\"",
+      "fix": "Changed to \"data-i18n\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-07-11T20:12:26.159Z"
+    },
+    {
+      "id": "bug-154",
+      "timestamp": "2026-07-11T20:16:10.556Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/main/kotlin/com/adoptu/pages/MyPetsPage.kt",
+      "root_cause": "Had \"Drop images here or click to browse\"",
+      "fix": "Changed to \"data-i18n\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T20:16:10.556Z"
+    },
+    {
+      "id": "bug-155",
+      "timestamp": "2026-07-11T20:24:53.964Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/kotlin/com/adoptu/pages/PetFoodPage.kt",
+      "root_cause": "104 lines replaced/restructured",
+      "fix": "Rewrote 112→6 lines (104 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T20:24:53.964Z"
+    },
+    {
+      "id": "bug-156",
+      "timestamp": "2026-07-11T20:26:18.086Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/PetFoodPage.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T20:26:18.086Z"
+    },
+    {
+      "id": "bug-157",
+      "timestamp": "2026-07-11T20:45:00.000Z",
+      "error_message": "Full-app i18n audit: ForgotPassword/auth-flow pages, PetDetailPage, PetFoodPage, and Privacy/Terms legal pages were entirely or mostly untranslated (hardcoded English, or i18n keys referenced but never defined in the dictionary)",
+      "file": "backend/pages/ForgotPasswordPage.kt, PetFoodPage.kt, PrivacyPage.kt, TermsPage.kt; frontend/pages/AuthFlowPages.kt, PetDetailPage.kt, PetFoodPage.kt, MyPetsPage.kt; frontend/I18n.kt",
+      "root_cause": "Same two-fold pattern as bug-148/bug-151: (1) tags with literal English text and no data-i18n attribute at all, and (2) I18n.t(key) called with a key never added to the dictionary (silently falls back to the raw key string). PetFoodPage additionally had a completely unused/dead duplicate foodData map in the backend template (never referenced by petFoodPage()) and its selected-pet-type header never updated on tab switch.",
+      "fix": "Added ~1900 new i18n entries across en/es/fr/pt/zh (built via generator scripts to keep 5-language parity mechanical and error-free): ~22 keys for ForgotPassword/AuthFlowPages incl. previously-broken passwordTooShort/NeedUppercase/NeedLowercase/NeedNumber/NeedSymbol keys that were called but undefined; ~12 keys for PetDetailPage field labels/status/yes-no; 187 keys for PetFoodPage (60 food items x name/detail/desc, refactored FoodItem to carry i18n keys instead of literal strings, deleted the dead backend foodData map, wired the pet-type header to update on tab click); 73 keys for PrivacyPage and 51 for TermsPage legal content (generated the Kotlin page files programmatically from a translation table to keep data-i18n attributes and English SSR fallback text in sync across 124 legal strings). Verified all in a live browser with preferredLanguage=es.",
+      "tags": [
+        "i18n",
+        "translation",
+        "forgot-password",
+        "pet-detail-page",
+        "pet-food-page",
+        "privacy-page",
+        "terms-page",
+        "legal-content"
+      ],
+      "related_bugs": [
+        "bug-148",
+        "bug-151"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T20:45:00.000Z"
+    },
+    {
+      "id": "bug-158",
+      "timestamp": "2026-07-11T22:20:32.942Z",
+      "error_message": "Null/undefined access in ",
+      "file": "backend/src/test/kotlin/com/adoptu/services/EmailChangeServiceTest.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T22:20:32.942Z"
+    },
+    {
+      "id": "bug-159",
+      "timestamp": "2026-07-11T22:21:19.117Z",
+      "error_message": "Null/undefined access in ",
+      "file": "backend/src/test/kotlin/com/adoptu/services/MagicLinkServiceTest.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T22:21:19.117Z"
+    },
+    {
+      "id": "bug-160",
+      "timestamp": "2026-07-11T22:21:29.585Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/test/kotlin/com/adoptu/adapters/notification/SesEmailAdapterTest.kt",
+      "root_cause": "12 lines replaced/restructured",
+      "fix": "Rewrote 52→83 lines (12 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T22:21:29.585Z"
+    },
+    {
+      "id": "bug-161",
+      "timestamp": "2026-07-11T22:21:40.349Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "backend/src/test/kotlin/com/adoptu/adapters/notification/SesEmailAdapterTest.kt",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T22:21:40.349Z"
+    },
+    {
+      "id": "bug-162",
+      "timestamp": "2026-07-11T22:24:15.840Z",
+      "error_message": "Wrong reference: deleteWhere should be insert",
+      "file": "backend/src/test/kotlin/com/adoptu/services/EmailChangeServiceTest.kt",
+      "root_cause": "Used \"deleteWhere\" instead of \"insert\"",
+      "fix": "Changed deleteWhere → insert",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T22:24:15.840Z"
+    },
+    {
+      "id": "bug-163",
+      "timestamp": "2026-07-11T22:24:33.868Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/test/kotlin/com/adoptu/services/MagicLinkServiceTest.kt",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 14→22 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T22:24:33.868Z"
+    },
+    {
+      "id": "bug-164",
+      "timestamp": "2026-07-11T22:52:49.338Z",
+      "error_message": "Wrong return value",
+      "file": "../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/62863a52-3ff2-44ef-8f05-9c7af3c307ce/scratchpad/adoptu-authcov/backend/src/test/kotlin/com/adoptu/routes/AuthRoutesE2ETest.kt",
+      "root_cause": "Was returning: TestServer.start(modules = listOf(testModules), in",
+      "fix": "Now returns: TestServer.start(modules = listOf(testModules), in",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T22:52:49.338Z"
+    },
+    {
+      "id": "bug-165",
+      "timestamp": "2026-07-11T22:53:13.297Z",
+      "error_message": "Null/undefined access in ",
+      "file": "../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/62863a52-3ff2-44ef-8f05-9c7af3c307ce/scratchpad/adoptu-authcov/backend/src/test/kotlin/com/adoptu/routes/AuthRoutesE2ETest.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T22:53:13.297Z"
+    },
+    {
+      "id": "bug-166",
+      "timestamp": "2026-07-11T22:33:00.000Z",
+      "error_message": "Verification email never delivered after registration; resend endpoint returns \"Unable to send verification email due to a server error.\" (400)",
+      "file": "backend/src/main/kotlin/com/adoptu/adapters/notification/SesEmailAdapter.kt",
+      "root_cause": "SES send is failing in production (env=prod uses SesClient with DefaultCredentialsProvider, no fallback). Behavior matches SES sandbox mode: only pre-verified recipient addresses receive mail, all others are rejected. Confirmed by registering a real password account via the live UI (www.adopt-u.org/register) with a disposable mail.tm inbox - registration succeeded but no email arrived after 2.5+ minutes, and login is blocked with \"Please verify your email before logging in.\" IAM user ivan.gomez lacks ses:GetAccount/ListEmailIdentities/GetSendQuota and logs:DescribeLogGroups, so sandbox status could not be confirmed programmatically from this session.",
+      "fix": "Not yet fixed - user (Ivan) to check/move SES out of sandbox via AWS console or grant broader IAM permissions to diagnose further. This blocks any real end-to-end beta testing via the actual registration UI.",
+      "tags": [
+        "ses",
+        "email-verification",
+        "registration",
+        "sandbox-mode",
+        "production",
+        "blocker"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T22:33:00.000Z"
+    },
+    {
+      "id": "bug-167",
+      "timestamp": "2026-07-11T22:33:00.000Z",
+      "error_message": "POST /api/auth/registration-options with a brand-new, never-before-used email address returns a raw HTTP 500 with empty body (no JSON error) instead of a handled error response",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt",
+      "root_cause": "Likely an unhandled exception in the first-time registration-options code path (WebAuthn passkey options generation) when the underlying email send fails for a never-seen address, distinct from the resend path for an existing unverified user which does return a handled 400 with a friendly message. Not yet root-caused in source - only observed via curl against production (diagnostic.probe.9911@gmail.com).",
+      "fix": "Not yet fixed - needs investigation of the first-registration branch in AuthRoutes.kt / WebAuthnService.generateRegistrationOptions for a missing try/catch around the email-send call.",
+      "tags": [
+        "auth-routes",
+        "registration-options",
+        "unhandled-exception",
+        "500",
+        "production"
+      ],
+      "related_bugs": [
+        "bug-166"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T22:33:00.000Z"
+    },
+    {
+      "id": "bug-168",
+      "timestamp": "2026-07-11T23:52:04.746Z",
+      "error_message": "Null/undefined access in ",
+      "file": "backend/src/test/kotlin/com/adoptu/adapters/db/repositories/UserRepositoryTest.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T23:52:04.746Z"
+    },
+    {
+      "id": "bug-169",
+      "timestamp": "2026-07-12T00:45:03.556Z",
+      "error_message": "Significant refactor of ",
+      "file": "infra/ecs.tf",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 3→4 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tf"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-12T00:45:03.556Z"
+    },
+    {
+      "id": "bug-170",
+      "timestamp": "2026-07-12T00:45:07.176Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/test/kotlin/com/adoptu/services/MagicLinkServiceTest.kt",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 10→8 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-12T00:45:07.176Z"
     }
   ]
 }

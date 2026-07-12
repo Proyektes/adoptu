@@ -27,16 +27,20 @@ fun HTML.indexPage(navParams: NavParams = NavParams()) {
             div { id = "pets-filters"; classes = setOf("hidden")
                 div(classes = "filter-buttons") {
                     button(classes = "filter-btn active", type = ButtonType.button) { attributes["data-type"] = ""; attributes["data-i18n"] = "all"; +"All" }
-                    button(classes = "filter-btn", type = ButtonType.button) { attributes["data-type"] = "DOG"; +"🐕 Dogs" }
-                    button(classes = "filter-btn", type = ButtonType.button) { attributes["data-type"] = "CAT"; +"🐱 Cats" }
-                    button(classes = "filter-btn", type = ButtonType.button) { attributes["data-type"] = "BIRD"; +"🐦 Birds" }
-                    button(classes = "filter-btn", type = ButtonType.button) { attributes["data-type"] = "FISH"; +"🐟 Fish" }
+                    button(classes = "filter-btn", type = ButtonType.button) { attributes["data-type"] = "DOG"
+                        +"🐕 "; span { attributes["data-i18n"] = "filterDogs"; +"Dogs" } }
+                    button(classes = "filter-btn", type = ButtonType.button) { attributes["data-type"] = "CAT"
+                        +"🐱 "; span { attributes["data-i18n"] = "filterCats"; +"Cats" } }
+                    button(classes = "filter-btn", type = ButtonType.button) { attributes["data-type"] = "BIRD"
+                        +"🐦 "; span { attributes["data-i18n"] = "filterBirds"; +"Birds" } }
+                    button(classes = "filter-btn", type = ButtonType.button) { attributes["data-type"] = "FISH"
+                        +"🐟 "; span { attributes["data-i18n"] = "filterFish"; +"Fish" } }
                 }
                 div(classes = "filter-buttons") {
                     select(classes = "filter-sex") {
-                        option { value = ""; +"All Sex" }
-                        option { value = "MALE"; +"♂ Male" }
-                        option { value = "FEMALE"; +"♀ Female" }
+                        option { value = ""; attributes["data-i18n"] = "filterAllSexOption"; +"All Sex" }
+                        option { value = "MALE"; attributes["data-i18n"] = "filterMaleOption"; +"♂ Male" }
+                        option { value = "FEMALE"; attributes["data-i18n"] = "filterFemaleOption"; +"♀ Female" }
                     }
                 }
             }
