@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T18:22:24.616Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T18:39:02.888Z
 > Files: 561 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/62863a52-3ff2-44ef-8f05-9c7af3c307ce/scratchpad/adoptu-authcov/backend/src/test/kotlin/com/adoptu/routes/
@@ -735,7 +735,7 @@
 - `cloudfront.tf` (~3279 tok)
 - `ecs.tf` — New, dedicated cluster rather than reusing the account's existing (~1603 tok)
 - `iam.tf` (~1009 tok)
-- `terraform.tfvars` (~105 tok)
+- `terraform.tfvars` (~102 tok)
 
 ## shared/
 
