@@ -2345,6 +2345,20 @@
           "java.sql.Connection"
         ]
       }
+    },
+    {
+      "type": "com.adoptu.adapters.aws.EcsCredentialsPayload",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String"
+          ]
+        }
+      ]
     }
   ],
   "resources": [

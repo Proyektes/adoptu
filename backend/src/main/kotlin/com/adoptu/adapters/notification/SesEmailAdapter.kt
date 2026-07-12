@@ -1,5 +1,7 @@
 package com.adoptu.adapters.notification
 
+import com.adoptu.adapters.aws.EcsTaskCredentialsProvider
+import com.adoptu.adapters.aws.ecsTaskCredentialsAvailable
 import com.adoptu.config.AppConfig
 import com.adoptu.ports.NotificationPort
 import kotlinx.coroutines.Dispatchers
@@ -37,7 +39,9 @@ class SesEmailAdapter(config: AppConfig) : NotificationPort {
         val builder = SesClient.builder().region(Region.of(sesRegion))
 
         if (!isDev) {
-            builder.credentialsProvider(DefaultCredentialsProvider.create())
+            builder.credentialsProvider(
+                if (ecsTaskCredentialsAvailable()) EcsTaskCredentialsProvider() else DefaultCredentialsProvider.create()
+            )
         }
 
         if (!sesEndpoint.isNullOrBlank()) {

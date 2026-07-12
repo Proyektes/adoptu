@@ -96,9 +96,10 @@ resource "aws_ecs_task_definition" "app" {
 resource "aws_ecs_service" "app" {
   name            = "adoptu"
   cluster         = aws_ecs_cluster.this.id
-  task_definition = aws_ecs_task_definition.app.arn
-  desired_count   = var.desired_count
-  launch_type     = "FARGATE"
+  task_definition        = aws_ecs_task_definition.app.arn
+  desired_count          = var.desired_count
+  launch_type            = "FARGATE"
+  enable_execute_command = true # debugging aid, added while diagnosing SES credential-vending failure (2026-07-11)
 
   # No load balancer: CloudFront origins directly to this task over IPv6
   # (see cloudfront.tf / dns_updater.tf), matching the live deployment's

@@ -96,3 +96,26 @@ resource "aws_iam_role_policy_attachment" "ecs_task_app" {
   role       = aws_iam_role.ecs_task.name
   policy_arn = aws_iam_policy.ecs_task_app.arn
 }
+
+# --- ECS Exec channel (debugging aid) ----------------------------------------
+# Lets `aws ecs execute-command` open a session into the running container.
+# Added while diagnosing the SES credential-vending failure (2026-07-11).
+
+data "aws_iam_policy_document" "ecs_task_exec_ssm" {
+  statement {
+    sid = "ECSExecSSMChannel"
+    actions = [
+      "ssmmessages:CreateControlChannel",
+      "ssmmessages:CreateDataChannel",
+      "ssmmessages:OpenControlChannel",
+      "ssmmessages:OpenDataChannel",
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "ecs_task_exec_ssm" {
+  name   = "adoptu-ecs-exec-ssm"
+  role   = aws_iam_role.ecs_task.id
+  policy = data.aws_iam_policy_document.ecs_task_exec_ssm.json
+}

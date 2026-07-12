@@ -1,5 +1,7 @@
 package com.adoptu.adapters.storage
 
+import com.adoptu.adapters.aws.EcsTaskCredentialsProvider
+import com.adoptu.adapters.aws.ecsTaskCredentialsAvailable
 import com.adoptu.ports.ImageStoragePort
 import org.slf4j.LoggerFactory
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
@@ -37,7 +39,9 @@ class S3ImageStorageAdapter(
             )
         } else {
             @Suppress("DEPRECATION")
-            builder.credentialsProvider(DefaultCredentialsProvider.create())
+            builder.credentialsProvider(
+                if (ecsTaskCredentialsAvailable()) EcsTaskCredentialsProvider() else DefaultCredentialsProvider.create()
+            )
         }
 
         if (!endpoint.isNullOrEmpty()) {
