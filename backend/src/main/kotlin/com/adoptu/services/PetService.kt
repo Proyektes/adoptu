@@ -135,31 +135,38 @@ class PetService(
             return ServiceResult.Forbidden
         }
 
-        // Client-controlled header - restrict to what ImageCompressor below can actually decode
-        // (javax.imageio has no webp/svg/etc. support here), or a spoofed content-type paired with
-        // a polyglot file could get stored and later served back as something other than an image.
+        // Client-controlled header - restrict to what this method can actually validate. JPEG/PNG
+        // go through ImageCompressor's real decode; WebP has no JVM decoder without a native/JNI
+        // dependency, so it's stored as-is (client already resized/compressed it) after
+        // WebPDimensionValidator checks the RIFF/VP8 header - a spoofed content-type paired with a
+        // polyglot file that fails both would otherwise get stored and served back as non-image data.
         val normalizedContentType = contentType.substringBefore(";").trim().lowercase()
         if (normalizedContentType !in ALLOWED_IMAGE_CONTENT_TYPES) {
-            return ServiceResult.Error("Unsupported image type. Allowed: JPEG, PNG")
+            return ServiceResult.Error("Unsupported image type. Allowed: JPEG, PNG, WebP")
         }
         if (imageData.size > MAX_IMAGE_BYTES) {
             return ServiceResult.Error("Image exceeds maximum size of ${MAX_IMAGE_BYTES / (1024 * 1024)}MB")
         }
 
-        val format = if (normalizedContentType == "image/png") "png" else "jpg"
-        val compressedStream = try {
-            ImageCompressor.compress(imageData.inputStream(), format)
+        val uploadBytes = try {
+            if (normalizedContentType == "image/webp") {
+                WebPDimensionValidator.validate(imageData)
+                imageData
+            } else {
+                val format = if (normalizedContentType == "image/png") "png" else "jpg"
+                ImageCompressor.compress(imageData.inputStream(), format).toByteArray()
+            }
         } catch (e: IllegalArgumentException) {
             return ServiceResult.Error(e.message ?: "Invalid image data")
         }
-        val imageUrl = imageStorage.uploadImage(petId, imageName, normalizedContentType, compressedStream.toByteArray().inputStream())
+        val imageUrl = imageStorage.uploadImage(petId, imageName, normalizedContentType, uploadBytes.inputStream())
 
         val image = petRepository.addImage(petId, imageUrl, isPrimary)
         return ServiceResult.Success(image)
     }
 
     companion object {
-        private val ALLOWED_IMAGE_CONTENT_TYPES = setOf("image/jpeg", "image/png")
+        private val ALLOWED_IMAGE_CONTENT_TYPES = setOf("image/jpeg", "image/png", "image/webp")
         // Client compresses to ~2MB before upload; this is a defense-in-depth ceiling for
         // clients that skip/bypass that step, not the expected upload size.
         private const val MAX_IMAGE_BYTES = 5 * 1024 * 1024

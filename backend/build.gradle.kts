@@ -33,6 +33,7 @@ val playwrightVersion = "1.61.0"
 
 dependencies {
     // runtime / implementation
+    implementation(project(":common"))
     implementation("io.helidon.webserver:helidon-webserver:$helidonVersion")
     implementation("io.helidon.webserver:helidon-webserver-static-content:$helidonVersion")
     implementation("io.helidon.http.media:helidon-http-media-jackson:$helidonVersion")

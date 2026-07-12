@@ -50,7 +50,7 @@ object ImageCompression {
                             size <= TARGET_MAX_BYTES || quality <= MIN_QUALITY -> resolve(blob)
                             else -> attempt(quality - QUALITY_STEP)
                         }
-                    }, "image/jpeg", quality)
+                    }, "image/webp", quality)
                 }
                 attempt(INITIAL_QUALITY)
                 Unit

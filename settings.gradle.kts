@@ -8,3 +8,4 @@ plugins {
 rootProject.name = "adopt-u"
 include("backend")
 include("frontend")
+include("common")

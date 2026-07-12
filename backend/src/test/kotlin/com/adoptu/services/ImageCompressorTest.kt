@@ -97,10 +97,10 @@ class ImageCompressorTest {
     }
 
     @Test
-    fun `compress converts non-RGB image type when no resize is needed`() {
-        // A small ARGB image needs no resizing (calculateDimensions short-circuits), so this
-        // exercises the "image.type != TYPE_INT_RGB" conversion branch instead of the resize
-        // branch that the other tests already cover.
+    fun `compress preserves an ARGB png source when no resize is needed`() {
+        // A small ARGB image needs no resizing (calculateDimensions short-circuits), exercising
+        // the "no resize needed" branch of the png path with a source that actually has alpha -
+        // PNG supports alpha natively, unlike JPEG, so this no longer needs to be forced to RGB.
         val argbImage = BufferedImage(400, 300, BufferedImage.TYPE_INT_ARGB)
         for (x in 0 until 400) {
             for (y in 0 until 300) {
@@ -110,11 +110,36 @@ class ImageCompressorTest {
         val originalBytes = ByteArrayOutputStream().also { ImageIO.write(argbImage, "png", it) }.toByteArray()
         val inputStream = ByteArrayInputStream(originalBytes)
 
-        val result = ImageCompressor.compress(inputStream, "jpg")
+        val result = ImageCompressor.compress(inputStream, "png")
 
         val compressedImage = ImageIO.read(ByteArrayInputStream(result.toByteArray()))
         assertEquals(400, compressedImage.width)
         assertEquals(300, compressedImage.height)
+    }
+
+    @Test
+    fun `compress resizes large png image`() {
+        val largeImage = ByteArrayOutputStream().also {
+            ImageIO.write(BufferedImage(2000, 1500, BufferedImage.TYPE_INT_RGB), "png", it)
+        }.toByteArray()
+        val inputStream = ByteArrayInputStream(largeImage)
+
+        val result = ImageCompressor.compress(inputStream, "png")
+
+        val compressedImage = ImageIO.read(ByteArrayInputStream(result.toByteArray()))
+        assertTrue(compressedImage.width <= 1080)
+        assertTrue(compressedImage.height <= 1080)
+    }
+
+    @Test
+    fun `compress throws IllegalArgumentException for unreadable png data`() {
+        val garbage = "this is definitely not image data".toByteArray()
+        val inputStream = ByteArrayInputStream(garbage)
+
+        val exception = assertThrows<IllegalArgumentException> {
+            ImageCompressor.compress(inputStream, "png")
+        }
+        assertEquals("Invalid storage data or unsupported format", exception.message)
     }
 
     @Test

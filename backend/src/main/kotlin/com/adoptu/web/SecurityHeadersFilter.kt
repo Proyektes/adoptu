@@ -59,7 +59,11 @@ class SecurityHeadersFilter : Filter {
             "script-src-attr 'none'",
             "style-src 'self' https://fonts.googleapis.com",
             "font-src 'self' https://fonts.gstatic.com",
-            "img-src 'self' data: https://static.adopt-u.org https://*.amazonaws.com",
+            // blob: is required for client-side photo compression (ImageCompression.kt): the
+            // selected file is loaded into an <img> via a blob: object URL before being drawn to
+            // canvas and re-encoded - without it the browser blocks that load and the compressor
+            // silently falls back to uploading the original, uncompressed file.
+            "img-src 'self' data: blob: https://static.adopt-u.org https://*.amazonaws.com",
             "connect-src 'self'",
             "object-src 'none'",
             "base-uri 'self'",

@@ -190,9 +190,9 @@ object MyPetsPageModule {
         (document.getElementById("ageMonths") as HTMLInputElement).value = (pet.ageMonths ?: 0).toString()
         (document.getElementById("sex") as HTMLSelectElement).value = pet.sex?.toString() ?: "MALE"
         (document.getElementById("color") as HTMLInputElement).value = pet.color?.toString() ?: ""
-        (document.getElementById("size") as HTMLInputElement).value = pet.size?.toString() ?: ""
+        (document.getElementById("size") as HTMLSelectElement).value = pet.size?.toString() ?: ""
         (document.getElementById("temperament") as HTMLInputElement).value = pet.temperament?.toString() ?: ""
-        (document.getElementById("energyLevel") as HTMLInputElement).value = pet.energyLevel?.toString() ?: ""
+        (document.getElementById("energyLevel") as HTMLSelectElement).value = pet.energyLevel?.toString() ?: ""
         (document.getElementById("isSterilized") as HTMLInputElement).checked = pet.isSterilized == true
         (document.getElementById("isMicrochipped") as HTMLInputElement).checked = pet.isMicrochipped == true
         (document.getElementById("microchipId") as HTMLInputElement).value = pet.microchipId?.toString() ?: ""
@@ -347,9 +347,9 @@ object MyPetsPageModule {
         data.ageMonths = ageMonths
         data.sex = (document.getElementById("sex") as HTMLSelectElement).value
         data.color = (document.getElementById("color") as HTMLInputElement).value.ifEmpty { null }
-        data.size = (document.getElementById("size") as HTMLInputElement).value.ifEmpty { null }
+        data.size = (document.getElementById("size") as HTMLSelectElement).value.ifEmpty { null }
         data.temperament = (document.getElementById("temperament") as HTMLInputElement).value.ifEmpty { null }
-        data.energyLevel = (document.getElementById("energyLevel") as HTMLInputElement).value.ifEmpty { null }
+        data.energyLevel = (document.getElementById("energyLevel") as HTMLSelectElement).value.ifEmpty { null }
         data.isSterilized = (document.getElementById("isSterilized") as HTMLInputElement).checked
         data.isMicrochipped = (document.getElementById("isMicrochipped") as HTMLInputElement).checked
         data.microchipId = (document.getElementById("microchipId") as HTMLInputElement).value.ifEmpty { null }

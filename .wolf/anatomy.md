@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T03:54:55.437Z
-> Files: 547 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T05:44:59.599Z
+> Files: 558 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/62863a52-3ff2-44ef-8f05-9c7af3c307ce/scratchpad/adoptu-authcov/backend/src/test/kotlin/com/adoptu/routes/
 
@@ -12,6 +12,10 @@
 
 - `append_bugs.py` (~846 tok)
 - `ssm-exec-policy.json` (~97 tok)
+
+## ../../.claude/plans/
+
+- `concurrent-popping-cloud.md` — Add WebP support: frontend encode + backend pass-through with dimension validation (~1619 tok)
 
 ## ./
 
@@ -32,7 +36,7 @@
 - `package.json` — Node.js package manifest (~198 tok)
 - `playwright.config.ts` — Playwright test configuration (~289 tok)
 - `README.md` — Project documentation (~821 tok)
-- `settings.gradle.kts` — Gradle Kotlin settings (~105 tok)
+- `settings.gradle.kts` (~110 tok)
 
 ## .claude/
 
@@ -429,7 +433,7 @@
 
 ## backend/
 
-- `build.gradle.kts` — Declares minimum (~2654 tok)
+- `build.gradle.kts` — Declares minimum (~2812 tok)
 
 ## backend/src/main/kotlin/com/adoptu/
 
@@ -552,10 +556,10 @@
 
 - `EmailChangeService.kt` — EmailChangeService: requestEmailChange, verifyEmailChange, generateToken, getLocalizedEmailChangeContent (~1867 tok)
 - `EmailVerificationService.kt` — EmailVerificationService: getLocalizedContent, generateAndSendVerificationEmail, verifyToken, verifyTokenAndGetLanguage + 4 more (~1784 tok)
-- `ImageCompressor.kt` — compress, writeJpeg, calculateDimensions (~773 tok)
+- `ImageCompressor.kt` — compress, compressJpeg, compressPng, calculateDimensions (~842 tok)
 - `MagicLinkService.kt` — Data class: MagicLinkService (~2744 tok)
 - `PasswordService.kt` — PasswordService: isLoginRateLimited, recordLoginAttempt, hasPassword, invalidatePassword + 15 more (~3609 tok)
-- `PetService.kt` — PetService: getAll, getMine, getAllForAdmin, deactivatePet (~3485 tok)
+- `PetService.kt` — PetService: getAll, getMine, getAllForAdmin, deactivatePet (~3589 tok)
 - `PhotographerService.kt` — PhotographerService: getPhotographers, getPhotographerById, updatePhotographerSettings, canSendMessage + 8 more (~2627 tok)
 - `ProfileEmailVerificationService.kt` — Shelter and sterilization-location profiles carry their own public "contact email", (~1823 tok)
 - `ServiceResult.kt` — Data class: ServiceResult (2 properties) (~82 tok)
@@ -565,6 +569,7 @@
 - `UserService.kt` — UserService: getById, getByEmail, getAllUsers, getRescuers + 20 more (~1032 tok)
 - `UserShelterService.kt` — UserShelterService: getByUserId, create, update, delete + 1 more (~993 tok)
 - `UserSterilizationLocationService.kt` — UserSterilizationLocationService: getByUserId, create, update, delete + 1 more (~976 tok)
+- `WebPDimensionValidator.kt` — Data class: Dimensions (~1012 tok)
 
 ## backend/src/main/kotlin/com/adoptu/services/auth/
 
@@ -595,7 +600,7 @@
 - `JsonSupport.kt` — Jackson's DefaultPrettyPrinter differs from kotlinx.serialization's prettyPrint - what every (~650 tok)
 - `RequestExtensions.kt` — Path template parameter, e.g. `req.pathParam("id")` for a route registered as `"/pets/{id}"`. (~673 tok)
 - `Responses.kt` — Sends [result].data as JSON on success, or the matching error status otherwise. (~516 tok)
-- `SecurityHeadersFilter.kt` — Adds baseline defense-in-depth headers to every response. CloudFront always terminates TLS (~1057 tok)
+- `SecurityHeadersFilter.kt` — Adds baseline defense-in-depth headers to every response. CloudFront always terminates TLS (~1157 tok)
 - `Sessions.kt` — Replaces Ktor's `install(Sessions) { cookie<SessionUser>(...) }` (plugins/Sessions.kt). (~922 tok)
 
 ## backend/src/main/resources/
@@ -670,7 +675,7 @@
 
 ## backend/src/test/kotlin/com/adoptu/routes/
 
-- `PetsRoutesE2ETest.kt` — PetsRoutesE2ETest: setup, createTestUsers, startTestServer, generateTestImageBytes (~19414 tok)
+- `PetsRoutesE2ETest.kt` — PetsRoutesE2ETest: setup, createTestUsers, startTestServer, generateTestImageBytes (~20047 tok)
 - `PhotographerRoutesE2ETest.kt` — E2E tests for [photographerRoutes]. (~7601 tok)
 - `ShelterRoutesE2ETest.kt` — ShelterRoutesE2ETest: setup, createTestUsers, createShelterInDb (~6042 tok)
 - `SterilizationLocationRoutesE2ETest.kt` — SterilizationLocationRoutesE2ETest: setup, createTestUsers, testModules, startServer (~6704 tok)
@@ -683,17 +688,34 @@
 ## backend/src/test/kotlin/com/adoptu/services/
 
 - `EmailChangeServiceTest.kt` — EmailChangeServiceTest: setup, createTestUser, createEmailChangeToken, createExpiredEmailChangeToken (~3234 tok)
-- `ImageCompressorTest.kt` — ImageCompressorTest: createTestImage (~1355 tok)
+- `ImageCompressorTest.kt` — ImageCompressorTest: createTestImage (~1634 tok)
+- `JPEGCodecCrossValidationTest.kt` — JPEGCodecCrossValidationTest: testImage, toRgba, averageChannelDiff (~1084 tok)
 - `MagicLinkServiceTest.kt` — MagicLinkServiceTest: setup (~4136 tok)
 - `PasswordServiceTest.kt` — PasswordServiceTest: setup (~3959 tok)
 - `ProfileEmailVerificationServiceTest.kt` — ProfileEmailVerificationServiceTest: setup (~4165 tok)
 - `UserShelterServiceTest.kt` — UserShelterServiceTest: setup (~5325 tok)
 - `UserSterilizationLocationServiceTest.kt` — UserSterilizationLocationServiceTest: setup (~5248 tok)
 - `WebAuthnServiceTest.kt` — Builds genuine (self-signed, attestation "none") WebAuthn4j registration/authentication (~8003 tok)
+- `WebPDimensionValidatorTest.kt` — WebPDimensionValidatorTest: ascii, le, riffHeader, vp8xBytes (~998 tok)
 
 ## backend/src/test/kotlin/com/adoptu/web/
 
 - `HtmlTest.kt` — Unit test for [respondHtml]. Every production call site (see UIRoutes.kt) passes the `status` (~336 tok)
+
+## common/
+
+- `build.gradle.kts` (~104 tok)
+
+## common/src/commonMain/kotlin/com/adoptu/common/image/
+
+- `ImageScaling.kt` — Bilinear resize of an interleaved RGBA byte buffer (width * height * 4 bytes). Pure Kotlin, (~423 tok)
+- `JPEGDecoder.kt` — Data class: JPEGDecoder (~8755 tok)
+- `JPEGEncoder.kt` — JPEGEncoder: initQuantTables, computeHuffmanTbl, initHuffmanTbl, initCategoryNumber (~5569 tok)
+
+## common/src/commonTest/kotlin/com/adoptu/common/image/
+
+- `ImageScalingTest.kt` — ImageScalingTest: solidColor (~411 tok)
+- `JPEGCodecTest.kt` — JPEGCodecTest: gradient (~766 tok)
 
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/
 
@@ -702,9 +724,13 @@
 
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
 
-- `MyPetsPage.kt` — init, clampNonNegative, load, onPetsLoaded, renderPetCard (~6012 tok)
+- `MyPetsPage.kt` — init, clampNonNegative, load, onPetsLoaded, renderPetCard (~6013 tok)
 
 ## infra/
 
 - `ecs.tf` — New, dedicated cluster rather than reusing the account's existing (~1352 tok)
 - `iam.tf` (~1009 tok)
+
+## shared/
+
+- `build.gradle.kts` (~140 tok)

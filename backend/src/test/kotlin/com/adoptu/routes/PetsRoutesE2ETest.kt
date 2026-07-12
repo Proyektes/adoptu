@@ -141,6 +141,16 @@ class PetsRoutesE2ETest {
         return out.toByteArray()
     }
 
+    // Minimal VP8X-chunked WebP header - enough for WebPDimensionValidator to read
+    // dimensions from, without needing a real WebP-encoded image (no JVM encoder available).
+    private fun generateTestWebPBytes(width: Int = 10, height: Int = 10): ByteArray {
+        fun le(value: Int, byteCount: Int) = (0 until byteCount).map { (value shr (it * 8)) and 0xFF }
+        val header = "RIFF".map { it.code } + le(0, 4) + "WEBP".map { it.code } +
+            "VP8X".map { it.code } + le(10, 4)
+        val payload = le(0, 1) + le(0, 3) + le(width - 1, 3) + le(height - 1, 3)
+        return (header + payload).map { it.toByte() }.toByteArray()
+    }
+
     private fun createImageInDb(petId: Int, isPrimary: Boolean = false): Int {
         return transaction {
             PetImages.insert {
@@ -1274,6 +1284,49 @@ class PetsRoutesE2ETest {
             val response = TestHttp.multipart("${handle.baseUrl}/api/pets/$petId/images", boundary, body, cookie)
             assertEquals(400, response.statusCode())
             assertTrue(response.body().contains("Unsupported image type"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST pets images multipart succeeds with valid webp image for owner`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+
+            val boundary = "----TestBoundary${System.nanoTime()}"
+            val body = buildMultipartBody(
+                boundary,
+                fields = mapOf("isPrimary" to "true"),
+                files = mapOf("file" to Triple("test.webp", "image/webp", generateTestWebPBytes()))
+            )
+
+            val response = TestHttp.multipart("${handle.baseUrl}/api/pets/$petId/images", boundary, body, cookie)
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("mock-storage"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST pets images multipart returns 400 for webp with oversized dimensions`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+
+            val boundary = "----TestBoundary${System.nanoTime()}"
+            val body = buildMultipartBody(
+                boundary,
+                files = mapOf("file" to Triple("test.webp", "image/webp", generateTestWebPBytes(width = 5000, height = 100)))
+            )
+
+            val response = TestHttp.multipart("${handle.baseUrl}/api/pets/$petId/images", boundary, body, cookie)
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("exceed maximum"))
         } finally {
             handle.stop()
         }
