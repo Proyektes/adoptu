@@ -74,783 +74,111 @@
     },
     {
       "type": "com.adoptu.dto.input.AdoptionRequestDto",
-      "methods": [
-        {
-          "name": "getAdopterId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCreatedAt",
-          "parameterTypes": []
-        },
-        {
-          "name": "getId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getMessage",
-          "parameterTypes": []
-        },
-        {
-          "name": "getPetId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getStatus",
-          "parameterTypes": []
-        }
-      ]
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     },
     {
       "type": "com.adoptu.dto.input.CreateAdoptionRequestRequest",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     },
     {
-      "type": "com.adoptu.dto.input.Currency"
+      "type": "com.adoptu.dto.input.Currency",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     },
     {
-      "type": "com.adoptu.dto.input.Gender"
+      "type": "com.adoptu.dto.input.Gender",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     },
     {
       "type": "com.adoptu.dto.input.PetDto",
-      "methods": [
-        {
-          "name": "getAdoptionFee",
-          "parameterTypes": []
-        },
-        {
-          "name": "getAgeMonths",
-          "parameterTypes": []
-        },
-        {
-          "name": "getAgeYears",
-          "parameterTypes": []
-        },
-        {
-          "name": "getBreed",
-          "parameterTypes": []
-        },
-        {
-          "name": "getColor",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCountry",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCreatedAt",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCurrency",
-          "parameterTypes": []
-        },
-        {
-          "name": "getDescription",
-          "parameterTypes": []
-        },
-        {
-          "name": "getEnergyLevel",
-          "parameterTypes": []
-        },
-        {
-          "name": "getId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getImages",
-          "parameterTypes": []
-        },
-        {
-          "name": "getMicrochipId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getName",
-          "parameterTypes": []
-        },
-        {
-          "name": "getRescueDate",
-          "parameterTypes": []
-        },
-        {
-          "name": "getRescueLocation",
-          "parameterTypes": []
-        },
-        {
-          "name": "getRescuerId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getSex",
-          "parameterTypes": []
-        },
-        {
-          "name": "getSize",
-          "parameterTypes": []
-        },
-        {
-          "name": "getSpecialNeeds",
-          "parameterTypes": []
-        },
-        {
-          "name": "getStatus",
-          "parameterTypes": []
-        },
-        {
-          "name": "getTemperament",
-          "parameterTypes": []
-        },
-        {
-          "name": "getType",
-          "parameterTypes": []
-        },
-        {
-          "name": "getVaccinations",
-          "parameterTypes": []
-        },
-        {
-          "name": "getWeight",
-          "parameterTypes": []
-        },
-        {
-          "name": "isGoodWithCats",
-          "parameterTypes": []
-        },
-        {
-          "name": "isGoodWithDogs",
-          "parameterTypes": []
-        },
-        {
-          "name": "isGoodWithKids",
-          "parameterTypes": []
-        },
-        {
-          "name": "isHouseTrained",
-          "parameterTypes": []
-        },
-        {
-          "name": "isMicrochipped",
-          "parameterTypes": []
-        },
-        {
-          "name": "isPromoted",
-          "parameterTypes": []
-        },
-        {
-          "name": "isSterilized",
-          "parameterTypes": []
-        },
-        {
-          "name": "isUrgent",
-          "parameterTypes": []
-        },
-        {
-          "name": "getDeactivatedAt",
-          "parameterTypes": []
-        },
-        {
-          "name": "getDeactivatedBy",
-          "parameterTypes": []
-        }
-      ]
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     },
     {
       "type": "com.adoptu.dto.input.PetImageDto",
-      "methods": [
-        {
-          "name": "getId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getImageUrl",
-          "parameterTypes": []
-        },
-        {
-          "name": "isPrimary",
-          "parameterTypes": []
-        },
-        {
-          "name": "getSortOrder",
-          "parameterTypes": []
-        }
-      ]
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     },
     {
       "type": "com.adoptu.dto.input.PhotographerDto",
-      "methods": [
-        {
-          "name": "getCountry",
-          "parameterTypes": []
-        },
-        {
-          "name": "getDisplayName",
-          "parameterTypes": []
-        },
-        {
-          "name": "getPhotographerCurrency",
-          "parameterTypes": []
-        },
-        {
-          "name": "getPhotographerFee",
-          "parameterTypes": []
-        },
-        {
-          "name": "getState",
-          "parameterTypes": []
-        },
-        {
-          "name": "getUserId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getUsername",
-          "parameterTypes": []
-        }
-      ]
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     },
     {
       "type": "com.adoptu.dto.input.ShelterDto",
-      "methods": [
-        {
-          "name": "getAccountHolderName",
-          "parameterTypes": []
-        },
-        {
-          "name": "getAccountNumber",
-          "parameterTypes": []
-        },
-        {
-          "name": "getAddress",
-          "parameterTypes": []
-        },
-        {
-          "name": "getBankName",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCity",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCountry",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCreatedAt",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCurrency",
-          "parameterTypes": []
-        },
-        {
-          "name": "getDescription",
-          "parameterTypes": []
-        },
-        {
-          "name": "getEmail",
-          "parameterTypes": []
-        },
-        {
-          "name": "getFiscalId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getIban",
-          "parameterTypes": []
-        },
-        {
-          "name": "getId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getName",
-          "parameterTypes": []
-        },
-        {
-          "name": "getNeighborhood",
-          "parameterTypes": []
-        },
-        {
-          "name": "getPhone",
-          "parameterTypes": []
-        },
-        {
-          "name": "getState",
-          "parameterTypes": []
-        },
-        {
-          "name": "getSwiftBic",
-          "parameterTypes": []
-        },
-        {
-          "name": "getUpdatedAt",
-          "parameterTypes": []
-        },
-        {
-          "name": "getUserId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getWebsite",
-          "parameterTypes": []
-        },
-        {
-          "name": "getZip",
-          "parameterTypes": []
-        }
-      ]
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     },
     {
-      "type": "com.adoptu.dto.input.Status"
+      "type": "com.adoptu.dto.input.Status",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     },
     {
       "type": "com.adoptu.dto.input.SterilizationLocationDto",
-      "methods": [
-        {
-          "name": "getAddress",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCity",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCountry",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCreatedAt",
-          "parameterTypes": []
-        },
-        {
-          "name": "getDescription",
-          "parameterTypes": []
-        },
-        {
-          "name": "getEmail",
-          "parameterTypes": []
-        },
-        {
-          "name": "getId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getName",
-          "parameterTypes": []
-        },
-        {
-          "name": "getNeighborhood",
-          "parameterTypes": []
-        },
-        {
-          "name": "getPhone",
-          "parameterTypes": []
-        },
-        {
-          "name": "getState",
-          "parameterTypes": []
-        },
-        {
-          "name": "getUpdatedAt",
-          "parameterTypes": []
-        },
-        {
-          "name": "getUserId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getWebsite",
-          "parameterTypes": []
-        },
-        {
-          "name": "getZip",
-          "parameterTypes": []
-        }
-      ]
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     },
     {
       "type": "com.adoptu.dto.input.TemporalHomeDto",
-      "methods": [
-        {
-          "name": "getAlias",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCity",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCountry",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCreatedAt",
-          "parameterTypes": []
-        },
-        {
-          "name": "getNeighborhood",
-          "parameterTypes": []
-        },
-        {
-          "name": "getState",
-          "parameterTypes": []
-        },
-        {
-          "name": "getUserId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getZip",
-          "parameterTypes": []
-        }
-      ]
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     },
     {
       "type": "com.adoptu.dto.input.UserDto",
-      "methods": [
-        {
-          "name": "getActiveRoles",
-          "parameterTypes": []
-        },
-        {
-          "name": "getBanReason",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCountry",
-          "parameterTypes": []
-        },
-        {
-          "name": "getDisplayName",
-          "parameterTypes": []
-        },
-        {
-          "name": "getEmail",
-          "parameterTypes": []
-        },
-        {
-          "name": "getId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getLanguage",
-          "parameterTypes": []
-        },
-        {
-          "name": "getLastAcceptedPrivacyPolicy",
-          "parameterTypes": []
-        },
-        {
-          "name": "getLastAcceptedTermsAndConditions",
-          "parameterTypes": []
-        },
-        {
-          "name": "getPhotographerCountry",
-          "parameterTypes": []
-        },
-        {
-          "name": "getPhotographerCurrency",
-          "parameterTypes": []
-        },
-        {
-          "name": "getPhotographerFee",
-          "parameterTypes": []
-        },
-        {
-          "name": "getPhotographerState",
-          "parameterTypes": []
-        },
-        {
-          "name": "getUsername",
-          "parameterTypes": []
-        },
-        {
-          "name": "isBanned",
-          "parameterTypes": []
-        },
-        {
-          "name": "isEmailVerified",
-          "parameterTypes": []
-        },
-        {
-          "name": "getDeactivatedAt",
-          "parameterTypes": []
-        },
-        {
-          "name": "getDeactivatedBy",
-          "parameterTypes": []
-        }
-      ]
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     },
     {
-      "type": "com.adoptu.dto.input.UserRole"
+      "type": "com.adoptu.dto.input.UserRole",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     },
     {
       "type": "com.adoptu.dto.input.UserShelterDto",
-      "methods": [
-        {
-          "name": "getAccountHolderName",
-          "parameterTypes": []
-        },
-        {
-          "name": "getAccountNumber",
-          "parameterTypes": []
-        },
-        {
-          "name": "getAddress",
-          "parameterTypes": []
-        },
-        {
-          "name": "getBankName",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCity",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCountry",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCreatedAt",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCurrency",
-          "parameterTypes": []
-        },
-        {
-          "name": "getDescription",
-          "parameterTypes": []
-        },
-        {
-          "name": "getEmail",
-          "parameterTypes": []
-        },
-        {
-          "name": "getFiscalId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getIban",
-          "parameterTypes": []
-        },
-        {
-          "name": "getName",
-          "parameterTypes": []
-        },
-        {
-          "name": "getNeighborhood",
-          "parameterTypes": []
-        },
-        {
-          "name": "getPhone",
-          "parameterTypes": []
-        },
-        {
-          "name": "getState",
-          "parameterTypes": []
-        },
-        {
-          "name": "getSwiftBic",
-          "parameterTypes": []
-        },
-        {
-          "name": "getUserId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getWebsite",
-          "parameterTypes": []
-        },
-        {
-          "name": "getZip",
-          "parameterTypes": []
-        },
-        {
-          "name": "getEmailVerified",
-          "parameterTypes": []
-        }
-      ]
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     },
     {
       "type": "com.adoptu.dto.input.UserSterilizationLocationDto",
-      "methods": [
-        {
-          "name": "getAddress",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCity",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCountry",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCreatedAt",
-          "parameterTypes": []
-        },
-        {
-          "name": "getDescription",
-          "parameterTypes": []
-        },
-        {
-          "name": "getEmail",
-          "parameterTypes": []
-        },
-        {
-          "name": "getName",
-          "parameterTypes": []
-        },
-        {
-          "name": "getNeighborhood",
-          "parameterTypes": []
-        },
-        {
-          "name": "getPhone",
-          "parameterTypes": []
-        },
-        {
-          "name": "getState",
-          "parameterTypes": []
-        },
-        {
-          "name": "getUserId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getWebsite",
-          "parameterTypes": []
-        },
-        {
-          "name": "getZip",
-          "parameterTypes": []
-        },
-        {
-          "name": "getEmailVerified",
-          "parameterTypes": []
-        }
-      ]
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     },
     {
       "type": "com.adoptu.dto.output.AuthMeResponse",
-      "methods": [
-        {
-          "name": "getActiveRoles",
-          "parameterTypes": []
-        },
-        {
-          "name": "getAuthenticated",
-          "parameterTypes": []
-        },
-        {
-          "name": "getBanReason",
-          "parameterTypes": []
-        },
-        {
-          "name": "getCountry",
-          "parameterTypes": []
-        },
-        {
-          "name": "getDisplayName",
-          "parameterTypes": []
-        },
-        {
-          "name": "getEmail",
-          "parameterTypes": []
-        },
-        {
-          "name": "getEmailVerified",
-          "parameterTypes": []
-        },
-        {
-          "name": "getId",
-          "parameterTypes": []
-        },
-        {
-          "name": "getLanguage",
-          "parameterTypes": []
-        },
-        {
-          "name": "getLastAcceptedPrivacyPolicy",
-          "parameterTypes": []
-        },
-        {
-          "name": "getLastAcceptedTermsAndConditions",
-          "parameterTypes": []
-        },
-        {
-          "name": "getPhotographerCountry",
-          "parameterTypes": []
-        },
-        {
-          "name": "getPhotographerCurrency",
-          "parameterTypes": []
-        },
-        {
-          "name": "getPhotographerFee",
-          "parameterTypes": []
-        },
-        {
-          "name": "getPhotographerState",
-          "parameterTypes": []
-        },
-        {
-          "name": "isBanned",
-          "parameterTypes": []
-        }
-      ]
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     },
     {
       "type": "com.adoptu.dto.output.RegistrationResponse",
-      "methods": [
-        {
-          "name": "getEmailVerificationSent",
-          "parameterTypes": []
-        },
-        {
-          "name": "getMessage",
-          "parameterTypes": []
-        },
-        {
-          "name": "getSuccess",
-          "parameterTypes": []
-        }
-      ]
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     },
     {
       "type": "com.adoptu.dto.output.SuccessWithErrorResponse",
-      "methods": [
-        {
-          "name": "getEmail",
-          "parameterTypes": []
-        },
-        {
-          "name": "getError",
-          "parameterTypes": []
-        },
-        {
-          "name": "getNeedsProfileCompletion",
-          "parameterTypes": []
-        },
-        {
-          "name": "getSuccess",
-          "parameterTypes": []
-        }
-      ]
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     },
     {
       "type": "com.adoptu.routes.ChangePasswordRequest",
@@ -2401,6 +1729,180 @@
           ]
         }
       ]
+    },
+    {
+      "type": "com.adoptu.dto.output.VerificationResponse",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.output.PagedResult",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.CreateShelterRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.UpdateShelterRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.CreateUserShelterRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.UpdateUserShelterRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.BanUserRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.AcceptTermsRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.PhotographerSettingsRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.PhotographyRequestDto",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.CreatePhotographyRequestRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.UpdatePhotographyRequestRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.CreateMultiPhotographerRequestRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.RoleActivationRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.TemporalHomeSearchParams",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.CreateTemporalHomeRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.UpdateTemporalHomeRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.SendTemporalHomeRequestRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.BlockRescuerRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.TemporalHomeRequestDto",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.CreatePetRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.UpdatePetRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.CreateSterilizationLocationRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.UpdateSterilizationLocationRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.SterilizationLocationsByLocation",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.SterilizationLocationsByState",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.SterilizationLocationsByCity",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.CreateUserSterilizationLocationRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.UpdateUserSterilizationLocationRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     }
   ],
   "resources": [
