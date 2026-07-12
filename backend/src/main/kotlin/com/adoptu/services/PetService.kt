@@ -160,7 +160,9 @@ class PetService(
 
     companion object {
         private val ALLOWED_IMAGE_CONTENT_TYPES = setOf("image/jpeg", "image/png")
-        private const val MAX_IMAGE_BYTES = 10 * 1024 * 1024
+        // Client compresses to ~2MB before upload; this is a defense-in-depth ceiling for
+        // clients that skip/bypass that step, not the expected upload size.
+        private const val MAX_IMAGE_BYTES = 5 * 1024 * 1024
     }
 
     suspend fun removeImage(petId: Int, imageId: Int, userId: Int, userRoles: Set<String>): ServiceResult<Unit> {

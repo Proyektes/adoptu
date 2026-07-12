@@ -181,9 +181,10 @@ object ApiClientModule {
         return apiFetch("/api/pets/adoption-requests/$requestId", opts)
     }
 
-    fun addImage(petId: String, file: dynamic, isPrimary: Boolean = false): Promise<dynamic> {
+    fun addImage(petId: String, file: dynamic, isPrimary: Boolean = false, fileName: String? = null): Promise<dynamic> {
         val formData = js("new FormData()")
-        formData.append("file", file)
+        val name = fileName ?: (file.name as? String) ?: "photo.jpg"
+        formData.append("file", file, name)
         formData.append("isPrimary", isPrimary.toString())
         return window.asDynamic().fetch("/api/pets/$petId/images", js("({method: 'POST', body: formData, credentials: 'include'})")).then { res: dynamic ->
             if (res.ok != true) {

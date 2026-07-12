@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T00:55:14.718Z
-> Files: 544 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T03:54:55.437Z
+> Files: 547 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/62863a52-3ff2-44ef-8f05-9c7af3c307ce/scratchpad/adoptu-authcov/backend/src/test/kotlin/com/adoptu/routes/
 
@@ -552,10 +552,10 @@
 
 - `EmailChangeService.kt` — EmailChangeService: requestEmailChange, verifyEmailChange, generateToken, getLocalizedEmailChangeContent (~1867 tok)
 - `EmailVerificationService.kt` — EmailVerificationService: getLocalizedContent, generateAndSendVerificationEmail, verifyToken, verifyTokenAndGetLanguage + 4 more (~1784 tok)
-- `ImageCompressor.kt` — compress, calculateDimensions (~536 tok)
+- `ImageCompressor.kt` — compress, writeJpeg, calculateDimensions (~773 tok)
 - `MagicLinkService.kt` — Data class: MagicLinkService (~2744 tok)
 - `PasswordService.kt` — PasswordService: isLoginRateLimited, recordLoginAttempt, hasPassword, invalidatePassword + 15 more (~3609 tok)
-- `PetService.kt` — PetService: getAll, getMine, getAllForAdmin, deactivatePet + 15 more (~3440 tok)
+- `PetService.kt` — PetService: getAll, getMine, getAllForAdmin, deactivatePet (~3485 tok)
 - `PhotographerService.kt` — PhotographerService: getPhotographers, getPhotographerById, updatePhotographerSettings, canSendMessage + 8 more (~2627 tok)
 - `ProfileEmailVerificationService.kt` — Shelter and sterilization-location profiles carry their own public "contact email", (~1823 tok)
 - `ServiceResult.kt` — Data class: ServiceResult (2 properties) (~82 tok)
@@ -694,6 +694,15 @@
 ## backend/src/test/kotlin/com/adoptu/web/
 
 - `HtmlTest.kt` — Unit test for [respondHtml]. Every production call site (see UIRoutes.kt) passes the `status` (~336 tok)
+
+## frontend/src/jsMain/kotlin/com/adoptu/frontend/
+
+- `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~2627 tok)
+- `ImageCompression.kt` — compress, attempt (~724 tok)
+
+## frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
+
+- `MyPetsPage.kt` — init, clampNonNegative, load, onPetsLoaded, renderPetCard (~6012 tok)
 
 ## infra/
 

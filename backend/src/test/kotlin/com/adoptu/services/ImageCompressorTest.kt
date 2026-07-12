@@ -128,8 +128,8 @@ class ImageCompressorTest {
         val result = ImageCompressor.compress(inputStream, "jpg")
 
         val compressedImage = ImageIO.read(ByteArrayInputStream(result.toByteArray()))
-        assertEquals(1200, compressedImage.height)
-        assertTrue(compressedImage.width <= 1200)
+        assertEquals(1080, compressedImage.height)
+        assertTrue(compressedImage.width <= 1080)
         assertTrue(compressedImage.width < compressedImage.height)
     }
 }

@@ -4,12 +4,16 @@ import java.awt.Image
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import javax.imageio.IIOImage
 import javax.imageio.ImageIO
+import javax.imageio.ImageWriteParam
 
 object ImageCompressor {
-    private const val MAX_WIDTH = 1200
-    private const val MAX_HEIGHT = 1200
-    private const val QUALITY = 0.8
+    // Matches Instagram's own served resolution (1080px longest side) so re-uploaded
+    // photos don't carry resolution far beyond what the site will ever display.
+    private const val MAX_WIDTH = 1080
+    private const val MAX_HEIGHT = 1080
+    private const val JPEG_QUALITY = 0.8f
 
     fun compress(inputStream: InputStream, format: String = "jpg"): ByteArrayOutputStream {
         val image = ImageIO.read(inputStream) ?: throw IllegalArgumentException("Invalid storage data or unsupported format")
@@ -33,8 +37,25 @@ object ImageCompressor {
 
         val outputStream = ByteArrayOutputStream()
         val imageFormat = if (format.equals("png", ignoreCase = true)) "png" else "jpg"
-        ImageIO.write(resized, imageFormat, outputStream)
+        if (imageFormat == "jpg") {
+            writeJpeg(resized, outputStream)
+        } else {
+            ImageIO.write(resized, imageFormat, outputStream)
+        }
         return outputStream
+    }
+
+    private fun writeJpeg(image: BufferedImage, outputStream: ByteArrayOutputStream) {
+        val writer = ImageIO.getImageWritersByFormatName("jpg").next()
+        val params = writer.defaultWriteParam.apply {
+            compressionMode = ImageWriteParam.MODE_EXPLICIT
+            compressionQuality = JPEG_QUALITY
+        }
+        ImageIO.createImageOutputStream(outputStream).use { ios ->
+            writer.output = ios
+            writer.write(null, IIOImage(image, null, null), params)
+        }
+        writer.dispose()
     }
 
     private fun calculateDimensions(width: Int, height: Int): Pair<Int, Int> {

@@ -2807,6 +2807,38 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-12T00:45:07.176Z"
+    },
+    {
+      "id": "bug-171",
+      "timestamp": "2026-07-12T03:53:50.218Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/kotlin/com/adoptu/services/ImageCompressor.kt",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 38→59 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-12T03:53:50.218Z"
+    },
+    {
+      "id": "bug-172",
+      "timestamp": "2026-07-12T03:54:22.266Z",
+      "error_message": "Significant refactor of ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/ApiClient.kt",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 4→5 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-12T03:54:22.267Z"
     }
   ]
 }

@@ -3,6 +3,7 @@ package com.adoptu.frontend.pages
 import com.adoptu.frontend.ApiClientModule
 import com.adoptu.frontend.CommonModule
 import com.adoptu.frontend.I18n
+import com.adoptu.frontend.ImageCompression
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.HTMLElement
@@ -380,7 +381,12 @@ object MyPetsPageModule {
         if (selectedFiles.isEmpty()) return kotlin.js.Promise.resolve<Unit>(Unit)
         var chain: kotlin.js.Promise<dynamic> = kotlin.js.Promise.resolve<dynamic>(Unit)
         selectedFiles.forEachIndexed { i, file ->
-            chain = chain.then<dynamic> { ApiClientModule.addImage(petId, file, i == 0) }
+            val originalName = (file.name as? String) ?: "photo.jpg"
+            chain = chain.then<dynamic> {
+                ImageCompression.compress(file).then<dynamic> { compressed ->
+                    ApiClientModule.addImage(petId, compressed, i == 0, originalName)
+                }
+            }
         }
         return chain.then<Unit> { Unit }
     }
