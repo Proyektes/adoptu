@@ -120,6 +120,13 @@ graalvmNative {
             )
             buildArgs.add("--no-fallback")
             buildArgs.add("-H:+ReportExceptionStackTraces")
+            // ImageCompressor uses javax.imageio, which touches java.awt.Toolkit at class
+            // init. Without this, Toolkit tries the X11-backed libawt_xawt.so - the
+            // oraclelinux:10-slim runtime image has no X11 libraries installed at all, so
+            // that would fail differently even once libawt.so itself is present. Baking
+            // this in at build time (rather than as a runtime flag) means it can't be
+            // forgotten by a future ENTRYPOINT change.
+            buildArgs.add("-Djava.awt.headless=true")
             // Dynamically linked against glibc (the default) - the ghcr.io/graalvm/
             // native-image-community builder image has no musl cross-toolchain installed,
             // so --static --libc=musl fails with "x86_64-linux-musl-gcc not found". The

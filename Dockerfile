@@ -48,7 +48,13 @@ RUN microdnf install -y ca-certificates shadow-utils \
 
 WORKDIR /app
 
+# javax.imageio's AWT/Toolkit init (used by ImageCompressor for pet photo
+# uploads) dlopen's these at runtime relative to the executable's own
+# directory - copying just the binary left them missing entirely
+# (UnsatisfiedLinkError: Can't load library: awt), silently breaking every
+# photo upload since the native-image migration.
 COPY --from=builder /app/backend/build/native/nativeCompile/adoptu-backend .
+COPY --from=builder /app/backend/build/native/nativeCompile/*.so .
 COPY backend/src/main/resources/application.conf .
 
 ENV ADOPTU_ENV="prod"
