@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T16:39:47.146Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T18:22:24.616Z
 > Files: 561 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/62863a52-3ff2-44ef-8f05-9c7af3c307ce/scratchpad/adoptu-authcov/backend/src/test/kotlin/com/adoptu/routes/
@@ -600,7 +600,7 @@
 - `JsonSupport.kt` — Jackson's DefaultPrettyPrinter differs from kotlinx.serialization's prettyPrint - what every (~650 tok)
 - `RequestExtensions.kt` — Path template parameter, e.g. `req.pathParam("id")` for a route registered as `"/pets/{id}"`. (~673 tok)
 - `Responses.kt` — Sends [result].data as JSON on success, or the matching error status otherwise. (~516 tok)
-- `SecurityHeadersFilter.kt` — Adds baseline defense-in-depth headers to every response. CloudFront always terminates TLS (~1157 tok)
+- `SecurityHeadersFilter.kt` — Adds baseline defense-in-depth headers to every response. CloudFront always terminates TLS (~1265 tok)
 - `Sessions.kt` — Replaces Ktor's `install(Sessions) { cookie<SessionUser>(...) }` (plugins/Sessions.kt). (~922 tok)
 
 ## backend/src/main/resources/
@@ -735,7 +735,7 @@
 - `cloudfront.tf` (~3279 tok)
 - `ecs.tf` — New, dedicated cluster rather than reusing the account's existing (~1603 tok)
 - `iam.tf` (~1009 tok)
-- `terraform.tfvars` (~108 tok)
+- `terraform.tfvars` (~105 tok)
 
 ## shared/
 

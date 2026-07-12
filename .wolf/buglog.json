@@ -3083,6 +3083,45 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-07-12T16:37:00.000Z"
+    },
+    {
+      "id": "bug-187",
+      "timestamp": "2026-07-12T16:54:02.187Z",
+      "error_message": "Incorrect value in code",
+      "file": "infra/terraform.tfvars",
+      "root_cause": "Had \"sha256:148c3c6122fbc360bd40d719b312964cb31f57d630",
+      "fix": "Changed to \"sha256:9bc4c2ef1954a7bb7eaf9716da9c02cc9d8a5ab268",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tfvars"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-12T16:54:02.187Z"
+    },
+    {
+      "id": "bug-184",
+      "timestamp": "2026-07-12T18:20:00.000Z",
+      "error_message": "Loading the image 'https://dynamic.adopt-u.org/pets/...' violates Content Security Policy directive img-src",
+      "file": "backend/src/main/kotlin/com/adoptu/web/SecurityHeadersFilter.kt",
+      "root_cause": "The img-src CSP directive listed https://static.adopt-u.org and https://*.amazonaws.com but never https://dynamic.adopt-u.org - the CDN domain the bug-183 fix now correctly returns for pet photo URLs. dynamic.adopt-u.org is a custom CNAME to CloudFront, not an *.amazonaws.com host, so the existing wildcard didn't cover it. Found immediately after deploying the bug-183 fix: the correct CDN URL was now being returned, but the browser blocked loading it entirely.",
+      "fix": "Added https://dynamic.adopt-u.org to the img-src CSP directive alongside the existing https://static.adopt-u.org entry.",
+      "tags": [
+        "csp",
+        "security-headers",
+        "cdn",
+        "image-url",
+        "production",
+        "pre-existing",
+        "latent-bug"
+      ],
+      "related_bugs": [
+        "bug-181",
+        "bug-183"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-12T18:20:00.000Z"
     }
   ]
 }

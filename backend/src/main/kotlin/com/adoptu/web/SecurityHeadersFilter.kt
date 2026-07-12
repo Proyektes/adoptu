@@ -63,7 +63,11 @@ class SecurityHeadersFilter : Filter {
             // selected file is loaded into an <img> via a blob: object URL before being drawn to
             // canvas and re-encoded - without it the browser blocks that load and the compressor
             // silently falls back to uploading the original, uncompressed file.
-            "img-src 'self' data: blob: https://static.adopt-u.org https://*.amazonaws.com",
+            // https://dynamic.adopt-u.org is the pet-photo CDN domain (S3ImageStorageAdapter's
+            // publicUrl, see infra/ecs.tf's ADOPTU_S3_PUBLIC_URL) - it's a custom CNAME to
+            // CloudFront, not an *.amazonaws.com host, so the wildcard below doesn't cover it and
+            // it needs its own entry or every pet photo is blocked by CSP after upload.
+            "img-src 'self' data: blob: https://static.adopt-u.org https://dynamic.adopt-u.org https://*.amazonaws.com",
             "connect-src 'self'",
             "object-src 'none'",
             "base-uri 'self'",
