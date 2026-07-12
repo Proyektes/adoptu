@@ -264,6 +264,42 @@
       ]
     },
     {
+      "type": "com.adoptu.services.auth.RelyingParty",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.services.auth.PublicKeyUser",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.services.auth.PubKeyCredParam",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.services.auth.PublicKeyOptions",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.services.auth.RegistrationOptionsResponse",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.services.auth.AssertionOptionsResponse",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
       "type": "com.adoptu.web.ErrorResponse",
       "methods": [
         {

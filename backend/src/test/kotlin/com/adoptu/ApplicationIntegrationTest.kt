@@ -145,7 +145,7 @@ class ApplicationIntegrationTest {
                 )
             }
             single<NotificationPort> { SesEmailAdapter(get()) }
-            single<UserService> { UserService(get()) }
+            single<UserService> { UserService(get(), get()) }
             single<PetService> { PetService(get(), get(), get(), get()) }
             single<PhotographerService> { PhotographerService(get(), get(), get(), get()) }
             single<TemporalHomeService> { TemporalHomeService(get(), get(), get(), get()) }

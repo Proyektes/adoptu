@@ -57,7 +57,7 @@ class PasswordRegistrationRoutesE2ETest {
         single { testConfig }
         single<Clock> { Clock.System }
         single<UserRepositoryPort> { UserRepository(get()) }
-        single { UserService(get()) }
+        single { UserService(get(), get()) }
         single { EmailVerificationService(get(), get(), get(), "http://localhost:80") }
         single { PasswordService(get(), mockNotificationAdapter, get(), "http://localhost:80") }
         single { MagicLinkService(get(), mockNotificationAdapter, get(), "http://localhost:80", get()) }

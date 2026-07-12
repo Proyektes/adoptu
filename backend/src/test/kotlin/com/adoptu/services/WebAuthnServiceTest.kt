@@ -3,6 +3,8 @@ package com.adoptu.services
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.WebAuthnCredentials
+import com.adoptu.adapters.db.repositories.PetRepositoryImpl
+import com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl
 import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.dto.input.UserRole
 import com.adoptu.mocks.MockNotificationAdapter
@@ -181,7 +183,8 @@ class WebAuthnServiceTest {
         CryptoService.initialize()
     }
 
-    private fun userService(): UserService = UserService(userRepository)
+    private fun userService(): UserService =
+        UserService(userRepository, PhotographerRepositoryImpl(PetRepositoryImpl(clock), userRepository, clock))
 
     @Test
     fun `hasPasskey returns false when user has no credentials`() = runBlocking {
@@ -245,6 +248,39 @@ class WebAuthnServiceTest {
         // ADOPTER is active immediately after registration.
         assertTrue(userRoles.contains("ADOPTER"))
         assertFalse(userRoles.contains("RESCUER"))
+
+        // The selected-but-gated role is recorded as pending, not silently dropped - it
+        // gets granted automatically once the user verifies their email (see UserService).
+        val pendingRoles = userRepository.consumePendingRoleActivations(result.userId)
+        assertEquals(setOf(UserRole.RESCUER), pendingRoles)
+    }
+
+    @Test
+    fun `registerWithPassword then verifying email auto-grants the pending rescuer role`() = runBlocking {
+        val email = "autogrant@example.com"
+        val displayName = "Auto Grant User"
+        val roles = setOf(UserRole.ADOPTER, UserRole.RESCUER)
+        val encryptedPassword = encryptPassword("SecurePassword123!")
+
+        val result = webAuthnService.registerWithPassword(email, displayName, roles, encryptedPassword)
+        assertNotNull(result)
+
+        val token = transaction {
+            com.adoptu.adapters.db.EmailVerificationTokens.selectAll()
+                .where { com.adoptu.adapters.db.EmailVerificationTokens.userId eq result.userId }
+                .first()[com.adoptu.adapters.db.EmailVerificationTokens.token]
+        }
+
+        val verified = userService().verifyToken(token)
+        assertTrue(verified)
+
+        val userRoles = transaction {
+            UserActiveRoles.selectAll()
+                .where { UserActiveRoles.userId eq result.userId }
+                .map { it[UserActiveRoles.role] }
+                .toSet()
+        }
+        assertTrue(userRoles.contains("RESCUER"))
     }
 
     @Test
@@ -436,6 +472,27 @@ class WebAuthnServiceTest {
             UserActiveRoles.selectAll().where { UserActiveRoles.userId eq result.userId }.map { it[UserActiveRoles.role] }.toSet()
         }
         assertTrue(userRoles.contains("ADOPTER"))
+    }
+
+    @Test
+    fun `verifyAndRegister records a gated role as pending instead of granting it immediately`() = runBlocking {
+        val email = "pending-passkey@example.com"
+        val displayName = "Pending Passkey User"
+        val options = webAuthnService.generateRegistrationOptions(email, displayName)
+        val challenge = Base64.getUrlDecoder().decode(options.publicKey.challenge)
+        val keyMaterial = WebAuthnCeremony.generateKeyMaterial()
+        val responseJson = WebAuthnCeremony.buildRegistrationResponseJson(rpId, origins.first(), challenge, keyMaterial)
+
+        val result = webAuthnService.verifyAndRegister(email, displayName, setOf(UserRole.ADOPTER, UserRole.RESCUER), responseJson)
+
+        assertNotNull(result)
+        val userRoles = transaction {
+            UserActiveRoles.selectAll().where { UserActiveRoles.userId eq result.userId }.map { it[UserActiveRoles.role] }.toSet()
+        }
+        assertFalse(userRoles.contains("RESCUER"))
+
+        val pendingRoles = userRepository.consumePendingRoleActivations(result.userId)
+        assertEquals(setOf(UserRole.RESCUER), pendingRoles)
     }
 
     @Test

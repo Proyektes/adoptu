@@ -122,7 +122,7 @@ class ApplicationTestcontainersIT {
             single { config }
             single<Clock> { testClock }
             single<UserRepositoryPort> { UserRepository(get()) }
-            single<com.adoptu.services.UserService> { com.adoptu.services.UserService(get()) }
+            single<com.adoptu.services.UserService> { com.adoptu.services.UserService(get(), get()) }
             single<com.adoptu.services.EmailVerificationService> { com.adoptu.services.EmailVerificationService(get(), get(), get(), "http://localhost:80") }
             single<com.adoptu.services.PasswordService> { com.adoptu.services.PasswordService(get(), get(), get(), "http://localhost:80") }
             single<com.adoptu.services.MagicLinkService> { com.adoptu.services.MagicLinkService(get(), get(), get(), "http://localhost:80", get()) }

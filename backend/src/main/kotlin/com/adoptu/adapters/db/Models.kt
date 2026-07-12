@@ -146,6 +146,18 @@ object UserActiveRoles : Table("user_active_roles") {
     override val primaryKey = PrimaryKey(userId, role)
 }
 
+// Roles selected at registration for role types that require a verified email before
+// activation (RESCUER, PHOTOGRAPHER, TEMPORAL_HOME, SHELTER, STERILIZATION_SERVICE - see
+// ROLES_REQUIRING_VERIFICATION_BEFORE_ACTIVATION in WebAuthnService.kt) are recorded here
+// instead of being silently dropped, then consumed and actually granted the moment email
+// verification completes (UserService.verifyToken()).
+object PendingRoleActivations : Table("pending_role_activations") {
+    val userId = integer("user_id").references(Users.id)
+    val role = varchar("role", 50)
+
+    override val primaryKey = PrimaryKey(userId, role)
+}
+
 object WebAuthnCredentials : Table("webauthn_credentials") {
     val id = integer("id").autoIncrement()
     val userId = integer("user_id").references(Users.id)

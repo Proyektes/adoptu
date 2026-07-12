@@ -59,7 +59,7 @@ class WebAuthnServiceChallengeStoreTest {
     inner class RelyingPartyDataClass {
         @Test
         fun `RelyingParty serializes correctly`() {
-            val rp = WebAuthnService.RelyingParty(id = "test-rp-id", name = "Test RP")
+            val rp = RelyingParty(id = "test-rp-id", name = "Test RP")
 
             assertEquals("test-rp-id", rp.id)
             assertEquals("Test RP", rp.name)
@@ -67,9 +67,9 @@ class WebAuthnServiceChallengeStoreTest {
 
         @Test
         fun `RelyingParty equality works`() {
-            val rp1 = WebAuthnService.RelyingParty(id = "id", name = "name")
-            val rp2 = WebAuthnService.RelyingParty(id = "id", name = "name")
-            val rp3 = WebAuthnService.RelyingParty(id = "other", name = "name")
+            val rp1 = RelyingParty(id = "id", name = "name")
+            val rp2 = RelyingParty(id = "id", name = "name")
+            val rp3 = RelyingParty(id = "other", name = "name")
 
             assertEquals(rp1, rp2)
             assertTrue(rp1 != rp3)
@@ -80,7 +80,7 @@ class WebAuthnServiceChallengeStoreTest {
     inner class PublicKeyUserDataClass {
         @Test
         fun `PublicKeyUser serializes correctly`() {
-            val user = WebAuthnService.PublicKeyUser(
+            val user = PublicKeyUser(
                 id = "user-id",
                 name = "user@example.com",
                 displayName = "Display Name"
@@ -96,7 +96,7 @@ class WebAuthnServiceChallengeStoreTest {
     inner class PubKeyCredParamDataClass {
         @Test
         fun `PubKeyCredParam serializes correctly`() {
-            val param = WebAuthnService.PubKeyCredParam(type = "public-key", alg = -7)
+            val param = PubKeyCredParam(type = "public-key", alg = -7)
 
             assertEquals("public-key", param.type)
             assertEquals(-7, param.alg)
@@ -104,9 +104,9 @@ class WebAuthnServiceChallengeStoreTest {
 
         @Test
         fun `PubKeyCredParam equality works`() {
-            val param1 = WebAuthnService.PubKeyCredParam(type = "public-key", alg = -7)
-            val param2 = WebAuthnService.PubKeyCredParam(type = "public-key", alg = -7)
-            val param3 = WebAuthnService.PubKeyCredParam(type = "public-key", alg = -257)
+            val param1 = PubKeyCredParam(type = "public-key", alg = -7)
+            val param2 = PubKeyCredParam(type = "public-key", alg = -7)
+            val param3 = PubKeyCredParam(type = "public-key", alg = -257)
 
             assertEquals(param1, param2)
             assertTrue(param1 != param3)
@@ -117,13 +117,13 @@ class WebAuthnServiceChallengeStoreTest {
     inner class RegistrationOptionsResponseDataClass {
         @Test
         fun `RegistrationOptionsResponse contains all fields`() {
-            val response = WebAuthnService.RegistrationOptionsResponse(
-                publicKey = WebAuthnService.PublicKeyOptions(
-                    rp = WebAuthnService.RelyingParty(id = "rp-id", name = "RP Name"),
-                    user = WebAuthnService.PublicKeyUser(id = "user-id", name = "name", displayName = "Display"),
+            val response = RegistrationOptionsResponse(
+                publicKey = PublicKeyOptions(
+                    rp = RelyingParty(id = "rp-id", name = "RP Name"),
+                    user = PublicKeyUser(id = "user-id", name = "name", displayName = "Display"),
                     challenge = "challenge-value",
                     pubKeyCredParams = listOf(
-                        WebAuthnService.PubKeyCredParam(type = "public-key", alg = -7)
+                        PubKeyCredParam(type = "public-key", alg = -7)
                     )
                 )
             )
@@ -139,7 +139,7 @@ class WebAuthnServiceChallengeStoreTest {
     inner class AssertionOptionsResponseDataClass {
         @Test
         fun `AssertionOptionsResponse contains all fields`() {
-            val response = WebAuthnService.AssertionOptionsResponse(
+            val response = AssertionOptionsResponse(
                 challenge = "challenge-value",
                 rpId = "rp-id",
                 userVerification = "required"

@@ -3,6 +3,7 @@ package com.adoptu.services
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.repositories.PetRepositoryImpl
+import com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl
 import com.adoptu.adapters.db.repositories.TemporalHomeRepositoryImpl
 import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.dto.input.CreateTemporalHomeRequest
@@ -41,8 +42,9 @@ class TemporalHomeServiceTest {
     fun setup() {
         TestDatabase.initH2()
         val userRepository = UserRepository(clock)
-        userService = UserService(userRepository)
         val petRepository = PetRepositoryImpl(clock)
+        val photographerRepository = PhotographerRepositoryImpl(petRepository, userRepository, clock)
+        userService = UserService(userRepository, photographerRepository)
         temporalHomeRepository = TemporalHomeRepositoryImpl(petRepository, userRepository, clock)
         mockNotificationAdapter = MockNotificationAdapter()
         service = TemporalHomeService(

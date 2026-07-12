@@ -28,8 +28,13 @@ class DatabaseFactoryTest {
     }
 
     @Test
-    fun `DatabaseFactory has 24 tables`() {
-        assertEquals(24, DatabaseFactory.listOfTables.size)
+    fun `DatabaseFactory has 25 tables`() {
+        assertEquals(25, DatabaseFactory.listOfTables.size)
+    }
+
+    @Test
+    fun `PendingRoleActivations table is in listOfTables`() {
+        assertTrue(DatabaseFactory.listOfTables.contains(PendingRoleActivations))
     }
 
     @Test
@@ -106,6 +111,7 @@ class DatabaseFactoryTest {
             UserPasswords,
             MagicLinkTokens,
             UserActiveRoles,
+            PendingRoleActivations,
             Photographers,
             WebAuthnCredentials,
             Pets,

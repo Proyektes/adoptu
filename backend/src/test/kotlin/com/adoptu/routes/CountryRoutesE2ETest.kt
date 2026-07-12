@@ -1,5 +1,7 @@
 package com.adoptu.routes
 
+import com.adoptu.adapters.db.repositories.PetRepositoryImpl
+import com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl
 import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.config.AppConfig
 import com.adoptu.mocks.MockNotificationAdapter
@@ -45,7 +47,9 @@ class CountryRoutesE2ETest {
             single<AppConfig> { config }
             single<Clock> { Clock.System }
             single<com.adoptu.ports.UserRepositoryPort> { UserRepository(get()) }
-            single { com.adoptu.services.UserService(get()) }
+            single<com.adoptu.ports.PetRepositoryPort> { PetRepositoryImpl(get()) }
+            single<com.adoptu.ports.PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
+            single { com.adoptu.services.UserService(get(), get()) }
             single { EmailVerificationService(get(), get(), get(), "http://localhost:80") }
             single { com.adoptu.services.PasswordService(get(), mockNotificationAdapter, get(), "http://localhost:80") }
             single { com.adoptu.services.MagicLinkService(get(), mockNotificationAdapter, get(), "http://localhost:80", get()) }

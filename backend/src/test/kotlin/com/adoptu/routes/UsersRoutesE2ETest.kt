@@ -142,7 +142,7 @@ class UsersRoutesE2ETest {
             single<UserRepositoryPort> { UserRepository(get()) }
             single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
             single { PhotographerService(get(), get(), get(), get()) }
-            single { UserService(get()) }
+            single { UserService(get(), get()) }
             single { ProfileEmailVerificationService(get(), get(), get(), "http://localhost:80") }
             single { PetService(get(), get(), get(), get()) }
             single { PasswordService(get(), get(), get(), "http://localhost:80") }

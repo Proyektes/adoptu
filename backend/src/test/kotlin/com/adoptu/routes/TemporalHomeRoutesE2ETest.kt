@@ -6,6 +6,7 @@ import com.adoptu.adapters.db.TemporalHomes
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.repositories.PetRepositoryImpl
+import com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl
 import com.adoptu.adapters.db.repositories.TemporalHomeRepositoryImpl
 import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.dto.input.BlockRescuerRequest
@@ -16,6 +17,7 @@ import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestDatabase
 import com.adoptu.ports.NotificationPort
 import com.adoptu.ports.PetRepositoryPort
+import com.adoptu.ports.PhotographerRepositoryPort
 import com.adoptu.ports.TemporalHomeRepositoryPort
 import com.adoptu.ports.UserRepositoryPort
 import com.adoptu.services.TemporalHomeService
@@ -59,7 +61,8 @@ class TemporalHomeRoutesE2ETest {
             single<PetRepositoryPort> { PetRepositoryImpl(get()) }
             single<UserRepositoryPort> { UserRepository(get()) }
             single<TemporalHomeRepositoryPort> { TemporalHomeRepositoryImpl(get(), get(), get()) }
-            single { UserService(get()) }
+            single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
+            single { UserService(get(), get()) }
             single { TemporalHomeService(get(), get(), get(), get()) }
             single { TemporalHomesValidationService() }
         }

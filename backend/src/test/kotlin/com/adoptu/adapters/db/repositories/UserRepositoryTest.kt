@@ -137,4 +137,50 @@ class UserRepositoryTest {
         assertEquals("United States", result?.country)
         Unit
     }
+
+    @Test
+    fun `consumePendingRoleActivations returns empty set when nothing was ever added`() = runBlocking {
+        val userId = createTestUser()
+
+        val pending = repository.consumePendingRoleActivations(userId)
+
+        assertTrue(pending.isEmpty())
+    }
+
+    @Test
+    fun `addPendingRoleActivations then consumePendingRoleActivations returns the roles once`() = runBlocking {
+        val userId = createTestUser()
+
+        repository.addPendingRoleActivations(userId, setOf(UserRole.RESCUER, UserRole.PHOTOGRAPHER))
+
+        val pending = repository.consumePendingRoleActivations(userId)
+        assertEquals(setOf(UserRole.RESCUER, UserRole.PHOTOGRAPHER), pending)
+
+        // Consuming clears them - a second call finds nothing left.
+        val secondCall = repository.consumePendingRoleActivations(userId)
+        assertTrue(secondCall.isEmpty())
+    }
+
+    @Test
+    fun `addPendingRoleActivations is idempotent for a role already pending`() = runBlocking {
+        val userId = createTestUser()
+
+        repository.addPendingRoleActivations(userId, setOf(UserRole.RESCUER))
+        repository.addPendingRoleActivations(userId, setOf(UserRole.RESCUER))
+
+        val pending = repository.consumePendingRoleActivations(userId)
+        assertEquals(setOf(UserRole.RESCUER), pending)
+    }
+
+    @Test
+    fun `addPendingRoleActivations scopes pending roles per user`() = runBlocking {
+        val userId1 = createTestUser(1)
+        val userId2 = createTestUser(2)
+
+        repository.addPendingRoleActivations(userId1, setOf(UserRole.RESCUER))
+        repository.addPendingRoleActivations(userId2, setOf(UserRole.PHOTOGRAPHER))
+
+        assertEquals(setOf(UserRole.RESCUER), repository.consumePendingRoleActivations(userId1))
+        assertEquals(setOf(UserRole.PHOTOGRAPHER), repository.consumePendingRoleActivations(userId2))
+    }
 }

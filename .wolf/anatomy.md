@@ -1,7 +1,13 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T18:39:02.888Z
-> Files: 561 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T22:12:58.956Z
+> Files: 577 tracked | Anatomy hits: 0 | Misses: 0
+
+## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/37d425e0-d2ad-499f-bde7-97b1baf5c00b/scratchpad/
+
+- `fixup_photographer_temporalhome.py` — login (~372 tok)
+- `run_seed.py` — random_pet, run_profile (~1572 tok)
+- `seed_prod.py` — PasskeyCredential: b64url, b64url_decode, mailtm_create_account, mailtm_wait_for_message + 15 more (~2205 tok)
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/62863a52-3ff2-44ef-8f05-9c7af3c307ce/scratchpad/adoptu-authcov/backend/src/test/kotlin/com/adoptu/routes/
 
@@ -445,9 +451,9 @@
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/
 
-- `DatabaseFactory.kt` — init, createDefaultAdmin (~1447 tok)
+- `DatabaseFactory.kt` — init, createDefaultAdmin (~1456 tok)
 - `DbDispatcher.kt` — Shared, bounded dispatcher for repository DB calls. (~705 tok)
-- `Models.kt` (~4239 tok)
+- `Models.kt` (~4407 tok)
 - `PoolSizing.kt` — Single source of truth for how many DB-bound worker threads/connections this (~365 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/repositories/
@@ -457,7 +463,7 @@
 - `ShelterRepository.kt` — ShelterRepository: rowToDto, getById, getAll, create + 4 more (~2132 tok)
 - `SterilizationLocationRepository.kt` — SterilizationLocationRepository: rowToDto, getById, getAll, create + 6 more (~2658 tok)
 - `TemporalHomeRepository.kt` — Data class: TemporalHomeRepositoryImpl (11 properties) (~3509 tok)
-- `UserRepository.kt` — UserRepository: getActiveRolesForUser, getById, getByEmail, getActiveRolesForUserIds + 5 more (~7358 tok)
+- `UserRepository.kt` — UserRepository: getActiveRolesForUser, getById, getByEmail, getActiveRolesForUserIds (~7731 tok)
 - `UserShelterRepository.kt` — UserShelterRepository: rowToDto, getByUserId, create, update + 2 more (~2589 tok)
 - `UserSterilizationLocationRepository.kt` — UserSterilizationLocationRepository: rowToDto, getByUserId, create, update + 2 more (~2404 tok)
 
@@ -483,7 +489,7 @@
 
 ## backend/src/main/kotlin/com/adoptu/di/
 
-- `AppModule.kt` — appModule, getOrigins, createImageStorageAdapter (~1252 tok)
+- `AppModule.kt` — appModule, getOrigins, createImageStorageAdapter (~1254 tok)
 
 ## backend/src/main/kotlin/com/adoptu/dto/input/
 
@@ -515,10 +521,10 @@
 - `PetsPage.kt` — HTML (~824 tok)
 - `PhotographersPage.kt` — HTML (~330 tok)
 - `PrivacyPage.kt` — UL, UL, HTML (~4200 tok)
-- `ProfilePage.kt` — HTML (~4786 tok)
+- `ProfilePage.kt` — HTML (~4791 tok)
 - `RegisterPage.kt` — HTML (~2128 tok)
 - `Shared.kt` — HTML, A, BODY, DIV, NAV (~2040 tok)
-- `SheltersPage.kt` — HTML (~349 tok)
+- `SheltersPage.kt` — HTML (~347 tok)
 - `SterilizationLocationsPage.kt` — HTML, HTML (~1544 tok)
 - `TemporalHomePage.kt` — HTML, HTML, HTML (~639 tok)
 - `TermsPage.kt` — UL, HTML (~3302 tok)
@@ -534,7 +540,7 @@
 - `ShelterRepositoryPort.kt` — getById, getAll, create, update, delete (~178 tok)
 - `SterilizationLocationRepositoryPort.kt` — getById, getAll, create, update, delete (~286 tok)
 - `TemporalHomeRepositoryPort.kt` — Returns (temporalHomeId, rescuerId) and marks the token used, or null if invalid/expired/already used. (~343 tok)
-- `UserRepositoryPort.kt` — getById, getByEmail, getAllUsers, getPhotographers, getRescuers (~769 tok)
+- `UserRepositoryPort.kt` — getById, getByEmail, getAllUsers, getPhotographers, getRescuers (~810 tok)
 - `UserShelterRepositoryPort.kt` — getByUserId, create, update, delete, search (~182 tok)
 - `UserSterilizationLocationRepositoryPort.kt` — getByUserId, create, update, delete, search (~219 tok)
 
@@ -566,7 +572,7 @@
 - `ShelterService.kt` — ShelterService: getAll, getById, create, update + 3 more (~507 tok)
 - `SterilizationLocationService.kt` — SterilizationLocationService: getAll, getById, create, update + 5 more (~604 tok)
 - `TemporalHomeService.kt` — Validates and consumes a spam-report token (see sendRequest), then blocks the rescuer it names. (~1332 tok)
-- `UserService.kt` — UserService: getById, getByEmail, getAllUsers, getRescuers + 20 more (~1032 tok)
+- `UserService.kt` — UserService(userRepository, photographerRepository): getById, getByEmail, getAllUsers, getRescuers; verifyToken/verifyTokenAndGetLanguage now auto-activate PendingRoleActivations via activatePendingRoles() (~1300 tok)
 - `UserShelterService.kt` — UserShelterService: getByUserId, create, update, delete + 1 more (~993 tok)
 - `UserSterilizationLocationService.kt` — UserSterilizationLocationService: getByUserId, create, update, delete + 1 more (~976 tok)
 - `WebPDimensionValidator.kt` — Data class: Dimensions (~1012 tok)
@@ -574,7 +580,7 @@
 ## backend/src/main/kotlin/com/adoptu/services/auth/
 
 - `SessionUser.kt` — Data class: SessionUser (3 properties) (~36 tok)
-- `WebAuthnService.kt` — Data class: VerificationResendOutcome (34 properties) (~6144 tok)
+- `WebAuthnService.kt` — Data class: VerificationResendOutcome (~6503 tok)
 
 ## backend/src/main/kotlin/com/adoptu/services/crypto/
 
@@ -652,9 +658,13 @@
 - `photographers.scss` — Styles: 6 rules (~214 tok)
 - `policy.scss` — Styles: 5 rules (~129 tok)
 
+## backend/src/test/kotlin/com/adoptu/adapters/db/
+
+- `DatabaseFactoryTest.kt` — Declares DatabaseFactoryTest (~3450 tok)
+
 ## backend/src/test/kotlin/com/adoptu/adapters/db/repositories/
 
-- `UserRepositoryTest.kt` — Direct repository-level tests for two UserRepository methods that exist to satisfy the (~1363 tok)
+- `UserRepositoryTest.kt` — Direct repository-level tests for two UserRepository methods that exist to satisfy the (~1857 tok)
 
 ## backend/src/test/kotlin/com/adoptu/adapters/notification/
 
@@ -672,6 +682,10 @@
 
 - `AppModuleTest.kt` — Declares AppModuleTest (~1218 tok)
 
+## backend/src/test/kotlin/com/adoptu/mocks/
+
+- `TestDatabase.kt` — initH2, clearAllData (~1076 tok)
+
 ## backend/src/test/kotlin/com/adoptu/pages/
 
 - `ForgotPasswordPageTest.kt` — Direct unit coverage for the auth-flow page builders in ForgotPasswordPage.kt. (~1012 tok)
@@ -679,12 +693,14 @@
 
 ## backend/src/test/kotlin/com/adoptu/routes/
 
+- `CountryRoutesE2ETest.kt` — End-to-end tests for [countryRoutes]: GET /api/detect-country prefers the CloudFront-injected (~1925 tok)
 - `PetsRoutesE2ETest.kt` — PetsRoutesE2ETest: setup, createTestUsers, startTestServer, generateTestImageBytes (~20047 tok)
 - `PhotographerRoutesE2ETest.kt` — E2E tests for [photographerRoutes]. (~7601 tok)
 - `ShelterRoutesE2ETest.kt` — ShelterRoutesE2ETest: setup, createTestUsers, createShelterInDb (~6042 tok)
 - `SterilizationLocationRoutesE2ETest.kt` — SterilizationLocationRoutesE2ETest: setup, createTestUsers, testModules, startServer (~6704 tok)
-- `TemporalHomeRoutesE2ETest.kt` — E2E tests for [temporalHomeRoutes]. (~7458 tok)
+- `TemporalHomeRoutesE2ETest.kt` — E2E tests for [temporalHomeRoutes]. (~7519 tok)
 - `UIRoutesDataTest.kt` — UIRoutesDataTest: setup (~5104 tok)
+- `UIRoutesE2ETest.kt` — End-to-end tests for [uiRoutes]: starts a real Helidon Nima [TestServer] mounting the full (~7444 tok)
 - `UserShelterRoutesE2ETest.kt` — UserShelterRoutesE2ETest: setup, createTestUsers, startServer, createShelterInDb (~4074 tok)
 - `UsersRoutesE2ETest.kt` — Verbatim port of the old Ktor test's inline `module { ... }` block of mocked adapters. (~17800 tok)
 - `UserSterilizationLocationRoutesE2ETest.kt` — UserSterilizationLocationRoutesE2ETest: setup, createTestUsers, createLocationInDb (~4654 tok)
@@ -696,11 +712,19 @@
 - `JPEGCodecCrossValidationTest.kt` — JPEGCodecCrossValidationTest: testImage, toRgba, averageChannelDiff (~1084 tok)
 - `MagicLinkServiceTest.kt` — MagicLinkServiceTest: setup (~4136 tok)
 - `PasswordServiceTest.kt` — PasswordServiceTest: setup (~3959 tok)
+- `PetServiceTest.kt` — PetServiceTest: setup (~7235 tok)
 - `ProfileEmailVerificationServiceTest.kt` — ProfileEmailVerificationServiceTest: setup (~4165 tok)
+- `TemporalHomeServiceTest.kt` — TemporalHomeServiceTest: setup, cleanup (~4427 tok)
+- `UserServiceTest.kt` — UserServiceTest: setup (~5055 tok)
 - `UserShelterServiceTest.kt` — UserShelterServiceTest: setup (~5325 tok)
 - `UserSterilizationLocationServiceTest.kt` — UserSterilizationLocationServiceTest: setup (~5248 tok)
-- `WebAuthnServiceTest.kt` — Builds genuine (self-signed, attestation "none") WebAuthn4j registration/authentication (~8003 tok)
+- `WebAuthnServiceTest.kt` — Builds genuine (self-signed, attestation "none") WebAuthn4j registration/authentication (~8752 tok)
 - `WebPDimensionValidatorTest.kt` — WebPDimensionValidatorTest: ascii, le, riffHeader, vp8xBytes (~998 tok)
+
+## backend/src/test/kotlin/com/adoptu/services/validation/
+
+- `PetsValidationServiceTest.kt` — PetsValidationServiceTest: setup, tearDown, createTestUser, userDto (~2359 tok)
+- `TemporalHomesValidationServiceTest.kt` — TemporalHomesValidationServiceTest: setup, tearDown, createTestUser, createTemporalHomeRequest (~3930 tok)
 
 ## backend/src/test/kotlin/com/adoptu/web/
 
@@ -724,11 +748,15 @@
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/
 
 - `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~2627 tok)
+- `I18n.kt` (~60315 tok)
 - `ImageCompression.kt` — compress, attempt (~724 tok)
+- `WebAuthn.kt` — encodeURIComponent, register, authenticate, parseAssertionOptions, getRegistrationOptions (~2384 tok)
 
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
 
-- `MyPetsPage.kt` — init, clampNonNegative, load, onPetsLoaded, renderPetCard (~6013 tok)
+- `AdminPage.kt` — init, switchTab, formatDate, buildQuery, renderPagination (~4624 tok)
+- `MyPetsPage.kt` — init, clampNonNegative, load, onPetsLoaded, renderPetCard (~6017 tok)
+- `TemporalHomePage.kt` — init, search, displayResults, init, render (~2451 tok)
 
 ## infra/
 

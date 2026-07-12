@@ -28,6 +28,7 @@ object DatabaseFactory {
         UserPasswords,
         MagicLinkTokens,
         UserActiveRoles,
+        PendingRoleActivations,
         Photographers,
         WebAuthnCredentials,
         Pets,

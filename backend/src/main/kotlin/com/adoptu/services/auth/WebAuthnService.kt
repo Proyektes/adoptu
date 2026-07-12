@@ -1,5 +1,6 @@
 package com.adoptu.services.auth
 
+import com.adoptu.adapters.db.PendingRoleActivations
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.WebAuthnCredentials
@@ -43,6 +44,46 @@ private val ROLES_REQUIRING_VERIFICATION_BEFORE_ACTIVATION = setOf(
 
 enum class VerificationResendOutcome { SENT, ALREADY_VERIFIED, RATE_LIMITED, SEND_FAILED, USER_NOT_FOUND }
 
+// These are serialized directly as HTTP response bodies (res.send(...) in AuthRoutes.kt) and
+// MUST stay top-level, not nested inside WebAuthnService: jackson-module-kotlin's kotlin-reflect
+// based introspection cannot resolve a nested data class's Kotlin @Metadata under GraalVM
+// native-image (kotlin.reflect.jvm.internal.KotlinReflectionInternalError: Unresolved class),
+// which made every passkey registration/login entry point 500 (or silently serialize as `{}`)
+// in production - see bug-205/bug-206 in .wolf/buglog.json. Nested data classes that are never
+// serialized directly (AuthenticatedUser, AuthResult, RegistrationResult below) don't hit this.
+data class RelyingParty(
+    val id: String,
+    val name: String
+)
+
+data class PublicKeyUser(
+    val id: String,
+    val name: String,
+    val displayName: String
+)
+
+data class PubKeyCredParam(
+    val type: String,
+    val alg: Int
+)
+
+data class PublicKeyOptions(
+    val rp: RelyingParty,
+    val user: PublicKeyUser,
+    val challenge: String,
+    val pubKeyCredParams: List<PubKeyCredParam>
+)
+
+data class RegistrationOptionsResponse(
+    val publicKey: PublicKeyOptions
+)
+
+data class AssertionOptionsResponse(
+    val challenge: String,
+    val rpId: String,
+    val userVerification: String
+)
+
 @OptIn(ExperimentalTime::class)
 class WebAuthnService(
     private val clock: Clock,
@@ -59,39 +100,6 @@ class WebAuthnService(
     private val webAuthnManager = WebAuthnManager.createNonStrictWebAuthnManager(objectConverter)
     private val attestedCredentialDataConverter = AttestedCredentialDataConverter(objectConverter)
     private val secureRandom = SecureRandom()
-
-    data class RelyingParty(
-        val id: String,
-        val name: String
-    )
-
-    data class PublicKeyUser(
-        val id: String,
-        val name: String,
-        val displayName: String
-    )
-
-    data class PubKeyCredParam(
-        val type: String,
-        val alg: Int
-    )
-
-    data class RegistrationOptionsResponse(
-        val publicKey: PublicKeyOptions
-    )
-
-    data class PublicKeyOptions(
-        val rp: RelyingParty,
-        val user: PublicKeyUser,
-        val challenge: String,
-        val pubKeyCredParams: List<PubKeyCredParam>
-    )
-
-    data class AssertionOptionsResponse(
-        val challenge: String,
-        val rpId: String,
-        val userVerification: String
-    )
 
     data class AuthenticatedUser(
         val id: Int,
@@ -188,6 +196,12 @@ class WebAuthnService(
                         UserActiveRoles.insert {
                             it[UserActiveRoles.userId] = id
                             it[UserActiveRoles.role] = role.name
+                        }
+                    }
+                    (effectiveRoles intersect ROLES_REQUIRING_VERIFICATION_BEFORE_ACTIVATION).forEach { role ->
+                        PendingRoleActivations.insert {
+                            it[PendingRoleActivations.userId] = id
+                            it[PendingRoleActivations.role] = role.name
                         }
                     }
                 }
@@ -326,6 +340,12 @@ class WebAuthnService(
                             UserActiveRoles.insert {
                                 it[UserActiveRoles.userId] = id
                                 it[UserActiveRoles.role] = role.name
+                            }
+                        }
+                        (effectiveRoles intersect ROLES_REQUIRING_VERIFICATION_BEFORE_ACTIVATION).forEach { role ->
+                            PendingRoleActivations.insert {
+                                it[PendingRoleActivations.userId] = id
+                                it[PendingRoleActivations.role] = role.name
                             }
                         }
                     }

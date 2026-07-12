@@ -72,14 +72,16 @@ object WebAuthnModule {
                 }
                 val idBase64 = arrayBufferToBase64(credential.id)
                 val rawIdBase64 = arrayBufferToBase64(credential.rawId)
-                val clientDataJSON = credential.response.clientDataJSON
-                val bytes = js("new Uint8Array(clientDataJSON)")
-                var clientBinary = ""
-                for (i in 0 until bytes.length) {
-                    clientBinary += js("String.fromCharCode(bytes[i])")
+                val clientDataBase64 = arrayBufferToBase64(credential.response.clientDataJSON)
+                val authenticatorDataBase64 = arrayBufferToBase64(credential.response.authenticatorData)
+                val signatureBase64 = arrayBufferToBase64(credential.response.signature)
+                val userHandle = credential.response.userHandle
+                val userHandleField = if (userHandle != null && userHandle != undefined) {
+                    ""","userHandle":"${arrayBufferToBase64(userHandle)}""""
+                } else {
+                    ""
                 }
-                val clientBase64 = toBase64Url(window.btoa(clientBinary))
-                val jsonStr = """{"id":"$idBase64","type":"public-key","rawId":"$rawIdBase64","response":{"clientDataJSON":"$clientBase64"}}"""
+                val jsonStr = """{"id":"$idBase64","type":"public-key","rawId":"$rawIdBase64","response":{"clientDataJSON":"$clientDataBase64","authenticatorData":"$authenticatorDataBase64","signature":"$signatureBase64"$userHandleField}}"""
                 val body = "credential=${encodeURIComponent(jsonStr)}"
                 window.asDynamic().fetch("/api/auth/authenticate", js("({method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: body})")).then { res ->
                     res.unsafeCast<dynamic>().json().then<dynamic> { json -> json }

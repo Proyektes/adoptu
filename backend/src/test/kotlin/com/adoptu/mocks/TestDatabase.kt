@@ -35,6 +35,7 @@ object TestDatabase {
                     WebAuthnCredentials,
                     UserPasswords,
                     UserActiveRoles,
+                    PendingRoleActivations,
                     TemporalHomeRequests,
                     BlockedRescuers,
                     Photographers,
@@ -61,6 +62,7 @@ object TestDatabase {
                 UserPasswords,
                 WebAuthnCredentials,
                 UserActiveRoles,
+                PendingRoleActivations,
                 AnimalShelters,
                 SterilizationLocations,
                 UserShelters,
@@ -97,6 +99,7 @@ object TestDatabase {
             exec("DELETE FROM webauthn_credentials")
             exec("DELETE FROM photography_requests")
             exec("DELETE FROM user_active_roles")
+            exec("DELETE FROM pending_role_activations")
             exec("DELETE FROM photographers")
             exec("DELETE FROM users")
             exec("DELETE FROM animal_shelters")

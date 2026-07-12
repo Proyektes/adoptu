@@ -4,10 +4,12 @@ import com.adoptu.dto.input.AcceptTermsRequest
 import com.adoptu.dto.input.UserDto
 import com.adoptu.dto.input.UserRole
 import com.adoptu.dto.output.PagedResult
+import com.adoptu.ports.PhotographerRepositoryPort
 import com.adoptu.ports.UserRepositoryPort
 
 class UserService(
-    private val userRepository: UserRepositoryPort
+    private val userRepository: UserRepositoryPort,
+    private val photographerRepository: PhotographerRepositoryPort
 ) {
     suspend fun getById(userId: Int): UserDto? = userRepository.getById(userId)
 
@@ -67,6 +69,7 @@ class UserService(
         val updated = userRepository.setEmailVerified(userId, true)
         if (updated) {
             userRepository.deleteVerificationTokens(userId)
+            activatePendingRoles(userId)
         }
         return updated
     }
@@ -78,7 +81,25 @@ class UserService(
         val updated = userRepository.setEmailVerified(userId, true)
         if (updated) {
             userRepository.deleteVerificationTokens(userId)
+            activatePendingRoles(userId)
         }
         return updated to language
+    }
+
+    // Roles selected at registration for types that require a verified email
+    // (see ROLES_REQUIRING_VERIFICATION_BEFORE_ACTIVATION in WebAuthnService.kt) were recorded
+    // as pending instead of granted. Now that verification succeeded, grant them for real.
+    private suspend fun activatePendingRoles(userId: Int) {
+        val pendingRoles = userRepository.consumePendingRoleActivations(userId)
+        pendingRoles.forEach { role ->
+            when (role) {
+                UserRole.RESCUER -> userRepository.activateRescuerProfile(userId)
+                UserRole.TEMPORAL_HOME -> userRepository.activateTemporalHomeProfile(userId)
+                UserRole.SHELTER -> userRepository.activateShelterProfile(userId)
+                UserRole.STERILIZATION_SERVICE -> userRepository.activateSterilizationProfile(userId)
+                UserRole.PHOTOGRAPHER -> photographerRepository.activatePhotographerProfile(userId)
+                else -> Unit
+            }
+        }
     }
 }

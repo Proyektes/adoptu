@@ -2,6 +2,8 @@ package com.adoptu.services.validation
 
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
+import com.adoptu.adapters.db.repositories.PetRepositoryImpl
+import com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl
 import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.dto.input.UserDto
 import com.adoptu.mocks.TestClock
@@ -38,7 +40,8 @@ class AuthValidationServiceTest {
     fun setup() {
         TestDatabase.initH2()
         val userRepository = UserRepository(clock)
-        userService = UserService(userRepository)
+        val photographerRepository = PhotographerRepositoryImpl(PetRepositoryImpl(clock), userRepository, clock)
+        userService = UserService(userRepository, photographerRepository)
 
         stopKoin() // defensive: clear any Koin app leaked from a concurrently-run test in this JVM
         startKoin {

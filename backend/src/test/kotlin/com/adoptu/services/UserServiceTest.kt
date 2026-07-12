@@ -1,7 +1,10 @@
 package com.adoptu.services
 
+import com.adoptu.adapters.db.EmailVerificationTokens
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
+import com.adoptu.adapters.db.repositories.PetRepositoryImpl
+import com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl
 import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.dto.input.AcceptTermsRequest
 import com.adoptu.dto.input.UserRole
@@ -28,13 +31,15 @@ import kotlinx.coroutines.runBlocking
 class UserServiceTest {
 
     private lateinit var userService: UserService
+    private lateinit var userRepository: UserRepository
     private val clock: TestClock = TestClock(Instant.parse("2024-01-15T10:00:00Z"))
 
     @BeforeEach
     fun setup() {
         TestDatabase.initH2()
-        val userRepository = UserRepository(clock)
-        userService = UserService(userRepository)
+        userRepository = UserRepository(clock)
+        val photographerRepository = PhotographerRepositoryImpl(PetRepositoryImpl(clock), userRepository, clock)
+        userService = UserService(userRepository, photographerRepository)
     }
 
     @Test
@@ -425,9 +430,58 @@ class UserServiceTest {
     @Test
     fun `verifyTokenAndGetLanguage returns false and en for invalid token`() = runBlocking {
         val result = userService.verifyTokenAndGetLanguage("invalid-token")
-        
+
         assertFalse(result.first)
         assertEquals("en", result.second)
+    }
+
+    @Test
+    fun `verifyToken activates pending rescuer role granted at registration`() = runBlocking {
+        val userId = createTestUser(username = "pendingrescuer@test.com", displayName = "Pending Rescuer")
+        userRepository.addPendingRoleActivations(userId, setOf(UserRole.RESCUER))
+        val token = createVerificationToken(userId)
+
+        val result = userService.verifyToken(token)
+
+        assertTrue(result)
+        val user = userService.getById(userId)
+        assertTrue(user?.activeRoles?.contains(UserRole.RESCUER) == true)
+    }
+
+    @Test
+    fun `verifyToken activates pending photographer role granted at registration`() = runBlocking {
+        val userId = createTestUser(username = "pendingphotographer@test.com", displayName = "Pending Photographer")
+        userRepository.addPendingRoleActivations(userId, setOf(UserRole.PHOTOGRAPHER))
+        val token = createVerificationToken(userId)
+
+        val result = userService.verifyToken(token)
+
+        assertTrue(result)
+        val user = userService.getById(userId)
+        assertTrue(user?.activeRoles?.contains(UserRole.PHOTOGRAPHER) == true)
+    }
+
+    @Test
+    fun `verifyToken does not fail when there are no pending role activations`() = runBlocking {
+        val userId = createTestUser(username = "nopending@test.com", displayName = "No Pending")
+        val token = createVerificationToken(userId)
+
+        val result = userService.verifyToken(token)
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun `verifyTokenAndGetLanguage activates pending roles granted at registration`() = runBlocking {
+        val userId = createTestUser(username = "pendingtemporal@test.com", displayName = "Pending Temporal")
+        userRepository.addPendingRoleActivations(userId, setOf(UserRole.TEMPORAL_HOME))
+        val token = createVerificationToken(userId)
+
+        val result = userService.verifyTokenAndGetLanguage(token)
+
+        assertTrue(result.first)
+        val user = userService.getById(userId)
+        assertTrue(user?.activeRoles?.contains(UserRole.TEMPORAL_HOME) == true)
     }
 
     @Test
@@ -465,5 +519,18 @@ class UserServiceTest {
         }
         
         return userId
+    }
+
+    private fun createVerificationToken(userId: Int): String {
+        val token = "token-$userId-${clock.now().toEpochMilliseconds()}"
+        transaction {
+            EmailVerificationTokens.insert {
+                it[EmailVerificationTokens.userId] = userId
+                it[EmailVerificationTokens.token] = token
+                it[EmailVerificationTokens.expiresAt] = clock.now().toEpochMilliseconds() + 86_400_000L
+                it[EmailVerificationTokens.createdAt] = clock.now().toEpochMilliseconds()
+            }
+        }
+        return token
     }
 }

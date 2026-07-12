@@ -4,6 +4,7 @@ import com.adoptu.adapters.db.EmailVerificationTokens
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.repositories.PetRepositoryImpl
+import com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl
 import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.config.AppConfig
 import com.adoptu.dto.input.Gender
@@ -117,9 +118,11 @@ class UIRoutesE2ETest {
         val config = AppConfig.fromMap(mapOf("env" to "test"))
         single<Clock> { Clock.System }
         single<com.adoptu.ports.UserRepositoryPort> { UserRepository(get()) }
+        single<com.adoptu.ports.PetRepositoryPort> { PetRepositoryImpl(get()) }
         single { MockNotificationAdapter() }
         single<com.adoptu.ports.NotificationPort> { get<MockNotificationAdapter>() }
-        single { UserService(get()) }
+        single<com.adoptu.ports.PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
+        single { UserService(get(), get()) }
         single { EmailVerificationService(get(), get(), get()) }
         single { PasswordService(get(), get(), get(), "http://localhost:80") }
         single { MagicLinkService(get(), get(), get(), "http://localhost:80", get()) }

@@ -437,6 +437,39 @@ class UserRepository(private val clock: Clock) : UserRepositoryPort {
         return getById(userId)
     }
 
+    override suspend fun addPendingRoleActivations(userId: Int, roles: Set<UserRole>) {
+        withContext(dbDispatcher) {
+            transaction {
+                roles.forEach { role ->
+                    val existing = PendingRoleActivations.selectAll()
+                        .where { (PendingRoleActivations.userId eq userId) and (PendingRoleActivations.role eq role.name) }
+                        .firstOrNull()
+                    if (existing == null) {
+                        PendingRoleActivations.insert {
+                            it[PendingRoleActivations.userId] = userId
+                            it[PendingRoleActivations.role] = role.name
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    override suspend fun consumePendingRoleActivations(userId: Int): Set<UserRole> {
+        return withContext(dbDispatcher) {
+            transaction {
+                val pending = PendingRoleActivations.selectAll()
+                    .where { PendingRoleActivations.userId eq userId }
+                    .mapNotNull { row ->
+                        runCatching { UserRole.valueOf(row[PendingRoleActivations.role]) }.getOrNull()
+                    }
+                    .toSet()
+                PendingRoleActivations.deleteWhere { PendingRoleActivations.userId eq userId }
+                pending
+            }
+        }
+    }
+
     override suspend fun updateProfile(userId: Int, displayName: String, language: String?, country: String?): UserDto? {
         if (displayName.isBlank()) {
             throw IllegalArgumentException("Display name cannot be empty")
