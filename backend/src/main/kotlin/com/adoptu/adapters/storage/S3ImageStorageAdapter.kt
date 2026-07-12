@@ -24,7 +24,11 @@ class S3ImageStorageAdapter(
     private val accessKeyId: String?,
     private val secretAccessKey: String?,
     private val endpoint: String?,
-    private val pathStyleAccess: Boolean = false
+    private val pathStyleAccess: Boolean = false,
+    // Public-facing URL clients actually load images from (a CDN domain). Distinct from
+    // [endpoint], which the S3 SDK client itself uses to reach the bucket - the bucket blocks
+    // direct public access, so [endpoint]'s host is never valid to hand back to a browser.
+    private val publicUrl: String? = null
 ) : ImageStoragePort {
     private val log = LoggerFactory.getLogger(S3ImageStorageAdapter::class.java)
 
@@ -118,14 +122,19 @@ class S3ImageStorageAdapter(
     }
 
     override fun getImageUrl(petId: Int, imageKey: String): String {
-        return if (!endpoint.isNullOrEmpty()) {
-            "$endpoint/$bucketName/$imageKey"
-        } else {
-            "https://$bucketName.s3.$region.amazonaws.com/$imageKey"
+        return when {
+            !publicUrl.isNullOrEmpty() -> "$publicUrl/$imageKey"
+            !endpoint.isNullOrEmpty() -> "$endpoint/$bucketName/$imageKey"
+            else -> "https://$bucketName.s3.$region.amazonaws.com/$imageKey"
         }
     }
 
+    // The key is always the URL path with the leading slash stripped, except for path-style
+    // addressing (LocalStack in dev), where the bucket name is also part of the path and must
+    // be stripped too - virtual-hosted-style and CDN URLs both put the bucket in the host (or
+    // omit it entirely), never the path.
     private fun extractKeyFromUrl(url: String): String {
-        return url.substringAfter("$bucketName/")
+        val path = java.net.URI.create(url).path.removePrefix("/")
+        return if (pathStyleAccess) path.substringAfter("$bucketName/") else path
     }
 }

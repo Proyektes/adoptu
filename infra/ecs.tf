@@ -56,6 +56,10 @@ resource "aws_ecs_task_definition" "app" {
         { name = "ADOPTU_DB_USER", value = "adoptu" },
         { name = "ADOPTU_S3_BUCKET", value = aws_s3_bucket.dynamic_images.bucket },
         { name = "ADOPTU_S3_REGION", value = var.aws_region },
+        # The bucket blocks direct public access (policy only allows the CloudFront
+        # distribution) - image URLs returned to clients must be the CDN domain, not any
+        # S3-derived host, or the browser gets a 403 loading every photo.
+        { name = "ADOPTU_S3_PUBLIC_URL", value = "https://dynamic.${var.domain_name}" },
         # No ADOPTU_S3_ENDPOINT here on purpose: S3ImageStorageAdapter uses
         # virtual-hosted-style addressing (path_style_access = false), which
         # prepends the bucket name onto whatever endpoint it's given. Setting

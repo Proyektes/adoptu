@@ -3029,6 +3029,60 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-12T15:23:00.000Z"
+    },
+    {
+      "id": "bug-184",
+      "timestamp": "2026-07-12T16:04:19.347Z",
+      "error_message": "Incorrect value in code",
+      "file": "infra/terraform.tfvars",
+      "root_cause": "Had \"sha256:91120d712188aa618063a3494e939bd263d591bb2b",
+      "fix": "Changed to \"sha256:148c3c6122fbc360bd40d719b312964cb31f57d630",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tfvars"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-12T16:04:19.347Z"
+    },
+    {
+      "id": "bug-185",
+      "timestamp": "2026-07-12T16:39:16.475Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/kotlin/com/adoptu/adapters/storage/S3ImageStorageAdapter.kt",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 11\u219216 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-12T16:39:16.475Z"
+    },
+    {
+      "id": "bug-183",
+      "timestamp": "2026-07-12T16:37:00.000Z",
+      "error_message": "Pet photo uploaded successfully (200) but the image doesn't render on the pet detail page - <img> src returns 403 Forbidden",
+      "file": "backend/src/main/kotlin/com/adoptu/adapters/storage/S3ImageStorageAdapter.kt",
+      "root_cause": "getImageUrl() constructed a raw direct-S3-bucket URL (https://{bucket}.s3.{region}.amazonaws.com/{key}) whenever no endpoint override was configured. The adoptu-dynamic-images bucket's policy only allows access via its CloudFront distribution (dynamic.adopt-u.org) - direct bucket URLs always 403. This bug was previously masked by bug-181 (the broken ADOPTU_S3_ENDPOINT that made uploads fail entirely before ever reaching getImageUrl); fixing bug-181 exposed this separate, previously-latent bug. Found immediately after verifying the bug-181 fix by uploading a real photo and checking the pet detail page in a browser.",
+      "fix": "Added a new publicUrl config field (ADOPTU_S3_PUBLIC_URL, set by infra/ecs.tf to https://dynamic.${var.domain_name}) threaded through application.conf -> AppModule.kt -> S3ImageStorageAdapter. getImageUrl() now prefers publicUrl when set. Also fixed extractKeyFromUrl() (used by deleteImage) to parse the key from the URL's path component via java.net.URI instead of a bucket-name substring match, so it works correctly for both the new CDN URL format (bucket not in the path) and the existing LocalStack path-style format (bucket in the path, stripped when pathStyleAccess=true).",
+      "tags": [
+        "s3",
+        "cloudfront",
+        "cdn",
+        "image-url",
+        "production",
+        "pre-existing",
+        "latent-bug"
+      ],
+      "related_bugs": [
+        "bug-181"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-12T16:37:00.000Z"
     }
   ]
 }

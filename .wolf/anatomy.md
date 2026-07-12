@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T15:34:57.346Z
-> Files: 560 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T16:39:47.146Z
+> Files: 561 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/62863a52-3ff2-44ef-8f05-9c7af3c307ce/scratchpad/adoptu-authcov/backend/src/test/kotlin/com/adoptu/routes/
 
@@ -471,7 +471,7 @@
 
 ## backend/src/main/kotlin/com/adoptu/adapters/storage/
 
-- `S3ImageStorageAdapter.kt` — S3ImageStorageAdapter: uploadImage, uploadImage, createBucket, deleteImage (~1262 tok)
+- `S3ImageStorageAdapter.kt` — S3ImageStorageAdapter: uploadImage, uploadImage, createBucket, deleteImage (~1476 tok)
 
 ## backend/src/main/kotlin/com/adoptu/common/
 
@@ -483,7 +483,7 @@
 
 ## backend/src/main/kotlin/com/adoptu/di/
 
-- `AppModule.kt` — appModule, getOrigins, createImageStorageAdapter (~1223 tok)
+- `AppModule.kt` — appModule, getOrigins, createImageStorageAdapter (~1252 tok)
 
 ## backend/src/main/kotlin/com/adoptu/dto/input/
 
@@ -605,7 +605,7 @@
 
 ## backend/src/main/resources/
 
-- `application.conf` — Declares STRING (~833 tok)
+- `application.conf` — Declares STRING (~909 tok)
 - `logback.xml` (~246 tok)
 
 ## backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/
@@ -659,6 +659,10 @@
 ## backend/src/test/kotlin/com/adoptu/adapters/notification/
 
 - `SesEmailAdapterTest.kt` — Declares SesEmailAdapterTest (~3818 tok)
+
+## backend/src/test/kotlin/com/adoptu/adapters/storage/
+
+- `S3ImageStorageAdapterTest.kt` — Declares S3ImageStorageAdapterTest (~505 tok)
 
 ## backend/src/test/kotlin/com/adoptu/common/
 
@@ -729,9 +733,9 @@
 ## infra/
 
 - `cloudfront.tf` (~3279 tok)
-- `ecs.tf` — New, dedicated cluster rather than reusing the account's existing (~1513 tok)
+- `ecs.tf` — New, dedicated cluster rather than reusing the account's existing (~1603 tok)
 - `iam.tf` (~1009 tok)
-- `terraform.tfvars` (~111 tok)
+- `terraform.tfvars` (~108 tok)
 
 ## shared/
 

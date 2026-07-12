@@ -73,6 +73,7 @@ internal fun createImageStorageAdapter(config: AppConfig): ImageStoragePort {
     val secretAccessKey = config.propertyOrNull("$prefix.secret_access_key")?.getString()
     val endpoint = config.propertyOrNull("$prefix.endpoint")?.getString()
     val pathStyleAccess = config.propertyOrNull("$prefix.path_style_access")?.getString()?.toBoolean() ?: false
+    val publicUrl = config.propertyOrNull("$prefix.public_url")?.getString()
 
     return S3ImageStorageAdapter(
         bucketName = bucketName,
@@ -80,6 +81,7 @@ internal fun createImageStorageAdapter(config: AppConfig): ImageStoragePort {
         accessKeyId = accessKeyId,
         secretAccessKey = secretAccessKey,
         endpoint = endpoint,
-        pathStyleAccess = pathStyleAccess
+        pathStyleAccess = pathStyleAccess,
+        publicUrl = publicUrl
     )
 }
