@@ -2975,6 +2975,60 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-11T23:16:00.000Z"
+    },
+    {
+      "id": "bug-181",
+      "timestamp": "2026-07-12T15:08:28.182Z",
+      "error_message": "Incorrect value in code",
+      "file": "infra/terraform.tfvars",
+      "root_cause": "Had \"sha256:2b1de69d218b9e9b7888c688c7e5adaabc8af17dbc",
+      "fix": "Changed to \"sha256:91120d712188aa618063a3494e939bd263d591bb2b",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tfvars"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-12T15:08:28.182Z"
+    },
+    {
+      "id": "bug-181",
+      "timestamp": "2026-07-12T15:31:00.000Z",
+      "error_message": "POST /api/pets/{id}/images returns 500 in production: \"Certificate for <adoptu-pets.adoptu-dynamic-images.s3.us-east-1.amazonaws.com> doesn't match any of the subject alternative names\"",
+      "file": "backend/src/main/resources/application.conf, infra/ecs.tf",
+      "root_cause": "Two compounding pre-existing bugs, unrelated to the WebP/JPEG work: (1) application.conf's storage.prod block had 'bucket = ${?ADOPTU_S3_BUCKET}' followed by a hardcoded 'bucket = \"adoptu-pets\"' - in HOCON, later assignments win, so the hardcoded literal (a bucket that doesn't exist in the AWS account) always overrode whatever Terraform set via the env var, regardless of its value. Same inverted-precedence bug also affected region/path_style_access, harmlessly since those happened to match. (2) infra/ecs.tf set ADOPTU_S3_ENDPOINT to aws_s3_bucket.dynamic_images.bucket_regional_domain_name (an already bucket-specific virtual-hosted-style hostname); combined with S3ImageStorageAdapter's pathStyleAccess=false, the AWS SDK prepended the bucket name onto that endpoint AGAIN, producing an invalid doubled hostname that fails TLS SNI/cert validation. Found while running the requested S3 image upload verification test against the live production deploy - blocked ALL photo uploads (PNG included), not just WebP, and predates this session's changes entirely.",
+      "fix": "application.conf: swapped the override order so the hardcoded default comes first and the env var substitution comes second (matching the correct pattern already used for db.prod.url). infra/ecs.tf: removed the ADOPTU_S3_ENDPOINT env var entirely for prod - the AWS SDK resolves the correct virtual-hosted-style endpoint on its own with no override needed; an endpoint override is only required for LocalStack in dev.",
+      "tags": [
+        "s3",
+        "hocon",
+        "config-precedence",
+        "terraform",
+        "tls",
+        "production",
+        "pre-existing"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-12T15:31:00.000Z"
+    },
+    {
+      "id": "bug-182",
+      "timestamp": "2026-07-12T15:23:00.000Z",
+      "error_message": "N/A - not an error, a functional gap found during manual verification: checking 'Rescuer' at /register doesn't grant the role",
+      "file": "N/A - not yet root-caused, registration flow (frontend RegisterPage + backend registration endpoint)",
+      "root_cause": "Not yet investigated in depth. A newly registered account that checked the 'Rescuer' role checkbox during /register still shows activeRoles: [\"ADOPTER\"] only via /api/auth/me after registering and verifying email. Manually checking the same 'Rescuer' checkbox on /profile afterward and saving grants it immediately (no approval delay), confirming the role-grant mechanism itself works - the gap is specifically that registration-time role selections aren't applied.",
+      "fix": "Not fixed - out of scope for this session, worked around by granting the role via /profile instead. Flagged for follow-up.",
+      "tags": [
+        "registration",
+        "roles",
+        "frontend-or-backend",
+        "needs-investigation",
+        "not-fixed"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-12T15:23:00.000Z"
     }
   ]
 }

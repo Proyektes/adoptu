@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T05:44:59.599Z
-> Files: 558 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T15:34:57.346Z
+> Files: 560 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/62863a52-3ff2-44ef-8f05-9c7af3c307ce/scratchpad/adoptu-authcov/backend/src/test/kotlin/com/adoptu/routes/
 
@@ -28,7 +28,7 @@
 - `buildspec.yml` (~614 tok)
 - `CLAUDE.md` — OpenWolf (~624 tok)
 - `docker-compose.yml` — Docker Compose services (~118 tok)
-- `Dockerfile` — Docker container definition (~611 tok)
+- `Dockerfile` — Docker container definition (~759 tok)
 - `gradle.properties` (~159 tok)
 - `gradlew` — you may not use this file except in compliance with the License. (~2380 tok)
 - `gradlew.bat` (~748 tok)
@@ -728,8 +728,10 @@
 
 ## infra/
 
-- `ecs.tf` — New, dedicated cluster rather than reusing the account's existing (~1352 tok)
+- `cloudfront.tf` (~3279 tok)
+- `ecs.tf` — New, dedicated cluster rather than reusing the account's existing (~1513 tok)
 - `iam.tf` (~1009 tok)
+- `terraform.tfvars` (~111 tok)
 
 ## shared/
 

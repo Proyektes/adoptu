@@ -56,7 +56,16 @@ resource "aws_ecs_task_definition" "app" {
         { name = "ADOPTU_DB_USER", value = "adoptu" },
         { name = "ADOPTU_S3_BUCKET", value = aws_s3_bucket.dynamic_images.bucket },
         { name = "ADOPTU_S3_REGION", value = var.aws_region },
-        { name = "ADOPTU_S3_ENDPOINT", value = "https://${aws_s3_bucket.dynamic_images.bucket_regional_domain_name}" },
+        # No ADOPTU_S3_ENDPOINT here on purpose: S3ImageStorageAdapter uses
+        # virtual-hosted-style addressing (path_style_access = false), which
+        # prepends the bucket name onto whatever endpoint it's given. Setting
+        # this to bucket_regional_domain_name (already bucket-specific,
+        # "adoptu-dynamic-images.s3.<region>.amazonaws.com") doubled the
+        # bucket name into an invalid host and broke every upload with a TLS
+        # hostname-mismatch error. The AWS SDK resolves the correct
+        # regional/virtual-hosted endpoint on its own with no override at
+        # all - an endpoint override is only needed for LocalStack in dev
+        # (see application.conf's storage.dev block).
         { name = "AWS_REGION", value = var.aws_region },
         { name = "AWS_SES_ENDPOINT", value = "https://email.${var.aws_region}.amazonaws.com" },
         # Never set before - every outbound-email action link (password

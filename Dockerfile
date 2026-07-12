@@ -17,10 +17,12 @@ COPY gradlew .
 COPY build.gradle.kts settings.gradle.kts ./
 COPY backend/build.gradle.kts backend/build.gradle.kts
 COPY frontend/build.gradle.kts frontend/build.gradle.kts
+COPY common/build.gradle.kts common/build.gradle.kts
 RUN chmod +x gradlew
 
 COPY backend/src backend/src
 COPY frontend/src frontend/src
+COPY common/src common/src
 
 # CSS is precompiled from SCSS by hand and committed under
 # backend/src/main/resources/static/css/ - there is no Gradle Sass task.
@@ -48,8 +50,9 @@ RUN microdnf install -y ca-certificates shadow-utils \
 
 WORKDIR /app
 
-# javax.imageio's AWT/Toolkit init (used by ImageCompressor for pet photo
-# uploads) dlopen's these at runtime relative to the executable's own
+# javax.imageio's AWT/Toolkit init (used by ImageCompressor for the PNG
+# upload path only as of the JPEG codec vendoring - JPEG no longer touches
+# AWT at all) dlopen's these at runtime relative to the executable's own
 # directory - copying just the binary left them missing entirely
 # (UnsatisfiedLinkError: Can't load library: awt), silently breaking every
 # photo upload since the native-image migration.

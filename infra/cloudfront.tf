@@ -198,11 +198,21 @@ resource "aws_cloudfront_distribution" "app" {
   # before it ever reached the origin (found 2026-07-12 while testing pet
   # creation end-to-end; cached_methods stays GET/HEAD-only so POST is never
   # cached, only forwarded).
+  #
+  # CloudFront's AllowedMethods only accepts one of three fixed sets:
+  # [HEAD,GET], [HEAD,GET,OPTIONS], or the full [HEAD,DELETE,POST,GET,OPTIONS,
+  # PUT,PATCH] - there is no "read + POST only" combination, so enabling POST
+  # here means accepting the full write-method set too (found 2026-07-12: the
+  # previous [GET,HEAD,OPTIONS,POST] value is rejected outright by the
+  # CloudFront API with InvalidArgument and was never actually applied - the
+  # live distribution had silently stayed on the full set this whole time).
+  # PUT/PATCH/DELETE are harmless here even though no route handles them on
+  # the bare /api/pets path (Helidon 404s them at the origin same as today).
   ordered_cache_behavior {
     path_pattern             = "/api/pets"
     target_origin_id         = "ecs-task"
     viewer_protocol_policy   = "redirect-to-https"
-    allowed_methods          = ["GET", "HEAD", "OPTIONS", "POST"]
+    allowed_methods          = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
     cached_methods           = ["GET", "HEAD"]
     compress                 = true
     cache_policy_id          = aws_cloudfront_cache_policy.api_public_listings.id
