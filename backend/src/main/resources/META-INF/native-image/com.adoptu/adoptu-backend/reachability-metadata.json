@@ -252,11 +252,37 @@
         {
           "name": "isUrgent",
           "parameterTypes": []
+        },
+        {
+          "name": "getDeactivatedAt",
+          "parameterTypes": []
+        },
+        {
+          "name": "getDeactivatedBy",
+          "parameterTypes": []
         }
       ]
     },
     {
-      "type": "com.adoptu.dto.input.PetImageDto"
+      "type": "com.adoptu.dto.input.PetImageDto",
+      "methods": [
+        {
+          "name": "getId",
+          "parameterTypes": []
+        },
+        {
+          "name": "getImageUrl",
+          "parameterTypes": []
+        },
+        {
+          "name": "isPrimary",
+          "parameterTypes": []
+        },
+        {
+          "name": "getSortOrder",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "com.adoptu.dto.input.PhotographerDto",
@@ -555,6 +581,14 @@
         {
           "name": "isEmailVerified",
           "parameterTypes": []
+        },
+        {
+          "name": "getDeactivatedAt",
+          "parameterTypes": []
+        },
+        {
+          "name": "getDeactivatedBy",
+          "parameterTypes": []
         }
       ]
     },
@@ -643,6 +677,10 @@
         {
           "name": "getZip",
           "parameterTypes": []
+        },
+        {
+          "name": "getEmailVerified",
+          "parameterTypes": []
         }
       ]
     },
@@ -699,6 +737,10 @@
         },
         {
           "name": "getZip",
+          "parameterTypes": []
+        },
+        {
+          "name": "getEmailVerified",
           "parameterTypes": []
         }
       ]
