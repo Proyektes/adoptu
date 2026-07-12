@@ -57,17 +57,17 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
                             div {
                                 classes = setOf("checkbox-row")
                                 input(InputType.checkBox) { id = "role-rescuer" }
-                                span { attributes["data-i18n"] = "publishPets"; +"Rescuer - Publish pets for adoption" }
+                                span { attributes["data-i18n"] = "profileRescuerRole"; +"Rescuer - Publish pets for adoption" }
                             }
                             div {
                                 classes = setOf("checkbox-row")
                                 input(InputType.checkBox) { id = "role-photographer" }
-                                span { attributes["data-i18n"] = "offerPhotography"; +"Photographer - Offer photography services" }
+                                span { attributes["data-i18n"] = "profilePhotographerRole"; +"Photographer - Offer photography services" }
                             }
                             div {
                                 classes = setOf("checkbox-row")
                                 input(InputType.checkBox) { id = "role-temporal-home" }
-                                span { attributes["data-i18n"] = "provideTemporaryHome"; +"Temporal Home - Provide temporary home for pets" }
+                                span { attributes["data-i18n"] = "profileTemporalHomeRole"; +"Temporal Home - Provide temporary home for pets" }
                             }
                             div {
                                 classes = setOf("checkbox-row")

@@ -1,6 +1,7 @@
 package com.adoptu.frontend.pages
 
 import com.adoptu.frontend.CommonModule
+import com.adoptu.frontend.I18n
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.HTMLElement
@@ -211,7 +212,7 @@ object AdminPageModule {
     }
 
     private fun unbanUser(id: Int) {
-        if (!window.confirm("Unban this user?")) return
+        if (!window.confirm(I18n.t("confirmUnbanUser"))) return
         window.asDynamic().fetch("/api/admin/users/$id/unban", js("({method: 'POST', credentials: 'include'})")).then { res: dynamic ->
             if (res.ok != true) throw js("new Error('Failed to unban user')")
             loadUsers()
@@ -222,7 +223,7 @@ object AdminPageModule {
     // email (POST /api/admin/users/{id}/reset-password) - the confirm text mirrors exactly
     // what that endpoint does so an admin can't trigger it by accident.
     private fun resetPassword(id: Int, email: String) {
-        if (!window.confirm("This will invalidate $email's current password and passkeys and email them a reset link. Continue?")) return
+        if (!window.confirm(I18n.t("confirmResetUserCredentials").replace("{email}", email))) return
         window.asDynamic().fetch("/api/admin/users/$id/reset-password", js("({method: 'POST', credentials: 'include'})")).then { res: dynamic ->
             if (res.ok != true) throw js("new Error('Failed to reset password')")
             window.alert("Password reset email sent to $email.")
@@ -232,7 +233,7 @@ object AdminPageModule {
 
     // Independent of Ban/Unban - see POST /api/admin/users/{id}/deactivate in UsersRoutes.kt.
     private fun deactivateUser(id: Int) {
-        if (!window.confirm("Deactivate this user? They can be reactivated later.")) return
+        if (!window.confirm(I18n.t("confirmDeactivateUser"))) return
         window.asDynamic().fetch("/api/admin/users/$id/deactivate", js("({method: 'POST', credentials: 'include'})")).then { res: dynamic ->
             if (res.ok != true) throw js("new Error('Failed to deactivate user')")
             loadUsers()
@@ -298,7 +299,7 @@ object AdminPageModule {
     }
 
     private fun deactivatePet(id: Int) {
-        if (!window.confirm("Deactivate this pet? It will be hidden from public listings and can be reactivated later.")) return
+        if (!window.confirm(I18n.t("confirmDeactivatePet"))) return
         window.asDynamic().fetch("/api/admin/pets/$id/deactivate", js("({method: 'POST', credentials: 'include'})")).then { res: dynamic ->
             if (res.ok != true) throw js("new Error('Failed to deactivate pet')")
             loadPetsAdmin()

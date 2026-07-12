@@ -173,7 +173,7 @@ object TemporalHomeProfilePageModule {
     }
 
     private fun blockRescuer(rescuerId: Int) {
-        if (!window.confirm("Block this rescuer from sending you more requests?")) return
+        if (!window.confirm(I18n.t("confirmBlockRescuer"))) return
         ApiClientModule.blockRescuer(rescuerId).then<Unit> { result ->
             window.alert(if (result.blocked == true) "Rescuer blocked!" else "Already blocked")
             loadRequests()

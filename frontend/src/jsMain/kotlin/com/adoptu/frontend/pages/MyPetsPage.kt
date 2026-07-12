@@ -224,7 +224,7 @@ object MyPetsPageModule {
     }
 
     private fun deletePet(id: Int) {
-        if (!window.confirm("Delete this pet?")) return
+        if (!window.confirm(I18n.t("confirmDeletePet"))) return
         ApiClientModule.deletePet(id.toString()).then<Unit> { load() }
     }
 
@@ -303,7 +303,7 @@ object MyPetsPageModule {
     private fun removeExistingImage(index: Int) {
         val img = existingImages[index]
         val petId = (document.getElementById("pet-id") as HTMLInputElement).value
-        if (!window.confirm("Delete this storage?")) return
+        if (!window.confirm(I18n.t("confirmDeleteStorage"))) return
         ApiClientModule.removeImage(petId, img.id as Int).then<Unit> {
             existingImages = existingImages.filterIndexed { i, _ -> i != index }.toTypedArray()
             updatePreviews()

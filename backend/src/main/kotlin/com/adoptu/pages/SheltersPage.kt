@@ -19,7 +19,7 @@ fun HTML.sheltersPage(navParams: NavParams = NavParams()) {
                 )
                 button(classes = "btn", type = ButtonType.button) {
                     id = "search-btn"
-                    attributes["data-i18n"] = "searchShelters";
+                    attributes["data-i18n"] = "search";
                     +"Search"
                 }
             }
