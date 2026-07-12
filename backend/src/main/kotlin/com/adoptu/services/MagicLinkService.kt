@@ -52,7 +52,7 @@ class MagicLinkService(
             }
 
             val latestToken = userRepository.getLatestVerificationToken(user.id)
-            val now = System.currentTimeMillis()
+            val now = clock.now().toEpochMilliseconds()
 
             if (latestToken != null && latestToken.expiresAt > now) {
                 return Result.failure(Exception("Verification email already sent. Please check your inbox or wait for the link to expire."))

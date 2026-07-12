@@ -6,7 +6,7 @@ import com.adoptu.dto.input.UpdateShelterRequest
 
 interface ShelterRepositoryPort {
     suspend fun getById(id: Int): ShelterDto?
-    suspend fun getAll(country: String, state: String? = null, city: String? = null, neighborhood: String? = null, zip: String? = null): List<ShelterDto>
+    suspend fun getAll(country: String, state: String?, city: String?, neighborhood: String?, zip: String?): List<ShelterDto>
     suspend fun create(request: CreateShelterRequest): ShelterDto
     suspend fun update(id: Int, request: UpdateShelterRequest): ShelterDto?
     suspend fun delete(id: Int): Boolean

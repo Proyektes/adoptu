@@ -211,6 +211,31 @@ class UserShelterRoutesE2ETest {
     }
 
     @Test
+    fun `POST users shelter returns 500 for session user that does not exist`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val request = CreateUserShelterRequest(
+                name = "My Shelter",
+                country = "United States",
+                city = "LA",
+                address = "123 Main St"
+            )
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/shelter",
+                JsonSupport.objectMapper.writeValueAsString(request),
+                cookie
+            )
+
+            assertEquals(500, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `POST users shelter returns 400 for blank name`() {
         val handle = startServer()
         try {

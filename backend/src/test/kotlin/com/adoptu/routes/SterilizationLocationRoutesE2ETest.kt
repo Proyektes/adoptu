@@ -363,6 +363,20 @@ class SterilizationLocationRoutesE2ETest {
     }
 
     @Test
+    fun `GET admin sterilization-location by id returns 403 when not admin`() {
+        val id = createLocationInDb(name = "Clinic A")
+
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter
+            val response = TestHttp.get("${handle.baseUrl}/api/admin/sterilization-locations/$id", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `GET admin sterilization-location by id returns location when it exists`() {
         val id = createLocationInDb(name = "Clinic A")
 
@@ -413,6 +427,23 @@ class SterilizationLocationRoutesE2ETest {
                 JsonSupport.objectMapper.writeValueAsString(request)
             )
             assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST admin sterilization-locations returns 403 when not admin`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter
+            val request = CreateSterilizationLocationRequest(name = "New Clinic", country = "United States", city = "LA", address = "123 Main St")
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/admin/sterilization-locations",
+                JsonSupport.objectMapper.writeValueAsString(request),
+                cookie
+            )
+            assertEquals(403, response.statusCode())
         } finally {
             handle.stop()
         }
@@ -481,6 +512,24 @@ class SterilizationLocationRoutesE2ETest {
                 JsonSupport.objectMapper.writeValueAsString(UpdateSterilizationLocationRequest(name = "New Name"))
             )
             assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `PUT admin sterilization-location returns 403 when not admin`() {
+        val id = createLocationInDb(name = "Old Name")
+
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/admin/sterilization-locations/$id",
+                JsonSupport.objectMapper.writeValueAsString(UpdateSterilizationLocationRequest(name = "New Name")),
+                cookie
+            )
+            assertEquals(403, response.statusCode())
         } finally {
             handle.stop()
         }
@@ -567,6 +616,20 @@ class SterilizationLocationRoutesE2ETest {
         try {
             val response = TestHttp.delete("${handle.baseUrl}/api/admin/sterilization-locations/$id")
             assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `DELETE admin sterilization-location returns 403 when not admin`() {
+        val id = createLocationInDb(name = "To Delete")
+
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter
+            val response = TestHttp.delete("${handle.baseUrl}/api/admin/sterilization-locations/$id", cookie)
+            assertEquals(403, response.statusCode())
         } finally {
             handle.stop()
         }

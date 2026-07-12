@@ -1,5 +1,6 @@
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.jvm.toolchain.JvmVendorSpec
+import kotlinx.kover.gradle.plugin.dsl.GroupingEntityType
 
 plugins {
     kotlin("jvm")
@@ -207,12 +208,16 @@ kover {
             excludes {
                 // entrypoint / bootstrap wiring, exercised by ApplicationIntegrationTest+ApplicationContainerTest
                 // (Docker-only IT suite) rather than unit coverage
-                classes("com.adoptu.ApplicationKt")
+                classes("com.adoptu.ApplicationKt", "com.adoptu.ApplicationKt$*")
             }
         }
         verify {
-            rule {
+            rule("overall minimum") {
                 minBound(95)
+            }
+            rule("per-class minimum") {
+                groupBy = GroupingEntityType.CLASS
+                minBound(90)
             }
         }
     }

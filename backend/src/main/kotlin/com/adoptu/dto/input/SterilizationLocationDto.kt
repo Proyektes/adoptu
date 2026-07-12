@@ -47,12 +47,6 @@ data class UpdateSterilizationLocationRequest(
     val description: String? = null
 )
 
-data class SterilizationLocationSearchParams(
-    val country: String? = null,
-    val state: String? = null,
-    val city: String? = null
-)
-
 data class SterilizationLocationsByLocation(
     val country: String,
     val states: List<SterilizationLocationsByState>

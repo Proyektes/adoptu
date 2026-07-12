@@ -315,6 +315,22 @@ class PhotographerRoutesE2ETest {
         }
     }
 
+    @Test
+    fun `POST profile deactivate returns 404 when session user does not exist`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/photographers/profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(activate = false)),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
     // ==================== PUT /api/photographers/settings ====================
 
     @Test

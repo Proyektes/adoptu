@@ -37,18 +37,3 @@ data class VerificationResponse(
     val success: Boolean,
     val message: String? = null
 )
-
-data class PhotographerProfileResponse(
-    val id: Int,
-    val username: String,
-    val email: String,
-    val displayName: String,
-    val language: String,
-    val activeRoles: Set<String>,
-    val lastAcceptedPrivacyPolicy: Long?,
-    val lastAcceptedTermsAndConditions: Long?,
-    val photographerFee: Double?,
-    val photographerCurrency: String?,
-    val photographerCountry: String?,
-    val photographerState: String?
-)

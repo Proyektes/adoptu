@@ -308,6 +308,23 @@ class TemporalHomeRoutesE2ETest {
     }
 
     @Test
+    fun `PUT temporal-home returns 500 for an invalid country`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/temporal-home",
+                JsonSupport.objectMapper.writeValueAsString(UpdateTemporalHomeRequest(country = "Nowhereland")),
+                cookie
+            )
+            assertEquals(500, response.statusCode())
+            assertTrue(response.body().contains("Invalid country"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `PUT temporal-home updates the profile when it exists`() {
         val handle = startServer()
         try {

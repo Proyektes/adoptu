@@ -305,6 +305,39 @@ class UserSterilizationLocationServiceTest {
     }
 
     @Test
+    fun `update returns error when new email belongs to another account`() = runBlocking {
+        val userId = createTestUser("wendy")
+        createTestUserLocation(userId, name = "Wendy Clinic", country = "United States", state = "NY", city = "New York", email = "old@test.com")
+        createTestUser("conflict@test.com")
+
+        val result = userSterilizationLocationService.update(userId, accountEmail, displayName, UpdateUserSterilizationLocationRequest(email = "conflict@test.com"))
+
+        assertTrue(result is ServiceResult.Error)
+        assertEquals("This email is already associated with another account", (result as ServiceResult.Error).message)
+        Unit
+    }
+
+    @Test
+    fun `create for existing user throws IllegalArgumentException when new email belongs to another account`() = runBlocking {
+        val userId = createTestUser("xena")
+        createTestUserLocation(userId, name = "Xena Clinic", country = "United States", state = "NY", city = "New York", email = "old2@test.com")
+        createTestUser("conflict2@test.com")
+        val request = CreateUserSterilizationLocationRequest(
+            name = "New Name",
+            country = "United States",
+            city = "New York",
+            address = "123 St",
+            email = "conflict2@test.com"
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            userSterilizationLocationService.create(userId, accountEmail, displayName, request)
+        }
+        assertEquals("This email is already associated with another account", exception.message)
+        Unit
+    }
+
+    @Test
     fun `search throws exception when country is blank`() = runBlocking {
         assertThrows<IllegalArgumentException> {
             userSterilizationLocationService.search("")

@@ -37,7 +37,7 @@ interface UserRepositoryPort {
     suspend fun deactivateShelterProfile(userId: Int): UserDto?
     suspend fun activateSterilizationProfile(userId: Int): UserDto?
     suspend fun deactivateSterilizationProfile(userId: Int): UserDto?
-    suspend fun updateProfile(userId: Int, displayName: String, language: String? = null, country: String? = null): UserDto?
+    suspend fun updateProfile(userId: Int, displayName: String, language: String?, country: String?): UserDto?
     suspend fun updateLanguage(userId: Int, language: String): UserDto?
     suspend fun updatePhotographerSettings(userId: Int, request: PhotographerSettingsRequest): PhotographerDto?
     suspend fun acceptTerms(userId: Int, request: AcceptTermsRequest): UserDto?

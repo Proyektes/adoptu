@@ -319,6 +319,39 @@ class UserShelterServiceTest {
     }
 
     @Test
+    fun `update returns error when new email belongs to another account`() = runBlocking {
+        val userId = createTestUser("wendy")
+        createTestUserShelter(userId, name = "Wendy Shelter", country = "United States", state = "NY", city = "New York", email = "old@test.com")
+        createTestUser("conflict@test.com")
+
+        val result = userShelterService.update(userId, accountEmail, displayName, UpdateUserShelterRequest(email = "conflict@test.com"))
+
+        assertTrue(result is ServiceResult.Error)
+        assertEquals("This email is already associated with another account", (result as ServiceResult.Error).message)
+        Unit
+    }
+
+    @Test
+    fun `create for existing user throws IllegalArgumentException when new email belongs to another account`() = runBlocking {
+        val userId = createTestUser("xena")
+        createTestUserShelter(userId, name = "Xena Shelter", country = "United States", state = "NY", city = "New York", email = "old2@test.com")
+        createTestUser("conflict2@test.com")
+        val request = CreateUserShelterRequest(
+            name = "New Name",
+            country = "United States",
+            city = "New York",
+            address = "123 St",
+            email = "conflict2@test.com"
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            userShelterService.create(userId, accountEmail, displayName, request)
+        }
+        assertEquals("This email is already associated with another account", exception.message)
+        Unit
+    }
+
+    @Test
     fun `search throws exception when country is blank`() = runBlocking {
         assertThrows<IllegalArgumentException> {
             userShelterService.search("")

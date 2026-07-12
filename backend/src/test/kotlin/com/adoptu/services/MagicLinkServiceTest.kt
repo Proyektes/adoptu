@@ -1,5 +1,6 @@
 package com.adoptu.services
 
+import com.adoptu.adapters.db.EmailVerificationTokens
 import com.adoptu.adapters.db.MagicLinkTokens
 import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.repositories.UserRepository
@@ -25,6 +26,7 @@ class MagicLinkServiceTest {
     private lateinit var magicLinkService: MagicLinkService
     private lateinit var userRepository: UserRepository
     private lateinit var mockNotificationAdapter: MockNotificationAdapter
+    private lateinit var emailVerificationService: EmailVerificationService
 
     @BeforeEach
     fun setup() {
@@ -32,7 +34,7 @@ class MagicLinkServiceTest {
         TestDatabase.clearAllData()
         userRepository = UserRepository(clock)
         mockNotificationAdapter = MockNotificationAdapter()
-        val emailVerificationService = EmailVerificationService(userRepository, mockNotificationAdapter, clock, "http://localhost:80")
+        emailVerificationService = EmailVerificationService(userRepository, mockNotificationAdapter, clock, "http://localhost:80")
         magicLinkService = MagicLinkService(userRepository, mockNotificationAdapter, clock, "http://localhost:80", emailVerificationService)
     }
 
@@ -119,6 +121,91 @@ class MagicLinkServiceTest {
 
         val sentEmails = mockNotificationAdapter.getSentEmails()
         assertTrue(sentEmails.first().subject.contains("Lien de connexion"))
+    }
+
+    @Test
+    fun `requestMagicLink works for Portuguese language`() = kotlinx.coroutines.runBlocking {
+        val userId = createTestUser("test@example.com", "Test User")
+
+        val result = magicLinkService.requestMagicLink("test@example.com", "pt")
+        assertTrue(result.isSuccess)
+
+        val sentEmails = mockNotificationAdapter.getSentEmails()
+        assertTrue(sentEmails.first().subject.contains("Link de login"))
+    }
+
+    @Test
+    fun `requestMagicLink works for Chinese language`() = kotlinx.coroutines.runBlocking {
+        val userId = createTestUser("test@example.com", "Test User")
+
+        val result = magicLinkService.requestMagicLink("test@example.com", "zh")
+        assertTrue(result.isSuccess)
+
+        val sentEmails = mockNotificationAdapter.getSentEmails()
+        assertTrue(sentEmails.first().subject.contains("登录链接"))
+    }
+
+    @Test
+    fun `requestMagicLink fails when a verification email was already sent recently`() = kotlinx.coroutines.runBlocking {
+        val userId = createTestUser("unverified@example.com", "Unverified User", verified = false)
+
+        transaction {
+            EmailVerificationTokens.insert {
+                it[EmailVerificationTokens.userId] = userId
+                it[EmailVerificationTokens.token] = "existing-verification-token"
+                it[EmailVerificationTokens.expiresAt] = clock.now().toEpochMilliseconds() + 3_600_000
+                it[EmailVerificationTokens.createdAt] = clock.now().toEpochMilliseconds()
+            }
+        }
+
+        val result = magicLinkService.requestMagicLink("unverified@example.com", "en")
+
+        assertTrue(result.isFailure)
+        val message = result.exceptionOrNull()?.message
+        assertNotNull(message)
+        assertTrue(message.contains("already sent") || message.contains("wait for the link"))
+    }
+
+    @Test
+    fun `requestMagicLink fails when verification email daily limit already reached`() = kotlinx.coroutines.runBlocking {
+        val userId = createTestUser("unverified@example.com", "Unverified User", verified = false)
+
+        repeat(3) {
+            emailVerificationService.generateAndSendVerificationEmail(userId, "unverified@example.com", "Unverified User", "en")
+        }
+
+        val result = magicLinkService.requestMagicLink("unverified@example.com", "en")
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull()?.message?.contains("Maximum verification emails") == true)
+    }
+
+    @Test
+    fun `requestMagicLink fails when resending the verification email cannot be delivered`() = kotlinx.coroutines.runBlocking {
+        val userId = createTestUser("unverified@example.com", "Unverified User", verified = false)
+        mockNotificationAdapter.setFailMode(true)
+
+        val result = magicLinkService.requestMagicLink("unverified@example.com", "en")
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull()?.message?.contains("Failed to send verification email") == true)
+    }
+
+    @Test
+    fun `requestMagicLink succeeds but reports failure when the magic link email cannot be delivered`() = kotlinx.coroutines.runBlocking {
+        val userId = createTestUser("test@example.com", "Test User")
+        mockNotificationAdapter.setFailMode(true)
+
+        val result = magicLinkService.requestMagicLink("test@example.com", "en")
+
+        assertTrue(result.isSuccess)
+        assertFalse(result.getOrDefault(true))
+        assertEquals(0, mockNotificationAdapter.getSentEmails().size)
+    }
+
+    @Test
+    fun `releaseMagicLinkToken is a no-op`() {
+        magicLinkService.releaseMagicLinkToken("any-token")
     }
 
     @Test
@@ -261,14 +348,15 @@ class MagicLinkServiceTest {
     private fun createTestUser(
         username: String,
         displayName: String,
-        language: String = "en"
+        language: String = "en",
+        verified: Boolean = true
     ): Int {
         return transaction {
             Users.insert {
                 it[Users.username] = username
                 it[Users.displayName] = displayName
                 it[Users.language] = language
-                it[Users.isEmailVerified] = true
+                it[Users.isEmailVerified] = verified
                 it[Users.createdAt] = clock.now().toEpochMilliseconds()
             } get Users.id
         }

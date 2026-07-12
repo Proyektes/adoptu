@@ -218,6 +218,60 @@ class PasswordServiceTest {
     }
 
     @Test
+    fun `requestPasswordReset works for French language`() = runBlocking {
+        createTestUser("test@example.com", "Test User", "fr")
+
+        val result = passwordService.requestPasswordReset("test@example.com", "fr")
+        assertTrue(result.isSuccess)
+
+        val sentEmails = mockNotificationAdapter.getSentEmails()
+        assertTrue(sentEmails.first().subject.contains("Réinitialiser"))
+    }
+
+    @Test
+    fun `requestPasswordReset works for Portuguese language`() = runBlocking {
+        createTestUser("test@example.com", "Test User", "pt")
+
+        val result = passwordService.requestPasswordReset("test@example.com", "pt")
+        assertTrue(result.isSuccess)
+
+        val sentEmails = mockNotificationAdapter.getSentEmails()
+        assertTrue(sentEmails.first().subject.contains("Redefinir senha"))
+    }
+
+    @Test
+    fun `requestPasswordReset works for Chinese language`() = runBlocking {
+        createTestUser("test@example.com", "Test User", "zh")
+
+        val result = passwordService.requestPasswordReset("test@example.com", "zh")
+        assertTrue(result.isSuccess)
+
+        val sentEmails = mockNotificationAdapter.getSentEmails()
+        assertTrue(sentEmails.first().subject.contains("重置密码"))
+    }
+
+    @Test
+    fun `resetPassword fails with tampered encrypted password`() = runBlocking {
+        val userId = createTestUser("test@example.com", "Test User")
+        val token = createPasswordResetToken(userId)
+
+        val result = passwordService.resetPassword(token, "tampered-not-encrypted")
+        assertFalse(result)
+        assertFalse(passwordService.hasPassword(userId))
+    }
+
+    @Test
+    fun `resetPassword fails when new password does not meet requirements`() = runBlocking {
+        val userId = createTestUser("test@example.com", "Test User")
+        val token = createPasswordResetToken(userId)
+        val weakPassword = encryptPassword("weak")
+
+        val result = passwordService.resetPassword(token, weakPassword)
+        assertFalse(result)
+        assertFalse(passwordService.hasPassword(userId))
+    }
+
+    @Test
     fun `resetPassword sets new password`() = runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val token = createPasswordResetToken(userId)

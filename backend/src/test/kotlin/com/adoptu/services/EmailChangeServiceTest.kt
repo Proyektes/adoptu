@@ -125,6 +125,52 @@ class EmailChangeServiceTest {
     }
 
     @Test
+    fun `requestEmailChange works for French language`() = kotlinx.coroutines.runBlocking {
+        val userId = createTestUser("old@example.com", "Test User")
+
+        val result = emailChangeService.requestEmailChange(userId, "new@example.com", "fr")
+        assertTrue(result.isSuccess)
+
+        val sentEmails = mockNotificationAdapter.getSentEmails()
+        val newEmailMsg = sentEmails.find { it.to == "new@example.com" }
+        assertTrue(newEmailMsg?.subject?.contains("Vérifier la nouvelle adresse") == true)
+    }
+
+    @Test
+    fun `requestEmailChange works for Portuguese language`() = kotlinx.coroutines.runBlocking {
+        val userId = createTestUser("old@example.com", "Test User")
+
+        val result = emailChangeService.requestEmailChange(userId, "new@example.com", "pt")
+        assertTrue(result.isSuccess)
+
+        val sentEmails = mockNotificationAdapter.getSentEmails()
+        val newEmailMsg = sentEmails.find { it.to == "new@example.com" }
+        assertTrue(newEmailMsg?.subject?.contains("Verificar novo email") == true)
+    }
+
+    @Test
+    fun `requestEmailChange works for Chinese language`() = kotlinx.coroutines.runBlocking {
+        val userId = createTestUser("old@example.com", "Test User")
+
+        val result = emailChangeService.requestEmailChange(userId, "new@example.com", "zh")
+        assertTrue(result.isSuccess)
+
+        val sentEmails = mockNotificationAdapter.getSentEmails()
+        val newEmailMsg = sentEmails.find { it.to == "new@example.com" }
+        assertTrue(newEmailMsg?.subject?.contains("验证新电子邮件") == true)
+    }
+
+    @Test
+    fun `requestEmailChange returns false result when new-email delivery fails`() = kotlinx.coroutines.runBlocking {
+        val userId = createTestUser("old@example.com", "Test User")
+        mockNotificationAdapter.setFailMode(true)
+
+        val result = emailChangeService.requestEmailChange(userId, "new@example.com", "en")
+        assertTrue(result.isSuccess)
+        assertFalse(result.getOrDefault(true))
+    }
+
+    @Test
     fun `verifyEmailChange updates user email`() = runBlocking {
         val userId = createTestUser("old@example.com", "Test User")
         val token = createEmailChangeToken(userId, "new@example.com")

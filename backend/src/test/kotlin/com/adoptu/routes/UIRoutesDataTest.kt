@@ -369,6 +369,49 @@ class UIRoutesDataTest {
         assertEquals("https://s3.example.com/second.jpg", primary.imageUrl)
     }
 
+    @Test
+    fun `removeImage returns false when image does not exist`() = runBlocking {
+        val created = PetRepositoryImpl(clock).create(
+            rescuerId = 1,
+            country = "United States",
+            name = "NoImages",
+            type = "DOG",
+            description = "No images yet",
+            weight = 10.0,
+            ageYears = 1,
+            ageMonths = 0,
+            sex = Gender.MALE,
+            status = "AVAILABLE"
+        )
+
+        val result = PetRepositoryImpl(clock).removeImage(created.id, 999999)
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `removeImage returns true when image exists`() = runBlocking {
+        val created = PetRepositoryImpl(clock).create(
+            rescuerId = 1,
+            country = "United States",
+            name = "HasImage",
+            type = "DOG",
+            description = "Has an image to remove",
+            weight = 10.0,
+            ageYears = 1,
+            ageMonths = 0,
+            sex = Gender.MALE,
+            status = "AVAILABLE"
+        )
+        PetRepositoryImpl(clock).addImage(created.id, "https://s3.example.com/toremove.jpg", true, 0)
+        val image = PetRepositoryImpl(clock).getImages(created.id).single()
+
+        val result = PetRepositoryImpl(clock).removeImage(created.id, image.id)
+
+        assertTrue(result)
+        assertTrue(PetRepositoryImpl(clock).getImages(created.id).isEmpty())
+    }
+
     // ==================== Urgent Pets ====================
 
     @Test

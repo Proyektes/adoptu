@@ -208,6 +208,29 @@ class UsersRoutesE2ETest {
     }
 
     @Test
+    fun `POST accept-terms returns 404 for session user that does not exist`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val request = AcceptTermsRequest(
+                acceptPrivacyPolicy = true,
+                acceptTermsAndConditions = true
+            )
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/accept-terms",
+                JsonSupport.objectMapper.writeValueAsString(request),
+                cookie
+            )
+
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `POST accept-terms succeeds for authenticated user`() {
         val handle = startServer()
         try {
@@ -705,6 +728,35 @@ class UsersRoutesE2ETest {
         }
     }
 
+    // ==================== POST /api/admin/users/{id}/reactivate (edge cases) ====================
+
+    @Test
+    fun `POST admin users reactivate returns 403 for non-admin user`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer
+
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/users/4/reactivate", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST admin users reactivate returns 500 for non-existent target`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/users/9999/reactivate", cookie)
+            assertEquals(500, response.statusCode())
+            assertTrue(response.body().contains("Failed to reactivate user"))
+        } finally {
+            handle.stop()
+        }
+    }
+
     // ==================== POST /api/admin/users/{id}/reset-password ====================
 
     @Test
@@ -844,6 +896,40 @@ class UsersRoutesE2ETest {
     }
 
     @Test
+    fun `PUT profile returns 404 for session user that does not exist`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/profile",
+                JsonSupport.objectMapper.writeValueAsString(UpdateProfileRequest("New Name")),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `PUT profile returns 400 for blank display name`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/profile",
+                JsonSupport.objectMapper.writeValueAsString(UpdateProfileRequest("")),
+                cookie
+            )
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `PUT profile accepts language query parameter`() {
         val handle = startServer()
         try {
@@ -888,6 +974,23 @@ class UsersRoutesE2ETest {
                 cookie
             )
             assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `PUT language returns 404 for session user that does not exist`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/language",
+                JsonSupport.objectMapper.writeValueAsString(UpdateLanguageRequest("fr")),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
         } finally {
             handle.stop()
         }
@@ -1048,6 +1151,40 @@ class UsersRoutesE2ETest {
         }
     }
 
+    @Test
+    fun `POST temporal-home-profile returns 403 when activating for unverified user`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer, not verified
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/temporal-home-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST temporal-home-profile deactivate returns 404 for session user that does not exist`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/temporal-home-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(false)),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
     // ==================== PUT /api/users/photographer-settings ====================
 
     @Test
@@ -1076,6 +1213,29 @@ class UsersRoutesE2ETest {
                 cookie
             )
             assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `PUT photographer-settings succeeds when photographer profile exists`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
+
+            TestHttp.postJson(
+                "${handle.baseUrl}/api/users/photographer-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/photographer-settings",
+                """{"photographerFee":50.0,"photographerCurrency":"USD","country":"United States","state":"NY"}""",
+                cookie
+            )
+            assertEquals(200, response.statusCode())
         } finally {
             handle.stop()
         }
@@ -1116,6 +1276,40 @@ class UsersRoutesE2ETest {
                 cookie
             )
             assertEquals(200, deactivate.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST photographer-profile returns 403 when activating for unverified user`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer, not verified
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/photographer-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST photographer-profile deactivate returns 404 for session user that does not exist`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/photographer-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(false)),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
         } finally {
             handle.stop()
         }
@@ -1178,6 +1372,70 @@ class UsersRoutesE2ETest {
         }
     }
 
+    @Test
+    fun `POST shelter-profile returns 403 when activating for unverified account email`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer, not verified
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/shelter-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST shelter-profile returns 403 when shelter contact email is unverified`() {
+        val handle = startServer()
+        try {
+            transaction {
+                com.adoptu.adapters.db.UserShelters.insert {
+                    it[com.adoptu.adapters.db.UserShelters.userId] = 2
+                    it[com.adoptu.adapters.db.UserShelters.name] = "Test Shelter"
+                    it[com.adoptu.adapters.db.UserShelters.country] = com.adoptu.common.Country.UNITED_STATES
+                    it[com.adoptu.adapters.db.UserShelters.city] = "Anytown"
+                    it[com.adoptu.adapters.db.UserShelters.address] = "123 Main St"
+                    it[com.adoptu.adapters.db.UserShelters.email] = "contact@shelter-test.com"
+                    it[com.adoptu.adapters.db.UserShelters.emailVerified] = false
+                    it[com.adoptu.adapters.db.UserShelters.createdAt] = clock.now().toEpochMilliseconds()
+                    it[com.adoptu.adapters.db.UserShelters.updatedAt] = clock.now().toEpochMilliseconds()
+                }
+            }
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter, verified account email
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/shelter-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST shelter-profile deactivate returns 404 for session user that does not exist`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/shelter-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(false)),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
     // ==================== POST /api/users/sterilization-profile ====================
 
     @Test
@@ -1227,6 +1485,70 @@ class UsersRoutesE2ETest {
             val response = TestHttp.postJson(
                 "${handle.baseUrl}/api/users/sterilization-profile",
                 JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST sterilization-profile returns 403 when activating for unverified account email`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer, not verified
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/sterilization-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST sterilization-profile returns 403 when contact email is unverified`() {
+        val handle = startServer()
+        try {
+            transaction {
+                com.adoptu.adapters.db.UserSterilizationLocations.insert {
+                    it[com.adoptu.adapters.db.UserSterilizationLocations.userId] = 2
+                    it[com.adoptu.adapters.db.UserSterilizationLocations.name] = "Test Clinic"
+                    it[com.adoptu.adapters.db.UserSterilizationLocations.country] = com.adoptu.common.Country.UNITED_STATES
+                    it[com.adoptu.adapters.db.UserSterilizationLocations.city] = "Anytown"
+                    it[com.adoptu.adapters.db.UserSterilizationLocations.address] = "123 Main St"
+                    it[com.adoptu.adapters.db.UserSterilizationLocations.email] = "contact@clinic-test.com"
+                    it[com.adoptu.adapters.db.UserSterilizationLocations.emailVerified] = false
+                    it[com.adoptu.adapters.db.UserSterilizationLocations.createdAt] = clock.now().toEpochMilliseconds()
+                    it[com.adoptu.adapters.db.UserSterilizationLocations.updatedAt] = clock.now().toEpochMilliseconds()
+                }
+            }
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter, verified account email
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/sterilization-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST sterilization-profile deactivate returns 404 for session user that does not exist`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/sterilization-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(false)),
                 cookie
             )
             assertEquals(404, response.statusCode())
@@ -1415,6 +1737,41 @@ class UsersRoutesE2ETest {
     }
 
     @Test
+    fun `POST request-email-change returns 404 for session user that does not exist`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/request-email-change",
+                """{"newEmail":"new@test.com"}""",
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST request-email-change returns success false when email already in use`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/request-email-change",
+                """{"newEmail":"adopter@test.com"}""",
+                cookie
+            )
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("\"success\":false") || response.body().contains("\"success\": false"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `POST request-email-change succeeds for a valid new email`() {
         val handle = startServer()
         try {
@@ -1449,6 +1806,31 @@ class UsersRoutesE2ETest {
         val handle = startServer()
         try {
             val response = TestHttp.get("${handle.baseUrl}/api/users/verify-email-change?token=nonexistent")
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("\"success\":false") || response.body().contains("\"success\": false"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    // ==================== GET /api/users/verify-profile-email ====================
+
+    @Test
+    fun `GET verify-profile-email returns 400 when token missing`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/users/verify-profile-email")
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET verify-profile-email returns failure message for invalid token`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/users/verify-profile-email?token=nonexistent")
             assertEquals(200, response.statusCode())
             assertTrue(response.body().contains("\"success\":false") || response.body().contains("\"success\": false"))
         } finally {

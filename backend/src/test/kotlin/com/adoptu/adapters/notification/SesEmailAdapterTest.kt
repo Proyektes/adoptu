@@ -39,12 +39,17 @@ class SesEmailAdapterTest {
 
     @Test
     fun `sendEmail returns false when smtp host missing in dev mode`() {
+        // NOTE: the real config keys are "email.dev.*" / "email.prod.*" (see SesEmailAdapter's
+        // emailPrefix). This test (and its siblings below) previously used a bare "email.*"
+        // prefix that the adapter never reads, so it always exercised the "not configured"
+        // path regardless of intent. Fixed to use the correct prefix so each test genuinely
+        // covers what its name claims - bug found and fixed while raising coverage.
         val config = AppConfig.fromMap(mapOf(
             "env" to "dev",
-            "email.port" to "587",
-            "email.username" to "test",
-            "email.password" to "test",
-            "email.from" to "test@example.com"
+            "email.dev.port" to "587",
+            "email.dev.username" to "test",
+            "email.dev.password" to "test",
+            "email.dev.from" to "test@example.com"
         ))
         val adapter = SesEmailAdapter(config)
 
@@ -59,10 +64,10 @@ class SesEmailAdapterTest {
     fun `sendEmail returns false when smtp port missing in dev mode`() {
         val config = AppConfig.fromMap(mapOf(
             "env" to "dev",
-            "email.host" to "localhost",
-            "email.username" to "test",
-            "email.password" to "test",
-            "email.from" to "test@example.com"
+            "email.dev.host" to "localhost",
+            "email.dev.username" to "test",
+            "email.dev.password" to "test",
+            "email.dev.from" to "test@example.com"
         ))
         val adapter = SesEmailAdapter(config)
 
@@ -74,12 +79,38 @@ class SesEmailAdapterTest {
     }
 
     @Test
-    fun `sendEmail returns false when smtp credentials missing in dev mode`() {
+    fun `sendEmail attempts smtp send when host and port configured without credentials in dev mode`() {
+        // With the correct "email.dev.*" prefix this is actually configured (isSmtpConfigured
+        // only requires host+port), so this now exercises sendEmailViaSmtp's full body up to
+        // the network call - which fails against the unbound loopback port and is caught,
+        // still yielding false. hasSmtpCredentials is false, so no authenticator is set.
         val config = AppConfig.fromMap(mapOf(
             "env" to "dev",
-            "email.host" to "localhost",
-            "email.port" to "587",
-            "email.from" to "test@example.com"
+            "email.dev.host" to "localhost",
+            "email.dev.port" to "1",
+            "email.dev.from" to "test@example.com"
+        ))
+        val adapter = SesEmailAdapter(config)
+
+        val result = kotlinx.coroutines.runBlocking {
+            adapter.sendEmail("test@example.com", "Test Subject", "Test Body")
+        }
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `sendEmail attempts smtp send with authenticator when credentials configured in dev mode`() {
+        // hasSmtpCredentials is true here, so this covers the setAuthenticator(...) branch
+        // inside sendEmailViaSmtp in addition to the rest of its body.
+        val config = AppConfig.fromMap(mapOf(
+            "env" to "dev",
+            "email.dev.host" to "localhost",
+            "email.dev.port" to "1",
+            "email.dev.username" to "smtpuser",
+            "email.dev.password" to "smtppass",
+            "email.dev.from" to "test@example.com",
+            "email.dev.starttls" to "true"
         ))
         val adapter = SesEmailAdapter(config)
 
@@ -254,14 +285,53 @@ class SesEmailAdapterTest {
     fun `adapter can be instantiated with smtp config`() {
         val config = AppConfig.fromMap(mapOf(
             "env" to "dev",
-            "email.host" to "localhost",
-            "email.port" to "587",
-            "email.username" to "user",
-            "email.password" to "pass",
-            "email.from" to "test@example.com"
+            "email.dev.host" to "localhost",
+            "email.dev.port" to "587",
+            "email.dev.username" to "user",
+            "email.dev.password" to "pass",
+            "email.dev.from" to "test@example.com"
         ))
         val adapter = SesEmailAdapter(config)
         assertNotNull(adapter)
+    }
+
+    @Test
+    fun `adapter overrides ses endpoint when configured`() {
+        // Covers the sesEndpoint.isNullOrBlank() == false branch (builder.endpointOverride)
+        // in the SesClient construction. The endpoint points at an unbound loopback port so
+        // the eventual send attempt fails fast and is caught by sendEmail's outer try/catch.
+        val config = AppConfig.fromMap(mapOf(
+            "env" to "prod",
+            "ses.region" to "us-east-1",
+            "ses.endpoint" to "http://localhost:1"
+        ))
+        val adapter = SesEmailAdapter(config)
+        assertNotNull(adapter)
+
+        val result = kotlinx.coroutines.runBlocking {
+            adapter.sendEmail("test@example.com", "Test Subject", "Test Body")
+        }
+        assertFalse(result)
+    }
+
+    @Test
+    fun `adapter falls back to not-configured when ses endpoint is malformed`() {
+        // A malformed endpoint makes URI.create(...) throw inside the SesClient construction
+        // try/catch, so sesClient stays null. Covers that catch block, plus the "SES not
+        // configured" prod-mode logging branch of sendEmail (isConfigured == false, isDev ==
+        // false), which no other test reaches since a validly-built SesClient always makes
+        // isSesConfigured true in prod mode.
+        val config = AppConfig.fromMap(mapOf(
+            "env" to "prod",
+            "ses.endpoint" to "http://invalid host with spaces"
+        ))
+        val adapter = SesEmailAdapter(config)
+        assertNotNull(adapter)
+
+        val result = kotlinx.coroutines.runBlocking {
+            adapter.sendEmail("test@example.com", "Test Subject", "Test Body")
+        }
+        assertFalse(result)
     }
 
     @Test

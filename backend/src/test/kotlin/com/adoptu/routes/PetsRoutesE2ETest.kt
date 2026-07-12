@@ -286,6 +286,19 @@ class PetsRoutesE2ETest {
     }
 
     @Test
+    fun `GET pets mine returns 404 when session user does not exist`() {
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/mine", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `GET pets mine includes pets with no country and non-available status`() {
         createPetInDb("NoCountryPet", "DOG", country = null)
         createPetInDb("AdoptedPet", "DOG", status = "ADOPTED", country = "Canada")
@@ -955,6 +968,24 @@ class PetsRoutesE2ETest {
     }
 
     @Test
+    fun `PUT pets returns 400 for negative weight`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/pets/$petId",
+                JsonSupport.objectMapper.writeValueAsString(UpdatePetRequest(weight = -1.0)),
+                cookie
+            )
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `PUT pets succeeds for admin on someone else's pet`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
         val handle = startTestServer()
@@ -1550,6 +1581,33 @@ class PetsRoutesE2ETest {
     }
 
     @Test
+    fun `POST admin pets reactivate returns 403 for non-admin user`() {
+        val petId = createPetInDb("Buddy", "DOG")
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer
+
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/pets/$petId/reactivate", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST admin pets reactivate returns 404 for non-existent target`() {
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/pets/9999/reactivate", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `POST admin pets deactivate hides the pet from the public listing but not from my-pets`() {
         val petId = createPetInDb("Buddy", "DOG", country = "United States")
         val handle = startTestServer()
@@ -1723,6 +1781,22 @@ class PetsRoutesE2ETest {
     }
 
     @Test
+    fun `PUT primary image returns 404 when session user does not exist`() {
+        val petId = createPetInDb("Buddy", "DOG")
+        val imageId = createImageInDb(petId)
+
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.put("${handle.baseUrl}/api/pets/$petId/images/$imageId/primary", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `PUT primary image returns 404 when pet does not exist`() {
         val handle = startTestServer()
         try {
@@ -1757,6 +1831,22 @@ class PetsRoutesE2ETest {
             val cookie = TestHttp.loginAs(handle.baseUrl, 1)
             val response = TestHttp.get("${handle.baseUrl}/api/pets/not-a-number/adoption-requests", cookie)
             assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET adoption-requests returns 404 when session user does not exist`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        createAdoptionRequestInDb(petId)
+
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/$petId/adoption-requests", cookie)
+            assertEquals(404, response.statusCode())
         } finally {
             handle.stop()
         }
@@ -1857,6 +1947,22 @@ class PetsRoutesE2ETest {
         try {
             val cookie = TestHttp.loginAs(handle.baseUrl, 1)
             val response = TestHttp.putForm("${handle.baseUrl}/api/pets/adoption-requests/9999", "status=APPROVED", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `PUT adoption-requests returns 404 when session user does not exist`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val requestId = createAdoptionRequestInDb(petId)
+
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.putForm("${handle.baseUrl}/api/pets/adoption-requests/$requestId", "status=APPROVED", cookie)
             assertEquals(404, response.statusCode())
         } finally {
             handle.stop()

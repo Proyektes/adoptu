@@ -2,8 +2,10 @@ package com.adoptu.di
 
 import com.adoptu.adapters.storage.S3ImageStorageAdapter
 import com.adoptu.config.AppConfig
+import com.adoptu.services.auth.WebAuthnService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.koin.dsl.koinApplication
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -91,9 +93,47 @@ class AppModuleTest {
             "env" to "test",
             "storage.test.bucket" to "test-bucket"
         ))
-        
+
         val testModule = appModule(config)
-        
+
         Assertions.assertNotNull(testModule)
+    }
+
+    // getOrigins() is private and only invoked lazily, inside the WebAuthnService `single {}`
+    // factory, when that bean is actually resolved through Koin - building the module object
+    // alone (as the tests above do) never runs it. Resolve WebAuthnService from a real,
+    // standalone Koin container built from appModule(config) to exercise both of its branches.
+
+    @Test
+    fun `appModule resolves WebAuthnService falling back to default origins when webauthn origins unset`() {
+        val config = AppConfig.fromMap(mapOf(
+            "env" to "test",
+            "storage.test.bucket" to "test-bucket"
+        ))
+
+        val koinApp = koinApplication { modules(appModule(config)) }
+        try {
+            val webAuthnService = koinApp.koin.get<WebAuthnService>()
+            Assertions.assertNotNull(webAuthnService)
+        } finally {
+            koinApp.close()
+        }
+    }
+
+    @Test
+    fun `appModule resolves WebAuthnService parsing configured comma-separated webauthn origins`() {
+        val config = AppConfig.fromMap(mapOf(
+            "env" to "test",
+            "storage.test.bucket" to "test-bucket",
+            "webauthn.origins" to "https://a.adopt-u.org, https://b.adopt-u.org"
+        ))
+
+        val koinApp = koinApplication { modules(appModule(config)) }
+        try {
+            val webAuthnService = koinApp.koin.get<WebAuthnService>()
+            Assertions.assertNotNull(webAuthnService)
+        } finally {
+            koinApp.close()
+        }
     }
 }

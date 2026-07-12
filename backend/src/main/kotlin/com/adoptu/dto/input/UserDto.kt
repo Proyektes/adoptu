@@ -30,14 +30,6 @@ data class BanUserRequest(
     val reason: String? = null
 )
 
-data class UpdateProfileRequest(
-    val displayName: String
-)
-
-data class UpdateLanguageRequest(
-    val language: String
-)
-
 data class PhotographerDto(
     val userId: Int,
     val displayName: String,

@@ -208,6 +208,31 @@ class UserSterilizationLocationRoutesE2ETest {
     }
 
     @Test
+    fun `POST users sterilization-location returns 500 for session user that does not exist`() {
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val request = CreateUserSterilizationLocationRequest(
+                name = "My Location",
+                country = "United States",
+                city = "LA",
+                address = "123 Main St"
+            )
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/sterilization-location",
+                JsonSupport.objectMapper.writeValueAsString(request),
+                cookie
+            )
+
+            assertEquals(500, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `POST users sterilization-location returns 400 for blank name`() {
         val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
         try {

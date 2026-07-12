@@ -125,4 +125,16 @@ class UserRepositoryTest {
         assertEquals(1, repository.getPhotographers(null, null).size)
         Unit
     }
+
+    @Test
+    fun `updateProfile updates displayName, language, and country together`() = runBlocking {
+        val userId = createTestUser()
+
+        val result = repository.updateProfile(userId, "New Name", "es", "United States")
+
+        assertEquals("New Name", result?.displayName)
+        assertEquals("es", result?.language)
+        assertEquals("United States", result?.country)
+        Unit
+    }
 }

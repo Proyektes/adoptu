@@ -68,14 +68,6 @@ data class UpdateShelterRequest(
     val description: String? = null
 )
 
-data class ShelterSearchParams(
-    val country: String,
-    val state: String? = null,
-    val city: String? = null,
-    val neighborhood: String? = null,
-    val zip: String? = null
-)
-
 data class UserShelterDto(
     val userId: Int,
     val name: String,
