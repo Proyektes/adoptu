@@ -4,6 +4,8 @@ import com.adoptu.adapters.db.repositories.*
 import com.adoptu.adapters.notification.NotificationEmailAdapter
 import com.adoptu.adapters.storage.S3ImageStorageAdapter
 import com.universaliun.email.common.EmailSenderPort
+import com.universaliun.ratelimit.backend.adapter.out.persistence.ExposedRateLimitStateAdapter
+import com.universaliun.ratelimit.common.RateLimiter
 import com.adoptu.config.AppConfig
 import com.adoptu.ports.*
 import com.adoptu.services.*
@@ -30,6 +32,7 @@ fun appModule(config: AppConfig) = module {
     single<ImageStoragePort> { createImageStorageAdapter(config) }
     single<EmailSenderPort> { emailSenderPortFromConfig(config) }
     single<NotificationPort> { NotificationEmailAdapter(get()) }
+    single { RateLimiter(ExposedRateLimitStateAdapter()) }
     single<PhotographerService> { PhotographerService(get(), get(), get(), get()) }
     single<UserService> { UserService(get(), get()) }
     single<PetService> { PetService(get(), get(), get(), get()) }
@@ -39,9 +42,9 @@ fun appModule(config: AppConfig) = module {
     single { UserSterilizationLocationService(get(), get()) }
     single { ShelterService(get()) }
     single { SterilizationLocationService(get()) }
-    single { EmailVerificationService(get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
-    single { PasswordService(get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
-    single { MagicLinkService(get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80", get()) }
+    single { EmailVerificationService(get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80", get()) }
+    single { PasswordService(get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80", get()) }
+    single { MagicLinkService(get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80", get(), get()) }
     single { EmailChangeService(get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
     single { UsersValidationService() }
     single { PetsValidationService() }

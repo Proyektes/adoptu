@@ -167,9 +167,10 @@ class WebAuthnServiceTest {
         
         userRepository = UserRepository(clock)
         mockNotificationAdapter = MockNotificationAdapter()
-        passwordService = PasswordService(userRepository, mockNotificationAdapter, clock, "http://localhost:80")
-        emailVerificationService = EmailVerificationService(userRepository, mockNotificationAdapter, clock, "http://localhost:80")
-        magicLinkService = MagicLinkService(userRepository, mockNotificationAdapter, clock, "http://localhost:80", emailVerificationService)
+        val rateLimiter = com.universaliun.ratelimit.common.RateLimiter(com.universaliun.ratelimit.common.InMemoryRateLimitStateAdapter())
+        passwordService = PasswordService(userRepository, mockNotificationAdapter, clock, "http://localhost:80", rateLimiter)
+        emailVerificationService = EmailVerificationService(userRepository, mockNotificationAdapter, clock, "http://localhost:80", rateLimiter)
+        magicLinkService = MagicLinkService(userRepository, mockNotificationAdapter, clock, "http://localhost:80", emailVerificationService, rateLimiter)
         webAuthnService = WebAuthnService(
             clock,
             emailVerificationService,

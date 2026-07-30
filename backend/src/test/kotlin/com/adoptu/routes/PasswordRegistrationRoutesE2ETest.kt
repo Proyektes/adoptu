@@ -58,9 +58,10 @@ class PasswordRegistrationRoutesE2ETest {
         single<Clock> { Clock.System }
         single<UserRepositoryPort> { UserRepository(get()) }
         single { UserService(get(), get()) }
-        single { EmailVerificationService(get(), get(), get(), "http://localhost:80") }
-        single { PasswordService(get(), mockNotificationAdapter, get(), "http://localhost:80") }
-        single { MagicLinkService(get(), mockNotificationAdapter, get(), "http://localhost:80", get()) }
+        single { com.universaliun.ratelimit.common.RateLimiter(com.universaliun.ratelimit.common.InMemoryRateLimitStateAdapter()) }
+        single { EmailVerificationService(get(), get(), get(), "http://localhost:80", get()) }
+        single { PasswordService(get(), mockNotificationAdapter, get(), "http://localhost:80", get()) }
+        single { MagicLinkService(get(), mockNotificationAdapter, get(), "http://localhost:80", get(), get()) }
         single {
             WebAuthnService(
                 get(), get(), get(), get(), get(),

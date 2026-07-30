@@ -153,7 +153,8 @@ class ApplicationIntegrationTest {
             single<PhotographerService> { PhotographerService(get(), get(), get(), get()) }
             single<TemporalHomeService> { TemporalHomeService(get(), get(), get(), get()) }
             single { ShelterService(get()) }
-            single { EmailVerificationService(get(), get(), get(), "http://localhost:80") }
+            single { com.universaliun.ratelimit.common.RateLimiter(com.universaliun.ratelimit.common.InMemoryRateLimitStateAdapter()) }
+            single { EmailVerificationService(get(), get(), get(), "http://localhost:80", get()) }
         }
 
         handle = TestServer.start(configOverrides = configOverrides, modules = listOf(testModules), initDatabase = false)

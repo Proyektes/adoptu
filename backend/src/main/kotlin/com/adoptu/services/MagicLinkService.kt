@@ -7,10 +7,11 @@ import com.adoptu.adapters.db.dbDispatcher
 import com.adoptu.ports.NotificationPort
 import com.adoptu.ports.UserRepositoryPort
 import com.adoptu.services.EmailVerificationService
+import com.universaliun.ratelimit.common.RateLimitPolicy
+import com.universaliun.ratelimit.common.RateLimiter
 import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.core.greaterEq
 import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.core.lessEq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory
 import java.security.SecureRandom
 import java.util.Base64
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 
 private val logger = LoggerFactory.getLogger(MagicLinkService::class.java)
@@ -32,11 +34,18 @@ class MagicLinkService(
     private val notificationPort: NotificationPort,
     private val clock: Clock,
     private val baseUrl: String,
-    private val emailVerificationService: EmailVerificationService
+    private val emailVerificationService: EmailVerificationService,
+    private val rateLimiter: RateLimiter
 ) {
     private val secureRandom = SecureRandom()
     private val magicLinkExpirationMs = 5 * 60 * 1000L
     private val maxMagicLinksPerDay = 5
+
+    // RateLimitKit consolidation: replaces the previous "count today's MagicLinkTokens rows"
+    // query. Small accepted behavior difference, same shape as PasswordService's equivalent note
+    // -- consumeMagicLink() no longer "refunds" a daily slot when a link is actually used.
+    private val requestPolicy = RateLimitPolicy(window = 24.hours, maxEventsPerWindow = maxMagicLinksPerDay)
+    private val requestLimitKind = "magic_link_request"
 
     suspend fun requestMagicLink(email: String, language: String): Result<Boolean> {
         val user = userRepository.getByEmail(email) ?: run {
@@ -66,18 +75,14 @@ class MagicLinkService(
             }
         }
 
-        val requestsToday = withContext(dbDispatcher) {
+        withContext(dbDispatcher) {
             transaction {
-                val startOfDay = getStartOfDayMillis()
                 MagicLinkTokens.deleteWhere { MagicLinkTokens.expiresAt lessEq clock.now().toEpochMilliseconds() }
-                MagicLinkTokens.selectAll()
-                    .where { (MagicLinkTokens.userId eq user.id) and (MagicLinkTokens.createdAt greaterEq startOfDay) }
-                    .count()
             }
         }
 
-        if (requestsToday >= maxMagicLinksPerDay) {
-            logger.warn("Magic link rate limit reached for userId=${user.id} (${requestsToday}/$maxMagicLinksPerDay today)")
+        if (!rateLimiter.verify(user.id.toString(), requestLimitKind, requestPolicy)) {
+            logger.warn("Magic link rate limit reached for userId=${user.id}")
             return Result.failure(Exception("Maximum magic link requests (5) reached for today. Please try again tomorrow."))
         }
 
@@ -181,12 +186,6 @@ class MagicLinkService(
         val bytes = ByteArray(32)
         secureRandom.nextBytes(bytes)
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
-    }
-
-    private fun getStartOfDayMillis(): Long {
-        val now = clock.now().toEpochMilliseconds()
-        val dayMillis = 24 * 60 * 60 * 1000L
-        return now - (now % dayMillis)
     }
 
     private fun getLocalizedMagicLinkContent(language: String, displayName: String, loginUrl: String): Pair<String, String> {

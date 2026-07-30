@@ -7,6 +7,8 @@ import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestClock
 import com.adoptu.mocks.TestDatabase
+import com.universaliun.ratelimit.common.InMemoryRateLimitStateAdapter
+import com.universaliun.ratelimit.common.RateLimiter
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
@@ -34,8 +36,9 @@ class MagicLinkServiceTest {
         TestDatabase.clearAllData()
         userRepository = UserRepository(clock)
         mockNotificationAdapter = MockNotificationAdapter()
-        emailVerificationService = EmailVerificationService(userRepository, mockNotificationAdapter, clock, "http://localhost:80")
-        magicLinkService = MagicLinkService(userRepository, mockNotificationAdapter, clock, "http://localhost:80", emailVerificationService)
+        val rateLimiter = RateLimiter(InMemoryRateLimitStateAdapter())
+        emailVerificationService = EmailVerificationService(userRepository, mockNotificationAdapter, clock, "http://localhost:80", rateLimiter)
+        magicLinkService = MagicLinkService(userRepository, mockNotificationAdapter, clock, "http://localhost:80", emailVerificationService, rateLimiter)
     }
 
     @Test

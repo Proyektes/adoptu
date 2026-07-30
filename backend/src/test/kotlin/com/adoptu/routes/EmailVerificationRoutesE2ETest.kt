@@ -45,9 +45,10 @@ class EmailVerificationRoutesE2ETest {
             single<Clock> { Clock.System }
             single<com.adoptu.ports.UserRepositoryPort> { UserRepository(get()) }
             single { com.adoptu.services.UserService(get(), get()) }
-            single { EmailVerificationService(get(), get(), get(), "http://localhost:80") }
-            single { com.adoptu.services.PasswordService(get(), mockNotificationAdapter, get(), "http://localhost:80") }
-            single { com.adoptu.services.MagicLinkService(get(), mockNotificationAdapter, get(), "http://localhost:80", get()) }
+            single { com.universaliun.ratelimit.common.RateLimiter(com.universaliun.ratelimit.common.InMemoryRateLimitStateAdapter()) }
+            single { EmailVerificationService(get(), get(), get(), "http://localhost:80", get()) }
+            single { com.adoptu.services.PasswordService(get(), mockNotificationAdapter, get(), "http://localhost:80", get()) }
+            single { com.adoptu.services.MagicLinkService(get(), mockNotificationAdapter, get(), "http://localhost:80", get(), get()) }
             single {
                 com.adoptu.services.auth.WebAuthnService(
                     get(), get(), get(), get(), get(),

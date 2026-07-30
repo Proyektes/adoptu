@@ -2,9 +2,12 @@ package com.adoptu.services
 
 import com.adoptu.ports.NotificationPort
 import com.adoptu.ports.UserRepositoryPort
+import com.universaliun.ratelimit.common.RateLimitPolicy
+import com.universaliun.ratelimit.common.RateLimiter
 import java.security.SecureRandom
 import java.util.*
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -12,14 +15,23 @@ class EmailVerificationService(
     private val userRepository: UserRepositoryPort,
     private val notificationPort: NotificationPort,
     private val clock: Clock,
-    private val baseUrl: String = "http://localhost:8080"
+    private val baseUrl: String = "http://localhost:8080",
+    private val rateLimiter: RateLimiter
 ) {
     private val secureRandom = SecureRandom()
     private val tokenExpirationMs = 24 * 60 * 60 * 1000L
     private val maxVerificationEmailsPerDay = 3
 
+    // RateLimitKit consolidation: this is now the single source of truth for the daily count
+    // (previously a separate EmailVerificationAttempts row-count query, kept in sync by hand).
+    private val resendPolicy = RateLimitPolicy(window = 24.hours, maxEventsPerWindow = maxVerificationEmailsPerDay)
+    private fun resendLimitKey(userId: Int) = userId.toString()
+
     companion object {
         const val ERROR_RATE_LIMIT_EXCEEDED = "Maximum verification emails (3) reached for today. Please try again tomorrow."
+        // Non-private so tests can seed RateLimitStateTable directly with the exact same key this
+        // service uses, instead of duplicating the raw string (see AuthRoutesE2ETest).
+        const val LIMIT_KIND = "email_verification_resend"
     }
 
     private fun getLocalizedContent(language: String, displayName: String, verificationUrl: String): Pair<String, String> {
@@ -110,24 +122,25 @@ class EmailVerificationService(
         displayName: String,
         language: String = "en"
     ): Result<Boolean> {
-        if (userRepository.getVerificationAttemptsToday(userId) >= maxVerificationEmailsPerDay) {
+        if (!rateLimiter.verify(resendLimitKey(userId), LIMIT_KIND, resendPolicy)) {
             return Result.failure(RateLimitExceededException(ERROR_RATE_LIMIT_EXCEEDED))
         }
 
         val token = generateToken()
         val expiresAt = clock.now().toEpochMilliseconds() + tokenExpirationMs
-        
+
         val tokenCreated = userRepository.createEmailVerificationToken(userId, token, expiresAt)
         if (!tokenCreated) return Result.failure(Exception("Failed to create verification token"))
-        
+
         val verificationUrl = "$baseUrl/verify?token=$token"
-        
+
         val (subject, body) = getLocalizedContent(language, displayName, verificationUrl)
 
+        // Slot is already consumed by the rateLimiter.verify() call above, even if the send below
+        // fails -- a behavior change from the previous "only count it if the email actually sent"
+        // logic, accepted as part of consolidating onto one shared counter (see this class's own
+        // git history for the previous per-table implementation if this ever needs revisiting).
         val sent = notificationPort.sendEmail(email, subject, body)
-        if (sent) {
-            userRepository.recordVerificationAttempt(userId)
-        }
 
         return Result.success(sent)
     }
@@ -162,7 +175,7 @@ class EmailVerificationService(
     }
 
     suspend fun canSendVerificationEmail(userId: Int): Boolean {
-        return userRepository.getVerificationAttemptsToday(userId) < maxVerificationEmailsPerDay
+        return rateLimiter.wouldAllow(resendLimitKey(userId), LIMIT_KIND, resendPolicy)
     }
 
     private fun generateToken(): String {

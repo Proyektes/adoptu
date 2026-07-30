@@ -123,9 +123,10 @@ class UIRoutesE2ETest {
         single<com.adoptu.ports.NotificationPort> { get<MockNotificationAdapter>() }
         single<com.adoptu.ports.PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
         single { UserService(get(), get()) }
-        single { EmailVerificationService(get(), get(), get()) }
-        single { PasswordService(get(), get(), get(), "http://localhost:80") }
-        single { MagicLinkService(get(), get(), get(), "http://localhost:80", get()) }
+        single { com.universaliun.ratelimit.common.RateLimiter(com.universaliun.ratelimit.common.InMemoryRateLimitStateAdapter()) }
+        single { EmailVerificationService(get(), get(), get(), rateLimiter = get()) }
+        single { PasswordService(get(), get(), get(), "http://localhost:80", get()) }
+        single { MagicLinkService(get(), get(), get(), "http://localhost:80", get(), get()) }
         single {
             WebAuthnService(
                 get(),

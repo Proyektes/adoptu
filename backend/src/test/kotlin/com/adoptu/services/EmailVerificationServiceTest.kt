@@ -6,6 +6,8 @@ import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestClock
 import com.adoptu.mocks.TestDatabase
+import com.universaliun.ratelimit.common.InMemoryRateLimitStateAdapter
+import com.universaliun.ratelimit.common.RateLimiter
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.select
@@ -31,7 +33,7 @@ class EmailVerificationServiceTest {
         TestDatabase.clearAllData()
         userRepository = UserRepository(clock)
         mockNotificationAdapter = MockNotificationAdapter()
-        emailVerificationService = EmailVerificationService(userRepository, mockNotificationAdapter, clock, "http://localhost:80")
+        emailVerificationService = EmailVerificationService(userRepository, mockNotificationAdapter, clock, "http://localhost:80", RateLimiter(InMemoryRateLimitStateAdapter()))
     }
 
     @Test

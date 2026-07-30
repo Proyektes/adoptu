@@ -9,6 +9,8 @@ import com.adoptu.services.crypto.CryptoService
 import com.password4j.Argon2Function
 import com.password4j.Password
 import com.password4j.types.Argon2
+import com.universaliun.ratelimit.common.RateLimitPolicy
+import com.universaliun.ratelimit.common.RateLimiter
 import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
@@ -21,6 +23,7 @@ import org.jetbrains.exposed.v1.jdbc.update
 import java.security.SecureRandom
 import java.util.Base64
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -28,13 +31,29 @@ class PasswordService(
     private val userRepository: UserRepositoryPort,
     private val notificationPort: com.adoptu.ports.NotificationPort,
     private val clock: Clock,
-    private val baseUrl: String
+    private val baseUrl: String,
+    private val rateLimiter: RateLimiter
 ) {
     private val secureRandom = SecureRandom()
     private val passwordResetExpirationMs = 15 * 60 * 1000L
     private val maxResetEmailsPerDay = 3
     private val maxFailedLoginAttempts = 5
     private val loginLockoutWindowMs = 15 * 60 * 1000L
+
+    // RateLimitKit consolidation: replaces the previous "count today's PasswordResetTokens rows"
+    // query. Note a small accepted behavior difference -- the old counter derived from actual
+    // token rows, which resetPassword() deletes on success, effectively "refunding" a daily slot
+    // when a reset completes; this counter never refunds. Login-attempt lockout below is
+    // deliberately NOT migrated: it counts only *failed* attempts within the window (a successful
+    // login never counts against it), a semantic RateLimitKit's plain event counter doesn't
+    // support -- see isLoginRateLimited/recordLoginAttempt.
+    private val resetRequestPolicy = RateLimitPolicy(window = 24.hours, maxEventsPerWindow = maxResetEmailsPerDay)
+
+    companion object {
+        // Non-private so tests can seed RateLimitStateTable directly with the exact same key this
+        // service uses, instead of duplicating the raw string.
+        const val RESET_REQUEST_LIMIT_KIND = "password_reset_request"
+    }
 
     // DB-backed (not in-memory) so the lockout is shared across every ECS task, not just
     // whichever instance happened to handle a given request.
@@ -183,17 +202,8 @@ class PasswordService(
 
     suspend fun requestPasswordReset(email: String, language: String): Result<Boolean> {
         val user = userRepository.getByEmail(email) ?: return Result.success(true)
-        
-        val resetAttemptsToday = withContext(dbDispatcher) {
-            transaction {
-                val startOfDay = getStartOfDayMillis()
-                PasswordResetTokens.selectAll()
-                    .where { (PasswordResetTokens.userId eq user.id) and (PasswordResetTokens.createdAt greaterEq startOfDay) }
-                    .count()
-            }
-        }
-        
-        if (resetAttemptsToday >= maxResetEmailsPerDay) {
+
+        if (!rateLimiter.verify(user.id.toString(), RESET_REQUEST_LIMIT_KIND, resetRequestPolicy)) {
             return Result.failure(Exception("Maximum password reset requests (3) reached for today. Please try again tomorrow."))
         }
 
@@ -264,12 +274,6 @@ class PasswordService(
         val bytes = ByteArray(32)
         secureRandom.nextBytes(bytes)
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
-    }
-
-    private fun getStartOfDayMillis(): Long {
-        val now = clock.now().toEpochMilliseconds()
-        val dayMillis = 24 * 60 * 60 * 1000L
-        return now - (now % dayMillis)
     }
 
     private fun getLocalizedResetContent(language: String, displayName: String, resetUrl: String): Pair<String, String> {

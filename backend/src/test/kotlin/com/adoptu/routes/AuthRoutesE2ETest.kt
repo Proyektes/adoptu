@@ -17,7 +17,10 @@ import com.adoptu.mocks.MockImageStorage
 import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestDatabase
 import com.adoptu.services.EmailVerificationService
+import com.adoptu.services.PasswordService
 import com.adoptu.services.crypto.CryptoService
+import com.universaliun.ratelimit.backend.adapter.out.persistence.ExposedRateLimitStateAdapter
+import com.universaliun.ratelimit.common.RateLimitState
 import com.adoptu.testsupport.TestHttp
 import com.adoptu.testsupport.TestServer
 import com.adoptu.testsupport.TestServerHandle
@@ -68,6 +71,14 @@ class AuthRoutesE2ETest {
     private val clock = Clock.System
     private lateinit var mockNotificationAdapter: MockNotificationAdapter
 
+    /** Seeds RateLimitStateTable directly as already-exhausted, bypassing the real verify() call
+     *  sequence -- same intent as the old direct EmailVerificationAttempts/PasswordResetTokens row
+     *  seeding this replaced, now that those tables no longer back the actual rate-limit checks. */
+    private fun seedExhaustedRateLimit(subjectKey: String, limitKind: String, count: Int = 3) {
+        val now = clock.now()
+        ExposedRateLimitStateAdapter().save(subjectKey, limitKind, RateLimitState(windowStartedAt = now, countInWindow = count, lastEventAt = now))
+    }
+
     @BeforeEach
     fun setup() {
         TestDatabase.initH2()
@@ -89,9 +100,14 @@ class AuthRoutesE2ETest {
             single<Clock> { Clock.System }
             single<com.adoptu.ports.UserRepositoryPort> { UserRepository(get()) }
             single { com.adoptu.services.UserService(get(), get()) }
-            single { EmailVerificationService(get(), get(), get(), "http://localhost:80") }
-            single { com.adoptu.services.PasswordService(get(), mockNotificationAdapter, get(), "http://localhost:80") }
-            single { com.adoptu.services.MagicLinkService(get(), mockNotificationAdapter, get(), "http://localhost:80", get()) }
+            // DB-backed, not in-memory: this file seeds already-exhausted rate-limit state
+            // directly into RateLimitStateTable (see seedExhaustedRateLimit) to test the
+            // exhausted-limit response path, which only the running server can observe if both
+            // reach the same backing store -- matches production's own ExposedRateLimitStateAdapter.
+            single { com.universaliun.ratelimit.common.RateLimiter(ExposedRateLimitStateAdapter()) }
+            single { EmailVerificationService(get(), get(), get(), "http://localhost:80", get()) }
+            single { com.adoptu.services.PasswordService(get(), mockNotificationAdapter, get(), "http://localhost:80", get()) }
+            single { com.adoptu.services.MagicLinkService(get(), mockNotificationAdapter, get(), "http://localhost:80", get(), get()) }
             single {
                 com.adoptu.services.auth.WebAuthnService(
                     get(), get(), get(), get(), get(),
@@ -414,13 +430,8 @@ class AuthRoutesE2ETest {
             val userId = handle.registerUnverifiedUser(email)
             transaction {
                 EmailVerificationTokens.deleteWhere { EmailVerificationTokens.userId eq userId }
-                repeat(3) {
-                    EmailVerificationAttempts.insert {
-                        it[EmailVerificationAttempts.userId] = userId
-                        it[EmailVerificationAttempts.createdAt] = clock.now().toEpochMilliseconds()
-                    }
-                }
             }
+            seedExhaustedRateLimit(userId.toString(), EmailVerificationService.LIMIT_KIND)
 
             val response = TestHttp.postForm(
                 "${handle.baseUrl}/api/auth/registration-options",
@@ -463,13 +474,8 @@ class AuthRoutesE2ETest {
             val limitUserId = handle.registerUnverifiedUser(limitEmail)
             transaction {
                 EmailVerificationTokens.deleteWhere { EmailVerificationTokens.userId eq limitUserId }
-                repeat(3) {
-                    EmailVerificationAttempts.insert {
-                        it[EmailVerificationAttempts.userId] = limitUserId
-                        it[EmailVerificationAttempts.createdAt] = clock.now().toEpochMilliseconds()
-                    }
-                }
             }
+            seedExhaustedRateLimit(limitUserId.toString(), EmailVerificationService.LIMIT_KIND)
             val limited = TestHttp.postForm(
                 "${handle.baseUrl}/api/auth/registration-options",
                 formUrlEncode(listOf("email" to limitEmail, "displayName" to "N", "language" to "es"))
@@ -511,13 +517,8 @@ class AuthRoutesE2ETest {
             val limitUserId = handle.registerUnverifiedUser(limitEmail)
             transaction {
                 EmailVerificationTokens.deleteWhere { EmailVerificationTokens.userId eq limitUserId }
-                repeat(3) {
-                    EmailVerificationAttempts.insert {
-                        it[EmailVerificationAttempts.userId] = limitUserId
-                        it[EmailVerificationAttempts.createdAt] = clock.now().toEpochMilliseconds()
-                    }
-                }
             }
+            seedExhaustedRateLimit(limitUserId.toString(), EmailVerificationService.LIMIT_KIND)
             val limited = TestHttp.postForm(
                 "${handle.baseUrl}/api/auth/registration-options",
                 formUrlEncode(listOf("email" to limitEmail, "displayName" to "N", "language" to "fr"))
@@ -559,13 +560,8 @@ class AuthRoutesE2ETest {
             val limitUserId = handle.registerUnverifiedUser(limitEmail)
             transaction {
                 EmailVerificationTokens.deleteWhere { EmailVerificationTokens.userId eq limitUserId }
-                repeat(3) {
-                    EmailVerificationAttempts.insert {
-                        it[EmailVerificationAttempts.userId] = limitUserId
-                        it[EmailVerificationAttempts.createdAt] = clock.now().toEpochMilliseconds()
-                    }
-                }
             }
+            seedExhaustedRateLimit(limitUserId.toString(), EmailVerificationService.LIMIT_KIND)
             val limited = TestHttp.postForm(
                 "${handle.baseUrl}/api/auth/registration-options",
                 formUrlEncode(listOf("email" to limitEmail, "displayName" to "N", "language" to "pt"))
@@ -615,13 +611,8 @@ class AuthRoutesE2ETest {
             val limitUserId = handle.registerUnverifiedUser(limitEmail)
             transaction {
                 EmailVerificationTokens.deleteWhere { EmailVerificationTokens.userId eq limitUserId }
-                repeat(3) {
-                    EmailVerificationAttempts.insert {
-                        it[EmailVerificationAttempts.userId] = limitUserId
-                        it[EmailVerificationAttempts.createdAt] = clock.now().toEpochMilliseconds()
-                    }
-                }
             }
+            seedExhaustedRateLimit(limitUserId.toString(), EmailVerificationService.LIMIT_KIND)
             val limited = TestHttp.postForm(
                 "${handle.baseUrl}/api/auth/registration-options",
                 formUrlEncode(listOf("email" to limitEmail, "displayName" to "N", "language" to "zh"))
@@ -1704,13 +1695,8 @@ class AuthRoutesE2ETest {
             val userId = handle.registerUnverifiedUser(email)
             transaction {
                 EmailVerificationTokens.deleteWhere { EmailVerificationTokens.userId eq userId }
-                repeat(3) {
-                    EmailVerificationAttempts.insert {
-                        it[EmailVerificationAttempts.userId] = userId
-                        it[EmailVerificationAttempts.createdAt] = clock.now().toEpochMilliseconds()
-                    }
-                }
             }
+            seedExhaustedRateLimit(userId.toString(), EmailVerificationService.LIMIT_KIND)
 
             val response = TestHttp.postJson(
                 "${handle.baseUrl}/api/auth/login-with-password",
@@ -1818,16 +1804,7 @@ class AuthRoutesE2ETest {
         val handle = startTestServer()
         try {
             val userId = handle.registerVerifiedUser(email)
-            transaction {
-                repeat(3) { i ->
-                    PasswordResetTokens.insert {
-                        it[PasswordResetTokens.userId] = userId
-                        it[PasswordResetTokens.token] = "preexisting-token-$i"
-                        it[PasswordResetTokens.expiresAt] = clock.now().toEpochMilliseconds() + 900000
-                        it[PasswordResetTokens.createdAt] = clock.now().toEpochMilliseconds()
-                    }
-                }
-            }
+            seedExhaustedRateLimit(userId.toString(), PasswordService.RESET_REQUEST_LIMIT_KIND)
 
             val response = TestHttp.postJson(
                 "${handle.baseUrl}/api/auth/forgot-password",

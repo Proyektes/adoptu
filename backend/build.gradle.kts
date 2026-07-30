@@ -34,6 +34,19 @@ repositories {
         }
         content { includeGroup("com.universaliun.email") }
     }
+
+    // RateLimitKit (generic rate-limit/throttle primitive) -- see Libraries/RateLimitKit/README.md.
+    // Same GITHUB_ACTOR/PAYMENT_KIT_TOKEN credential pair as EmailKit above; content{} scopes this
+    // repository to only the ratelimit group.
+    maven {
+        name = "RateLimitKitGitHubPackages"
+        url = uri("https://maven.pkg.github.com/ULibraries/RateLimitKit")
+        credentials {
+            username = credential("GITHUB_ACTOR")
+            password = credential("PAYMENT_KIT_TOKEN")
+        }
+        content { includeGroup("com.universaliun.ratelimit") }
+    }
 }
 
 // EmailKit is consumed as a `1.0-SNAPSHOT` ("changing") dependency -- same reasoning as the other
@@ -107,6 +120,10 @@ dependencies {
     // Transactional email (SMTP in dev via Mailpit, SES in prod) -- replaces the previous
     // hand-rolled SesEmailAdapter/commons-email combo. See di/EmailSenderConfig.kt.
     implementation("com.universaliun.email:backend:1.0-SNAPSHOT")
+
+    // Daily-resend throttles (password reset, magic link, email verification) -- see
+    // services/PasswordService.kt, MagicLinkService.kt, EmailVerificationService.kt.
+    implementation("com.universaliun.ratelimit:backend:1.0-SNAPSHOT")
 
     // test
     testImplementation(kotlin("test"))

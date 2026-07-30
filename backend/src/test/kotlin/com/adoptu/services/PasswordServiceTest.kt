@@ -8,6 +8,8 @@ import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestClock
 import com.adoptu.mocks.TestDatabase
 import com.adoptu.services.crypto.CryptoService
+import com.universaliun.ratelimit.common.InMemoryRateLimitStateAdapter
+import com.universaliun.ratelimit.common.RateLimiter
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -33,7 +35,7 @@ class PasswordServiceTest {
         TestDatabase.clearAllData()
         userRepository = UserRepository(clock)
         mockNotificationAdapter = MockNotificationAdapter()
-        passwordService = PasswordService(userRepository, mockNotificationAdapter, clock, "http://localhost:80")
+        passwordService = PasswordService(userRepository, mockNotificationAdapter, clock, "http://localhost:80", RateLimiter(InMemoryRateLimitStateAdapter()))
         CryptoService.initialize()
     }
 

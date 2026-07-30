@@ -2,6 +2,7 @@ package com.adoptu.adapters.db
 
 import com.adoptu.config.AppConfig
 import com.adoptu.dto.input.UserRole
+import com.universaliun.ratelimit.backend.adapter.out.persistence.tables.RateLimitStateTable
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.jetbrains.exposed.v1.core.eq
@@ -48,7 +49,8 @@ object DatabaseFactory {
         SpamReportTokens,
         LoginAttempts,
         CryptoKeys,
-        WebAuthnChallenges)
+        WebAuthnChallenges,
+        RateLimitStateTable)
     fun init(config: AppConfig) {
         val env = config.propertyOrNull("env")?.getString() ?: "prod"
         val prefix = "db.$env"

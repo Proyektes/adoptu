@@ -1,5 +1,6 @@
 package com.adoptu.adapters.db
 
+import com.universaliun.ratelimit.backend.adapter.out.persistence.tables.RateLimitStateTable
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -28,8 +29,8 @@ class DatabaseFactoryTest {
     }
 
     @Test
-    fun `DatabaseFactory has 27 tables`() {
-        assertEquals(27, DatabaseFactory.listOfTables.size)
+    fun `DatabaseFactory has 28 tables`() {
+        assertEquals(28, DatabaseFactory.listOfTables.size)
     }
 
     @Test
@@ -141,7 +142,8 @@ class DatabaseFactoryTest {
             SpamReportTokens,
             LoginAttempts,
             CryptoKeys,
-            WebAuthnChallenges
+            WebAuthnChallenges,
+            RateLimitStateTable
         )
         
         assertEquals(expectedTables.size, DatabaseFactory.listOfTables.size)

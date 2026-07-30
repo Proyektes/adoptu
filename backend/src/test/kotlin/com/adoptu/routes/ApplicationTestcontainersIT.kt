@@ -125,9 +125,10 @@ class ApplicationTestcontainersIT {
             single<Clock> { testClock }
             single<UserRepositoryPort> { UserRepository(get()) }
             single<com.adoptu.services.UserService> { com.adoptu.services.UserService(get(), get()) }
-            single<com.adoptu.services.EmailVerificationService> { com.adoptu.services.EmailVerificationService(get(), get(), get(), "http://localhost:80") }
-            single<com.adoptu.services.PasswordService> { com.adoptu.services.PasswordService(get(), get(), get(), "http://localhost:80") }
-            single<com.adoptu.services.MagicLinkService> { com.adoptu.services.MagicLinkService(get(), get(), get(), "http://localhost:80", get()) }
+            single { com.universaliun.ratelimit.common.RateLimiter(com.universaliun.ratelimit.common.InMemoryRateLimitStateAdapter()) }
+            single<com.adoptu.services.EmailVerificationService> { com.adoptu.services.EmailVerificationService(get(), get(), get(), "http://localhost:80", get()) }
+            single<com.adoptu.services.PasswordService> { com.adoptu.services.PasswordService(get(), get(), get(), "http://localhost:80", get()) }
+            single<com.adoptu.services.MagicLinkService> { com.adoptu.services.MagicLinkService(get(), get(), get(), "http://localhost:80", get(), get()) }
             single<EmailSenderPort> { emailSenderPortFromConfig(config) }
             single<NotificationPort> { NotificationEmailAdapter(get()) }
             single { WebAuthnService(get(), get(), get(), get(), get(), config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com", config.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost", config.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption", listOf(config.propertyOrNull("webauthn.origin")?.getString() ?: "http://localhost:80")) }

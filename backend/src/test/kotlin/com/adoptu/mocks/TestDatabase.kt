@@ -1,6 +1,7 @@
 package com.adoptu.mocks
 
 import com.adoptu.adapters.db.*
+import com.universaliun.ratelimit.backend.adapter.out.persistence.tables.RateLimitStateTable
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
@@ -46,7 +47,8 @@ object TestDatabase {
                     UserSterilizationLocations,
                     Users,
                     CryptoKeys,
-                    WebAuthnChallenges
+                    WebAuthnChallenges,
+                    RateLimitStateTable
                 )
             } catch (e: Exception) {
                 // Tables may not exist on first run, ignore
@@ -78,7 +80,8 @@ object TestDatabase {
                 Pets,
                 PetImages,
                 AdoptionRequests,
-                PhotographyRequests
+                PhotographyRequests,
+                RateLimitStateTable
             )
         }
     }
@@ -112,6 +115,7 @@ object TestDatabase {
             exec("DELETE FROM user_sterilization_locations")
             exec("DELETE FROM crypto_keys")
             exec("DELETE FROM webauthn_challenges")
+            exec("DELETE FROM rate_limit_state")
         }
     }
 }
