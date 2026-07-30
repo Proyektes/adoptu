@@ -44,13 +44,17 @@ object TestDatabase {
                     AnimalShelters,
                     UserShelters,
                     UserSterilizationLocations,
-                    Users
+                    Users,
+                    CryptoKeys,
+                    WebAuthnChallenges
                 )
             } catch (e: Exception) {
                 // Tables may not exist on first run, ignore
             }
             SchemaUtils.create(
                 Users,
+                CryptoKeys,
+                WebAuthnChallenges,
                 LoginAttempts,
                 EmailVerificationAttempts,
                 EmailVerificationTokens,
@@ -106,6 +110,8 @@ object TestDatabase {
             exec("DELETE FROM sterilization_locations")
             exec("DELETE FROM user_shelters")
             exec("DELETE FROM user_sterilization_locations")
+            exec("DELETE FROM crypto_keys")
+            exec("DELETE FROM webauthn_challenges")
         }
     }
 }

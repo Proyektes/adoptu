@@ -1,5 +1,6 @@
 package com.adoptu.services.auth
 
+import com.adoptu.mocks.TestDatabase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -15,6 +16,9 @@ class WebAuthnServiceChallengeStoreTest {
 
     @BeforeEach
     fun setup() {
+        TestDatabase.initH2()
+        TestDatabase.clearAllData()
+
         webAuthnService = WebAuthnService(
             clock = com.adoptu.mocks.TestClock(kotlin.time.Instant.parse("2024-01-15T10:00:00Z")),
             emailVerificationService = io.mockk.mockk(relaxed = true),

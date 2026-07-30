@@ -160,6 +160,8 @@ class DatabaseFactoryInitIT {
             assertTrue(TemporalHomes.selectAll().count() >= 0)
             assertTrue(BlockedRescuers.selectAll().count() >= 0)
             assertTrue(TemporalHomeRequests.selectAll().count() >= 0)
+            assertTrue(CryptoKeys.selectAll().count() >= 0)
+            assertTrue(WebAuthnChallenges.selectAll().count() >= 0)
         }
     }
 

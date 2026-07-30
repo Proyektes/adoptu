@@ -1,5 +1,7 @@
 package com.adoptu.services.crypto
 
+import com.adoptu.mocks.TestDatabase
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -7,6 +9,12 @@ import kotlin.test.assertNull
 import kotlin.test.assertNotEquals
 
 class CryptoServiceTest {
+
+    @BeforeEach
+    fun setup() {
+        TestDatabase.initH2()
+        TestDatabase.clearAllData()
+    }
 
     @Test
     fun `generateKeyPair returns a usable public and private key pair`() {
@@ -70,5 +78,26 @@ class CryptoServiceTest {
         CryptoService.initialize()
         val result = CryptoService.decrypt("not-valid-base64-ciphertext!!!")
         assertNull(result)
+    }
+
+    @Test
+    fun `initialize loads the same persisted keypair across simulated ECS task restarts`() {
+        // Force a clean slate: no cached in-memory keypair and no persisted row, so the first
+        // initialize() below must generate and persist a brand-new one.
+        CryptoService.resetForTesting()
+        CryptoService.initialize()
+        val publicKeyFromFirstInstance = CryptoService.getPublicKey()
+        val ciphertext = CryptoService.encrypt("cross-instance secret", publicKeyFromFirstInstance)
+        assertNotNull(ciphertext)
+
+        // Drop the in-memory cache again to simulate a *different* ECS task/JVM handling the
+        // next request - it must load the SAME row from Postgres rather than minting its own,
+        // which is exactly the bug that broke login when requests landed on different tasks.
+        CryptoService.resetForTesting()
+        CryptoService.initialize()
+        val publicKeyFromSecondInstance = CryptoService.getPublicKey()
+
+        assertEquals(publicKeyFromFirstInstance, publicKeyFromSecondInstance)
+        assertEquals("cross-instance secret", CryptoService.decrypt(ciphertext))
     }
 }

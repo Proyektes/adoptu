@@ -3,6 +3,7 @@ package com.adoptu.services.auth
 import com.adoptu.adapters.db.PendingRoleActivations
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
+import com.adoptu.adapters.db.WebAuthnChallenges
 import com.adoptu.adapters.db.WebAuthnCredentials
 import com.adoptu.adapters.db.dbDispatcher
 import com.adoptu.dto.input.UserRole
@@ -22,7 +23,10 @@ import com.webauthn4j.data.client.Origin
 import com.webauthn4j.data.client.challenge.DefaultChallenge
 import com.webauthn4j.server.ServerProperty
 import kotlinx.coroutines.withContext
+import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.greater
+import org.jetbrains.exposed.v1.core.lessEq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -564,38 +568,58 @@ class WebAuthnService(
         magicLinkService.consumeMagicLink(token)
     }
 
+    // DB-backed (not in-memory) so a challenge created on one ECS task is still found when the
+    // browser posts the signed response back to a different task - see WebAuthnChallenges in
+    // Models.kt. Rows also expire (CHALLENGE_TTL_MS) and are opportunistically purged on every
+    // store, instead of growing unbounded like the old in-memory map did.
     private object ChallengeStore {
-        private val challenges = mutableMapOf<String, ByteArray>()
-        private val userChallenges = mutableMapOf<Int, ByteArray>()
-        private var assertionChallenge: ByteArray? = null
+        private const val CHALLENGE_TTL_MS = 5 * 60 * 1000L
+        private const val ASSERTION_KEY = "assertion"
 
-        fun store(username: String, challenge: ByteArray) {
-            challenges[username] = challenge
+        private fun registrationKey(username: String) = "registration:${username.lowercase()}"
+        private fun registrationUserKey(userId: Int) = "registration-user:$userId"
+
+        private fun put(key: String, challenge: ByteArray) {
+            val now = System.currentTimeMillis()
+            transaction {
+                WebAuthnChallenges.deleteWhere { WebAuthnChallenges.expiresAt lessEq now }
+                WebAuthnChallenges.deleteWhere { WebAuthnChallenges.challengeKey eq key }
+                WebAuthnChallenges.insert {
+                    it[challengeKey] = key
+                    it[WebAuthnChallenges.challenge] = Base64.getEncoder().encodeToString(challenge)
+                    it[expiresAt] = now + CHALLENGE_TTL_MS
+                }
+            }
         }
 
-        fun retrieve(username: String): ByteArray? = challenges.remove(username)
+        private fun take(key: String): ByteArray? {
+            val now = System.currentTimeMillis()
+            return transaction {
+                val row = WebAuthnChallenges.selectAll()
+                    .where { (WebAuthnChallenges.challengeKey eq key) and (WebAuthnChallenges.expiresAt greater now) }
+                    .firstOrNull() ?: return@transaction null
 
-        fun remove(username: String) {
-            challenges.remove(username)
+                WebAuthnChallenges.deleteWhere { WebAuthnChallenges.id eq row[WebAuthnChallenges.id] }
+                Base64.getDecoder().decode(row[WebAuthnChallenges.challenge])
+            }
         }
 
-        fun storeForUser(userId: Int, challenge: ByteArray) {
-            userChallenges[userId] = challenge
+        private fun delete(key: String) {
+            transaction {
+                WebAuthnChallenges.deleteWhere { WebAuthnChallenges.challengeKey eq key }
+            }
         }
 
-        fun retrieveForUser(userId: Int): ByteArray? = userChallenges.remove(userId)
+        fun store(username: String, challenge: ByteArray) = put(registrationKey(username), challenge)
+        fun retrieve(username: String): ByteArray? = take(registrationKey(username))
+        fun remove(username: String) = delete(registrationKey(username))
 
-        fun removeForUser(userId: Int) {
-            userChallenges.remove(userId)
-        }
+        fun storeForUser(userId: Int, challenge: ByteArray) = put(registrationUserKey(userId), challenge)
+        fun retrieveForUser(userId: Int): ByteArray? = take(registrationUserKey(userId))
+        fun removeForUser(userId: Int) = delete(registrationUserKey(userId))
 
-        fun storeAssertion(challenge: ByteArray) {
-            assertionChallenge = challenge
-        }
-
-        fun retrieveAssertion(): ByteArray? = assertionChallenge.also { assertionChallenge = null }
-        fun removeAssertion() {
-            assertionChallenge = null
-        }
+        fun storeAssertion(challenge: ByteArray) = put(ASSERTION_KEY, challenge)
+        fun retrieveAssertion(): ByteArray? = take(ASSERTION_KEY)
+        fun removeAssertion() = delete(ASSERTION_KEY)
     }
 }

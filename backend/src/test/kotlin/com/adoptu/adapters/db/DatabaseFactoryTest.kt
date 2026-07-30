@@ -28,13 +28,23 @@ class DatabaseFactoryTest {
     }
 
     @Test
-    fun `DatabaseFactory has 25 tables`() {
-        assertEquals(25, DatabaseFactory.listOfTables.size)
+    fun `DatabaseFactory has 27 tables`() {
+        assertEquals(27, DatabaseFactory.listOfTables.size)
     }
 
     @Test
     fun `PendingRoleActivations table is in listOfTables`() {
         assertTrue(DatabaseFactory.listOfTables.contains(PendingRoleActivations))
+    }
+
+    @Test
+    fun `CryptoKeys table is in listOfTables`() {
+        assertTrue(DatabaseFactory.listOfTables.contains(CryptoKeys))
+    }
+
+    @Test
+    fun `WebAuthnChallenges table is in listOfTables`() {
+        assertTrue(DatabaseFactory.listOfTables.contains(WebAuthnChallenges))
     }
 
     @Test
@@ -129,7 +139,9 @@ class DatabaseFactoryTest {
             EmailChangeTokens,
             ProfileEmailVerificationTokens,
             SpamReportTokens,
-            LoginAttempts
+            LoginAttempts,
+            CryptoKeys,
+            WebAuthnChallenges
         )
         
         assertEquals(expectedTables.size, DatabaseFactory.listOfTables.size)

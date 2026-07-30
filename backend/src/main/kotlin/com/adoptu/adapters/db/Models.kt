@@ -170,6 +170,34 @@ object WebAuthnCredentials : Table("webauthn_credentials") {
     override val primaryKey = PrimaryKey(id)
 }
 
+// Persists the RSA keypair CryptoService uses to decrypt passwords encrypted client-side (see
+// CryptoService.kt) so every ECS task decrypts with the SAME key. Previously each JVM generated
+// and cached its own keypair at startup with no persistence, so a public key fetched from one
+// task's /api/auth/encryption-key could not be decrypted by a different task handling the
+// follow-up login/register request - a single fixed-id row acts as the shared singleton.
+object CryptoKeys : Table("crypto_keys") {
+    val id = integer("id")
+    val publicKey = text("public_key")
+    val privateKey = text("private_key")
+    val createdAt = long("created_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+// Persists WebAuthn registration/assertion challenges (see WebAuthnService.ChallengeStore) so a
+// challenge created on one ECS task is still found when the browser posts the signed response
+// back to a different task. Previously an in-memory map keyed the same way - also unbounded,
+// since nothing ever expired it, only removed it on retrieval - expiresAt lets stale rows be
+// purged instead of accumulating forever.
+object WebAuthnChallenges : Table("webauthn_challenges") {
+    val id = integer("id").autoIncrement()
+    val challengeKey = varchar("challenge_key", 320).uniqueIndex()
+    val challenge = varchar("challenge", 100)
+    val expiresAt = long("expires_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
 object Pets : Table("pets") {
     val id = integer("id").autoIncrement()
     val rescuerId = integer("rescuer_id").references(Users.id)

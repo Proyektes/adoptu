@@ -3490,6 +3490,27 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-07-12T22:15:00.000Z"
+    },
+    {
+      "id": "bug-210",
+      "timestamp": "2026-07-27T13:15:00.000Z",
+      "error_message": "Intermittent, hard-to-diagnose login/passkey failures under real ECS horizontal scaling: password login sometimes fails as invalid-credentials even with the right password, and WebAuthn registration/assertion sometimes fails as invalid-credential, both correlated with which ECS task handled which request.",
+      "file": "backend/src/main/kotlin/com/adoptu/services/crypto/CryptoService.kt, backend/src/main/kotlin/com/adoptu/services/auth/WebAuthnService.kt",
+      "root_cause": "CryptoService was a singleton object that generated a fresh in-memory RSA-2048 keypair per JVM startup, never persisted. The frontend fetches the public key from GET /api/auth/encryption-key (whichever ECS task answers), encrypts the password client-side with it, then POSTs to a login/register endpoint that may land on a DIFFERENT task with a DIFFERENT keypair - CryptoService.decrypt() silently returns null on the mismatch, which every call site treats as \"invalid credentials\" rather than surfacing the real cause. Separately, WebAuthnService.ChallengeStore held WebAuthn registration/assertion challenges in a plain in-memory mutableMapOf (plus a single global var for the assertion challenge) - a challenge created on one task was invisible to a different task handling the signed completion request, and the map was unbounded (only ever removed on retrieval, never expired), so a flood of registration-options requests could grow it without bound until a restart.",
+      "fix": "Persisted both to Postgres, following the existing DB-backed pattern (see LoginAttempts for rate limiting). Added CryptoKeys (singleton row, id=1) and WebAuthnChallenges (keyed rows with expiresAt) tables in Models.kt, registered in DatabaseFactory.listOfTables. CryptoService.initialize() now loads the persisted keypair on first use (or generates+persists one, with a synchronized+insert-then-fallback-select race guard for concurrent first callers) instead of minting an ephemeral one; added an internal resetForTesting() hook to simulate a fresh ECS task/JVM in tests. WebAuthnService.ChallengeStore was rewritten to read/write WebAuthnChallenges directly (no in-memory map at all) with a 5-minute TTL and opportunistic cleanup of expired rows on every store, keeping the exact same store/retrieve/remove call sites so no caller changes were needed. Added TestDatabase.initH2() wiring (H2 in Postgres-compat mode, same pattern used by every other DB-backed unit test) to CryptoServiceTest and WebAuthnServiceChallengeStoreTest/WebAuthnServiceTest which previously ran with zero DB dependency, plus new tests: CryptoServiceTest verifies the same public key round-trips after simulating a JVM restart via resetForTesting(); WebAuthnServiceTest verifies a challenge is actually a row in webauthn_challenges (not process memory) and is consumed on use, and that a second, independently-constructed WebAuthnService instance can complete a ceremony started by another instance. Updated DatabaseFactoryTest (table count 25->27, added the two new tables to the ordered list) and DatabaseFactoryInitIT to cover the new tables.",
+      "tags": [
+        "security",
+        "multi-instance",
+        "ecs",
+        "auth",
+        "webauthn",
+        "crypto",
+        "race-condition",
+        "completed"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-27T13:15:00.000Z"
     }
   ]
 }

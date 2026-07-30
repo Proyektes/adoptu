@@ -30,6 +30,9 @@ class WebAuthnServiceTest {
 
     @BeforeEach
     fun setup() {
+        TestDatabase.initH2()
+        TestDatabase.clearAllData()
+
         userService = mockk(relaxed = true)
         passwordService = mockk(relaxed = true)
         webAuthnService = WebAuthnService(
