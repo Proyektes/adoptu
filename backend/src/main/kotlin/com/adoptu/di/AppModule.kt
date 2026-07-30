@@ -1,8 +1,9 @@
 package com.adoptu.di
 
 import com.adoptu.adapters.db.repositories.*
-import com.adoptu.adapters.notification.SesEmailAdapter
+import com.adoptu.adapters.notification.NotificationEmailAdapter
 import com.adoptu.adapters.storage.S3ImageStorageAdapter
+import com.universaliun.email.common.EmailSenderPort
 import com.adoptu.config.AppConfig
 import com.adoptu.ports.*
 import com.adoptu.services.*
@@ -27,7 +28,8 @@ fun appModule(config: AppConfig) = module {
     single<ShelterRepositoryPort> { ShelterRepository(get()) }
     single<SterilizationLocationRepositoryPort> { SterilizationLocationRepository(get()) }
     single<ImageStoragePort> { createImageStorageAdapter(config) }
-    single<NotificationPort> { SesEmailAdapter(get()) }
+    single<EmailSenderPort> { emailSenderPortFromConfig(config) }
+    single<NotificationPort> { NotificationEmailAdapter(get()) }
     single<PhotographerService> { PhotographerService(get(), get(), get(), get()) }
     single<UserService> { UserService(get(), get()) }
     single<PetService> { PetService(get(), get(), get(), get()) }

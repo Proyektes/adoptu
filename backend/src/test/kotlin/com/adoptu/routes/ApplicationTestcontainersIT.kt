@@ -5,7 +5,9 @@ import com.adoptu.adapters.db.repositories.PetRepositoryImpl
 import com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl
 import com.adoptu.adapters.db.repositories.TemporalHomeRepositoryImpl
 import com.adoptu.adapters.db.repositories.UserRepository
-import com.adoptu.adapters.notification.SesEmailAdapter
+import com.adoptu.adapters.notification.NotificationEmailAdapter
+import com.adoptu.di.emailSenderPortFromConfig
+import com.universaliun.email.common.EmailSenderPort
 import com.adoptu.adapters.storage.S3ImageStorageAdapter
 import com.adoptu.config.AppConfig
 import com.adoptu.mocks.TestClock
@@ -126,7 +128,8 @@ class ApplicationTestcontainersIT {
             single<com.adoptu.services.EmailVerificationService> { com.adoptu.services.EmailVerificationService(get(), get(), get(), "http://localhost:80") }
             single<com.adoptu.services.PasswordService> { com.adoptu.services.PasswordService(get(), get(), get(), "http://localhost:80") }
             single<com.adoptu.services.MagicLinkService> { com.adoptu.services.MagicLinkService(get(), get(), get(), "http://localhost:80", get()) }
-            single<NotificationPort> { SesEmailAdapter(get()) }
+            single<EmailSenderPort> { emailSenderPortFromConfig(config) }
+            single<NotificationPort> { NotificationEmailAdapter(get()) }
             single { WebAuthnService(get(), get(), get(), get(), get(), config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com", config.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost", config.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption", listOf(config.propertyOrNull("webauthn.origin")?.getString() ?: "http://localhost:80")) }
             single<PetRepositoryPort> { PetRepositoryImpl(get()) }
             single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }

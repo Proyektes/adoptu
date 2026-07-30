@@ -13,8 +13,35 @@ plugins {
 group = "com.adoptu"
 version = "1.0.0"
 
+// Env var first (terminal builds), falling back to a Gradle property of the same name
+// (IDE-launched Gradle daemons don't inherit shell rc files) -- same helper Mazmobi/Bitakore/
+// Find-u use for their own GitHub-Packages-consumed Universaliun libraries.
+fun credential(name: String): String? = System.getenv(name) ?: findProperty(name) as String?
+
 repositories {
     mavenCentral()
+
+    // EmailKit (SMTP/SES send adapters) -- see Libraries/EmailKit/README.md. Requires a GitHub
+    // PAT with `read:packages` scope: set GITHUB_ACTOR / PAYMENT_KIT_TOKEN in the environment
+    // (same variable names EmailKit itself publishes with -- matches Mazmobi/Bitakore/Find-u's
+    // identical setup). content{} scopes this repository to only the email group.
+    maven {
+        name = "EmailKitGitHubPackages"
+        url = uri("https://maven.pkg.github.com/ULibraries/EmailKit")
+        credentials {
+            username = credential("GITHUB_ACTOR")
+            password = credential("PAYMENT_KIT_TOKEN")
+        }
+        content { includeGroup("com.universaliun.email") }
+    }
+}
+
+// EmailKit is consumed as a `1.0-SNAPSHOT` ("changing") dependency -- same reasoning as the other
+// Universaliun libraries' identical setting: it's an internal library published by hand, so extend
+// Gradle's default 24h changing-module revalidation window to reuse the local dependency cache
+// instead of re-checking GitHub Packages on every build. `--refresh-dependencies` forces a pull.
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor(30, "days")
 }
 
 kotlin {
@@ -75,8 +102,11 @@ dependencies {
         exclude(group = "net.bytebuddy")
     }
 
-    implementation("org.apache.commons:commons-email:1.6.0")
     implementation("com.password4j:password4j:1.8.4")
+
+    // Transactional email (SMTP in dev via Mailpit, SES in prod) -- replaces the previous
+    // hand-rolled SesEmailAdapter/commons-email combo. See di/EmailSenderConfig.kt.
+    implementation("com.universaliun.email:backend:1.0-SNAPSHOT")
 
     // test
     testImplementation(kotlin("test"))

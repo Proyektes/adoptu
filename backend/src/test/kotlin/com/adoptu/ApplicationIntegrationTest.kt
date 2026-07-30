@@ -1,7 +1,9 @@
 package com.adoptu
 
 import com.adoptu.adapters.db.*
-import com.adoptu.adapters.notification.SesEmailAdapter
+import com.adoptu.adapters.notification.NotificationEmailAdapter
+import com.adoptu.di.emailSenderPortFromConfig
+import com.universaliun.email.common.EmailSenderPort
 import com.adoptu.adapters.storage.S3ImageStorageAdapter
 import com.adoptu.config.AppConfig
 import com.adoptu.mocks.TestClock
@@ -144,7 +146,8 @@ class ApplicationIntegrationTest {
                     pathStyleAccess = true
                 )
             }
-            single<NotificationPort> { SesEmailAdapter(get()) }
+            single<EmailSenderPort> { emailSenderPortFromConfig(config) }
+            single<NotificationPort> { NotificationEmailAdapter(get()) }
             single<UserService> { UserService(get(), get()) }
             single<PetService> { PetService(get(), get(), get(), get()) }
             single<PhotographerService> { PhotographerService(get(), get(), get(), get()) }
