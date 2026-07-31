@@ -218,8 +218,12 @@ object WebAuthnChallenges : Table("webauthn_challenges") {
 object AuthKitPasskeyCeremonies : Table("authkit_passkey_ceremonies") {
     val id = integer("id").autoIncrement()
     val requestId = varchar("request_id", 255).uniqueIndex()
-    val type = varchar("type", 20) // "REGISTRATION" or "LOGIN"
+    val type = varchar("type", 20) // "REGISTRATION", "LOGIN", or "SIGNUP"
     val userId = integer("user_id").nullable() // only set for REGISTRATION
+    // Only set for SIGNUP -- no user exists yet at that point, so email/displayName travel with
+    // the challenge instead (see AuthKit's SignupPasskeyChallenge).
+    val signupEmail = varchar("signup_email", 255).nullable()
+    val signupDisplayName = varchar("signup_display_name", 255).nullable()
     val payloadJson = text("payload_json")
     val expiresAt = long("expires_at")
 

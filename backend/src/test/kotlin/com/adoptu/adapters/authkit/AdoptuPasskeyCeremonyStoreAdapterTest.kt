@@ -5,11 +5,13 @@ import com.universaliun.auth.backend.adapter.out.persistence.InMemoryUserReposit
 import com.universaliun.auth.backend.adapter.out.security.WebAuthnCredentialRepositoryAdapter
 import com.universaliun.auth.backend.application.passkey.StartPasskeyLoginService
 import com.universaliun.auth.backend.application.passkey.StartPasskeyRegistrationService
+import com.universaliun.auth.backend.application.passkey.StartPasskeySignupService
 import com.universaliun.auth.backend.domain.model.passkey.PasskeyCredential
 import com.universaliun.auth.backend.domain.model.user.AuthUser
 import com.universaliun.auth.backend.domain.model.user.Email
 import com.universaliun.auth.backend.domain.port.`in`.StartPasskeyLoginUseCase
 import com.universaliun.auth.backend.domain.port.`in`.StartPasskeyRegistrationUseCase
+import com.universaliun.auth.backend.domain.port.`in`.StartPasskeySignupUseCase
 import com.universaliun.auth.backend.domain.port.out.PasskeyCredentialRepositoryPort
 import com.universaliun.auth.common.identity.AuthUserId
 import com.universaliun.auth.common.rbac.PermissionSet
@@ -145,5 +147,24 @@ class AdoptuPasskeyCeremonyStoreAdapterTest {
         val result = startService.start(StartPasskeyRegistrationUseCase.Command(user.id))
 
         assertNull(adapter.consumeRegistrationChallenge(result.requestId))
+    }
+
+    @Test fun `signup challenge round-trips email and displayName through real Postgres storage -- no user exists yet`() {
+        val startService = StartPasskeySignupService(relyingParty, userRepository, adapter)
+
+        val result = startService.start(StartPasskeySignupUseCase.Command("ceremony-signup@test.com", "Ceremony Signup"))
+
+        val consumed = adapter.consumeSignupChallenge(result.requestId)
+        assertEquals("ceremony-signup@test.com", consumed?.email)
+        assertEquals("Ceremony Signup", consumed?.displayName)
+    }
+
+    @Test fun `signup challenge is one-time use`() {
+        val startService = StartPasskeySignupService(relyingParty, userRepository, adapter)
+        val result = startService.start(StartPasskeySignupUseCase.Command("ceremony-signup-once@test.com", "Once"))
+
+        adapter.consumeSignupChallenge(result.requestId)
+
+        assertNull(adapter.consumeSignupChallenge(result.requestId))
     }
 }

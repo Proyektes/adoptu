@@ -1,6 +1,7 @@
 package com.adoptu.adapters.authkit
 
 import com.adoptu.adapters.db.AuthKitPasskeyCeremonies
+import com.universaliun.auth.backend.domain.model.passkey.SignupPasskeyChallenge
 import com.universaliun.auth.backend.domain.port.out.PasskeyCeremonyStorePort
 import com.universaliun.auth.common.identity.AuthUserId
 import com.yubico.webauthn.AssertionRequest
@@ -16,6 +17,7 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 private const val TYPE_REGISTRATION = "REGISTRATION"
 private const val TYPE_LOGIN = "LOGIN"
+private const val TYPE_SIGNUP = "SIGNUP"
 
 /**
  * Bridges AuthKit's [PasskeyCeremonyStorePort] onto Postgres via [AuthKitPasskeyCeremonies],
@@ -67,6 +69,30 @@ class AdoptuPasskeyCeremonyStoreAdapter(
     override fun consumeLoginChallenge(requestId: String): AssertionRequest? = transaction {
         val row = findAndDelete(requestId, TYPE_LOGIN) ?: return@transaction null
         AssertionRequest.fromJson(row[AuthKitPasskeyCeremonies.payloadJson])
+    }
+
+    override fun saveSignupChallenge(requestId: String, email: String, displayName: String, options: PublicKeyCredentialCreationOptions) {
+        transaction {
+            pruneExpired()
+            AuthKitPasskeyCeremonies.insert {
+                it[AuthKitPasskeyCeremonies.requestId] = requestId
+                it[type] = TYPE_SIGNUP
+                it[userId] = null
+                it[signupEmail] = email
+                it[signupDisplayName] = displayName
+                it[payloadJson] = options.toJson()
+                it[expiresAt] = System.currentTimeMillis() + expiryMs
+            }
+        }
+    }
+
+    override fun consumeSignupChallenge(requestId: String): SignupPasskeyChallenge? = transaction {
+        val row = findAndDelete(requestId, TYPE_SIGNUP) ?: return@transaction null
+        SignupPasskeyChallenge(
+            email = row[AuthKitPasskeyCeremonies.signupEmail]!!,
+            displayName = row[AuthKitPasskeyCeremonies.signupDisplayName]!!,
+            options = PublicKeyCredentialCreationOptions.fromJson(row[AuthKitPasskeyCeremonies.payloadJson]),
+        )
     }
 
     private fun findAndDelete(requestId: String, type: String) =
