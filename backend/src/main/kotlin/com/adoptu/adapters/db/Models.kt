@@ -22,6 +22,15 @@ object Users : Table("users") {
     // Auditable/deletedAt+deletedBy pattern, adapted to this app's actual verb.
     val deactivatedAt = long("deactivated_at").nullable()
     val deactivatedBy = integer("deactivated_by").references(id).nullable()
+    // AuthKit's UserRepositoryPort.findByResetTokenHash/updateResetToken expect ONE shared
+    // token slot per user, reused across magic-link/setup/confirm-email/password-reset -- this
+    // app instead has separate MagicLinkTokens/PasswordResetTokens/EmailVerificationTokens
+    // tables per purpose. Rather than repurpose one of those (risking a magic-link token also
+    // working as a password-reset token), these are new, dedicated columns used ONLY by the
+    // AuthKit bridge (AdoptuUserRepositoryAdapter) going forward -- the old per-purpose tables
+    // stay untouched until their native services are fully retired.
+    val resetTokenHash = varchar("reset_token_hash", 255).nullable()
+    val resetTokenExpiresAt = long("reset_token_expires_at").nullable()
 
     override val primaryKey = PrimaryKey(id)
 }
@@ -213,6 +222,23 @@ object AuthKitPasskeyCeremonies : Table("authkit_passkey_ceremonies") {
     val userId = integer("user_id").nullable() // only set for REGISTRATION
     val payloadJson = text("payload_json")
     val expiresAt = long("expires_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+// Persists AuthKit's refresh tokens (com.universaliun.auth.backend.domain.port.out.
+// RefreshTokenRepositoryPort) durably -- this app previously had no refresh-token concept at all
+// (cookie sessions were the whole story), so AuthKit's own in-memory default would silently log
+// every user out on every deploy/restart/task-recycle. tokenHash is unique+indexed (the hot
+// lookup path on every /refresh call); userId backs revokeAllForUser (logout-everywhere / reuse
+// detection).
+object AuthKitRefreshTokens : Table("authkit_refresh_tokens") {
+    val id = varchar("id", 36) // UUID string, matches AuthKit's RefreshToken.id type
+    val tokenHash = varchar("token_hash", 128).uniqueIndex()
+    val userId = integer("user_id").references(Users.id)
+    val expiresAt = long("expires_at")
+    val revoked = bool("revoked").default(false)
+    val deviceInfo = varchar("device_info", 255).nullable()
 
     override val primaryKey = PrimaryKey(id)
 }

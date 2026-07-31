@@ -49,7 +49,8 @@ object TestDatabase {
                     CryptoKeys,
                     WebAuthnChallenges,
                     RateLimitStateTable,
-                    AuthKitPasskeyCeremonies
+                    AuthKitPasskeyCeremonies,
+                    AuthKitRefreshTokens
                 )
             } catch (e: Exception) {
                 // Tables may not exist on first run, ignore
@@ -83,7 +84,8 @@ object TestDatabase {
                 AdoptionRequests,
                 PhotographyRequests,
                 RateLimitStateTable,
-                AuthKitPasskeyCeremonies
+                AuthKitPasskeyCeremonies,
+                AuthKitRefreshTokens
             )
         }
     }
@@ -119,6 +121,7 @@ object TestDatabase {
             exec("DELETE FROM webauthn_challenges")
             exec("DELETE FROM rate_limit_state")
             exec("DELETE FROM authkit_passkey_ceremonies")
+            exec("DELETE FROM authkit_refresh_tokens")
         }
     }
 }

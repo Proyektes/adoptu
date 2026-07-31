@@ -51,7 +51,8 @@ object DatabaseFactory {
         CryptoKeys,
         WebAuthnChallenges,
         RateLimitStateTable,
-        AuthKitPasskeyCeremonies)
+        AuthKitPasskeyCeremonies,
+        AuthKitRefreshTokens)
     fun init(config: AppConfig) {
         val env = config.propertyOrNull("env")?.getString() ?: "prod"
         val prefix = "db.$env"
