@@ -49,6 +49,7 @@ object TestDatabase {
                     CryptoKeys,
                     WebAuthnChallenges,
                     RateLimitStateTable,
+                    AuthKitJwtKeys,
                     AuthKitPasskeyCeremonies,
                     AuthKitRefreshTokens
                 )
@@ -84,6 +85,7 @@ object TestDatabase {
                 AdoptionRequests,
                 PhotographyRequests,
                 RateLimitStateTable,
+                AuthKitJwtKeys,
                 AuthKitPasskeyCeremonies,
                 AuthKitRefreshTokens
             )
@@ -122,6 +124,7 @@ object TestDatabase {
             exec("DELETE FROM rate_limit_state")
             exec("DELETE FROM authkit_passkey_ceremonies")
             exec("DELETE FROM authkit_refresh_tokens")
+            exec("DELETE FROM authkit_jwt_keys")
         }
     }
 }

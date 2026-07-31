@@ -29,8 +29,8 @@ class DatabaseFactoryTest {
     }
 
     @Test
-    fun `DatabaseFactory has 30 tables`() {
-        assertEquals(30, DatabaseFactory.listOfTables.size)
+    fun `DatabaseFactory has 31 tables`() {
+        assertEquals(31, DatabaseFactory.listOfTables.size)
     }
 
     @Test
@@ -144,6 +144,7 @@ class DatabaseFactoryTest {
             CryptoKeys,
             WebAuthnChallenges,
             RateLimitStateTable,
+            AuthKitJwtKeys,
             AuthKitPasskeyCeremonies,
             AuthKitRefreshTokens
         )

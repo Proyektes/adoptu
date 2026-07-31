@@ -215,6 +215,19 @@ object WebAuthnChallenges : Table("webauthn_challenges") {
 // Yubico's own PublicKeyCredentialCreationOptions.toJson()/AssertionRequest.toJson() output --
 // AuthKit generates and consumes these itself via the matching fromJson(), so this table never
 // needs to understand their internal shape.
+// Persists the RSA keypair AuthKit signs/verifies JWTs with, so every ECS task issues and accepts
+// tokens signed by the SAME key -- same singleton-row-per-deployment reasoning as CryptoKeys above
+// (bug-210). This app never issued JWTs before AuthKit (cookie sessions were the whole story), so
+// there was no existing keypair to bridge onto.
+object AuthKitJwtKeys : Table("authkit_jwt_keys") {
+    val id = integer("id")
+    val publicKey = text("public_key")
+    val privateKey = text("private_key")
+    val createdAt = long("created_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
 object AuthKitPasskeyCeremonies : Table("authkit_passkey_ceremonies") {
     val id = integer("id").autoIncrement()
     val requestId = varchar("request_id", 255).uniqueIndex()

@@ -51,6 +51,7 @@ object DatabaseFactory {
         CryptoKeys,
         WebAuthnChallenges,
         RateLimitStateTable,
+        AuthKitJwtKeys,
         AuthKitPasskeyCeremonies,
         AuthKitRefreshTokens)
     fun init(config: AppConfig) {
