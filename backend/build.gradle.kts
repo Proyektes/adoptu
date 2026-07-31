@@ -47,6 +47,20 @@ repositories {
         }
         content { includeGroup("com.universaliun.ratelimit") }
     }
+
+    // AuthKit (login/JWT/OAuth/WebAuthn passkey/magic-link auth engine, generic RBAC
+    // Role/Resource/PermissionSet) -- see Libraries/AuthKit/README.md. Uses AUTH_KIT_TOKEN
+    // (AuthKit's own publish credential, distinct from PAYMENT_KIT_TOKEN above) with the same
+    // GITHUB_ACTOR; content{} scopes this repository to only the auth group.
+    maven {
+        name = "AuthKitGitHubPackages"
+        url = uri("https://maven.pkg.github.com/ULibraries/AuthKit")
+        credentials {
+            username = credential("GITHUB_ACTOR")
+            password = credential("AUTH_KIT_TOKEN")
+        }
+        content { includeGroup("com.universaliun.auth") }
+    }
 }
 
 // EmailKit is consumed as a `1.0-SNAPSHOT` ("changing") dependency -- same reasoning as the other
@@ -124,6 +138,10 @@ dependencies {
     // Daily-resend throttles (password reset, magic link, email verification) -- see
     // services/PasswordService.kt, MagicLinkService.kt, EmailVerificationService.kt.
     implementation("com.universaliun.ratelimit:backend:1.0-SNAPSHOT")
+
+    // Login/register/refresh/passkey/magic-link/OAuth/password-reset auth engine -- replaces
+    // AuthRoutes.kt's own hand-rolled session/token logic. See adapters/authkit/.
+    implementation("com.universaliun.auth:backend:1.0-SNAPSHOT")
 
     // test
     testImplementation(kotlin("test"))

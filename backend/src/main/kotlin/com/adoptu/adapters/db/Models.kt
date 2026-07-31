@@ -198,6 +198,25 @@ object WebAuthnChallenges : Table("webauthn_challenges") {
     override val primaryKey = PrimaryKey(id)
 }
 
+// Persists AuthKit's WebAuthn ceremony state (com.universaliun.auth.backend.domain.port.out.
+// PasskeyCeremonyStorePort) between the "start" and "finish" half of a registration/login,
+// keyed by AuthKit's own requestId -- same "shared Postgres store instead of process-local state"
+// reasoning as CryptoKeys/WebAuthnChallenges above (bug-210): a challenge started on one ECS task
+// must still be found by whichever task handles the matching finish request. payloadJson is
+// Yubico's own PublicKeyCredentialCreationOptions.toJson()/AssertionRequest.toJson() output --
+// AuthKit generates and consumes these itself via the matching fromJson(), so this table never
+// needs to understand their internal shape.
+object AuthKitPasskeyCeremonies : Table("authkit_passkey_ceremonies") {
+    val id = integer("id").autoIncrement()
+    val requestId = varchar("request_id", 255).uniqueIndex()
+    val type = varchar("type", 20) // "REGISTRATION" or "LOGIN"
+    val userId = integer("user_id").nullable() // only set for REGISTRATION
+    val payloadJson = text("payload_json")
+    val expiresAt = long("expires_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
 object Pets : Table("pets") {
     val id = integer("id").autoIncrement()
     val rescuerId = integer("rescuer_id").references(Users.id)
