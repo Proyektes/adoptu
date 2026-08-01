@@ -1,6 +1,5 @@
 package com.adoptu.routes
 
-import com.adoptu.adapters.db.EmailVerificationTokens
 import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.config.AppConfig
@@ -12,12 +11,15 @@ import com.adoptu.services.EmailVerificationService
 import com.adoptu.testsupport.TestHttp
 import com.adoptu.testsupport.TestServer
 import com.adoptu.web.JsonSupport
+import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.update
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import java.security.MessageDigest
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -65,6 +67,9 @@ class EmailVerificationRoutesE2ETest {
             single<com.adoptu.ports.PhotographerRepositoryPort> { com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl(get(), get(), get()) }
             single { com.adoptu.services.PhotographerService(get(), get(), get(), get()) }
             single { com.adoptu.services.PetService(get(), get(), get(), get()) }
+            single { com.adoptu.services.validation.AuthValidationService() }
+            single { com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter() }
+            single { com.adoptu.adapters.authkit.AdoptuPasskeyCredentialRepositoryAdapter() }
         })
     }
 
@@ -141,14 +146,18 @@ class EmailVerificationRoutesE2ETest {
         }
     }
 
+    private fun sha256Hex(value: String): String =
+        MessageDigest.getInstance("SHA-256").digest(value.toByteArray()).joinToString("") { "%02x".format(it) }
+
+    // AuthRoutes.kt's /api/auth/verify-email now reads the shared AuthKit resetTokenHash slot on
+    // Users (via AdoptuUserRepositoryAdapter.findByResetTokenHash) instead of the retired
+    // EmailVerificationTokens table -- seed that slot directly, hashed the same way the route does.
     private fun createValidToken(userId: Int): String {
         val token = "valid-test-token-${clock.now().toEpochMilliseconds()}"
         transaction {
-            EmailVerificationTokens.insert {
-                it[EmailVerificationTokens.userId] = userId
-                it[EmailVerificationTokens.token] = token
-                it[EmailVerificationTokens.expiresAt] = clock.now().toEpochMilliseconds() + 86400000
-                it[EmailVerificationTokens.createdAt] = clock.now().toEpochMilliseconds()
+            Users.update({ Users.id eq userId }) {
+                it[resetTokenHash] = sha256Hex(token)
+                it[resetTokenExpiresAt] = clock.now().toEpochMilliseconds() + 86400000
             }
         }
         return token

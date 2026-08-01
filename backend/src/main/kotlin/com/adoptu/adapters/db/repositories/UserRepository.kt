@@ -470,6 +470,24 @@ class UserRepository(private val clock: Clock) : UserRepositoryPort {
         }
     }
 
+    override suspend fun addActiveRoles(userId: Int, roles: Set<UserRole>) {
+        withContext(dbDispatcher) {
+            transaction {
+                roles.forEach { role ->
+                    val existing = UserActiveRoles.selectAll()
+                        .where { (UserActiveRoles.userId eq userId) and (UserActiveRoles.role eq role.name) }
+                        .firstOrNull()
+                    if (existing == null) {
+                        UserActiveRoles.insert {
+                            it[UserActiveRoles.userId] = userId
+                            it[UserActiveRoles.role] = role.name
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     override suspend fun updateProfile(userId: Int, displayName: String, language: String?, country: String?): UserDto? {
         if (displayName.isBlank()) {
             throw IllegalArgumentException("Display name cannot be empty")

@@ -89,7 +89,10 @@ class UserService(
     // Roles selected at registration for types that require a verified email
     // (see ROLES_REQUIRING_VERIFICATION_BEFORE_ACTIVATION in WebAuthnService.kt) were recorded
     // as pending instead of granted. Now that verification succeeded, grant them for real.
-    private suspend fun activatePendingRoles(userId: Int) {
+    // internal, not private: AuthRoutes.kt's /api/auth/verify-email also needs this for
+    // AuthKit-gated signups, which verify against Users.resetTokenHash directly instead of going
+    // through this class's own verifyToken()/verifyTokenAndGetLanguage().
+    internal suspend fun activatePendingRoles(userId: Int) {
         val pendingRoles = userRepository.consumePendingRoleActivations(userId)
         pendingRoles.forEach { role ->
             when (role) {

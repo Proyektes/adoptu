@@ -1,8 +1,16 @@
 package com.adoptu.di
 
+import com.adoptu.adapters.authkit.AdoptuPasskeyCeremonyStoreAdapter
+import com.adoptu.adapters.authkit.AdoptuPasskeyCredentialRepositoryAdapter
+import com.adoptu.adapters.authkit.AdoptuRefreshTokenRepositoryAdapter
+import com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter
 import com.adoptu.adapters.db.repositories.*
 import com.adoptu.adapters.notification.NotificationEmailAdapter
 import com.adoptu.adapters.storage.S3ImageStorageAdapter
+import com.universaliun.auth.backend.domain.port.out.PasskeyCeremonyStorePort
+import com.universaliun.auth.backend.domain.port.out.PasskeyCredentialRepositoryPort
+import com.universaliun.auth.backend.domain.port.out.RefreshTokenRepositoryPort
+import com.universaliun.auth.backend.domain.port.out.UserRepositoryPort as KitUserRepositoryPort
 import com.universaliun.email.common.EmailSenderPort
 import com.universaliun.ratelimit.backend.adapter.out.persistence.ExposedRateLimitStateAdapter
 import com.universaliun.ratelimit.common.RateLimiter
@@ -20,6 +28,18 @@ fun appModule(config: AppConfig) = module {
     single { config }
     single<Clock> { Clock.System }
     single { WebAuthnService(get(), get(), get(), get(), get(), config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com", config.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost", config.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption", getOrigins(config)) }
+    // AuthKit bridge adapters -- registered as their own concrete type (so AuthRoutes.kt can
+    // inject them directly, e.g. for the has-passkey check and post-registration role
+    // assignment) AND bound to the AuthKit port they implement (so authKoinModule(...) in
+    // Application.kt can resolve the same singleton instances via get()).
+    single { AdoptuUserRepositoryAdapter() }
+    single<KitUserRepositoryPort> { get<AdoptuUserRepositoryAdapter>() }
+    single { AdoptuPasskeyCredentialRepositoryAdapter() }
+    single<PasskeyCredentialRepositoryPort> { get<AdoptuPasskeyCredentialRepositoryAdapter>() }
+    single { AdoptuRefreshTokenRepositoryAdapter() }
+    single<RefreshTokenRepositoryPort> { get<AdoptuRefreshTokenRepositoryAdapter>() }
+    single { AdoptuPasskeyCeremonyStoreAdapter() }
+    single<PasskeyCeremonyStorePort> { get<AdoptuPasskeyCeremonyStoreAdapter>() }
     single<PetRepositoryPort> { PetRepositoryImpl(get()) }
     single<UserRepositoryPort> { UserRepository(get()) }
     single { UserRepository(get()) }

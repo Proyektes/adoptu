@@ -34,7 +34,12 @@ class EmailVerificationService(
         const val LIMIT_KIND = "email_verification_resend"
     }
 
-    private fun getLocalizedContent(language: String, displayName: String, verificationUrl: String): Pair<String, String> {
+    // internal, not private: reused by AuthRoutes.kt's resendActivationEmail() for AuthKit-gated
+    // signups, which store their activation token on Users.resetTokenHash (via
+    // AdoptuUserRepositoryAdapter) instead of the EmailVerificationTokens table this class's own
+    // generateAndSendVerificationEmail()/verifyToken() use -- same subject/body templates either
+    // way, only the token persistence mechanism differs.
+    internal fun getLocalizedContent(language: String, displayName: String, verificationUrl: String): Pair<String, String> {
         return when (language.lowercase()) {
             "es" -> "Verifica tu correo electrónico - Adopt-U" to """
                 Hola,
@@ -142,6 +147,35 @@ class EmailVerificationService(
         // git history for the previous per-table implementation if this ever needs revisiting).
         val sent = notificationPort.sendEmail(email, subject, body)
 
+        return Result.success(sent)
+    }
+
+    /**
+     * Same rate limit + localized template as [generateAndSendVerificationEmail], for a signup
+     * whose activation token lives on `Users.resetTokenHash` (AuthKit's gated-register/passkey-
+     * signup flows, via [com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter]) instead of the
+     * EmailVerificationTokens table this class otherwise owns. [persistToken] does the actual
+     * hash+store — kept as a caller-supplied step rather than a hard AuthKit dependency here, so
+     * this service doesn't need to know about AuthKit's port types.
+     */
+    suspend fun generateAndSendActivationEmail(
+        userId: Int,
+        email: String,
+        displayName: String,
+        language: String = "en",
+        persistToken: (rawToken: String, expiresAtEpochMs: Long) -> Unit,
+    ): Result<Boolean> {
+        if (!rateLimiter.verify(resendLimitKey(userId), LIMIT_KIND, resendPolicy)) {
+            return Result.failure(RateLimitExceededException(ERROR_RATE_LIMIT_EXCEEDED))
+        }
+
+        val token = generateToken()
+        val expiresAt = clock.now().toEpochMilliseconds() + tokenExpirationMs
+        persistToken(token, expiresAt)
+
+        val verificationUrl = "$baseUrl/verify?token=$token"
+        val (subject, body) = getLocalizedContent(language, displayName, verificationUrl)
+        val sent = notificationPort.sendEmail(email, subject, body)
         return Result.success(sent)
     }
 

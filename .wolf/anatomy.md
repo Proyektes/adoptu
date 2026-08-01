@@ -686,6 +686,11 @@
 
 - `TestDatabase.kt` — initH2, clearAllData (~1076 tok)
 
+## backend/src/test/kotlin/com/adoptu/testsupport/
+
+- `TestServer.kt` — Starts a real Helidon Nima WebServer through configureRouting() with authKoinModule wired in. `registerTestLogin()` (POST /test/login/{userId}) sets BOTH the native SessionUser session cookie (still required by not-yet-AuthKit-migrated route groups) AND, best-effort, a real AuthKit JWT access-token cookie via TokenServicePort/UserRepositoryPort. (~1900 tok)
+- `TestHttp.kt` — java.net.http.HttpClient helpers (get/post/postJson/postForm/multipart) plus `loginAs(baseUrl, userId)` which POSTs to /test/login/{userId} and returns the first Set-Cookie value. (~900 tok)
+
 ## backend/src/test/kotlin/com/adoptu/pages/
 
 - `ForgotPasswordPageTest.kt` — Direct unit coverage for the auth-flow page builders in ForgotPasswordPage.kt. (~1012 tok)
@@ -693,6 +698,9 @@
 
 ## backend/src/test/kotlin/com/adoptu/routes/
 
+- `AuthRoutesE2ETest.kt` — E2E tests for authRoutes() (registration-options/register/register-passkey/authenticate/me/magic-link/login-with-password/forgot+reset-password/encryption-key). Real WebAuthn ceremonies via hand-built webauthn4j-crypto-but-Yubico-JSON-envelope helpers. 11 tests @Disabled with comments pointing to real AuthKit-migration production bugs (see .wolf/buglog.json bug-211..214: role activation, resend-verification verified-guard, GET assertion-options 500, register never emails). (~26000 tok)
+- `EmailVerificationRoutesE2ETest.kt` — E2E tests for /api/auth/verify-email and unauthenticated /api/auth/resend-verification, seeding the shared Users.resetTokenHash slot. (~4300 tok)
+- `PasswordRegistrationRoutesE2ETest.kt` — E2E tests for /api/auth/register-password happy paths, has-passkey/registration-options-for-user/register-passkey auth-required checks. (~5800 tok)
 - `CountryRoutesE2ETest.kt` — End-to-end tests for [countryRoutes]: GET /api/detect-country prefers the CloudFront-injected (~1925 tok)
 - `PetsRoutesE2ETest.kt` — PetsRoutesE2ETest: setup, createTestUsers, startTestServer, generateTestImageBytes (~20047 tok)
 - `PhotographerRoutesE2ETest.kt` — E2E tests for [photographerRoutes]. (~7601 tok)

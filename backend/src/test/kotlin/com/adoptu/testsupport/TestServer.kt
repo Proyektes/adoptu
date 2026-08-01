@@ -1,5 +1,10 @@
 package com.adoptu.testsupport
 
+import com.adoptu.adapters.authkit.AdoptuPasskeyCeremonyStoreAdapter
+import com.adoptu.adapters.authkit.AdoptuPasskeyCredentialRepositoryAdapter
+import com.adoptu.adapters.authkit.AdoptuRefreshTokenRepositoryAdapter
+import com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter
+import com.adoptu.adapters.authkit.AuthKitJwtKeyProvider
 import com.adoptu.adapters.db.DatabaseFactory
 import com.adoptu.config.AppConfig
 import com.adoptu.configureRouting
@@ -8,9 +13,16 @@ import com.adoptu.services.auth.SessionUser
 import com.adoptu.services.crypto.CryptoService
 import com.adoptu.web.JsonSupport
 import com.adoptu.web.setSession
+import com.universaliun.auth.backend.domain.port.out.TokenServicePort
+import com.universaliun.auth.backend.domain.port.out.UserRepositoryPort
+import com.universaliun.auth.backend.infrastructure.authKoinModule
+import com.universaliun.auth.common.identity.AuthUserId
+import com.universaliun.auth.common.rbac.PermissionSet
+import io.helidon.http.SetCookie
 import io.helidon.webserver.WebServer
 import io.helidon.webserver.http.Handler
 import io.helidon.webserver.http.HttpRouting
+import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.module.Module
@@ -69,17 +81,49 @@ object TestServer {
         val dbName = "testdb_${System.identityHashCode(this)}_${dbCounter++}_${System.nanoTime()}"
         val config = AppConfig.fromMap(defaultTestConfig(dbName) + configOverrides)
 
-        // configureRouting() unconditionally mounts every route group, including authRoutes(),
-        // which resolves AppConfig from Koin eagerly (not lazily per-request) to compute
-        // adminEmail. A caller-supplied custom `modules` list built for one narrow route group
-        // (the common pattern in the ported E2E tests) usually doesn't bind AppConfig - append a
-        // fallback binding last so it's always resolvable, regardless of what the test needs.
-        val effectiveModules = (modules ?: listOf(appModule(config))) + module { single { config } }
+        // DB must be ready before AuthKitJwtKeyProvider.loadOrCreate() below (mirrors
+        // Application.kt's main() ordering fix - loadOrCreate() needs a live connection and its
+        // result is passed as plain String args into authKoinModule(...) at module-construction
+        // time). When initDatabase is false, the caller's own TestDatabase.initH2() already ran
+        // in @BeforeEach before start() was invoked, so the DB is ready either way.
+        if (initDatabase) {
+            DatabaseFactory.init(config)
+        }
+
+        // configureRouting() unconditionally installs installJwtAuth (needs TokenServicePort/
+        // TokenBlocklistPort) and mounts authRoutes(), which resolves AppConfig from Koin eagerly
+        // (not lazily per-request) to compute adminEmail. A caller-supplied custom `modules` list
+        // built for one narrow route group (the common pattern in the ported E2E tests) usually
+        // binds neither - provide authKoinModule(...) and a config fallback so both are always
+        // resolvable regardless of what the test's own module list provides.
+        val (jwtPrivateKey, jwtPublicKey) = AuthKitJwtKeyProvider.loadOrCreate()
+        val authModule = authKoinModule(
+            jwtPrivateKey = jwtPrivateKey,
+            jwtPublicKey = jwtPublicKey,
+            // Adopt-u has no AuthKit-native RBAC - see Application.kt's main() for the same choice.
+            resourceCount = 0,
+            roleByName = { null },
+            defaultPermissions = PermissionSet.empty(0),
+            magicLinkExpiryMs = 5 * 60 * 1000L,
+            requireEmailVerification = true,
+            webAuthnRpId = "localhost",
+            webAuthnRpName = "Adopt-U Pet Adoption",
+            webAuthnOrigins = setOf("http://localhost:8080"),
+            userRepository = AdoptuUserRepositoryAdapter(),
+            passkeyCredentialRepository = AdoptuPasskeyCredentialRepositoryAdapter(),
+            refreshTokenRepository = AdoptuRefreshTokenRepositoryAdapter(),
+            passkeyCeremonyStore = AdoptuPasskeyCeremonyStoreAdapter(),
+        )
+        // Koin's later-registered definition silently wins on a type collision (no error) - the
+        // config fallback and authModule MUST come first, so a caller-supplied `modules` list that
+        // binds its own AppConfig (e.g. to override admin.email for a test) or its own AuthKit
+        // port overrides (rare, but authKoinModule's own defaults would otherwise win instead)
+        // takes precedence, not the other way around. This bit a real test once already: a test
+        // binding its own admin.email got silently overridden by this fallback's default value
+        // when the fallback was appended last instead of first.
+        val effectiveModules = listOf(module { single { config } }, authModule) + (modules ?: listOf(appModule(config)))
         startKoin { modules(effectiveModules) }
         try {
-            if (initDatabase) {
-                DatabaseFactory.init(config)
-            }
             CryptoService.initialize()
 
             val server = WebServer.builder()
@@ -105,10 +149,31 @@ object TestServer {
     }
 }
 
+// Mirrors the old Ktor tests' `client.loginAs(userId)` helper. Route groups other than
+// AuthRoutes.kt (Pets/Users/Photographer/... ) haven't been migrated onto AuthKit yet and still
+// authenticate via the native `req.getSession()` cookie -- that native SessionUser cookie MUST
+// keep being set here unconditionally, or every one of those still-native suites' test-logins
+// break (confirmed: an earlier version of this helper that set *only* the AuthKit cookie turned
+// 256 tests red across PetsRoutesE2ETest/UsersRoutesE2ETest/etc.). AuthRoutes.kt itself now
+// authenticates via `req.currentPrincipal()`, populated by AuthKit's JwtAuthFilter from a JWT in
+// the "adoptu_access_token" cookie (see ACCESS_COOKIE in AuthRoutes.kt) -- so also mint a real
+// AuthKit access token via the same TokenServicePort/UserRepositoryPort AuthRoutes.kt resolves
+// from Koin (both bound by authKoinModule(...) above) and set it as a second cookie, best-effort:
+// some callers deliberately log in as a userId with no AuthKit-visible row (e.g. to exercise a
+// downstream 404), which must still reach the route rather than fail here, so this only adds the
+// AuthKit cookie when the user actually resolves.
 private fun HttpRouting.Builder.registerTestLogin() {
     post("/test/login/{userId}", Handler { req, res ->
         val userId = req.path().pathParameters().get("userId").toInt()
         res.setSession(SessionUser(userId, "user$userId@test.com", "Test User $userId"))
+        val koin = GlobalContext.get()
+        val user = koin.get<UserRepositoryPort>().findById(AuthUserId(userId.toString()))
+        if (user != null) {
+            val accessToken = koin.get<TokenServicePort>().generateAccessToken(user)
+            res.headers().addCookie(
+                SetCookie.builder("adoptu_access_token", accessToken).path("/").build()
+            )
+        }
         res.send("OK")
     })
 }

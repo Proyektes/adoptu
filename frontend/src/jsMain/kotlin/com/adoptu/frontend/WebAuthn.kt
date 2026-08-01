@@ -14,14 +14,26 @@ object WebAuthnModule {
     private val navigator: dynamic
         get() = window.asDynamic().navigator
 
+    // AuthKit's passkey start responses wrap the actual WebAuthn options as a JSON *string*
+    // under optionsJson, plus a requestId that must be echoed back on the matching finish call --
+    // the server-side ceremony state (the challenge) is looked up by that id, not derived from
+    // the caller's identity the way the previous native implementation did it (which only ever
+    // needed email/session, no requestId at all). Mirrors Mazmobi's own AuthKit frontend cutover
+    // (webauthn.service.ts) -- optionsJson parses to the WebAuthn spec's flat
+    // PublicKeyCredentialCreationOptionsJSON/PublicKeyCredentialRequestOptionsJSON shape (no
+    // "publicKey" wrapper at this level; parseCreationOptions/parseAssertionOptions below build
+    // that wrapper only when calling navigator.credentials.*).
     fun register(email: String, displayName: String): Promise<dynamic> {
         console.log("Starting passkey registration for: $email")
+        var requestId = ""
         return getRegistrationOptions(email, displayName)
-            .then<dynamic> { options ->
+            .then<dynamic> { start ->
                 console.log("Got registration options, creating credential")
+                requestId = start.requestId as String
+                val options = js("JSON.parse")(start.optionsJson)
                 val publicKey = parseCreationOptions(options)
                 try {
-                    navigator.credentials.create(publicKey)
+                    navigator.credentials.create(json("publicKey" to publicKey))
                 } catch (e: dynamic) {
                     console.log("Credential creation error: $e")
                     throw e
@@ -49,10 +61,10 @@ object WebAuthnModule {
                     attBinary += js("String.fromCharCode(attBytes[i])")
                 }
                 val attBase64 = toBase64Url(window.btoa(attBinary))
-                val jsonStr = """{"id":"$idBase64","type":"public-key","rawId":"$rawIdBase64","response":{"clientDataJSON":"$clientBase64","attestationObject":"$attBase64"}}"""
+                val credentialJsonStr = """{"id":"$idBase64","type":"public-key","rawId":"$rawIdBase64","response":{"clientDataJSON":"$clientBase64","attestationObject":"$attBase64"}}"""
+                val jsonStr = """{"requestId":"$requestId","email":"${email.replace("\"", "\\\"")}","displayName":"${displayName.replace("\"", "\\\"")}","credentialJson":${window.asDynamic().JSON.stringify(credentialJsonStr)}}"""
                 console.log("Encoded json: " + jsonStr)
-                val body = "email=${encodeURIComponent(email)}&displayName=${encodeURIComponent(displayName)}&registrationResponse=${encodeURIComponent(jsonStr)}"
-                window.asDynamic().fetch("/api/auth/register", js("({method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: body})")).then { res ->
+                window.asDynamic().fetch("/api/auth/register", js("({method: 'POST', headers: {'Content-Type': 'application/json'}, body: jsonStr})")).then { res ->
                     console.log("Server responded: " + res.status)
                     res.unsafeCast<dynamic>().json().then<dynamic> { json -> json }
                 }
@@ -60,8 +72,11 @@ object WebAuthnModule {
     }
 
     fun authenticate(): Promise<dynamic> {
+        var requestId = ""
         return getAuthenticationOptions()
-            .then<dynamic> { options ->
+            .then<dynamic> { start ->
+                requestId = start.requestId as String
+                val options = js("JSON.parse")(start.optionsJson)
                 val publicKey = parseAssertionOptions(options)
                 navigator.credentials.get(json("publicKey" to publicKey))
             }
@@ -81,14 +96,18 @@ object WebAuthnModule {
                 } else {
                     ""
                 }
-                val jsonStr = """{"id":"$idBase64","type":"public-key","rawId":"$rawIdBase64","response":{"clientDataJSON":"$clientDataBase64","authenticatorData":"$authenticatorDataBase64","signature":"$signatureBase64"$userHandleField}}"""
-                val body = "credential=${encodeURIComponent(jsonStr)}"
-                window.asDynamic().fetch("/api/auth/authenticate", js("({method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: body})")).then { res ->
+                val credentialJsonStr = """{"id":"$idBase64","type":"public-key","rawId":"$rawIdBase64","response":{"clientDataJSON":"$clientDataBase64","authenticatorData":"$authenticatorDataBase64","signature":"$signatureBase64"$userHandleField}}"""
+                val jsonStr = """{"requestId":"$requestId","credentialJson":${window.asDynamic().JSON.stringify(credentialJsonStr)}}"""
+                window.asDynamic().fetch("/api/auth/authenticate", js("({method: 'POST', headers: {'Content-Type': 'application/json'}, body: jsonStr})")).then { res ->
                     res.unsafeCast<dynamic>().json().then<dynamic> { json -> json }
                 }
             }
     }
 
+    // options is now the flat WebAuthn spec object AuthKit/Yubico produces (parsed from
+    // optionsJson) -- no "publicKey"-wrapper level above it the way the retired native response
+    // had, unlike parseCreationOptions/parseAssertionOptions' RETURN value, which the caller
+    // still wraps under "publicKey" itself when invoking navigator.credentials.*.
     private fun parseAssertionOptions(options: dynamic): dynamic {
         options.challenge = base64ToArrayBuffer(options.challenge as String)
         val allowCredentials = options.allowCredentials
@@ -124,8 +143,7 @@ object WebAuthnModule {
         return apiFetch("/api/auth/assertion-options")
     }
 
-    private fun parseCreationOptions(options: dynamic): dynamic {
-        val pk = options.publicKey
+    private fun parseCreationOptions(pk: dynamic): dynamic {
         val userEntity = js("({})")
         userEntity.id = base64ToArrayBuffer(pk.user.id)
         userEntity.name = pk.user.name
@@ -150,7 +168,7 @@ object WebAuthnModule {
         converted.timeout = pk.timeout
         converted.attestation = pk.attestation
         converted.extensions = pk.extensions
-        return js("({publicKey: converted})")
+        return converted
     }
 
     private fun toBase64Url(base64: String): String {

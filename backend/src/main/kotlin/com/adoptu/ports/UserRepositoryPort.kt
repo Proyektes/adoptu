@@ -39,6 +39,9 @@ interface UserRepositoryPort {
     suspend fun deactivateSterilizationProfile(userId: Int): UserDto?
     suspend fun addPendingRoleActivations(userId: Int, roles: Set<UserRole>)
     suspend fun consumePendingRoleActivations(userId: Int): Set<UserRole>
+    /** Grants roles that don't require email verification (e.g. ADOPTER, ADMIN) immediately -
+     *  contrast [addPendingRoleActivations], for roles that do. */
+    suspend fun addActiveRoles(userId: Int, roles: Set<UserRole>)
     suspend fun updateProfile(userId: Int, displayName: String, language: String?, country: String?): UserDto?
     suspend fun updateLanguage(userId: Int, language: String): UserDto?
     suspend fun updatePhotographerSettings(userId: Int, request: PhotographerSettingsRequest): PhotographerDto?

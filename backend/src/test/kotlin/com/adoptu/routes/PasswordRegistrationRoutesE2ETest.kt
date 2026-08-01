@@ -78,6 +78,9 @@ class PasswordRegistrationRoutesE2ETest {
         single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
         single { PhotographerService(get(), get(), get(), get()) }
         single { PetService(get(), get(), get(), get()) }
+        single { com.adoptu.services.validation.AuthValidationService() }
+        single { com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter() }
+        single { com.adoptu.adapters.authkit.AdoptuPasskeyCredentialRepositoryAdapter() }
     }
 
     private fun startServer() = TestServer.start(modules = listOf(testModules()), initDatabase = false)

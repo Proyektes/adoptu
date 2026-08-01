@@ -3511,6 +3511,119 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-27T13:15:00.000Z"
+    },
+    {
+      "id": "bug-211",
+      "timestamp": "2026-07-31T19:00:00.000Z",
+      "error_message": "AuthRoutesE2ETest: register-password role assertions (e.g. 'adds ADMIN role for admin email') fail with 'Expected value to be true' -- UserActiveRoles is always empty after self-registration.",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt (applyRoleSelection)",
+      "root_cause": "applyRoleSelection(userId, effectiveRoles) computes `immediate` (roles that do NOT require email verification, e.g. ADOPTER/ADMIN) vs `pending` (roles that do), but then calls userRepository.addPendingRoleActivations(userId, ...) for BOTH buckets -- it never inserts the immediate roles into UserActiveRoles directly. The retired native WebAuthnService.registerWithPassword/verifyAndRegister inserted immediate roles into UserActiveRoles directly (UserActiveRoles.insert{...}) and only routed verification-gated roles through pending activation. Additionally the migrated /api/auth/verify-email handler never calls anything equivalent to the old UserService.activatePendingRoles()/consumePendingRoleActivations() after verifying, so even the verification-gated roles never get activated post-verification either. Net effect: no self-registered role (via /register-password or the passkey /register path) ever reaches UserActiveRoles anymore.",
+      "fix": "FIXED. Added UserRepositoryPort.addActiveRoles(userId, roles) (UserRepository.kt) mirroring the dedupe-check pattern of addPendingRoleActivations. AuthRoutes.kt's applyRoleSelection now calls addActiveRoles(...) for the immediate bucket instead of addPendingRoleActivations(...) for both. UserService.activatePendingRoles (previously private, used only by the retired native verifyToken()/verifyTokenAndGetLanguage()) is now internal and called directly from /api/auth/verify-email after a successful AuthKit-gated verification, so verification-gated roles activate too. Re-enabled the 4 disabled tests + the activeRoles assertion in 'GET me' -- all pass.",
+      "tags": [
+        "auth",
+        "authkit-migration",
+        "regression",
+        "roles",
+        "rbac",
+        "not-fixed"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-31T19:00:00.000Z"
+    },
+    {
+      "id": "bug-212",
+      "timestamp": "2026-07-31T19:00:00.000Z",
+      "error_message": "AuthRoutesE2ETest: 'POST resend-verification fails for already verified user via form email' / '...for authenticated already-verified user' fail with 'Expected value to be false' -- resend-verification reports success for an already-verified user.",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt (/api/auth/resend-verification handler)",
+      "root_cause": "The migrated resend-verification handler (both the unauthenticated form-email branch and the authenticated branch) calls resendActivationEmail(...)/EmailVerificationService.generateAndSendActivationEmail(...) unconditionally, with no isUserVerified(...) guard beforehand. The retired native WebAuthnService.resendVerificationEmailByEmail/resendVerificationEmailDetailed explicitly checked isUserVerified first and short-circuited to failure -- that guard was dropped during the AuthKit migration.",
+      "fix": "FIXED. Added an isUserVerified(userId) guard at the top of both branches (form-email and authenticated) in /api/auth/resend-verification, returning VerificationResponse(success=false, ...) immediately for an already-verified user, restoring the retired native WebAuthnService.resendVerificationEmailByEmail/resendVerificationEmailDetailed behavior. Re-enabled the 2 disabled tests -- both pass.",
+      "tags": [
+        "auth",
+        "authkit-migration",
+        "regression",
+        "email-verification",
+        "not-fixed"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-31T19:00:00.000Z"
+    },
+    {
+      "id": "bug-213",
+      "timestamp": "2026-07-31T19:00:00.000Z",
+      "error_message": "AuthRoutesE2ETest: 'GET assertion-options returns challenge' (and every test that calls it, e.g. real-passkey 'authenticate' tests) fails with 500 -- io.helidon...Unhandled exception / InvalidEmailException.",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt (GET /api/auth/assertion-options handler)",
+      "root_cause": "The handler always calls startPasskeyLogin.start(StartPasskeyLoginUseCase.Command(email = \"\")) -- it never reads a username/email from the request, hardcoding \"\" to mean a 'usernameless' ceremony start. But AuthKit's WebAuthnCredentialRepositoryAdapter.getCredentialIdsForUsername(username) wraps that string in the domain Email value class (com.universaliun.auth.backend.domain.model.user.Email), which validates a regex and throws InvalidEmailException for \"\". RelyingParty.startAssertion(...) calls that lookup whenever a non-null username is supplied to StartAssertionOptions, so this throws on EVERY call to this endpoint, uncaught -> 500. The retired native implementation used a dedicated no-arg webAuthnService.generateAssertionOptions() that never needed a per-user lookup. This is a full, user-facing break of the entire 'log in with passkey' start step in production, not just a test artifact.",
+      "fix": "FIXED at the library level (per project convention: fix libs in the libs). AuthKit's StartPasskeyLoginUseCase.Command.email is now nullable (default null) -- StartPasskeyLoginService only calls StartAssertionOptions.builder().username(...) when email is non-null/non-blank, producing a real usernameless/discoverable ceremony instead of wrapping \"\" in the Email value class and throwing. PasskeyLoginStartRequest.email (AuthKit's own mounted-route DTO) made nullable too. Adopt-u's GET /api/auth/assertion-options now passes email = null. Also had to fix two follow-on issues surfaced by real end-to-end ceremony testing: (1) TestHttp.loginAs/loginAndGetCookie only captured the FIRST of multiple Set-Cookie headers via firstValue(), silently dropping the AuthKit access-token cookie set alongside the native session cookie -- fixed to join all Set-Cookie headers. (2) a usernameless assertion response MUST carry response.userHandle (Yubico has no other way to identify the account) -- the test's simulated-authenticator helpers didn't set it; threaded the real AuthUserId (Adopt-u's int user id, UTF-8 encoded per AuthKit's WebAuthnCredentialRepositoryAdapter convention) through as userHandle. Re-enabled all 4 disabled tests -- all pass. Published AuthKit with this fix (also added `cause` chaining to PasskeyLoginFailedException/PasskeyRegistrationFailedException while debugging, a real diagnostic improvement for any consumer).",
+      "tags": [
+        "auth",
+        "authkit-migration",
+        "regression",
+        "webauthn",
+        "passkey",
+        "production-bug",
+        "not-fixed"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-31T19:00:00.000Z"
+    },
+    {
+      "id": "bug-214",
+      "timestamp": "2026-07-31T19:00:00.000Z",
+      "error_message": "AuthRoutesE2ETest: 'POST register succeeds with a real ceremony but reports failure when the verification email cannot be sent' fails with 'Expected value to be false' -- setFailMode(true) on the mock notification adapter has no effect on the response.",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt (/api/auth/register and /api/auth/register-password handlers)",
+      "root_cause": "Neither the passkey /api/auth/register handler nor the password /api/auth/register-password handler ever actually dispatches a verification email. AuthKit's FinishPasskeySignupService.finish/RegisterService.register both return `activationToken`/`email` in their Result specifically so the HOST builds the activation link and sends it -- the exact 'library never emails, host builds the link and sends' contract AuthRoutes.kt already honors correctly for forgot-password and request-magic-link. But both /register handlers ignore result.activationToken entirely and just reply success=true/emailVerificationSent=true whenever result.requiresEmailVerification is true (a config-derived flag, not an actual send outcome).",
+      "fix": "FIXED. Added a sendActivationEmail(activationToken, email, user) helper in AuthRoutes.kt that builds the verification URL from AuthKit's own already-persisted result.activationToken (same 'library never emails, host builds link and sends' contract already used for forgot-password/request-magic-link) and sends it via NotificationPort using EmailVerificationService's existing localized templates (getLocalizedContent, already internal). Both /api/auth/register and /api/auth/register-password now call it and report the real send outcome instead of a config-derived flag. Re-enabled the 1 disabled test -- passes.",
+      "tags": [
+        "auth",
+        "authkit-migration",
+        "regression",
+        "email-verification",
+        "notifications",
+        "not-fixed"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-31T19:00:00.000Z"
+    },
+    {
+      "id": "bug-215",
+      "timestamp": "2026-07-31T19:00:00.000Z",
+      "error_message": "After rewriting TestServer.kt's registerTestLogin() to mint an AuthKit JWT cookie (for AuthRoutesE2ETest), the full backend test suite went from 0 failures outside auth E2E tests to 256 failures across PetsRoutesE2ETest/UsersRoutesE2ETest/PhotographerRoutesE2ETest/etc. (401s and 'No session cookie returned from test login' errors).",
+      "file": "backend/src/test/kotlin/com/adoptu/testsupport/TestServer.kt (registerTestLogin)",
+      "root_cause": "registerTestLogin() is shared test infrastructure used by many E2E suites beyond AuthRoutesE2ETest. Route groups other than AuthRoutes.kt (Pets/Users/Photographer/Shelter/TemporalHome/Sterilization/...) have NOT been migrated onto AuthKit yet and still authenticate via the native req.getSession() cookie. The first version of the fix set ONLY the new AuthKit access-token cookie and stopped setting the native SessionUser session cookie, breaking test-login for every still-native route group; it also threw when the test userId had no AuthKit-visible row (some tests deliberately log in as a nonexistent id to exercise a downstream 404), which surfaced as 'No session cookie returned from test login' since the 500 response carried no Set-Cookie header at all.",
+      "fix": "registerTestLogin() now sets BOTH cookies unconditionally: the native SessionUser session cookie first (unconditional, exactly as before -- keeps every not-yet-migrated route group's test-login working), then best-effort mints and sets the AuthKit access-token cookie only when the userId actually resolves via UserRepositoryPort.findById(...) (skipped, not thrown, for deliberately-nonexistent test userIds). Full suite re-run confirmed clean after this fix.",
+      "tags": [
+        "test-infra",
+        "authkit-migration",
+        "self-inflicted",
+        "fixed",
+        "regression-in-fix"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-31T19:00:00.000Z"
+    },
+    {
+      "id": "bug-216",
+      "timestamp": "2026-07-31T19:30:00-06:00",
+      "error_message": "AuthRoutesE2ETest 'register-password adds ADMIN role for admin email' failed: role list was [ADOPTER], missing ADMIN, even though the test's own AppConfig set admin.email=admin@test.com matching the registered email.",
+      "file": "backend/src/test/kotlin/com/adoptu/testsupport/TestServer.kt",
+      "root_cause": "TestServer.start()'s effectiveModules composed the caller's own `modules` list first, then appended a config fallback module (`module { single { config } }`) LAST -- using TestServer's own internal config (admin.email=admin@adopt-u.com from defaultTestConfig()), not the caller's. Koin silently lets the last-registered definition for a type win on a collision (no error), so this fallback silently overrode any test's own AppConfig binding, including admin.email overrides -- the actual adminEmail value used by AuthRoutes.kt's registration handlers was always the default, never the test's override.",
+      "fix": "Reordered effectiveModules so the config fallback and authKoinModule come FIRST, and the caller-supplied `modules` (or default appModule(config)) come LAST -- so a caller's own AppConfig binding wins, as originally intended by the fallback's own doc comment (\"append a fallback ... so it's always resolvable\", never meant to be authoritative). Verified the full backend suite (1323 tests) still green after the reorder.",
+      "tags": [
+        "koin",
+        "test-infra",
+        "config-override",
+        "dependency-injection"
+      ],
+      "related_bugs": [
+        "bug-215"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-31T19:30:00-06:00"
     }
   ]
 }
