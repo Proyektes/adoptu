@@ -33,9 +33,30 @@ COPY common/src common/src
 # from the same Gradle invocation the build gets OOM-killed (exit 137) in a
 # constrained-memory CI container. Running them separately lets the first
 # JVM fully exit before native-image starts.
+#
+# GITHUB_ACTOR/PAYMENT_KIT_TOKEN/AUTH_KIT_TOKEN (same names backend/build.gradle.kts's
+# credential() reads, same names exported in ~/.profile for host-side builds) authenticate the
+# three private GitHub Packages repos (EmailKit/RateLimitKit, AuthKit). Passed as build secrets
+# mounted as files (not --build-arg) so the token values never land in image layer history -
+# only this RUN's shell reads them, via a subshell `export` from the mounted path. Podman's
+# --mount=type=secret has no env= shorthand (unlike Docker buildx), so this file+export form is
+# what works on both. Caller must pass matching `podman build --secret id=...,src=...` (or
+# `env=...`, docker) flags (see scripts/deploy.sh).
 RUN --mount=type=cache,target=/root/.gradle \
+    --mount=type=secret,id=github_actor \
+    --mount=type=secret,id=payment_kit_token \
+    --mount=type=secret,id=auth_kit_token \
+    export GITHUB_ACTOR="$(cat /run/secrets/github_actor)" \
+      PAYMENT_KIT_TOKEN="$(cat /run/secrets/payment_kit_token)" \
+      AUTH_KIT_TOKEN="$(cat /run/secrets/auth_kit_token)" && \
     ./gradlew :backend:jar --no-daemon
 RUN --mount=type=cache,target=/root/.gradle \
+    --mount=type=secret,id=github_actor \
+    --mount=type=secret,id=payment_kit_token \
+    --mount=type=secret,id=auth_kit_token \
+    export GITHUB_ACTOR="$(cat /run/secrets/github_actor)" \
+      PAYMENT_KIT_TOKEN="$(cat /run/secrets/payment_kit_token)" \
+      AUTH_KIT_TOKEN="$(cat /run/secrets/auth_kit_token)" && \
     ./gradlew :backend:nativeCompile --no-daemon
 
 # Runtime stage - same OS family/glibc as the builder (Oracle Linux 10.1,
