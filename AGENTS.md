@@ -22,7 +22,7 @@ Kotlin Multiplatform pet adoption platform. Ktor backend + Kotlin/JS admin front
 ./gradlew e2eTest          # Runs E2E tests with Playwright in Docker
 ./gradlew dockerDown       # Stop test containers
 ./gradlew shadowJar        # Build fat jar
-./gradlew compileSass      # Compile SCSS → CSS
+./gradlew :backend:compileSass  # Compile SCSS → CSS (needs the Dart Sass CLI, `sass`, on PATH)
 ```
 
 Run a single test: `./gradlew :backend:test --tests com.adoptu.SomeTest`
@@ -78,7 +78,7 @@ Dev mode uses SMTP via Mailpit. Run `./gradlew dockerUp` to start Mailpit, then 
 
 - **Multi-project build**: `backend` (Ktor server) and `frontend` (Kotlin/JS) subprojects.
 - **Custom `run` task**: `./gradlew run` is a custom `JavaExec` task (not from the `application` plugin, which conflicts with KMP).
-- **SCSS → CSS flow**: `compileSass` outputs to `build/sass/`, then `copyCssToResources` copies to `src/main/resources/static/css/`. The `run` task depends on this chain automatically.
+- **SCSS → CSS flow**: source lives in `backend/src/main/scss/*.scss` (real hand-authored, using `@use` partials -- see `_variables.scss`, `_base.scss`, `_layout.scss`, `_location-search-form.scss`, `_admin.scss`). `:backend:compileSass` (an `Exec` task shelling out to the standalone Dart Sass CLI, `sass` on PATH -- no npm/Node) compiles it to `build/generated/scss/main/static/css/`, registered as an extra `main` resources source dir so `processResources` (and therefore `run`/`shadowJar`) picks it up automatically -- `src/main/resources/static/css/*.css` no longer exists; that's generated now, not committed.
 - **Source dirs**: JVM sources are at `src/main/kotlin/` and `src/test/kotlin/` (non-standard for KMP, configured explicitly via `setSrcDirs`).
 - `gradle.properties` has extensive `--add-opens` JVM args required for Kotlin 2.3+ and ByteBuddy
 - Uses Amazon Corretto 25. Dockerfile installs Dart Sass 1.77.8 for SCSS compilation.
