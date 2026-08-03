@@ -1599,16 +1599,20 @@ class AuthRoutesE2ETest {
     }
 
     @Test
-    fun `GET magic-link-login succeeds and redirects to profile for verified non-banned user`() {
+    fun `GET magic-link-login succeeds and bounces to profile for verified non-banned user`() {
         val email = "magiclogin-success@example.com"
         val handle = startTestServer()
         try {
             val userId = handle.registerVerifiedUser(email)
             val token = insertMagicLinkToken(userId)
 
+            // A same-origin bounce page, not a 302: SameSite=Strict cookies are withheld for the
+            // rest of a cross-site-initiated redirect chain (the click comes from the mail
+            // client), so AuthRoutes serves a meta-refresh page and the re-navigation to /profile
+            // originates from our own origin, carrying the cookies just set.
             val response = TestHttp.get("${handle.baseUrl}/api/auth/magic-link-login?token=$token")
-            assertEquals(302, response.statusCode())
-            assertEquals("/profile", response.header("Location"))
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("url=/profile"))
             assertNotNull(response.header("Set-Cookie"))
         } finally {
             handle.stop()

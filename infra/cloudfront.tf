@@ -72,6 +72,63 @@ resource "aws_cloudfront_origin_access_control" "s3" {
   signing_protocol                  = "sigv4"
 }
 
+# Clean-URL + dynamic-path-param rewrite for the static site (see
+# infra/cloudfront-functions/site-rewrite.js) - same table as scripts/serve_site.py, which serves
+# the identical build/site/ output locally.
+resource "aws_cloudfront_function" "site_rewrite" {
+  name    = "adoptu-site-rewrite"
+  runtime = "cloudfront-js-2.0"
+  comment = "Clean URLs + /pet/{id} and /temporal-home/{id} rewrites for the static site"
+  publish = true
+  code    = file("${path.module}/cloudfront-functions/site-rewrite.js")
+}
+
+# Static-site equivalent of SecurityHeadersFilter.kt (backend/src/main/kotlin/com/adoptu/web/) -
+# the backend dropped these once it stopped serving HTML (JSON API responses don't need them), but
+# the static site's HTML responses still do. script-src is a flat 'self' (no nonce/hash): every
+# inline <script> in the page templates was moved into common.js during the static-site migration
+# (see Shared.kt's commonScripts(), CommonModule.initLocationSearchFilters()/initAuthNav() in
+# frontend/Common.kt) specifically so this policy could stay nonce-free - a CDN response header
+# can't rotate a nonce per request the way the old per-response Helidon filter did.
+resource "aws_cloudfront_response_headers_policy" "site_security_headers" {
+  name = "adoptu-site-security-headers"
+
+  security_headers_config {
+    content_type_options {
+      override = true
+    }
+    frame_options {
+      frame_option = "DENY"
+      override     = true
+    }
+    referrer_policy {
+      referrer_policy = "strict-origin-when-cross-origin"
+      override        = true
+    }
+    strict_transport_security {
+      access_control_max_age_sec = 63072000
+      include_subdomains         = true
+      override                   = true
+    }
+    content_security_policy {
+      content_security_policy = join("; ", [
+        "default-src 'self'",
+        "script-src 'self'",
+        "script-src-attr 'none'",
+        "style-src 'self' https://fonts.googleapis.com",
+        "font-src 'self' https://fonts.gstatic.com",
+        "img-src 'self' data: blob: https://static.adopt-u.org https://dynamic.adopt-u.org https://*.amazonaws.com",
+        "connect-src 'self'",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "frame-ancestors 'none'",
+      ])
+      override = true
+    }
+  }
+}
+
 # --- static.adopt-u.org: long-lived static assets --------------------------
 
 resource "aws_cloudfront_distribution" "static_images" {
@@ -161,7 +218,13 @@ resource "aws_cloudfront_distribution" "app" {
   price_class     = "PriceClass_All"
   http_version    = "http2"
   aliases         = [var.domain_name, "www.${var.domain_name}", "api.${var.domain_name}"]
-  comment         = "adopt-u app (ECS Fargate, direct origin, no load balancer)"
+  comment         = "adopt-u app (static site default, ECS Fargate for /api/* - no load balancer)"
+
+  origin {
+    domain_name              = aws_s3_bucket.site.bucket_regional_domain_name
+    origin_id                = "site-s3"
+    origin_access_control_id = aws_cloudfront_origin_access_control.s3.id
+  }
 
   origin {
     domain_name = "backend.${var.domain_name}"
@@ -175,14 +238,25 @@ resource "aws_cloudfront_distribution" "app" {
     }
   }
 
+  # Static site (frontend/build/site/, uploaded to aws_s3_bucket.site as a deploy step) is now
+  # the default - it used to be the ECS task directly, back when the backend rendered HTML itself
+  # (UIRoutes.kt/com.adoptu.pages, removed in the static-site migration). All /api/* traffic is
+  # routed to ecs-task via the catch-all ordered_cache_behavior below instead - it MUST stay last
+  # among the ordered_cache_behaviors (first-match-wins) so the more specific /api/pets,
+  # /api/shelters*, etc. behaviors below still take precedence over it.
   default_cache_behavior {
-    target_origin_id         = "ecs-task"
-    viewer_protocol_policy   = "redirect-to-https"
-    allowed_methods          = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
-    cached_methods           = ["GET", "HEAD"]
-    compress                 = true
-    cache_policy_id          = data.aws_cloudfront_cache_policy.caching_disabled.id
-    origin_request_policy_id = aws_cloudfront_origin_request_policy.all_viewer_plus_country.id
+    target_origin_id           = "site-s3"
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = true
+    cache_policy_id            = data.aws_cloudfront_cache_policy.caching_optimized.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.site_security_headers.id
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.site_rewrite.arn
+    }
   }
 
   # Exact path match only (no wildcard) - a wildcard like "/api/pets/*" would
@@ -277,6 +351,24 @@ resource "aws_cloudfront_distribution" "app" {
     compress                 = true
     cache_policy_id          = aws_cloudfront_cache_policy.api_public_listings.id
     origin_request_policy_id = data.aws_cloudfront_origin_request_policy.all_viewer.id
+  }
+
+  # Catch-all for every other /api/* path (auth, users, admin, image uploads, etc.) not covered by
+  # a more specific behavior above - MUST be the last ordered_cache_behavior (CloudFront evaluates
+  # these in the order they're listed here, first match wins), or it would shadow the specific
+  # listing-endpoint behaviors above it. Same settings the old default_cache_behavior used before
+  # the static site became the default (see the comment on default_cache_behavior above) - full
+  # method set, CachingDisabled, and the viewer-country-forwarding origin request policy that GET
+  # /api/detect-country needs.
+  ordered_cache_behavior {
+    path_pattern             = "/api/*"
+    target_origin_id         = "ecs-task"
+    viewer_protocol_policy   = "redirect-to-https"
+    allowed_methods          = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    cached_methods           = ["GET", "HEAD"]
+    compress                 = true
+    cache_policy_id          = data.aws_cloudfront_cache_policy.caching_disabled.id
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.all_viewer_plus_country.id
   }
 
   restrictions {

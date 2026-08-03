@@ -182,3 +182,9 @@ variable "dynamic_bucket_name" {
   type    = string
   default = "adoptu-dynamic-images"
 }
+
+variable "site_bucket_name" {
+  description = "S3 bucket holding the static site build (frontend/build/site, produced by :frontend:generateSite) - the origin the app CloudFront distribution's default_cache_behavior now points at instead of the ECS task directly. See cloudfront.tf's aws_cloudfront_distribution.app."
+  type        = string
+  default     = "adoptu-site"
+}

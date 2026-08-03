@@ -1,7 +1,14 @@
 -- =============================================================================
 -- Adopt-U Test Data
 -- 50 users (mixed roles) + 200 pets (mainly dogs)
--- Password for all users: Test1234!
+-- Password for all users: SuperClave99!!
+-- (Must satisfy AuthKit's PasswordPolicy — ≥10 chars, ≥2 uppercase, ≥2 lowercase, ≥1 special,
+-- and no fragment of the user's own name/email, which rules out anything containing "test"
+-- because the seeded addresses live under @test.com. The hash below must be in AuthKit
+-- PasswordHasher's own format: argon2id m=16384,t=2,p=1, 16-byte salt, 32-BYTE digest —
+-- verify() compares a fixed 32-byte digest, so hashes with other digest lengths never match.
+-- Regenerate with e.g. python argon2-cffi:
+--   PasswordHasher(time_cost=2, memory_cost=16384, parallelism=1, hash_len=32, salt_len=16))
 -- =============================================================================
 
 -- -------------------------
@@ -175,10 +182,15 @@ ON CONFLICT (id) DO NOTHING;
 SELECT setval(pg_get_serial_sequence('users', 'id'), GREATEST((SELECT MAX(id) FROM users), 50), true);
 
 -- -------------------------
--- PASSWORDS (all: Test1234!)
+-- PASSWORDS (all: SuperClave99!! — see header for the policy/format constraints)
 -- -------------------------
 INSERT INTO user_passwords (user_id, password_hash, created_at, updated_at)
-SELECT id, '$argon2id$v=19$m=65536,t=3,p=4$FrWyc5rTivlqFuys+G+Q6Q$uToUdFF9IBhSYRV+OCHW6IFgnVdmxCR98BBEIa6/NNhNLgg5E5d61vIne7XtHIlzCFl7dnRwsnmNQmKb+eKyFQ', 1704067200000, 1704067200000
+-- Argon2id in AuthKit's own format (m=16384,t=2,p=1, 16-byte salt, 32-byte digest — see
+-- AuthKit PasswordHasher). Its verify() compares against a fixed 32-byte digest, so hashes
+-- generated with other tools' defaults (64-byte digests) can never match.
+-- Password: SuperClave99!! (satisfies AuthKit PasswordPolicy; 'Test1234!' no longer can —
+-- too short, one uppercase, and "test" collides with the seeded @test.com addresses).
+SELECT id, '$argon2id$v=19$m=16384,t=2,p=1$zfJzbXHkjWNr9wam+uf0vw$JU2wUeYcP2Y2SQ1XY3yYkhFZI/AESBaXFnExUEtgaIg', 1704067200000, 1704067200000
 FROM users WHERE id BETWEEN 1 AND 50
 ON CONFLICT (user_id) DO NOTHING;
 

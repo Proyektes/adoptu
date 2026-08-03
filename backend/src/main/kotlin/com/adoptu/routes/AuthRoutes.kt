@@ -12,6 +12,7 @@ import com.adoptu.dto.output.SuccessWithErrorResponse
 import com.adoptu.dto.output.VerificationResponse
 import com.adoptu.services.EmailVerificationService
 import com.adoptu.services.PasswordService
+import com.adoptu.services.auth.SessionUser
 import com.adoptu.services.ServiceResult
 import com.adoptu.services.UserService
 import com.adoptu.services.crypto.CryptoService
@@ -22,7 +23,9 @@ import com.adoptu.web.receiveFormParameters
 import com.adoptu.web.receiveJson
 import com.adoptu.web.receiveText
 import com.adoptu.web.respondError
+import com.adoptu.web.respondHtml
 import com.adoptu.web.respondRedirect
+import com.adoptu.web.setSession
 import com.universaliun.auth.backend.domain.exception.EmailAlreadyRegisteredException
 import com.universaliun.auth.backend.domain.exception.InvalidCredentialsException
 import com.universaliun.auth.backend.domain.exception.InvalidMagicLinkTokenException
@@ -47,6 +50,10 @@ import io.helidon.http.HeaderNames
 import io.helidon.http.SetCookie
 import io.helidon.webserver.http.Handler
 import io.helidon.webserver.http.HttpRules
+import kotlinx.html.a
+import kotlinx.html.body
+import kotlinx.html.head
+import kotlinx.html.meta
 import io.helidon.webserver.http.ServerRequest
 import io.helidon.webserver.http.ServerResponse
 import kotlinx.coroutines.runBlocking
@@ -94,7 +101,7 @@ private fun parseSelfRegisteredRoles(rolesStr: String?): Set<UserRole> =
         ?.ifEmpty { null }
         ?: setOf(UserRole.ADOPTER)
 
-private fun sha256Hex(value: String): String =
+internal fun sha256Hex(value: String): String =
     MessageDigest.getInstance("SHA-256").digest(value.toByteArray()).joinToString("") { "%02x".format(it) }
 
 fun HttpRules.authRoutes() {
@@ -105,6 +112,7 @@ fun HttpRules.authRoutes() {
     val config by Deps.inject<AppConfig>()
     val kitUserRepository by Deps.inject<AdoptuUserRepositoryAdapter>()
     val kitPasskeyRepository by Deps.inject<AdoptuPasskeyCredentialRepositoryAdapter>()
+    val webAuthnService by Deps.inject<com.adoptu.services.auth.WebAuthnService>()
     val startPasskeySignup by Deps.inject<StartPasskeySignupUseCase>()
     val finishPasskeySignup by Deps.inject<FinishPasskeySignupUseCase>()
     val startPasskeyRegistration by Deps.inject<StartPasskeyRegistrationUseCase>()
@@ -119,21 +127,33 @@ fun HttpRules.authRoutes() {
     val cookieSecure = config.propertyOrNull("session.cookieSecure")?.getString()?.toBoolean() ?: true
     val userRepository = UserRepository(clock = kotlin.time.Clock.System)
 
-    fun ServerResponse.setAuthCookies(accessToken: String, refreshToken: String) {
+    // sessionUser also (re)issues the legacy `user_session` HMAC cookie: server-rendered pages
+    // (UIRoutes' getNavParams/isAdmin gates) and the pre-AuthKit routes (Photographer/Shelter/
+    // SterilizationLocation) still authenticate via getSession() — after the AuthKit cutover
+    // nothing set that cookie anymore, so every login looked anonymous to them.
+    fun ServerResponse.setAuthCookies(accessToken: String, refreshToken: String, sessionUser: SessionUser?) {
         headers().addCookie(
             SetCookie.builder(ACCESS_COOKIE, accessToken).secure(cookieSecure).httpOnly(true)
-                .sameSite(SetCookie.SameSite.LAX).path("/").maxAge(Duration.ofMinutes(15)).build()
+                .sameSite(SetCookie.SameSite.STRICT).path("/").maxAge(Duration.ofMinutes(15)).build()
         )
         headers().addCookie(
             SetCookie.builder(REFRESH_COOKIE, refreshToken).secure(cookieSecure).httpOnly(true)
-                .sameSite(SetCookie.SameSite.LAX).path("/").maxAge(Duration.ofDays(30)).build()
+                .sameSite(SetCookie.SameSite.STRICT).path("/").maxAge(Duration.ofDays(30)).build()
         )
+        sessionUser?.let { setSession(it) }
     }
 
+    // Explicit Path=/ + Max-Age=0, NOT headers().clearCookie(name): Helidon's clearCookie emits
+    // the expiry cookie without a Path, so the browser scopes it to the request's directory
+    // (/api/auth) and never deletes cookies stored with Path=/ — logout left every auth cookie
+    // alive in the browser.
     fun ServerResponse.clearAuthCookies() {
-        headers().clearCookie(ACCESS_COOKIE)
-        headers().clearCookie(REFRESH_COOKIE)
-        headers().clearCookie("user_session")
+        for (name in listOf(ACCESS_COOKIE, REFRESH_COOKIE, "user_session")) {
+            headers().addCookie(
+                SetCookie.builder(name, "").path("/").maxAge(Duration.ZERO)
+                    .secure(cookieSecure).httpOnly(true).sameSite(SetCookie.SameSite.STRICT).build()
+            )
+        }
     }
 
     fun ServerRequest.cookieValue(name: String): String? {
@@ -252,12 +272,17 @@ fun HttpRules.authRoutes() {
 
         val decryptedPassword = CryptoService.decrypt(encryptedPassword)
         if (decryptedPassword == null) return@Handler res.respondError("Registration failed")
+        // Same "email:password" unwrapping as login-with-password below — RegisterPage encrypts
+        // the pair together. Passing the combined string through meant AuthKit validated (and
+        // HASHED) "email:password" as the password, so password-registered users could never
+        // log in, and PasswordPolicy rejected it on name/email fragments.
+        val plainPassword = decryptedPassword.substringAfter(':', decryptedPassword)
 
         val roles = parseSelfRegisteredRoles(rolesStr)
         val effectiveRoles = if (email.equals(adminEmail, ignoreCase = true)) roles + UserRole.ADMIN else roles
 
         try {
-            val result = com.universaliun.auth.backend.domain.port.`in`.RegisterUseCase.Command(email, decryptedPassword, displayName)
+            val result = com.universaliun.auth.backend.domain.port.`in`.RegisterUseCase.Command(email, plainPassword, displayName)
                 .let { Deps.get<com.universaliun.auth.backend.domain.port.`in`.RegisterUseCase>().register(it) }
             if (result.requiresEmailVerification) {
                 val created = runBlocking { validationService.getUserByEmail(email) }
@@ -325,16 +350,43 @@ fun HttpRules.authRoutes() {
         // AuthKit-gated signups (passkey and password) store their activation token on
         // Users.resetTokenHash, not the old EmailVerificationTokens table -- verify against that
         // shared slot directly via the bridge repository rather than EmailVerificationService's
-        // own verifyToken(), which only ever looks in the old table.
-        val user = kitUserRepository.findByResetTokenHash(sha256Hex(token))
-        if (user == null) {
-            res.send(VerificationResponse(success = false, message = "Invalid or expired token"))
+        // own verifyToken(), which only ever looks in the old table. Absorbed from UIRoutes.kt's
+        // old /verify handler (deleted - the static verify.html/verify-email.html pages drive this
+        // endpoint via fetch instead, see EmailVerificationPageModule in frontend): auto-login
+        // (the legacy `user_session` cookie, still what PhotographerRoutes/ShelterRoutes/
+        // SterilizationLocationRoutes/UsersRoutes' session-gated routes check via getSession())
+        // and the pre-AuthKit-cutover legacy-token fallback both moved here too, so a single
+        // endpoint now does everything the two old page routes (/verify, /verify-email) used to
+        // split between them.
+        val kitUser = kitUserRepository.findByResetTokenHash(sha256Hex(token))
+        if (kitUser != null) {
+            val activated = kitUserRepository.save(kitUser.copy(enabled = true, emailVerified = true))
+            kitUserRepository.updateResetToken(kitUser.id, null, null)
+            val kitUserId = kitUser.id.value.toInt()
+            if (activated.emailVerified) {
+                runBlocking {
+                    userService.activatePendingRoles(kitUserId)
+                    userRepository.getById(kitUserId)?.let { res.setSession(SessionUser(it.id, it.username, it.displayName)) }
+                }
+            }
+            res.send(VerificationResponse(success = activated.emailVerified, message = "Email verified successfully. You can now login."))
             return@Handler
         }
-        val activated = kitUserRepository.save(user.copy(enabled = true, emailVerified = true))
-        kitUserRepository.updateResetToken(user.id, null, null)
-        if (activated.emailVerified) runBlocking { userService.activatePendingRoles(user.id.value.toInt()) }
-        res.send(VerificationResponse(success = activated.emailVerified, message = "Email verified successfully. You can now login."))
+
+        // Legacy fallback: tokens minted before the AuthKit cutover live in the old table.
+        val result = runBlocking {
+            val legacyUserId = userRepository.getUserIdByToken(token)
+            val verifyResult = webAuthnService.verifyTokenAndGetLanguage(token)
+            if (verifyResult.first && legacyUserId != null) {
+                userRepository.getById(legacyUserId)?.let { res.setSession(SessionUser(it.id, it.username, it.displayName)) }
+            }
+            verifyResult
+        }
+        if (result.first) {
+            res.send(VerificationResponse(success = true, message = "Email verified successfully. You can now login."))
+        } else {
+            res.send(VerificationResponse(success = false, message = "Invalid or expired token"))
+        }
     })
 
     post("/api/auth/resend-verification", Handler { req, res ->
@@ -414,7 +466,11 @@ fun HttpRules.authRoutes() {
                 return@Handler
             }
             logger.info("Passkey auth success: userId=$userId")
-            res.setAuthCookies(result.tokens.accessToken, result.tokens.refreshToken)
+            res.setAuthCookies(
+                result.tokens.accessToken,
+                result.tokens.refreshToken,
+                user?.let { SessionUser(it.id, it.username, it.displayName) },
+            )
             res.send(SuccessResponse(success = true))
         } catch (e: InvalidPasskeyCeremonyException) {
             res.send(SuccessWithErrorResponse(success = false, error = "Authentication failed"))
@@ -548,8 +604,20 @@ fun HttpRules.authRoutes() {
             val result = Deps.get<com.universaliun.auth.backend.domain.port.`in`.ConsumeMagicLinkUseCase>()
                 .consume(com.universaliun.auth.backend.domain.port.`in`.ConsumeMagicLinkUseCase.Command(token))
             logger.info("Magic link login success: userId=$tokenUserId")
-            res.setAuthCookies(result.tokens.accessToken, result.tokens.refreshToken)
-            res.respondRedirect("/profile")
+            val sessionUser = runBlocking { userService.getById(tokenUserId) }
+                ?.let { SessionUser(it.id, it.username, it.displayName) }
+            res.setAuthCookies(result.tokens.accessToken, result.tokens.refreshToken, sessionUser)
+            // Same-origin bounce instead of a 302: the click from the mail client is a cross-site
+            // navigation, and SameSite=Strict cookies are withheld for the whole redirect chain it
+            // initiates — a direct redirect would render /profile logged-out. The meta refresh
+            // re-navigates from this origin, so the cookies just set do get sent.
+            res.respondHtml {
+                head {
+                    meta { charset = "utf-8" }
+                    meta { httpEquiv = "refresh"; content = "0; url=/profile" }
+                }
+                body { a(href = "/profile") { +"Continuar" } }
+            }
         } catch (e: InvalidMagicLinkTokenException) {
             res.respondRedirect("/login?error=invalid_or_expired")
         }
@@ -583,7 +651,9 @@ fun HttpRules.authRoutes() {
             runBlocking { passwordService.recordLoginAttempt(body.email, successful = true) }
             val userId = extractUserId(result.tokens.accessToken)
             logger.info("Password login success: userId=$userId username=${body.email}")
-            res.setAuthCookies(result.tokens.accessToken, result.tokens.refreshToken)
+            val sessionUser = userId.toIntOrNull()?.let { id -> runBlocking { userService.getById(id) } }
+                ?.let { SessionUser(it.id, it.username, it.displayName) }
+            res.setAuthCookies(result.tokens.accessToken, result.tokens.refreshToken, sessionUser)
             res.send(SuccessResponse(success = true))
         } catch (e: InvalidCredentialsException) {
             runBlocking { passwordService.recordLoginAttempt(body.email, successful = false) }

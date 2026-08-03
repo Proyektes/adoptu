@@ -4,6 +4,7 @@ import com.adoptu.frontend.pages.AdminPageModule
 import com.adoptu.frontend.pages.AdminSheltersPageModule
 import com.adoptu.frontend.pages.AdminSterilizationLocationsPageModule
 import com.adoptu.frontend.pages.EmailChangeVerificationPageModule
+import com.adoptu.frontend.pages.EmailVerificationPageModule
 import com.adoptu.frontend.pages.ForgotPasswordPageModule
 import com.adoptu.frontend.pages.IndexPageModule
 import com.adoptu.frontend.pages.LoginPageModule
@@ -38,7 +39,13 @@ fun main() {
         window.asDynamic().AdoptuRegisterPage = RegisterPageModule
         window.asDynamic().AdoptuMyPets = MyPetsPageModule
 
+        window.asDynamic().t = { k: String -> I18n.t(k) }
+        window.asDynamic().tCountry = { n: String -> I18n.translateCountry(n) }
+
         CommonModule.initClickActions()
+        CommonModule.initDropdowns()
+        CommonModule.initLocationSearchFilters()
+        CommonModule.initAuthNav()
 
         CommonModule.initI18n(null).then<Unit> {
             try {
@@ -63,6 +70,7 @@ fun main() {
                     path == "/forgot-password" || path == "/forgot-password/" -> ForgotPasswordPageModule.init()
                     path == "/reset-password" || path == "/reset-password/" -> ResetPasswordPageModule.init()
                     path == "/magic-link-login" || path == "/magic-link-login/" -> MagicLinkLoginPageModule.init()
+                    path == "/verify" || path == "/verify/" || path == "/verify-email" || path == "/verify-email/" -> EmailVerificationPageModule.init()
                     path == "/verify-email-change" || path == "/verify-email-change/" -> EmailChangeVerificationPageModule.init()
                     path == "/verify-profile-email" || path == "/verify-profile-email/" -> ProfileEmailVerificationPageModule.init()
                     else -> {}

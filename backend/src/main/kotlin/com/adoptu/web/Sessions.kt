@@ -3,8 +3,10 @@ package com.adoptu.web
 import com.adoptu.config.AppConfig
 import com.adoptu.services.auth.SessionUser
 import io.helidon.http.HeaderNames
+import io.helidon.http.SetCookie
 import io.helidon.webserver.http.ServerRequest
 import io.helidon.webserver.http.ServerResponse
+import java.time.Duration
 import java.util.Base64
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -60,12 +62,25 @@ fun ServerResponse.setSession(session: SessionUser) {
     val payload = JsonSupport.objectMapper.writeValueAsBytes(session)
     val signature = hmac(payload)
     val value = "${base64UrlEncoder.encodeToString(payload)}.${base64UrlEncoder.encodeToString(signature)}"
-    header(
-        HeaderNames.SET_COOKIE,
-        "$COOKIE_NAME=$value; Path=/; Max-Age=$MAX_AGE_SECONDS; HttpOnly; Secure; SameSite=Lax"
+    // addCookie, not header(SET_COOKIE, ...): header() REPLACES the Set-Cookie header, silently
+    // dropping any cookies already added on this response (the AuthKit access/refresh pair when
+    // called from setAuthCookies).
+    headers().addCookie(
+        SetCookie.builder(COOKIE_NAME, value)
+            .path("/")
+            .maxAge(Duration.ofSeconds(MAX_AGE_SECONDS.toLong()))
+            .httpOnly(true)
+            .secure(true)
+            .sameSite(SetCookie.SameSite.STRICT)
+            .build()
     )
 }
 
 fun ServerResponse.clearSession() {
-    header(HeaderNames.SET_COOKIE, "$COOKIE_NAME=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax")
+    // Explicit Path=/ + Max-Age=0: Helidon's clearCookie(name) omits Path, so the deletion is
+    // scoped to the request's directory and never matches this cookie (stored with Path=/).
+    headers().addCookie(
+        SetCookie.builder(COOKIE_NAME, "").path("/").maxAge(Duration.ZERO)
+            .httpOnly(true).secure(true).sameSite(SetCookie.SameSite.STRICT).build()
+    )
 }

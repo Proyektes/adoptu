@@ -13,40 +13,10 @@ plugins {
 group = "com.adoptu"
 version = "1.0.0"
 
-// SCSS -> CSS: the standalone Dart Sass CLI (`sass` on PATH, no npm/Node) compiles
-// src/main/scss/*.scss (real hand-authored source, using @use partials -- see _variables.scss,
-// _base.scss, _layout.scss, _location-search-form.scss, _admin.scss) into build/generated/scss/,
-// registered as an extra `main` resources source dir below so `processResources` (and therefore
-// `run`/`shadowJar`) picks it up automatically. This used to be compiled by hand and the output
-// committed directly to src/main/resources/static/css/ -- that directory's *.css/*.css.map are
-// now generated instead (removed from git; see the sibling commit), matching the same
-// Gradle+Dart-Sass approach as Find-u and Bitakore.
-val scssSrcDir = layout.projectDirectory.dir("src/main/scss")
-// Nested under static/css/ (not flat) so this extra resources source dir reproduces the same
-// relative path the committed output used to live at -- TermsPage.kt/SheltersPage.kt/etc. link
-// to "/static/css/<page>.css", and a resources source dir's own internal layout is preserved
-// as-is by processResources, not merged into any particular subfolder automatically.
-val cssOutDir = layout.buildDirectory.dir("generated/scss/main/static/css")
-
-val compileSass by tasks.registering(Exec::class) {
-    inputs.dir(scssSrcDir)
-    outputs.dir(cssOutDir)
-    doFirst { cssOutDir.get().asFile.mkdirs() }
-    commandLine(
-        "sass",
-        "--no-source-map",
-        "--style=expanded",
-        "${scssSrcDir.asFile}:${cssOutDir.get().asFile}",
-    )
-}
-
-sourceSets {
-    main {
-        resources.srcDir(layout.buildDirectory.dir("generated/scss/main"))
-    }
-}
-
-tasks.named("processResources") { dependsOn(compileSass) }
+// SCSS/CSS, page templates (kotlinx.html), and the compiled JS bundle all moved to :frontend's
+// generateSite task (frontend/src/jvmMain/kotlin/com/adoptu/site/SiteGenerator.kt) - the backend
+// is API-only now (no more UIRoutes.kt / com.adoptu.pages / /static route), so it has nothing
+// left to compile Sass for.
 
 // Env var first (terminal builds), falling back to a Gradle property of the same name
 // (IDE-launched Gradle daemons don't inherit shell rc files) -- same helper Mazmobi/Bitakore/

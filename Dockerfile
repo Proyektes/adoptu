@@ -24,8 +24,10 @@ COPY backend/src backend/src
 COPY frontend/src frontend/src
 COPY common/src common/src
 
-# CSS is precompiled from SCSS by hand and committed under
-# backend/src/main/resources/static/css/ - there is no Gradle Sass task.
+# Only :backend:jar/:backend:nativeCompile build here - the backend is API-only (no page
+# rendering, no CSS/JS). The static site (SCSS/kotlinx.html pages/JS bundle, all now in
+# :frontend - see frontend/build.gradle.kts's generateSite task) is a separate deploy pipeline
+# (S3 + CloudFront, not this image), so this builder stage has no Sass/Node dependency at all.
 #
 # :backend:jar and :backend:nativeCompile run as two separate --no-daemon
 # invocations, not one combined build: native-image claims ~80% of container

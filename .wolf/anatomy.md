@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T22:12:58.956Z
-> Files: 577 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-03T23:55:11.751Z
+> Files: 602 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/37d425e0-d2ad-499f-bde7-97b1baf5c00b/scratchpad/
 
@@ -22,6 +22,7 @@
 ## ../../.claude/plans/
 
 - `concurrent-popping-cloud.md` — Add WebP support: frontend encode + backend pass-through with dimension validation (~1619 tok)
+- `vast-scribbling-goose.md` — Convert backend-rendered UI to a static site (frontend module), served locally by a static server an (~3533 tok)
 
 ## ./
 
@@ -29,12 +30,12 @@
 - `.gitattributes` — Git attributes (~70 tok)
 - `.gitignore` — Git ignore rules (~246 tok)
 - `.mcp.json` (~41 tok)
-- `AGENTS.md` — Adopt-U - Agent Guidelines (~1305 tok)
+- `AGENTS.md` — Adopt-U - Agent Guidelines (~2026 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~154 tok)
 - `buildspec.yml` (~614 tok)
 - `CLAUDE.md` — OpenWolf (~624 tok)
 - `docker-compose.yml` — Docker Compose services (~118 tok)
-- `Dockerfile` — Docker container definition (~759 tok)
+- `Dockerfile` — Docker container definition (~1182 tok)
 - `gradle.properties` (~159 tok)
 - `gradlew` — you may not use this file except in compliance with the License. (~2380 tok)
 - `gradlew.bat` (~748 tok)
@@ -439,11 +440,11 @@
 
 ## backend/
 
-- `build.gradle.kts` — Declares minimum (~2812 tok)
+- `build.gradle.kts` — credential (~3816 tok)
 
 ## backend/src/main/kotlin/com/adoptu/
 
-- `Application.kt` — main, configureRouting (~980 tok)
+- `Application.kt` — main, configureRouting (~1937 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/aws/
 
@@ -546,7 +547,7 @@
 
 ## backend/src/main/kotlin/com/adoptu/routes/
 
-- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (3 properties) (~7475 tok)
+- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~13586 tok)
 - `CountryRoutes.kt` — HttpRules, regionFromLocale (~320 tok)
 - `PetsRoutes.kt` — HttpRules (~4621 tok)
 - `PhotographerRoutes.kt` — HttpRules, validateUser (~2385 tok)
@@ -606,7 +607,7 @@
 - `JsonSupport.kt` — Jackson's DefaultPrettyPrinter differs from kotlinx.serialization's prettyPrint - what every (~650 tok)
 - `RequestExtensions.kt` — Path template parameter, e.g. `req.pathParam("id")` for a route registered as `"/pets/{id}"`. (~673 tok)
 - `Responses.kt` — Sends [result].data as JSON on success, or the matching error status otherwise. (~516 tok)
-- `SecurityHeadersFilter.kt` — Adds baseline defense-in-depth headers to every response. CloudFront always terminates TLS (~1265 tok)
+- `SecurityHeadersFilter.kt` — Adds baseline defense-in-depth headers to every response. CloudFront always terminates TLS (~1087 tok)
 - `Sessions.kt` — Replaces Ktor's `install(Sessions) { cookie<SessionUser>(...) }` (plugins/Sessions.kt). (~922 tok)
 
 ## backend/src/main/resources/
@@ -686,22 +687,21 @@
 
 - `TestDatabase.kt` — initH2, clearAllData (~1076 tok)
 
-## backend/src/test/kotlin/com/adoptu/testsupport/
-
-- `TestServer.kt` — Starts a real Helidon Nima WebServer through configureRouting() with authKoinModule wired in. `registerTestLogin()` (POST /test/login/{userId}) sets BOTH the native SessionUser session cookie (still required by not-yet-AuthKit-migrated route groups) AND, best-effort, a real AuthKit JWT access-token cookie via TokenServicePort/UserRepositoryPort. (~1900 tok)
-- `TestHttp.kt` — java.net.http.HttpClient helpers (get/post/postJson/postForm/multipart) plus `loginAs(baseUrl, userId)` which POSTs to /test/login/{userId} and returns the first Set-Cookie value. (~900 tok)
-
 ## backend/src/test/kotlin/com/adoptu/pages/
 
 - `ForgotPasswordPageTest.kt` — Direct unit coverage for the auth-flow page builders in ForgotPasswordPage.kt. (~1012 tok)
 - `TermsPageTest.kt` — Direct unit coverage for termsPage(). The E2E route test only exercises the function through (~854 tok)
 
+## backend/src/test/kotlin/com/adoptu/plugins/
+
+- `RoutingTest.kt` — Exercises the real production route wiring in configureRouting() -- every other E2E test (~430 tok)
+
 ## backend/src/test/kotlin/com/adoptu/routes/
 
 - `AuthRoutesE2ETest.kt` — E2E tests for authRoutes() (registration-options/register/register-passkey/authenticate/me/magic-link/login-with-password/forgot+reset-password/encryption-key). Real WebAuthn ceremonies via hand-built webauthn4j-crypto-but-Yubico-JSON-envelope helpers. 11 tests @Disabled with comments pointing to real AuthKit-migration production bugs (see .wolf/buglog.json bug-211..214: role activation, resend-verification verified-guard, GET assertion-options 500, register never emails). (~26000 tok)
+- `CountryRoutesE2ETest.kt` — End-to-end tests for [countryRoutes]: GET /api/detect-country prefers the CloudFront-injected (~1925 tok)
 - `EmailVerificationRoutesE2ETest.kt` — E2E tests for /api/auth/verify-email and unauthenticated /api/auth/resend-verification, seeding the shared Users.resetTokenHash slot. (~4300 tok)
 - `PasswordRegistrationRoutesE2ETest.kt` — E2E tests for /api/auth/register-password happy paths, has-passkey/registration-options-for-user/register-passkey auth-required checks. (~5800 tok)
-- `CountryRoutesE2ETest.kt` — End-to-end tests for [countryRoutes]: GET /api/detect-country prefers the CloudFront-injected (~1925 tok)
 - `PetsRoutesE2ETest.kt` — PetsRoutesE2ETest: setup, createTestUsers, startTestServer, generateTestImageBytes (~20047 tok)
 - `PhotographerRoutesE2ETest.kt` — E2E tests for [photographerRoutes]. (~7601 tok)
 - `ShelterRoutesE2ETest.kt` — ShelterRoutesE2ETest: setup, createTestUsers, createShelterInDb (~6042 tok)
@@ -734,6 +734,11 @@
 - `PetsValidationServiceTest.kt` — PetsValidationServiceTest: setup, tearDown, createTestUser, userDto (~2359 tok)
 - `TemporalHomesValidationServiceTest.kt` — TemporalHomesValidationServiceTest: setup, tearDown, createTestUser, createTemporalHomeRequest (~3930 tok)
 
+## backend/src/test/kotlin/com/adoptu/testsupport/
+
+- `TestHttp.kt` — java.net.http.HttpClient helpers (get/post/postJson/postForm/multipart) plus `loginAs(baseUrl, userId)` which POSTs to /test/login/{userId} and returns the first Set-Cookie value. (~900 tok)
+- `TestServer.kt` — Starts a real Helidon Nima WebServer through configureRouting() with authKoinModule wired in. `registerTestLogin()` (POST /test/login/{userId}) sets BOTH the native SessionUser session cookie (still required by not-yet-AuthKit-migrated route groups) AND, best-effort, a real AuthKit JWT access-token cookie via TokenServicePort/UserRepositoryPort. (~1900 tok)
+
 ## backend/src/test/kotlin/com/adoptu/web/
 
 - `HtmlTest.kt` — Unit test for [respondHtml]. Every production call site (see UIRoutes.kt) passes the `status` (~336 tok)
@@ -753,25 +758,61 @@
 - `ImageScalingTest.kt` — ImageScalingTest: solidColor (~411 tok)
 - `JPEGCodecTest.kt` — JPEGCodecTest: gradient (~766 tok)
 
+## frontend/
+
+- `build.gradle.kts` (~702 tok)
+
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/
 
 - `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~2627 tok)
+- `Common.kt` — rule: NodeList, onCountryChange, initI18n, initClickActions (~3540 tok)
 - `I18n.kt` (~60315 tok)
 - `ImageCompression.kt` — compress, attempt (~724 tok)
+- `Main.kt` — main (~1326 tok)
 - `WebAuthn.kt` — encodeURIComponent, register, authenticate, parseAssertionOptions, getRegistrationOptions (~2384 tok)
 
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
 
 - `AdminPage.kt` — init, switchTab, formatDate, buildQuery, renderPagination (~4624 tok)
+- `AuthFlowPages.kt` — init, showSuccess, showError, init, submit (~2649 tok)
 - `MyPetsPage.kt` — init, clampNonNegative, load, onPetsLoaded, renderPetCard (~6017 tok)
-- `TemporalHomePage.kt` — init, search, displayResults, init, render (~2451 tok)
+- `TemporalHomePage.kt` — init, search, displayResults, init, render (~2534 tok)
+
+## frontend/src/jvmMain/kotlin/com/adoptu/site/
+
+- `SiteGenerator.kt` — main, copyMatching (~1072 tok)
+
+## frontend/src/jvmMain/kotlin/com/adoptu/site/pages/
+
+- `AdminPage.kt` — HTML (~1219 tok)
+- `AdminSheltersPage.kt` — HTML (~1716 tok)
+- `EmailVerificationPage.kt` — HTML (~1183 tok)
+- `LocationSearchFilters.kt` — DIV (~642 tok)
+- `NavParams.kt` — Data class: NavParams (~58 tok)
+- `Shared.kt` — HTML, A, BODY, DIV, NAV (~2152 tok)
+- `SterilizationLocationsPage.kt` — HTML, HTML (~1539 tok)
+- `TemporalHomePage.kt` — HTML, HTML, HTML, HTML (~973 tok)
+
+## frontend/src/main/scss/
+
+- `style.scss` — Styles: 60 rules (~3552 tok)
 
 ## infra/
 
-- `cloudfront.tf` (~3279 tok)
+- `cloudfront.tf` (~4439 tok)
 - `ecs.tf` — New, dedicated cluster rather than reusing the account's existing (~1603 tok)
 - `iam.tf` (~1009 tok)
+- `s3.tf` (~860 tok)
 - `terraform.tfvars` (~102 tok)
+- `variables.tf` — Declares can (~1728 tok)
+
+## infra/cloudfront-functions/
+
+- `site-rewrite.js` — Viewer-request rewrite for the adoptu static site (S3 origin behind aws_cloudfront_distribution (~298 tok)
+
+## scripts/
+
+- `serve_site.py` — Local static file server for the generated site (frontend/build/site), mirroring how (~1516 tok)
 
 ## shared/
 

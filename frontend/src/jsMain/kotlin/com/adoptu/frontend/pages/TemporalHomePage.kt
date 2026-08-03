@@ -185,7 +185,14 @@ object TemporalHomeProfilePageModule {
 @JsName("TemporalHomeBlockPage")
 object TemporalHomeBlockPageModule {
     fun init() {
-        window.asDynamic().blockRescuerAndRedirect = { token: String -> blockRescuerAndRedirect(token) }
+        val params = js("new URLSearchParams(window.location.search)")
+        val token = params.get("token") as? String
+        if (token.isNullOrBlank()) {
+            window.location.href = "/temporal-home"
+            return
+        }
+        document.getElementById("block-btn")?.setAttribute("data-arg", token)
+        window.asDynamic().blockRescuerAndRedirect = { t: String -> blockRescuerAndRedirect(t) }
     }
 
     private fun blockRescuerAndRedirect(token: String) {

@@ -19,7 +19,6 @@ import com.adoptu.routes.photographerRoutes
 import com.adoptu.routes.shelterRoutes
 import com.adoptu.routes.sterilizationLocationRoutes
 import com.adoptu.routes.temporalHomeRoutes
-import com.adoptu.routes.uiRoutes
 import com.adoptu.routes.userShelterRoutes
 import com.adoptu.routes.userSterilizationLocationRoutes
 import com.adoptu.routes.usersRoutes
@@ -37,8 +36,6 @@ import io.helidon.http.Status
 import io.helidon.webserver.WebServer
 import io.helidon.webserver.http.Handler
 import io.helidon.webserver.http.HttpRouting
-import io.helidon.webserver.staticcontent.ClasspathHandlerConfig
-import io.helidon.webserver.staticcontent.StaticContentFeature
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.logger.slf4jLogger
@@ -143,13 +140,8 @@ internal fun configureRouting(routing: HttpRouting.Builder) {
         res.status(Status.INTERNAL_SERVER_ERROR_500).send()
     }
 
-    routing.register(
-        "/static",
-        StaticContentFeature.createService(ClasspathHandlerConfig.builder().location("static").build())
-    )
     routing.get("/health", Handler { _, res -> res.send(mapOf("status" to "ok")) })
 
-    routing.uiRoutes()
     routing.authRoutes()
     routing.countryRoutes()
     routing.petsRoutes()

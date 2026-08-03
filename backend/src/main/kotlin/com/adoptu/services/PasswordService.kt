@@ -142,7 +142,13 @@ class PasswordService(
         return verifyPasswordString(password, storedHash)
     }
 
-    private val argon2 = Argon2Function.getInstance(65536, 3, 4, 64, Argon2.ID, 19)
+    // MUST match AuthKit PasswordHasher's parameters (m=16384 KiB, t=2, p=1, 32-byte digest):
+    // login goes through AuthKit, whose verify() compares against a fixed 32-BYTE digest, so any
+    // hash written here with another digest length can never log in again. The previous instance
+    // (65536, 3, 4, 64) did exactly that — every password set/changed through this service
+    // locked the account out of password login (and produced the unverifiable pre-cutover hashes
+    // that were seeded by scripts/test_data.sql).
+    private val argon2 = Argon2Function.getInstance(16384, 2, 1, 32, Argon2.ID, 19)
 
     private fun hashPassword(password: String): String {
         return Password.hash(password).with(argon2).getResult()

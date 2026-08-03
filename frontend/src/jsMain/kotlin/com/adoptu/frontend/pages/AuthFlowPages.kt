@@ -11,6 +11,45 @@ import org.w3c.dom.HTMLInputElement
 import kotlin.js.json
 
 @JsExport
+@JsName("EmailVerificationPage")
+object EmailVerificationPageModule {
+    fun init() {
+        val params = js("new URLSearchParams(window.location.search)")
+        val token = params.get("token") as? String
+        if (token.isNullOrBlank()) {
+            showError()
+            return
+        }
+        window.asDynamic().fetch("/api/auth/verify-email?token=" + window.asDynamic().encodeURIComponent(token)).then { res: dynamic ->
+            res.json().then { result: dynamic ->
+                if (result.success == true) showSuccess() else showError()
+            }
+        }.catch { _: dynamic -> showError() }
+    }
+
+    private fun showSuccess() {
+        document.getElementById("verification-success")?.className = "verification-success"
+        document.getElementById("verification-error")?.className = "verification-error hidden"
+        var countdown = 10
+        val countdownEl = document.getElementById("countdown")
+        var intervalId = -1
+        intervalId = window.setInterval({
+            countdown--
+            countdownEl?.textContent = countdown.toString()
+            if (countdown <= 0) {
+                window.clearInterval(intervalId)
+                window.location.href = "/"
+            }
+        }, 1000)
+    }
+
+    private fun showError() {
+        document.getElementById("verification-error")?.className = "verification-error"
+        document.getElementById("verification-success")?.className = "verification-success hidden"
+    }
+}
+
+@JsExport
 @JsName("ForgotPasswordPage")
 object ForgotPasswordPageModule {
     fun init() {

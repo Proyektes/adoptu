@@ -38,14 +38,7 @@ class RoutingTest {
         }
     }
 
-    @Test
-    fun `GET index page is served through the full route tree`() {
-        val handle = TestServer.start()
-        try {
-            val response = TestHttp.get("${handle.baseUrl}/")
-            assertEquals(200, response.statusCode())
-        } finally {
-            handle.stop()
-        }
-    }
+    // "GET / is served through the full route tree" used to live here - the backend is API-only
+    // now (page rendering moved to frontend's static site, see SiteGenerator.kt), so "/" is just
+    // another unknown route and correctly 404s like any other, covered by the test above.
 }

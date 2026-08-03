@@ -6,14 +6,21 @@
  *   2. Mailpit running on http://localhost:8025
  *   3. Test data loaded: bash scripts/load_test_data.sh
  *
- * All test users share password: Test1234!
+ * All test users share password: SuperClave99!! (see PASSWORD below — must satisfy AuthKit's
+ * PasswordPolicy and must match the argon2 hash seeded by scripts/test_data.sql)
  */
 
 import { test, expect, Page } from '@playwright/test';
 
-const BASE = 'http://localhost:8080';
-const MAILPIT = 'http://localhost:8025';
-const PASSWORD = 'Test1234!';
+const BASE = process.env.ADOPTU_BASE_URL ?? 'http://localhost:8080';
+const MAILPIT = process.env.MAILPIT_URL ?? 'http://localhost:8025';
+// For matching links inside email bodies — the backend builds them from its own
+// `baseUrl` config, so ADOPTU_BASE_URL must be set to the same value on both sides.
+const BASE_RE = BASE.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+// Must satisfy AuthKit's PasswordPolicy: ≥10 chars, ≥2 upper, ≥2 lower, ≥1 special, and no
+// fragment of the user's own name/email — which rules out anything containing "test", since
+// every seeded address lives under @test.com. ('Test1234!' fails all three.)
+const PASSWORD = 'SuperClave99!!';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -52,7 +59,7 @@ async function getVerificationLinkFromLatestEmail(page: Page): Promise<string | 
   const msgRes = await page.request.get(`${MAILPIT}/api/v1/message/${latest.ID}`);
   const msg = await msgRes.json();
   const body = msg.Text || msg.HTML || '';
-  const match = body.match(/http:\/\/localhost:8080\/verify\?token=[^\s"<]+/);
+  const match = body.match(new RegExp(`${BASE_RE}\\/verify\\?token=[^\\s"<]+`));
   return match ? match[0] : null;
 }
 
@@ -642,7 +649,7 @@ test.describe('8 · Profile modification', () => {
     // Verification link is emailed to the NEW address (a separate security
     // alert also goes to the old address — grab the one meant for newEmail).
     await page.waitForTimeout(1000);
-    const link = await getLinkFromEmailTo(page, newEmail, /http:\/\/localhost:8080\/verify-email-change\?token=[^\s"<]+/);
+    const link = await getLinkFromEmailTo(page, newEmail, new RegExp(`${BASE_RE}\\/verify-email-change\\?token=[^\\s"<]+`));
     expect(link).not.toBeNull();
 
     await page.goto(link!);

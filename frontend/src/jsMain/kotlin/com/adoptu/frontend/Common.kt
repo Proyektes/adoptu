@@ -132,6 +132,98 @@ object CommonModule {
 
     fun buildLocationSearchParams(): dynamic = window.asDynamic().buildLocationSearchParams()
 
+    // Replaces the window.onCountryChange/buildLocationSearchParams inline <script> that used to
+    // live in LocationSearchFilters.kt (a static page has no per-response CSP nonce to stamp on
+    // an inline script) - called unconditionally from Main.kt, no-ops when the page has no
+    // #search-country element (Shelters/Photographers/SterilizationLocations/TemporalHome only).
+    private const val SELECTED_COUNTRY_KEY = "adoptuSelectedCountry"
+
+    fun initLocationSearchFilters() {
+        val countrySelect = document.getElementById("search-country") as? HTMLSelectElement ?: return
+
+        fun onCountryChange() {
+            val hasCountry = countrySelect.value.isNotEmpty()
+            if (hasCountry) {
+                try { window.localStorage.setItem(SELECTED_COUNTRY_KEY, countrySelect.value) } catch (e: dynamic) {}
+            }
+            for (id in listOf("search-state", "search-city", "search-zip", "search-neighborhood")) {
+                val el = document.getElementById(id) as? HTMLInputElement ?: continue
+                el.disabled = !hasCountry
+                if (!hasCountry) el.value = ""
+            }
+            (document.querySelector(".location-search-hint") as? HTMLElement)?.style?.display = if (hasCountry) "none" else ""
+        }
+
+        window.asDynamic().onCountryChange = { onCountryChange() }
+        window.asDynamic().buildLocationSearchParams = {
+            val country = countrySelect.value
+            if (country.isEmpty()) {
+                null
+            } else {
+                val params = js("new URLSearchParams()")
+                params.append("country", country)
+                for (id in listOf("search-state" to "state", "search-city" to "city", "search-zip" to "zip", "search-neighborhood" to "neighborhood")) {
+                    val value = (document.getElementById(id.first) as? HTMLInputElement)?.value
+                    if (!value.isNullOrEmpty()) params.append(id.second, value)
+                }
+                params
+            }
+        }
+
+        countrySelect.addEventListener("change", { onCountryChange() })
+        if (countrySelect.value.isEmpty()) {
+            val saved = try { window.localStorage.getItem(SELECTED_COUNTRY_KEY) } catch (e: dynamic) { null }
+            if (!saved.isNullOrEmpty()) countrySelect.value = saved
+        }
+        onCountryChange()
+    }
+
+    // Replaces the per-response server-rendered nav (UIRoutes.kt's getNavParams/NavParams,
+    // pre-static-site) - every [data-auth] element in Shared.kt's commonNav() starts hidden
+    // (.hidden default in style.scss) and gets shown here based on GET /api/auth/me, matching the
+    // old isLoggedIn/isAdmin/isRescuerOrAdmin/isTemporalHomeOrAdmin gating exactly. Also enforces
+    // the admin-only pages' old server-side redirect (data-auth-required="admin" on <body>,
+    // set by AdminPage.kt/AdminSheltersPage.kt/SterilizationLocationsPage.kt's admin page).
+    fun initAuthNav() {
+        ApiClientModule.me().then<Unit> { result: dynamic ->
+            val authenticated = result.authenticated == true
+            val roles = (result.activeRoles as? Array<String>) ?: emptyArray()
+            val isAdmin = roles.contains("ADMIN")
+            val isRescuer = isAdmin || roles.contains("RESCUER")
+            val isTemporalHome = isAdmin || roles.contains("TEMPORAL_HOME")
+
+            fun matches(auth: String): Boolean = when (auth) {
+                "guest" -> !authenticated
+                "user" -> authenticated
+                "admin" -> isAdmin
+                "rescuer" -> isRescuer
+                "temporal-home" -> isTemporalHome
+                else -> false
+            }
+
+            // Toggle the .hidden class, not style.display directly - every [data-auth] element
+            // is already marked class="hidden" in the static HTML (Shared.kt's commonNav()), and
+            // setting style.display = "" only clears an inline override, it doesn't un-hide an
+            // element hidden by a stylesheet class rule.
+            val gated = document.querySelectorAll("[data-auth]")
+            gated.forEachElement { el ->
+                val required = el.getAttribute("data-auth") ?: return@forEachElement
+                if (matches(required)) el.classList.remove("hidden") else el.classList.add("hidden")
+            }
+
+            val requiredForPage = document.body?.getAttribute("data-auth-required")
+            if (requiredForPage != null && !matches(requiredForPage)) {
+                window.location.href = if (authenticated) "/" else "/login"
+            }
+        }.catch<Unit> {
+            // /api/auth/me itself failing means "not authenticated" - leave every [data-auth]
+            // element hidden (its default state) rather than throwing, same fallback the old
+            // server-side NavParams() default used.
+            val requiredForPage = document.body?.getAttribute("data-auth-required")
+            if (requiredForPage != null) window.location.href = "/login"
+        }
+    }
+
     private const val COUNTRY_STORAGE_KEY = "adoptu.selectedCountry"
 
     // Defaults a country <select>, in priority order: the last country picked anywhere on
