@@ -24,6 +24,7 @@ import com.adoptu.frontend.pages.TemporalHomeDetailPageModule
 import com.adoptu.frontend.pages.TemporalHomeProfilePageModule
 import com.adoptu.frontend.pages.TemporalHomeSearchPageModule
 import com.adoptu.frontend.pages.ReportUrgentPageModule
+import com.adoptu.frontend.pages.UrgentRescueAcceptPageModule
 import com.adoptu.frontend.pages.UrgentRescuerDashboardPageModule
 import com.adoptu.frontend.pages.UrgentRescuerLeaderboardPageModule
 import com.adoptu.frontend.pages.UrgentRescuerProfilePageModule
@@ -81,6 +82,7 @@ fun main() {
                     path == "/urgent-rescuer-profile" || path == "/urgent-rescuer-profile/" -> UrgentRescuerProfilePageModule.init()
                     path == "/urgent-rescuer-dashboard" || path == "/urgent-rescuer-dashboard/" -> UrgentRescuerDashboardPageModule.init()
                     path == "/urgent-rescuer-leaderboard" || path == "/urgent-rescuer-leaderboard/" -> UrgentRescuerLeaderboardPageModule.init()
+                    path == "/urgent-rescue-accept" || path == "/urgent-rescue-accept/" -> UrgentRescueAcceptPageModule.init()
                     else -> {}
                 }
             } catch (e: dynamic) {}

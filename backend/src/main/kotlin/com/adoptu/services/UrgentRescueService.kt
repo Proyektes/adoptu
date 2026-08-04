@@ -155,7 +155,9 @@ class UrgentRescueService(
         for (rescuerProfile in matches) {
             val rescuer = userRepository.getById(rescuerProfile.userId) ?: continue
             val page = urgentRescueRepository.createReportPage(report.id, rescuerProfile.userId)
-            val acceptLink = "$baseUrl/urgent-rescue/accept?token=${page.token}"
+            // Flat slug, not "/urgent-rescue/accept" - SiteGenerator writes one flat .html file per
+            // page (see its pages map), so a link with a path segment 404s on the static site.
+            val acceptLink = "$baseUrl/urgent-rescue-accept?token=${page.token}"
 
             scope.launch {
                 notificationAdapter.sendUrgentRescueAlert(

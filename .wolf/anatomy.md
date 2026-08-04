@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-04T18:35:18.399Z
-> Files: 568 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-04T18:56:56.115Z
+> Files: 567 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/37d425e0-d2ad-499f-bde7-97b1baf5c00b/scratchpad/
 
@@ -566,7 +566,7 @@
 - `ShelterService.kt` — ShelterService: getAll, getById, create, update + 3 more (~507 tok)
 - `SterilizationLocationService.kt` — SterilizationLocationService: getAll, getById, create, update + 5 more (~604 tok)
 - `TemporalHomeService.kt` — Validates and consumes a spam-report token (see sendRequest), then blocks the rescuer it names. (~1332 tok)
-- `UrgentRescueService.kt` — UrgentRescueService: getProfile, createProfile, updateProfile, activateProfile (~2974 tok)
+- `UrgentRescueService.kt` — UrgentRescueService: getProfile, createProfile, updateProfile, activateProfile (~3026 tok)
 - `UserService.kt` — UserService: getById, getByEmail, getAllUsers, getRescuers (~1445 tok)
 - `UserShelterService.kt` — UserShelterService: getByUserId, create, update, delete + 1 more (~993 tok)
 - `UserSterilizationLocationService.kt` — UserSterilizationLocationService: getByUserId, create, update, delete + 1 more (~976 tok)
@@ -714,9 +714,9 @@
 
 - `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~2627 tok)
 - `Common.kt` — rule: NodeList, onCountryChange, initI18n, initClickActions (~3575 tok)
-- `I18n.kt` (~60315 tok)
+- `I18n.kt` (~64162 tok)
 - `ImageCompression.kt` — compress, attempt (~724 tok)
-- `Main.kt` — main (~1534 tok)
+- `Main.kt` — main (~1584 tok)
 - `WebAuthn.kt` — encodeURIComponent, register, authenticate, parseAssertionOptions, getRegistrationOptions (~2384 tok)
 
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
@@ -725,11 +725,11 @@
 - `AuthFlowPages.kt` — init, showSuccess, showError, init, submit (~2649 tok)
 - `MyPetsPage.kt` — init, clampNonNegative, load, onPetsLoaded, renderPetCard (~6017 tok)
 - `TemporalHomePage.kt` — init, search, displayResults, init, render (~2534 tok)
-- `UrgentRescuePage.kt` — init, captureLocation, submit, init, toggleMode (~3409 tok)
+- `UrgentRescuePage.kt` — init, captureLocation, submit, init, toggleMode (~3712 tok)
 
 ## frontend/src/jvmMain/kotlin/com/adoptu/site/
 
-- `SiteGenerator.kt` — main, copyMatching (~1144 tok)
+- `SiteGenerator.kt` — main, copyMatching (~1161 tok)
 
 ## frontend/src/jvmMain/kotlin/com/adoptu/site/pages/
 
@@ -742,7 +742,7 @@
 - `Shared.kt` — HTML, A, BODY, DIV, NAV (~2433 tok)
 - `SterilizationLocationsPage.kt` — HTML, HTML (~1539 tok)
 - `TemporalHomePage.kt` — HTML, HTML, HTML, HTML (~973 tok)
-- `UrgentRescuePage.kt` — HTML, HTML, HTML, HTML (~2795 tok)
+- `UrgentRescuePage.kt` — HTML, HTML, HTML, HTML, HTML (~3440 tok)
 
 ## frontend/src/main/scss/
 

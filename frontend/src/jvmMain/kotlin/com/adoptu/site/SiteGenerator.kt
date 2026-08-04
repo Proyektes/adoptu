@@ -60,6 +60,7 @@ fun main(args: Array<String>) {
         "urgent-rescuer-profile" to { urgentRescuerProfilePage() },
         "urgent-rescuer-dashboard" to { urgentRescuerDashboardPage() },
         "urgent-rescuer-leaderboard" to { urgentRescuerLeaderboardPage() },
+        "urgent-rescue-accept" to { urgentRescueAcceptPage() },
     )
 
     for ((name, render) in pages) {

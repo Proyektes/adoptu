@@ -283,3 +283,32 @@ object UrgentRescuerLeaderboardPageModule {
         }
     }
 }
+
+@JsExport
+@JsName("UrgentRescueAcceptPage")
+object UrgentRescueAcceptPageModule {
+    fun init() {
+        val params = js("new URLSearchParams(window.location.search)")
+        val token = params.get("token") as? String
+        if (token.isNullOrBlank()) {
+            showError(null)
+            return
+        }
+        apiFetch("/api/urgent-reports/accept?token=" + window.asDynamic().encodeURIComponent(token))
+            .then<Unit> { _: dynamic -> showSuccess() }
+            .catch<Unit> { err: dynamic -> showError(err?.message?.toString()) }
+    }
+
+    private fun showSuccess() {
+        document.getElementById("accept-success")?.className = "verification-success"
+        document.getElementById("accept-error")?.className = "verification-error hidden"
+    }
+
+    private fun showError(message: String?) {
+        document.getElementById("accept-error")?.className = "verification-error"
+        document.getElementById("accept-success")?.className = "verification-success hidden"
+        if (!message.isNullOrBlank()) {
+            document.getElementById("accept-error-message")?.textContent = message
+        }
+    }
+}

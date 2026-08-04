@@ -4327,6 +4327,54 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-04T18:35:02.412Z"
+    },
+    {
+      "id": "bug-260",
+      "timestamp": "2026-08-04T18:54:40.787Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/main/kotlin/com/adoptu/services/UrgentRescueService.kt",
+      "root_cause": "Had \"$baseUrl/urgent-rescue/accept?token=${page.token}",
+      "fix": "Changed to \"/urgent-rescue/accept\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T18:54:40.787Z"
+    },
+    {
+      "id": "bug-261",
+      "timestamp": "2026-08-04T18:55:25.034Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/UrgentRescuePage.kt",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T18:55:25.034Z"
+    },
+    {
+      "id": "bug-262",
+      "timestamp": "2026-08-04T18:56:56.135Z",
+      "error_message": "Wrong reference: UrgentRescuerDashboardPageModule should be UrgentRescueAcceptPageModule",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/Main.kt",
+      "root_cause": "Used \"UrgentRescuerDashboardPageModule\" instead of \"UrgentRescueAcceptPageModule\"",
+      "fix": "Changed UrgentRescuerDashboardPageModule → UrgentRescueAcceptPageModule",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T18:56:56.135Z"
     }
   ]
 }
