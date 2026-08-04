@@ -30,11 +30,16 @@ A Kotlin pet adoption web application with **FIDO2/WebAuthn** passwordless authe
 
 ## Run
 
+Two processes: the backend serves the JSON API only (it no longer serves any HTML or static
+assets); `:frontend:serveSite` generates the static site and serves it, proxying `/api/*` to the
+backend.
+
 ```bash
-./gradlew run
+./gradlew run                  # backend JSON API on http://localhost:8080
+./gradlew :frontend:serveSite  # generates the static site, serves it on http://localhost:4000
 ```
 
-Then open http://localhost:8080
+Then open http://localhost:4000
 
 **Note**: WebAuthn requires HTTPS or localhost. For production, use HTTPS.
 

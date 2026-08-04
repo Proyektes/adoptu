@@ -2,24 +2,29 @@
 # Builds the backend image from the current git HEAD, pushes it to ECR by
 # digest, pins that digest in infra/terraform.tfvars (with the HEAD commit
 # subject as the tfvars comment, matching existing entries), and rolls it
-# out via OpenTofu.
+# out via OpenTofu. Also builds the static site (:frontend:generateSite) and,
+# once the infra apply confirms aws_s3_bucket.site exists, syncs it there and
+# invalidates the CloudFront distribution's edge cache (the site's filenames
+# aren't content-hashed, so a stale edge cache wouldn't otherwise notice).
 #
-# Defaults to a dry run (build + push + `tofu plan` only, no apply) so the
-# plan can be reviewed. Pass --yes to actually apply and roll the change out
-# to the live ECS service.
+# Defaults to a dry run (build + push + `tofu plan` only, no apply, no S3
+# sync) so the plan can be reviewed. Pass --yes to actually apply and roll
+# the change out to the live ECS service + static site.
 #
 # Any uncommitted local changes are auto-stashed before the build (so a
-# dirty working tree never leaks into the deployed image) and restored
+# dirty working tree never leaks into the deployed image/site) and restored
 # afterwards - deploy exactly what's on HEAD, nothing else.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+REPO_ROOT="$(pwd)"
 
 AWS_PROFILE="${AWS_PROFILE:-adoptu}"
 AWS_REGION="${AWS_REGION:-us-east-1}"
 ECR_REPO="${ECR_REPO:-174000857825.dkr.ecr.us-east-1.amazonaws.com/production/adoptu}"
 ECS_CLUSTER="${ECS_CLUSTER:-adoptu}"
 ECS_SERVICE="${ECS_SERVICE:-adoptu}"
+SITE_DIR="$REPO_ROOT/frontend/build/site"
 
 APPLY=false
 for arg in "$@"; do
@@ -47,6 +52,9 @@ IMAGE_TAG="$(git rev-parse --short HEAD)"
 COMMIT_SUBJECT="$(git log -1 --format=%s)"
 
 echo "==> Deploying HEAD ($IMAGE_TAG): $COMMIT_SUBJECT"
+
+echo "==> Building static site"
+./gradlew :frontend:generateSite
 
 echo "==> Logging in to ECR ($AWS_REGION, profile $AWS_PROFILE)"
 aws ecr get-login-password --profile "$AWS_PROFILE" --region "$AWS_REGION" \
@@ -109,8 +117,33 @@ fi
 echo "==> tofu apply"
 tofu apply -auto-approve -no-color
 
+SITE_BUCKET="$(tofu output -raw site_bucket_name)"
+DISTRIBUTION_ID="$(tofu output -raw cloudfront_app_distribution_id)"
+
+echo "==> Syncing $SITE_DIR to s3://$SITE_BUCKET"
+# --delete removes objects from the bucket that no longer exist in the build output (a page
+# renamed/removed since the last deploy would otherwise linger and stay reachable indefinitely).
+# HTML gets a short max-age since filenames aren't content-hashed (the CloudFront invalidation
+# below handles the immediate cutover; this bounds how stale a *client's own* cached copy of an
+# HTML page can get if invalidation is ever skipped) - CSS/JS get a longer one since they're still
+# far more frequently replaced than truly immutable fingerprinted assets would be.
+aws s3 sync "$SITE_DIR" "s3://$SITE_BUCKET" \
+  --profile "$AWS_PROFILE" --region "$AWS_REGION" \
+  --delete \
+  --exclude "*.html" --exclude "serve.json" \
+  --cache-control "public, max-age=3600"
+aws s3 sync "$SITE_DIR" "s3://$SITE_BUCKET" \
+  --profile "$AWS_PROFILE" --region "$AWS_REGION" \
+  --delete \
+  --exclude "*" --include "*.html" \
+  --cache-control "public, max-age=60" --content-type "text/html; charset=utf-8"
+
+echo "==> Invalidating CloudFront distribution $DISTRIBUTION_ID"
+aws cloudfront create-invalidation --profile "$AWS_PROFILE" --region "$AWS_REGION" \
+  --distribution-id "$DISTRIBUTION_ID" --paths "/*" >/dev/null
+
 echo "==> Waiting for ECS service to reach steady state..."
 aws ecs wait services-stable --profile "$AWS_PROFILE" --region "$AWS_REGION" \
   --cluster "$ECS_CLUSTER" --services "$ECS_SERVICE"
 
-echo "==> Deployment complete: $ECR_REPO:$IMAGE_TAG ($COMMIT_SUBJECT)"
+echo "==> Deployment complete: $ECR_REPO:$IMAGE_TAG ($COMMIT_SUBJECT), site synced to s3://$SITE_BUCKET"

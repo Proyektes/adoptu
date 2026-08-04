@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-03T23:55:11.751Z
-> Files: 602 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-04T02:45:20.052Z
+> Files: 604 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/37d425e0-d2ad-499f-bde7-97b1baf5c00b/scratchpad/
 
@@ -802,6 +802,7 @@
 - `cloudfront.tf` (~4439 tok)
 - `ecs.tf` — New, dedicated cluster rather than reusing the account's existing (~1603 tok)
 - `iam.tf` (~1009 tok)
+- `outputs.tf` (~328 tok)
 - `s3.tf` (~860 tok)
 - `terraform.tfvars` (~102 tok)
 - `variables.tf` — Declares can (~1728 tok)
@@ -812,6 +813,7 @@
 
 ## scripts/
 
+- `deploy.sh` — Builds the backend image from the current git HEAD, pushes it to ECR by (~1569 tok)
 - `serve_site.py` — Local static file server for the generated site (frontend/build/site), mirroring how (~1516 tok)
 
 ## shared/
