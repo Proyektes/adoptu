@@ -4055,6 +4055,102 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-04T02:44:42.484Z"
+    },
+    {
+      "id": "bug-243",
+      "timestamp": "2026-08-04T04:18:26.467Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/test/kotlin/com/adoptu/web/HtmlTest.kt",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 6→7 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T04:18:26.467Z"
+    },
+    {
+      "id": "bug-244",
+      "timestamp": "2026-08-04T04:18:37.847Z",
+      "error_message": "Significant refactor of ",
+      "file": "README.md",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 14→25 lines (5 removed) | Also: - **Backend**: Kotlin, Ktor, Exposed ORM; - **Frontend**: Kotlin HTML (kotlinx.html DSL), Ko",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-04T04:18:52.684Z"
+    },
+    {
+      "id": "bug-245",
+      "timestamp": "2026-08-04T04:21:34.250Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/resources/application.conf",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 8→16 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "conf"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T04:21:34.250Z"
+    },
+    {
+      "id": "bug-246",
+      "timestamp": "2026-08-04T04:21:46.444Z",
+      "error_message": "Significant refactor of ",
+      "file": "frontend/src/tests/e2e-verify.spec.ts",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 18→22 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T04:21:46.444Z"
+    },
+    {
+      "id": "bug-247",
+      "timestamp": "2026-08-04T04:22:16.811Z",
+      "error_message": "Significant refactor of ",
+      "file": "AGENTS.md",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 8→13 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T04:22:16.811Z"
+    },
+    {
+      "id": "bug-248",
+      "timestamp": "2026-08-04T04:23:07.653Z",
+      "error_message": "Incorrect value in code",
+      "file": "scripts/benchmark.sh",
+      "root_cause": "Had \"${2:-/}\"",
+      "fix": "Changed to \"${2:-/health}\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "sh"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-04T04:23:13.482Z"
     }
   ]
 }

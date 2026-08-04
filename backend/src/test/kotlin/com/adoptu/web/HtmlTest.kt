@@ -9,10 +9,11 @@ import kotlinx.html.body
 import org.junit.jupiter.api.Test
 
 /**
- * Unit test for [respondHtml]. Every production call site (see UIRoutes.kt) passes the `status`
- * argument explicitly, so Kover never exercises the default-parameter dispatch for
- * `status: Status = Status.OK_200` through the E2E route suite - this test calls the extension
- * directly, omitting `status`, to cover that default-value branch.
+ * Unit test for [respondHtml]. The backend is JSON-API-only since the static-site migration (see
+ * frontend/src/jvmMain/kotlin/com/adoptu/site/SiteGenerator.kt) - the only production call site
+ * left is AuthRoutes.kt's magic-link-login same-origin cookie bounce, which omits `status` (relies
+ * on the `Status.OK_200` default). Covered directly here rather than through the E2E route suite
+ * since that flow needs a real magic-link token to exercise.
  */
 class HtmlTest {
 

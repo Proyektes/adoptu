@@ -25,7 +25,7 @@ anymore.
 ## Commands
 
 ```bash
-./gradlew run              # Start dev server on :8080
+./gradlew run              # Backend JSON API on :8080 (no pages - see :frontend:serveSite below)
 ./gradlew :backend:test    # Unit tests
 ./gradlew dockerUp         # Start Postgres + LocalStack + Mailpit for integration tests
 ./gradlew integrationTest  # Runs .*IT tests (requires dockerUp first)
@@ -86,13 +86,18 @@ E2E tests use Playwright in Docker (`./gradlew e2eTest`). Tests run inside `mcr.
 ### Browser E2E suite (npx Playwright) + seed data
 
 `frontend/src/tests/e2e-verify.spec.ts` (run with `npx playwright test`; uses the system Chrome,
-`npm install` first) drives a real browser against a locally running backend. Prerequisites:
+`npm install` first) drives a real browser against the locally running static site (not the
+backend directly - pages only exist on the static site now). Prerequisites:
 
-1. Backend up (`ADOPTU_PORT`/`ADOPTU_BASE_URL` env vars relocate it if :8080 is taken — the spec
-   honors `ADOPTU_BASE_URL`, and the backend must be started with the SAME value or emailed
-   verification links point at the wrong port).
-2. Mailpit on :8025 (`docker compose up -d`).
-3. Seed data: `bash scripts/load_test_data.sh`. All seeded users share password
+1. Backend up (`./gradlew run`, `ADOPTU_PORT` relocates it if :8080 is taken).
+2. Static site up (`./gradlew :frontend:serveSite`, proxies `/api/*` to the backend - `ADOPTU_PORT`
+   above must match what `serve_site.py`'s third arg / `:frontend:serveSite`'s default (`http://
+   localhost:8080`) points at). The spec's `BASE` (default `http://localhost:4000`, override via
+   `ADOPTU_BASE_URL`) points at this, not the backend - the backend must also be configured with
+   the SAME `ADOPTU_BASE_URL` (its `baseUrl`, application.conf) or emailed verification/reset/
+   magic-link URLs point at the wrong place.
+3. Mailpit on :8025 (`docker compose up -d`).
+4. Seed data: `bash scripts/load_test_data.sh`. All seeded users share password
    **SuperClave99!!** — it must satisfy AuthKit's `PasswordPolicy` (≥10 chars, ≥2 upper, ≥2 lower,
    ≥1 special, no fragment of the user's name/email — nothing containing "test", the seeded
    domain), and the hash in `scripts/test_data.sql` must be in AuthKit `PasswordHasher`'s exact

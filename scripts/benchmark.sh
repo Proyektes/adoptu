@@ -7,8 +7,11 @@
 # Usage:
 #   scripts/benchmark.sh <label> [endpoint] [duration_s] [concurrency]
 #
-#   scripts/benchmark.sh baseline                              # GET /, 30s, 20 concurrent
+#   scripts/benchmark.sh baseline                              # GET /health, 30s, 20 concurrent
 #   scripts/benchmark.sh hikari-pool "/api/pets?country=United%20States" 30 20
+#
+# endpoint must be a real backend route - the backend is JSON-API-only (no page rendering, no
+# "/" route) since the static-site migration, so a bare "/" 404s here now.
 #
 # IMPORTANT: change exactly ONE thing between runs (one code change, one config value),
 # then re-run with a new label. Bundling two changes into one run misattributes the win
@@ -23,7 +26,7 @@
 set -euo pipefail
 
 LABEL="${1:?Usage: scripts/benchmark.sh <label> [endpoint] [duration_s] [concurrency]}"
-ENDPOINT="${2:-/}"
+ENDPOINT="${2:-/health}"
 DURATION="${3:-30}"
 CONCURRENCY="${4:-20}"
 
@@ -68,7 +71,7 @@ docker run -d --name "$CONTAINER_NAME" \
 
 echo "==> Waiting for the app to become healthy on :${PORT}"
 for i in $(seq 1 30); do
-    if curl -sf "http://localhost:${PORT}/" >/dev/null 2>&1; then
+    if curl -sf "http://localhost:${PORT}/health" >/dev/null 2>&1; then
         break
     fi
     if [ "$i" -eq 30 ]; then

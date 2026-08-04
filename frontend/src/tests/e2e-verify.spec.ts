@@ -2,9 +2,12 @@
  * Adoptu — End-to-End Verification Suite
  *
  * Prerequisites:
- *   1. Backend running on http://localhost:8080
- *   2. Mailpit running on http://localhost:8025
- *   3. Test data loaded: bash scripts/load_test_data.sh
+ *   1. Backend running on http://localhost:8080 (JSON API only - see ADOPTU_PORT below)
+ *   2. Static site running on http://localhost:4000 (`./gradlew :frontend:serveSite`, proxies
+ *      /api/* to the backend) - BASE below points here, not at the backend, since pages
+ *      (/login, /pets, /verify, ...) only exist on the static site now.
+ *   3. Mailpit running on http://localhost:8025
+ *   4. Test data loaded: bash scripts/load_test_data.sh
  *
  * All test users share password: SuperClave99!! (see PASSWORD below — must satisfy AuthKit's
  * PasswordPolicy and must match the argon2 hash seeded by scripts/test_data.sql)
@@ -12,10 +15,11 @@
 
 import { test, expect, Page } from '@playwright/test';
 
-const BASE = process.env.ADOPTU_BASE_URL ?? 'http://localhost:8080';
+const BASE = process.env.ADOPTU_BASE_URL ?? 'http://localhost:4000';
 const MAILPIT = process.env.MAILPIT_URL ?? 'http://localhost:8025';
-// For matching links inside email bodies — the backend builds them from its own
-// `baseUrl` config, so ADOPTU_BASE_URL must be set to the same value on both sides.
+// For matching links inside email bodies — the backend builds them from its own `baseUrl` config
+// (application.conf), which must point at the static site (this same BASE), not at the backend's
+// own origin - ADOPTU_BASE_URL must be set to the same value on both sides.
 const BASE_RE = BASE.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
 // Must satisfy AuthKit's PasswordPolicy: ≥10 chars, ≥2 upper, ≥2 lower, ≥1 special, and no
 // fragment of the user's own name/email — which rules out anything containing "test", since

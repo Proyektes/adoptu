@@ -1,6 +1,6 @@
 # Adopt-U - Pet Adoption Platform
 
-A Kotlin pet adoption web application with **FIDO2/WebAuthn** passwordless authentication. Multi-page application with HTML rendered from Kotlin (kotlinx.html).
+A Kotlin pet adoption web application with **FIDO2/WebAuthn** passwordless authentication. Multi-page application: pages are static HTML generated at build time from Kotlin (kotlinx.html), served independently of the backend, which is a JSON API only.
 
 ## Features
 
@@ -15,10 +15,11 @@ A Kotlin pet adoption web application with **FIDO2/WebAuthn** passwordless authe
 
 ## Tech Stack
 
-- **Backend**: Kotlin, Ktor, Exposed ORM
+- **Backend**: Kotlin, Helidon, Exposed ORM - JSON API only, no page rendering
 - **Database**: PostgreSQL
 - **Auth**: WebAuthn4J (FIDO2/Passkeys)
-- **Frontend**: Kotlin HTML (kotlinx.html DSL), Kotlin/JS
+- **Frontend**: static site generated at build time (Kotlin HTML / kotlinx.html DSL) + a Kotlin/JS
+  client bundle for interactivity, deployed to CloudFront/S3 independently of the backend
 - **Storage**: AWS S3 (LocalStack for dev)
 - **Email**: AWS SES (Mailpit for dev)
 
@@ -63,18 +64,29 @@ Stop services:
 
 ## Project Structure
 
+Three subprojects: `backend` (JSON API only), `frontend` (static site generator + browser JS
+bundle), `common` (shared JVM/JS code).
+
 ```
 backend/src/main/kotlin/com/adoptu/
 ├── Application.kt
 ├── adapters/          # DB repositories, S3 storage, SES email
 ├── di/                # Koin dependency injection
 ├── dto/               # Request/response DTOs
-├── pages/             # kotlinx.html page renderers
-├── plugins/           # Ktor plugins (Routing, Sessions, etc.)
-├── ports/             # Repository/storage/notification interfaces
-├── routes/            # Route handlers
-└── services/          # Business logic
+├── routes/            # Route handlers (JSON API only - no page rendering)
+├── services/          # Business logic
+└── web/               # Helidon glue (JSON support, security headers, session cookies)
+
+frontend/src/
+├── jvmMain/kotlin/com/adoptu/site/
+│   ├── SiteGenerator.kt   # renders every page to a static .html at build time
+│   └── pages/             # kotlinx.html page templates (index, login, profile, ...)
+├── jsMain/kotlin/com/adoptu/frontend/   # browser JS: API calls, DOM updates, i18n
+└── main/scss/                          # site styling (compiled by :frontend:compileSass)
 ```
+
+`./gradlew :frontend:generateSite` renders `frontend/src/jvmMain/.../site/pages/*.kt` to
+`frontend/build/site/*.html`, alongside the compiled CSS/JS - the deployable static site.
 
 ## Testing
 
@@ -87,6 +99,12 @@ backend/src/main/kotlin/com/adoptu/
 
 
 # Deploy:
+`scripts/deploy.sh` automates everything below (image build/push, tfvars digest pin, `tofu
+apply`, static site build/S3 sync, CloudFront invalidation) - use it instead of these manual
+steps unless you're debugging the pipeline itself. The steps below only cover the backend image;
+they do **not** deploy the static site (see `:frontend:generateSite` and the S3 sync step in
+`scripts/deploy.sh`) - following just this section leaves the frontend undeployed.
+
 Retrieve an authentication token and authenticate your Docker client to your registry. Use the AWS CLI:
 ```
 aws ecr get-login-password --region us-east-1 | podman login --username AWS --password-stdin 174000857825.dkr.ecr.us-east-1.amazonaws.com

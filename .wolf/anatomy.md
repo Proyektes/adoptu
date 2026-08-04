@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-04T02:45:20.052Z
-> Files: 604 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-04T04:23:13.460Z
+> Files: 606 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/37d425e0-d2ad-499f-bde7-97b1baf5c00b/scratchpad/
 
@@ -30,7 +30,7 @@
 - `.gitattributes` — Git attributes (~70 tok)
 - `.gitignore` — Git ignore rules (~246 tok)
 - `.mcp.json` (~41 tok)
-- `AGENTS.md` — Adopt-U - Agent Guidelines (~2026 tok)
+- `AGENTS.md` — Adopt-U - Agent Guidelines (~2149 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~154 tok)
 - `buildspec.yml` (~614 tok)
 - `CLAUDE.md` — OpenWolf (~624 tok)
@@ -42,7 +42,7 @@
 - `package-lock.json` — npm lock file (~800 tok)
 - `package.json` — Node.js package manifest (~198 tok)
 - `playwright.config.ts` — Playwright test configuration (~289 tok)
-- `README.md` — Project documentation (~821 tok)
+- `README.md` — Project documentation (~1251 tok)
 - `settings.gradle.kts` (~110 tok)
 
 ## .claude/
@@ -506,30 +506,6 @@
 - `AuthResponses.kt` — Data class: AuthMeResponse (~294 tok)
 - `PagedResult.kt` — Data class: PagedResult (4 properties) (~39 tok)
 
-## backend/src/main/kotlin/com/adoptu/pages/
-
-- `AdminPage.kt` — HTML (~1218 tok)
-- `AdminSheltersPage.kt` — HTML (~1715 tok)
-- `EmailVerificationPage.kt` — HTML (~1330 tok)
-- `ForgotPasswordPage.kt` — HTML, HTML, HTML, HTML, HTML (~1401 tok)
-- `Icons.kt` — Declares val (~121 tok)
-- `IndexPage.kt` — HTML (~825 tok)
-- `LocationSearchFilters.kt` — DIV (~1122 tok)
-- `LoginPage.kt` — HTML (~999 tok)
-- `MyPetsPage.kt` — HTML (~2564 tok)
-- `PetDetailPage.kt` — HTML (~165 tok)
-- `PetFoodPage.kt` — HTML (~655 tok)
-- `PetsPage.kt` — HTML (~824 tok)
-- `PhotographersPage.kt` — HTML (~330 tok)
-- `PrivacyPage.kt` — UL, UL, HTML (~4200 tok)
-- `ProfilePage.kt` — HTML (~4791 tok)
-- `RegisterPage.kt` — HTML (~2128 tok)
-- `Shared.kt` — HTML, A, BODY, DIV, NAV (~2040 tok)
-- `SheltersPage.kt` — HTML (~347 tok)
-- `SterilizationLocationsPage.kt` — HTML, HTML (~1544 tok)
-- `TemporalHomePage.kt` — HTML, HTML, HTML (~639 tok)
-- `TermsPage.kt` — UL, HTML (~3302 tok)
-
 ## backend/src/main/kotlin/com/adoptu/ports/
 
 - `DynamoDBPort.kt` — createUser, getUserById, getUserByEmail, updateUser, deleteUser (~641 tok)
@@ -554,7 +530,6 @@
 - `ShelterRoutes.kt` — HttpRules, HttpRules (~1627 tok)
 - `SterilizationLocationRoutes.kt` — HttpRules, HttpRules (~1754 tok)
 - `TemporalHomeRoutes.kt` — HttpRules (~2738 tok)
-- `UIRoutes.kt` — Data class: NavParams (6 properties) (~2664 tok)
 - `UserShelterRoutes.kt` — HttpRules (~767 tok)
 - `UsersRoutes.kt` — Data class: UpdateProfileRequest (7 properties) (~5523 tok)
 - `UserSterilizationLocationRoutes.kt` — HttpRules (~820 tok)
@@ -601,7 +576,6 @@
 ## backend/src/main/kotlin/com/adoptu/web/
 
 - `AccessLogFilter.kt` — Replaces Ktor's `install(CallLogging) { ... }` (plugins/Logging.kt). (~261 tok)
-- `CspNonce.kt` — Per-request CSP nonce, set by [SecurityHeadersFilter] before the request reaches its handler (~298 tok)
 - `Deps.kt` — Replaces Ktor's `org.koin.ktor.ext.inject` (which resolved via the Application's attached (~122 tok)
 - `Html.kt` — Replaces Ktor's `call.respondHtml { ... }` (ktor-server-html-builder). (~157 tok)
 - `JsonSupport.kt` — Jackson's DefaultPrettyPrinter differs from kotlinx.serialization's prettyPrint - what every (~650 tok)
@@ -612,52 +586,13 @@
 
 ## backend/src/main/resources/
 
-- `application.conf` — Declares STRING (~909 tok)
+- `application.conf` — Declares STRING (~1072 tok)
 - `logback.xml` (~246 tok)
 
 ## backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/
 
 - `native-image.properties` (~368 tok)
 - `reachability-metadata.json` (~15502 tok)
-
-## backend/src/main/resources/static/css/
-
-- `mypets.css` — Styles: 21 rules (~758 tok)
-- `mypets.css.map` (~192 tok)
-- `pet-detail.css` — Styles: 2 rules (~44 tok)
-- `pet-detail.css.map` (~41 tok)
-- `pet-food.css` — Styles: 98 rules, 8 vars, 2 media queries (~3880 tok)
-- `pet-food.css.map` (~851 tok)
-- `photographers.css` — Styles: 94 rules, 8 vars, 3 media queries (~3806 tok)
-- `photographers.css.map` (~824 tok)
-- `policy.css` — Styles: 94 rules, 8 vars, 3 media queries (~3720 tok)
-- `policy.css.map` (~812 tok)
-- `shelters.css` — Styles: 94 rules, 8 vars, 3 media queries (~3799 tok)
-- `shelters.css.map` (~825 tok)
-- `sterilization.css` — Styles: 94 rules, 8 vars, 3 media queries (~3802 tok)
-- `sterilization.css.map` (~826 tok)
-- `style.css` — Styles: 93 rules, 8 vars, 3 media queries (~7746 tok)
-- `style.css.map` (~1656 tok)
-- `temporal-home.css` — Styles: 94 rules, 8 vars, 3 media queries (~4248 tok)
-- `temporal-home.css.map` (~915 tok)
-
-## backend/src/main/resources/static/js/
-
-- `common.js` — z: D, F, U + 83 more (~118265 tok)
-- `common.js.map` (~214151 tok)
-
-## backend/src/main/scss/
-
-- `_admin.scss` — Styles: 14 rules (~972 tok)
-- `_base.scss` — Styles: 15 rules, 8 vars (~1285 tok)
-- `_layout.scss` — Styles: 13 rules, 2 media queries (~2162 tok)
-- `_location-search-form.scss` — Styles: 2 rules, 1 media queries (~629 tok)
-- `_variables.scss` — Variables (~47 tok)
-- `mypets.scss` — Styles: 5 rules (~833 tok)
-- `pet-detail.scss` — Styles: 2 rules (~33 tok)
-- `pet-food.scss` — Styles: 11 rules (~946 tok)
-- `photographers.scss` — Styles: 6 rules (~214 tok)
-- `policy.scss` — Styles: 5 rules (~129 tok)
 
 ## backend/src/test/kotlin/com/adoptu/adapters/db/
 
@@ -687,11 +622,6 @@
 
 - `TestDatabase.kt` — initH2, clearAllData (~1076 tok)
 
-## backend/src/test/kotlin/com/adoptu/pages/
-
-- `ForgotPasswordPageTest.kt` — Direct unit coverage for the auth-flow page builders in ForgotPasswordPage.kt. (~1012 tok)
-- `TermsPageTest.kt` — Direct unit coverage for termsPage(). The E2E route test only exercises the function through (~854 tok)
-
 ## backend/src/test/kotlin/com/adoptu/plugins/
 
 - `RoutingTest.kt` — Exercises the real production route wiring in configureRouting() -- every other E2E test (~430 tok)
@@ -707,8 +637,6 @@
 - `ShelterRoutesE2ETest.kt` — ShelterRoutesE2ETest: setup, createTestUsers, createShelterInDb (~6042 tok)
 - `SterilizationLocationRoutesE2ETest.kt` — SterilizationLocationRoutesE2ETest: setup, createTestUsers, testModules, startServer (~6704 tok)
 - `TemporalHomeRoutesE2ETest.kt` — E2E tests for [temporalHomeRoutes]. (~7519 tok)
-- `UIRoutesDataTest.kt` — UIRoutesDataTest: setup (~5104 tok)
-- `UIRoutesE2ETest.kt` — End-to-end tests for [uiRoutes]: starts a real Helidon Nima [TestServer] mounting the full (~7444 tok)
 - `UserShelterRoutesE2ETest.kt` — UserShelterRoutesE2ETest: setup, createTestUsers, startServer, createShelterInDb (~4074 tok)
 - `UsersRoutesE2ETest.kt` — Verbatim port of the old Ktor test's inline `module { ... }` block of mocked adapters. (~17800 tok)
 - `UserSterilizationLocationRoutesE2ETest.kt` — UserSterilizationLocationRoutesE2ETest: setup, createTestUsers, createLocationInDb (~4654 tok)
@@ -741,7 +669,7 @@
 
 ## backend/src/test/kotlin/com/adoptu/web/
 
-- `HtmlTest.kt` — Unit test for [respondHtml]. Every production call site (see UIRoutes.kt) passes the `status` (~336 tok)
+- `HtmlTest.kt` — Unit test for [respondHtml]. The backend is JSON-API-only since the static-site migration (see (~366 tok)
 
 ## common/
 
@@ -797,6 +725,10 @@
 
 - `style.scss` — Styles: 60 rules (~3552 tok)
 
+## frontend/src/tests/
+
+- `e2e-verify.spec.ts` — Adoptu — End-to-End Verification Suite (~13479 tok)
+
 ## infra/
 
 - `cloudfront.tf` (~4439 tok)
@@ -813,6 +745,7 @@
 
 ## scripts/
 
+- `benchmark.sh` — Load-tests the backend under the SAME resource ceiling as production (ECS Fargate), (~1580 tok)
 - `deploy.sh` — Builds the backend image from the current git HEAD, pushes it to ECR by (~1569 tok)
 - `serve_site.py` — Local static file server for the generated site (frontend/build/site), mirroring how (~1516 tok)
 
