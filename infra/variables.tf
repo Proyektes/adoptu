@@ -188,3 +188,15 @@ variable "site_bucket_name" {
   type        = string
   default     = "adoptu-site"
 }
+
+# --- Urgent Rescuer: SMS paging (AWS SNS) + anonymous-report CAPTCHA (Turnstile) --------------
+# SNS needs no account-level secret like Twilio's auth token did - the ECS task role
+# (SNSAccess statement in infra/iam.tf) authorizes sns:Publish directly, same credential chain
+# already used for S3/SES.
+
+variable "turnstile_secret_key" {
+  description = "Cloudflare Turnstile secret key, server-side verification for anonymous urgent-report submissions. Defaults to Cloudflare's published always-pass test key (safe for a real deploy only in the sense that it fails open to 'passes' - set a real key before relying on this as actual spam protection)."
+  type        = string
+  default     = "1x0000000000000000000000000000000AA"
+  sensitive   = true
+}

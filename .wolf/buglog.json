@@ -4151,6 +4151,182 @@
       "related_bugs": [],
       "occurrences": 2,
       "last_seen": "2026-08-04T04:23:13.482Z"
+    },
+    {
+      "id": "bug-249",
+      "timestamp": "2026-08-04T17:41:04.528Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/main/kotlin/com/adoptu/services/UrgentRescueService.kt",
+      "root_cause": "Had \"$baseUrl/urgent-rescue/accept?token=${page.id.let",
+      "fix": "Changed to \"$baseUrl/urgent-rescue/accept?token=${page.token}",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T17:41:04.528Z"
+    },
+    {
+      "id": "bug-250",
+      "timestamp": "2026-08-04T17:41:31.280Z",
+      "error_message": "Null/undefined access in ",
+      "file": "backend/src/main/kotlin/com/adoptu/di/AppModule.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T17:41:31.280Z"
+    },
+    {
+      "id": "bug-251",
+      "timestamp": "2026-08-04T17:45:49.391Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/UrgentRescueRoutes.kt",
+      "root_cause": "11 lines replaced/restructured",
+      "fix": "Rewrote 19→6 lines (11 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T17:45:49.391Z"
+    },
+    {
+      "id": "bug-252",
+      "timestamp": "2026-08-04T17:46:21.403Z",
+      "error_message": "Wrong reference: userShelterRoutes should be urgentRescueRoutes",
+      "file": "backend/src/main/kotlin/com/adoptu/Application.kt",
+      "root_cause": "Used \"userShelterRoutes\" instead of \"urgentRescueRoutes\"",
+      "fix": "Changed userShelterRoutes → urgentRescueRoutes",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-04T17:46:30.136Z"
+    },
+    {
+      "id": "bug-253",
+      "timestamp": "2026-08-04T17:47:16.293Z",
+      "error_message": "Wrong reference: com should be UrgentRescueService",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/UsersRoutes.kt",
+      "root_cause": "Used \"com\" instead of \"UrgentRescueService\"",
+      "fix": "Changed com → UrgentRescueService",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T17:47:16.293Z"
+    },
+    {
+      "id": "bug-254",
+      "timestamp": "2026-08-04T17:55:44.610Z",
+      "error_message": "Significant refactor of ",
+      "file": "infra/cloudfront.tf",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 17→21 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tf"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T17:55:44.610Z"
+    },
+    {
+      "id": "bug-255",
+      "timestamp": "2026-08-04T18:16:31.839Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/kotlin/com/adoptu/services/auth/WebAuthnService.kt",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 9→14 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T18:16:31.839Z"
+    },
+    {
+      "id": "bug-256",
+      "timestamp": "2026-08-04T18:17:16.597Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/AuthRoutes.kt",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 8→9 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T18:17:16.597Z"
+    },
+    {
+      "id": "bug-257",
+      "timestamp": "2026-08-04T18:34:25.290Z",
+      "error_message": "Wrong reference: TwilioSmsAdapter should be SnsSmsAdapter",
+      "file": "backend/src/main/kotlin/com/adoptu/di/AppModule.kt",
+      "root_cause": "Used \"TwilioSmsAdapter\" instead of \"SnsSmsAdapter\"",
+      "fix": "Changed TwilioSmsAdapter → SnsSmsAdapter",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T18:34:25.290Z"
+    },
+    {
+      "id": "bug-258",
+      "timestamp": "2026-08-04T18:34:54.160Z",
+      "error_message": "Significant refactor of ",
+      "file": "infra/variables.tf",
+      "root_cause": "17 lines replaced/restructured",
+      "fix": "Rewrote 22→6 lines (17 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tf"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T18:34:54.160Z"
+    },
+    {
+      "id": "bug-259",
+      "timestamp": "2026-08-04T18:35:02.412Z",
+      "error_message": "Significant refactor of ",
+      "file": "infra/secrets.tf",
+      "root_cause": "9 lines replaced/restructured",
+      "fix": "Rewrote 12→4 lines (9 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tf"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T18:35:02.412Z"
     }
   ]
 }

@@ -23,6 +23,10 @@ import com.adoptu.frontend.pages.TemporalHomeBlockPageModule
 import com.adoptu.frontend.pages.TemporalHomeDetailPageModule
 import com.adoptu.frontend.pages.TemporalHomeProfilePageModule
 import com.adoptu.frontend.pages.TemporalHomeSearchPageModule
+import com.adoptu.frontend.pages.ReportUrgentPageModule
+import com.adoptu.frontend.pages.UrgentRescuerDashboardPageModule
+import com.adoptu.frontend.pages.UrgentRescuerLeaderboardPageModule
+import com.adoptu.frontend.pages.UrgentRescuerProfilePageModule
 import kotlinx.browser.window
 
 fun main() {
@@ -73,6 +77,10 @@ fun main() {
                     path == "/verify" || path == "/verify/" || path == "/verify-email" || path == "/verify-email/" -> EmailVerificationPageModule.init()
                     path == "/verify-email-change" || path == "/verify-email-change/" -> EmailChangeVerificationPageModule.init()
                     path == "/verify-profile-email" || path == "/verify-profile-email/" -> ProfileEmailVerificationPageModule.init()
+                    path == "/report-urgent" || path == "/report-urgent/" -> ReportUrgentPageModule.init()
+                    path == "/urgent-rescuer-profile" || path == "/urgent-rescuer-profile/" -> UrgentRescuerProfilePageModule.init()
+                    path == "/urgent-rescuer-dashboard" || path == "/urgent-rescuer-dashboard/" -> UrgentRescuerDashboardPageModule.init()
+                    path == "/urgent-rescuer-leaderboard" || path == "/urgent-rescuer-leaderboard/" -> UrgentRescuerLeaderboardPageModule.init()
                     else -> {}
                 }
             } catch (e: dynamic) {}

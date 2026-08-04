@@ -11,6 +11,7 @@ import com.adoptu.services.EmailChangeService
 import com.adoptu.services.PasswordService
 import com.adoptu.services.PhotographerService
 import com.adoptu.services.ProfileEmailVerificationService
+import com.adoptu.services.UrgentRescueService
 import com.adoptu.services.UserService
 import com.adoptu.services.VerifiableProfileType
 import com.adoptu.services.auth.WebAuthnService
@@ -47,6 +48,7 @@ fun HttpRules.usersRoutes() {
     val passwordService by Deps.inject<PasswordService>()
     val emailChangeService by Deps.inject<EmailChangeService>()
     val profileEmailVerificationService by Deps.inject<ProfileEmailVerificationService>()
+    val urgentRescueService by Deps.inject<UrgentRescueService>()
 
     post("/api/users/accept-terms", Handler { req, res ->
         val session = req.getSession() ?: return@Handler res.respondUnauthorized()
@@ -134,6 +136,27 @@ fun HttpRules.usersRoutes() {
                 userService.activateTemporalHomeProfile(session.userId)
             } else {
                 userService.deactivateTemporalHomeProfile(session.userId)
+            } ?: return@runBlocking res.respondNotFound()
+
+            res.send(user)
+        }
+    })
+
+    post("/api/users/urgent-rescuer-profile", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+
+        runBlocking {
+            val body = req.receiveJson<RoleActivationRequest>()
+            if (body.activate) {
+                val existing = userService.getById(session.userId) ?: return@runBlocking res.respondNotFound()
+                if (!existing.isEmailVerified) {
+                    return@runBlocking res.respondError("Please verify your account email before publishing this profile", 403)
+                }
+            }
+            val user = if (body.activate) {
+                urgentRescueService.activateProfile(session.userId)
+            } else {
+                urgentRescueService.deactivateProfile(session.userId)
             } ?: return@runBlocking res.respondNotFound()
 
             res.send(user)

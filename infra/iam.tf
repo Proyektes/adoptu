@@ -85,6 +85,15 @@ data "aws_iam_policy_document" "ecs_task_app" {
     ]
     resources = ["*"]
   }
+
+  # Urgent Rescuer SMS paging (SnsSmsAdapter) - sns:Publish with a phone number destination
+  # (not a topic/platform-endpoint ARN) has no resource-level ARN to scope to, same as SES
+  # above; AWS requires resources = ["*"] for this action.
+  statement {
+    sid       = "SNSAccess"
+    actions   = ["sns:Publish"]
+    resources = ["*"]
+  }
 }
 
 resource "aws_iam_policy" "ecs_task_app" {

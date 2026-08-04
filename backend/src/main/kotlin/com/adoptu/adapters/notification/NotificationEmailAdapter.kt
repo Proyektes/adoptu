@@ -124,4 +124,34 @@ class NotificationEmailAdapter(
         }
         return sendEmail(temporalHomeEmail, subject, body)
     }
+
+    override suspend fun sendUrgentRescueAlert(
+        rescuerEmail: String,
+        rescuerName: String,
+        description: String,
+        dangerType: String,
+        locationLabel: String,
+        acceptLink: String
+    ): Boolean {
+        val subject = "URGENT: A pet needs immediate help near $locationLabel - Adopt-U"
+        val body = buildString {
+            appendLine("Hello $rescuerName,")
+            appendLine()
+            appendLine("A pet in danger has been reported near your coverage area and needs immediate help.")
+            appendLine()
+            appendLine("Type: $dangerType")
+            appendLine("Location: $locationLabel")
+            appendLine()
+            appendLine("Description:")
+            appendLine(description)
+            appendLine()
+            appendLine("This alert went out to every urgent rescuer covering this area - the first to accept")
+            appendLine("gets it. Tap the link below to accept now:")
+            appendLine(acceptLink)
+            appendLine()
+            appendLine("Best regards,")
+            appendLine("The Adopt-U Team")
+        }
+        return sendEmail(rescuerEmail, subject, body)
+    }
 }

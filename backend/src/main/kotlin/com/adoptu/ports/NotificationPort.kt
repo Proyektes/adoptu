@@ -25,4 +25,12 @@ interface NotificationPort {
         message: String,
         spamReportLink: String
     ): Boolean
+    suspend fun sendUrgentRescueAlert(
+        rescuerEmail: String,
+        rescuerName: String,
+        description: String,
+        dangerType: String,
+        locationLabel: String,
+        acceptLink: String
+    ): Boolean
 }

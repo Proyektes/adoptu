@@ -37,6 +37,8 @@ interface UserRepositoryPort {
     suspend fun deactivateShelterProfile(userId: Int): UserDto?
     suspend fun activateSterilizationProfile(userId: Int): UserDto?
     suspend fun deactivateSterilizationProfile(userId: Int): UserDto?
+    suspend fun activateUrgentRescuerProfile(userId: Int): UserDto?
+    suspend fun deactivateUrgentRescuerProfile(userId: Int): UserDto?
     suspend fun addPendingRoleActivations(userId: Int, roles: Set<UserRole>)
     suspend fun consumePendingRoleActivations(userId: Int): Set<UserRole>
     /** Grants roles that don't require email verification (e.g. ADOPTER, ADMIN) immediately -

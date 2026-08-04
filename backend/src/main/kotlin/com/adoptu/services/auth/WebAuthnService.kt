@@ -42,9 +42,15 @@ import kotlin.time.ExperimentalTime
 // new registration is never verified yet, so none of these can be granted at signup time.
 // Selecting one of these roles at registration just records intent on the form; the user
 // must activate it from /profile (through that already-gated endpoint) after verifying.
-private val ROLES_REQUIRING_VERIFICATION_BEFORE_ACTIVATION = setOf(
-    UserRole.PHOTOGRAPHER, UserRole.TEMPORAL_HOME, UserRole.SHELTER, UserRole.STERILIZATION_SERVICE, UserRole.RESCUER
-)
+//
+// Derived, not hand-listed: every role requires verification except ADOPTER (the default,
+// no-trust-implications role every signup gets) and ADMIN (never self-registered - only ever
+// added synthetically below when the email matches the configured admin.email, and that path
+// stays immediate on purpose, not gated on verification). This used to be a hand-maintained
+// literal that had to be kept in sync with an identical copy in AuthRoutes.kt on every new role -
+// easy to update one and forget the other. Deriving it means a new UserRole entry is safely
+// gated by default with zero extra code, in exactly one place.
+private val ROLES_REQUIRING_VERIFICATION_BEFORE_ACTIVATION = UserRole.entries.toSet() - UserRole.ADMIN - UserRole.ADOPTER
 
 enum class VerificationResendOutcome { SENT, ALREADY_VERIFIED, RATE_LIMITED, SEND_FAILED, USER_NOT_FOUND }
 

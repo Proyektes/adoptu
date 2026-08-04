@@ -43,3 +43,15 @@ resource "aws_secretsmanager_secret_version" "session_secret" {
   secret_id     = aws_secretsmanager_secret.session_secret.id
   secret_string = random_password.session_secret.result
 }
+
+# Turnstile secret key - a real external secret (var.turnstile_secret_key), not generated here,
+# same as db_app_password above. (Urgent-rescue SMS paging uses AWS SNS via the ECS task role -
+# no separate secret needed, unlike the Twilio auth token this used to require.)
+resource "aws_secretsmanager_secret" "turnstile_secret_key" {
+  name = "adoptu/turnstile-secret-key"
+}
+
+resource "aws_secretsmanager_secret_version" "turnstile_secret_key" {
+  secret_id     = aws_secretsmanager_secret.turnstile_secret_key.id
+  secret_string = var.turnstile_secret_key
+}

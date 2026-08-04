@@ -56,6 +56,10 @@ fun main(args: Array<String>) {
         "magic-link-login" to { magicLinkLoginPage() },
         "verify-email-change" to { emailChangeVerificationPage() },
         "verify-profile-email" to { profileEmailVerificationPage() },
+        "report-urgent" to { reportUrgentPage() },
+        "urgent-rescuer-profile" to { urgentRescuerProfilePage() },
+        "urgent-rescuer-dashboard" to { urgentRescuerDashboardPage() },
+        "urgent-rescuer-leaderboard" to { urgentRescuerLeaderboardPage() },
     )
 
     for ((name, render) in pages) {

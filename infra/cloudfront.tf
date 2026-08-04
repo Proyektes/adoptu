@@ -10,16 +10,17 @@ data "aws_cloudfront_origin_request_policy" "all_viewer" {
   name = "Managed-AllViewer"
 }
 
-# Same forwarding as Managed-AllViewer, plus the CloudFront-Viewer-Country header.
-# That header isn't a real viewer-sent header - CloudFront injects it itself from the
-# viewer's IP - so it has to be explicitly whitelisted via allViewerAndWhitelistCloudFront;
-# Managed-AllViewer alone does not forward it. Used by GET /api/detect-country
-# (CountryRoutes.kt) to pre-select the pet-search country dropdown for visitors who
-# haven't set one on their profile. Applied only to default_cache_behavior (below) -
-# the public listing endpoints don't need it, so they keep plain Managed-AllViewer.
+# Same forwarding as Managed-AllViewer, plus two headers CloudFront injects itself (not real
+# viewer-sent headers, so they need explicit whitelisting via allViewerAndWhitelistCloudFront -
+# Managed-AllViewer alone does not forward either):
+#   - CloudFront-Viewer-Country: GET /api/detect-country (CountryRoutes.kt) pre-selects the
+#     pet-search country dropdown for visitors who haven't set one on their profile.
+#   - CloudFront-Viewer-Address (viewer IP:port): POST /api/urgent-reports/submit
+#     (UrgentRescueRoutes.kt) rate-limits anonymous urgent-report submissions by IP - there's no
+#     account to key on for an unregistered reporter.
 resource "aws_cloudfront_origin_request_policy" "all_viewer_plus_country" {
   name    = "adoptu-all-viewer-plus-viewer-country"
-  comment = "Managed-AllViewer plus the CloudFront-Viewer-Country header, for GET /api/detect-country"
+  comment = "Managed-AllViewer plus CloudFront-Viewer-Country/-Address, for GET /api/detect-country and anonymous urgent-report rate limiting"
 
   cookies_config {
     cookie_behavior = "all"
@@ -27,7 +28,7 @@ resource "aws_cloudfront_origin_request_policy" "all_viewer_plus_country" {
   headers_config {
     header_behavior = "allViewerAndWhitelistCloudFront"
     headers {
-      items = ["CloudFront-Viewer-Country"]
+      items = ["CloudFront-Viewer-Country", "CloudFront-Viewer-Address"]
     }
   }
   query_strings_config {
@@ -113,12 +114,16 @@ resource "aws_cloudfront_response_headers_policy" "site_security_headers" {
     content_security_policy {
       content_security_policy = join("; ", [
         "default-src 'self'",
-        "script-src 'self'",
+        # https://challenges.cloudflare.com: Turnstile CAPTCHA widget on /report-urgent
+        # (UrgentRescuePage.kt) - api.js (script-src), its challenge iframe (frame-src), and its
+        # own XHR calls (connect-src) all need this origin explicitly allowed.
+        "script-src 'self' https://challenges.cloudflare.com",
         "script-src-attr 'none'",
         "style-src 'self' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
         "img-src 'self' data: blob: https://static.adopt-u.org https://dynamic.adopt-u.org https://*.amazonaws.com",
-        "connect-src 'self'",
+        "connect-src 'self' https://challenges.cloudflare.com",
+        "frame-src https://challenges.cloudflare.com",
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'self'",

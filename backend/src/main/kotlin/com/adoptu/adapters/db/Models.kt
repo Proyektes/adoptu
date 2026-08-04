@@ -374,6 +374,56 @@ object TemporalHomeRequests : Table("temporal_home_requests") {
     override val primaryKey = PrimaryKey(id)
 }
 
+// LocationInputMode/UrgentReportStatus/UrgentReportPageStatus/UrgentDangerType (dto/input/UrgentRescueDto.kt)
+// are stored as their enum .name via enumerationByName, same convention as UrgentReports.status below.
+object UrgentRescuerProfiles : Table("urgent_rescuer_profiles") {
+    val userId = integer("user_id").references(Users.id)
+    val phone = varchar("phone", 50)
+    val latitude = double("latitude")
+    val longitude = double("longitude")
+    val radiusKm = double("radius_km")
+    val inputMode = varchar("input_mode", 20)
+    val zoneCountry = enumerationByName("zone_country", 100, Country::class).nullable()
+    val zoneState = varchar("zone_state", 100).nullable()
+    val zoneCity = varchar("zone_city", 100).nullable()
+    val active = bool("active").default(true)
+    val createdAt = long("created_at")
+
+    override val primaryKey = PrimaryKey(userId)
+}
+
+object UrgentReports : Table("urgent_reports") {
+    val id = integer("id").autoIncrement()
+    val reporterUserId = integer("reporter_user_id").references(Users.id).nullable()
+    val reporterEmail = varchar("reporter_email", 255)
+    val reporterPhone = varchar("reporter_phone", 50).nullable()
+    val description = text("description")
+    val dangerType = varchar("danger_type", 20)
+    val photoUrl = varchar("photo_url", 500).nullable()
+    val latitude = double("latitude")
+    val longitude = double("longitude")
+    val locationLabel = varchar("location_label", 255)
+    val status = varchar("status", 20)
+    val acceptedByUserId = integer("accepted_by_user_id").references(Users.id).nullable()
+    val acceptedAt = long("accepted_at").nullable()
+    val createdAt = long("created_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+// One row per rescuer paged for a report - "first accept wins" and each rescuer's pending-pages
+// dashboard both query this, not UrgentReports directly (a report can page many rescuers).
+object UrgentReportPages : Table("urgent_report_pages") {
+    val id = integer("id").autoIncrement()
+    val reportId = integer("report_id").references(UrgentReports.id)
+    val rescuerId = integer("rescuer_id").references(Users.id)
+    val token = varchar("token", 255).uniqueIndex()
+    val status = varchar("status", 20)
+    val createdAt = long("created_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
 object AnimalShelters : Table("animal_shelters") {
     val id = integer("id").autoIncrement()
     val userId = integer("user_id").references(Users.id).nullable()

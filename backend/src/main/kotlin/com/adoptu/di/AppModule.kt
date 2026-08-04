@@ -4,8 +4,11 @@ import com.adoptu.adapters.authkit.AdoptuPasskeyCeremonyStoreAdapter
 import com.adoptu.adapters.authkit.AdoptuPasskeyCredentialRepositoryAdapter
 import com.adoptu.adapters.authkit.AdoptuRefreshTokenRepositoryAdapter
 import com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter
+import com.adoptu.adapters.captcha.TurnstileCaptchaAdapter
 import com.adoptu.adapters.db.repositories.*
+import com.adoptu.adapters.geocoding.NominatimGeocodingAdapter
 import com.adoptu.adapters.notification.NotificationEmailAdapter
+import com.adoptu.adapters.notification.SnsSmsAdapter
 import com.adoptu.adapters.storage.S3ImageStorageAdapter
 import com.universaliun.auth.backend.domain.port.out.PasskeyCeremonyStorePort
 import com.universaliun.auth.backend.domain.port.out.PasskeyCredentialRepositoryPort
@@ -49,14 +52,26 @@ fun appModule(config: AppConfig) = module {
     single<UserSterilizationLocationRepositoryPort> { UserSterilizationLocationRepository(get()) }
     single<ShelterRepositoryPort> { ShelterRepository(get()) }
     single<SterilizationLocationRepositoryPort> { SterilizationLocationRepository(get()) }
+    single<UrgentRescueRepositoryPort> { UrgentRescueRepositoryImpl(get()) }
+    single<GeocodingPort> { NominatimGeocodingAdapter() }
     single<ImageStoragePort> { createImageStorageAdapter(config) }
     single<EmailSenderPort> { emailSenderPortFromConfig(config) }
     single<NotificationPort> { NotificationEmailAdapter(get()) }
+    single<SmsNotificationPort> {
+        SnsSmsAdapter(
+            region = config.propertyOrNull("sns.region")?.getString() ?: "us-east-1",
+            accessKeyId = config.propertyOrNull("sns.access_key_id")?.getString(),
+            secretAccessKey = config.propertyOrNull("sns.secret_access_key")?.getString(),
+            endpoint = config.propertyOrNull("sns.endpoint")?.getString()
+        )
+    }
+    single<CaptchaPort> { TurnstileCaptchaAdapter(config.propertyOrNull("turnstile.secretKey")?.getString() ?: "") }
     single { RateLimiter(ExposedRateLimitStateAdapter()) }
     single<PhotographerService> { PhotographerService(get(), get(), get(), get()) }
     single<UserService> { UserService(get(), get()) }
     single<PetService> { PetService(get(), get(), get(), get()) }
     single<TemporalHomeService> { TemporalHomeService(get(), get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
+    single<UrgentRescueService> { UrgentRescueService(get(), get(), get(), get(), get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
     single { ProfileEmailVerificationService(get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
     single { UserShelterService(get(), get()) }
     single { UserSterilizationLocationService(get(), get()) }

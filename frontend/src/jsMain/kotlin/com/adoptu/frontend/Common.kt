@@ -191,6 +191,7 @@ object CommonModule {
             val isAdmin = roles.contains("ADMIN")
             val isRescuer = isAdmin || roles.contains("RESCUER")
             val isTemporalHome = isAdmin || roles.contains("TEMPORAL_HOME")
+            val isUrgentRescuer = isAdmin || roles.contains("URGENT_RESCUER")
 
             fun matches(auth: String): Boolean = when (auth) {
                 "guest" -> !authenticated
@@ -198,6 +199,7 @@ object CommonModule {
                 "admin" -> isAdmin
                 "rescuer" -> isRescuer
                 "temporal-home" -> isTemporalHome
+                "urgent-rescuer" -> isUrgentRescuer
                 else -> false
             }
 

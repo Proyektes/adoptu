@@ -133,6 +133,9 @@ dependencies {
     implementation("software.amazon.awssdk:sesv2") {
         exclude(group = "net.bytebuddy")
     }
+    implementation("software.amazon.awssdk:sns") {
+        exclude(group = "net.bytebuddy")
+    }
 
     implementation("com.password4j:password4j:1.8.4")
 

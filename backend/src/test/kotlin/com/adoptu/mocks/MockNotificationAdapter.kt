@@ -73,6 +73,19 @@ class MockNotificationAdapter : NotificationPort {
         return sendEmail(temporalHomeEmail, subject, body)
     }
 
+    override suspend fun sendUrgentRescueAlert(
+        rescuerEmail: String,
+        rescuerName: String,
+        description: String,
+        dangerType: String,
+        locationLabel: String,
+        acceptLink: String
+    ): Boolean {
+        val subject = "URGENT: A pet needs immediate help near $locationLabel - Adopt-U"
+        val body = "Type: $dangerType, Location: $locationLabel, Description: $description\nAccept: $acceptLink"
+        return sendEmail(rescuerEmail, subject, body)
+    }
+
     fun getSentEmails(): List<EmailRecord> = sentEmails.toList()
 
     fun clear() {

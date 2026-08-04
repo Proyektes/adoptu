@@ -29,7 +29,7 @@ resource "aws_ecs_task_definition" "app" {
 
   container_definitions = jsonencode([
     {
-      name      = "Main"
+      name = "Main"
       # container_image_tag may be a tag ("latest") or a digest
       # ("sha256:..."), per its description - digests need an "@" separator,
       # tags need ":". Without this, a digest value produces an invalid
@@ -92,6 +92,10 @@ resource "aws_ecs_task_definition" "app" {
       secrets = [
         { name = "ADOPTU_DB_PASSWORD", valueFrom = aws_secretsmanager_secret.db_app_password.arn },
         { name = "ADOPTU_SESSION_SECRET", valueFrom = aws_secretsmanager_secret.session_secret.arn },
+        # Urgent Rescuer anonymous-report CAPTCHA - see UrgentRescueService, TurnstileCaptchaAdapter.
+        # (SMS paging uses AWS SNS via the ECS task role - see SnsSmsAdapter, infra/iam.tf's
+        # SNSAccess statement - no separate credential needed, unlike Twilio's auth token.)
+        { name = "ADOPTU_TURNSTILE_SECRET_KEY", valueFrom = aws_secretsmanager_secret.turnstile_secret_key.arn },
       ]
 
       logConfiguration = {
@@ -107,8 +111,8 @@ resource "aws_ecs_task_definition" "app" {
 }
 
 resource "aws_ecs_service" "app" {
-  name            = "adoptu"
-  cluster         = aws_ecs_cluster.this.id
+  name                   = "adoptu"
+  cluster                = aws_ecs_cluster.this.id
   task_definition        = aws_ecs_task_definition.app.arn
   desired_count          = var.desired_count
   launch_type            = "FARGATE"

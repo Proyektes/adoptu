@@ -13,4 +13,5 @@ object Icons {
     const val ERROR_CIRCLE = "error"
     const val SYRINGE = "vaccines"
     const val CAMERA = "camera"
+    const val URGENT = "emergency"
 }

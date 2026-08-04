@@ -437,6 +437,36 @@ class UserRepository(private val clock: Clock) : UserRepositoryPort {
         return getById(userId)
     }
 
+    override suspend fun activateUrgentRescuerProfile(userId: Int): UserDto? {
+        val user = getById(userId) ?: return null
+
+        withContext(dbDispatcher) {
+            transaction {
+                val existingRole = UserActiveRoles.selectAll()
+                    .where { (UserActiveRoles.userId eq userId) and (UserActiveRoles.role eq UserRole.URGENT_RESCUER.name) }
+                    .firstOrNull()
+                if (existingRole == null) {
+                    UserActiveRoles.insert {
+                        it[UserActiveRoles.userId] = userId
+                        it[UserActiveRoles.role] = UserRole.URGENT_RESCUER.name
+                    }
+                }
+            }
+        }
+        return getById(userId)
+    }
+
+    override suspend fun deactivateUrgentRescuerProfile(userId: Int): UserDto? {
+        withContext(dbDispatcher) {
+            transaction {
+                UserActiveRoles.deleteWhere {
+                    (UserActiveRoles.userId eq userId) and (UserActiveRoles.role eq UserRole.URGENT_RESCUER.name)
+                }
+            }
+        }
+        return getById(userId)
+    }
+
     override suspend fun addPendingRoleActivations(userId: Int, roles: Set<UserRole>) {
         withContext(dbDispatcher) {
             transaction {

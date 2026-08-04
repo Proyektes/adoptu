@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-04T04:23:13.460Z
-> Files: 606 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-04T18:35:18.399Z
+> Files: 568 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/37d425e0-d2ad-499f-bde7-97b1baf5c00b/scratchpad/
 
@@ -22,7 +22,7 @@
 ## ../../.claude/plans/
 
 - `concurrent-popping-cloud.md` — Add WebP support: frontend encode + backend pass-through with dimension validation (~1619 tok)
-- `vast-scribbling-goose.md` — Convert backend-rendered UI to a static site (frontend module), served locally by a static server an (~3533 tok)
+- `vast-scribbling-goose.md` — Urgent Rescuer: anonymous danger reports, geo-matched paging, first-accept-wins, leaderboard (~3387 tok)
 
 ## ./
 
@@ -440,21 +440,25 @@
 
 ## backend/
 
-- `build.gradle.kts` — credential (~3816 tok)
+- `build.gradle.kts` — credential (~3843 tok)
 
 ## backend/src/main/kotlin/com/adoptu/
 
-- `Application.kt` — main, configureRouting (~1937 tok)
+- `Application.kt` — main, configureRouting (~1958 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/aws/
 
 - `EcsTaskCredentialsProvider.kt` — AWS SDK v2's own ContainerCredentialsProvider needs GraalVM native-image reflection/resource (~904 tok)
 
+## backend/src/main/kotlin/com/adoptu/adapters/captcha/
+
+- `TurnstileCaptchaAdapter.kt` — Cloudflare Turnstile (https://developers.cloudflare.com/turnstile/) - free, privacy-friendly (~570 tok)
+
 ## backend/src/main/kotlin/com/adoptu/adapters/db/
 
-- `DatabaseFactory.kt` — init, createDefaultAdmin (~1456 tok)
+- `DatabaseFactory.kt` — init, createDefaultAdmin (~1546 tok)
 - `DbDispatcher.kt` — Shared, bounded dispatcher for repository DB calls. (~705 tok)
-- `Models.kt` (~4407 tok)
+- `Models.kt` — Declares val (~6420 tok)
 - `PoolSizing.kt` — Single source of truth for how many DB-bound worker threads/connections this (~365 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/repositories/
@@ -464,7 +468,8 @@
 - `ShelterRepository.kt` — ShelterRepository: rowToDto, getById, getAll, create + 4 more (~2132 tok)
 - `SterilizationLocationRepository.kt` — SterilizationLocationRepository: rowToDto, getById, getAll, create + 6 more (~2658 tok)
 - `TemporalHomeRepository.kt` — Data class: TemporalHomeRepositoryImpl (11 properties) (~3509 tok)
-- `UserRepository.kt` — UserRepository: getActiveRolesForUser, getById, getByEmail, getActiveRolesForUserIds (~7731 tok)
+- `UrgentRescueRepository.kt` — UrgentRescueRepositoryImpl: generateToken, rowToProfile, rowToReport, rowToPage (~3893 tok)
+- `UserRepository.kt` — UserRepository: getActiveRolesForUser, getById, getByEmail, getActiveRolesForUserIds (~8221 tok)
 - `UserShelterRepository.kt` — UserShelterRepository: rowToDto, getByUserId, create, update + 2 more (~2589 tok)
 - `UserSterilizationLocationRepository.kt` — UserSterilizationLocationRepository: rowToDto, getByUserId, create, update + 2 more (~2404 tok)
 
@@ -472,9 +477,15 @@
 
 - `DynamoDBAdapter.kt` — DynamoDBAdapter: tableName, createUser, getUserById, getUserByEmail + 14 more (~8323 tok)
 
+## backend/src/main/kotlin/com/adoptu/adapters/geocoding/
+
+- `NominatimGeocodingAdapter.kt` — Free, no-API-key geocoding via OpenStreetMap's public Nominatim instance. Its usage policy (~985 tok)
+
 ## backend/src/main/kotlin/com/adoptu/adapters/notification/
 
+- `NotificationEmailAdapter.kt` — [NotificationPort] implementation delegating actual dispatch to EmailKit's [EmailSenderPort] (~1587 tok)
 - `SesEmailAdapter.kt` — SesEmailAdapter: sendEmail, sendEmailViaSmtp, sendEmailViaSes, sendPhotographerRequest (~2249 tok)
+- `SnsSmsAdapter.kt` — AWS SNS direct-to-phone SMS (Publish with a phoneNumber destination, not a topic ARN); credential chain mirrors S3ImageStorageAdapter (~760 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/storage/
 
@@ -490,7 +501,7 @@
 
 ## backend/src/main/kotlin/com/adoptu/di/
 
-- `AppModule.kt` — appModule, getOrigins, createImageStorageAdapter (~1254 tok)
+- `AppModule.kt` — appModule, getOrigins, createImageStorageAdapter (~2024 tok)
 
 ## backend/src/main/kotlin/com/adoptu/dto/input/
 
@@ -499,7 +510,8 @@
 - `PetDto.kt` — Data class: Gender (96 properties) (~1020 tok)
 - `ShelterDto.kt` — Data class: ShelterDto (~1043 tok)
 - `SterilizationLocationDto.kt` — Data class: SterilizationLocationDto (~765 tok)
-- `UserDto.kt` — Data class: UserRole (~1023 tok)
+- `UrgentRescueDto.kt` — Data class: LocationInputMode (~1020 tok)
+- `UserDto.kt` — Data class: UserRole (~1027 tok)
 
 ## backend/src/main/kotlin/com/adoptu/dto/output/
 
@@ -508,36 +520,42 @@
 
 ## backend/src/main/kotlin/com/adoptu/ports/
 
+- `CaptchaPort.kt` — Verifies a client-side CAPTCHA challenge token (e.g. Cloudflare Turnstile). (~55 tok)
 - `DynamoDBPort.kt` — createUser, getUserById, getUserByEmail, updateUser, deleteUser (~641 tok)
 - `EmailVerificationTokenInfo.kt` — Data class: EmailVerificationTokenInfo (3 properties) (~38 tok)
+- `GeocodingPort.kt` — Resolves a country/state/city into a center point + a radius that fully covers the zone's bounding b (~99 tok)
 - `ImageStoragePort.kt` — uploadImage, deleteImage, getImageUrl (~83 tok)
-- `NotificationPort.kt` — sendEmail, sendPhotographerRequest, sendAdoptionRequestNotification, sendTemporalHomeRequest (~219 tok)
+- `NotificationPort.kt` — sendEmail, sendPhotographerRequest, sendAdoptionRequestNotification, sendTemporalHomeRequest, sendUr (~280 tok)
 - `PetRepositoryPort.kt` — getAll, getAllUnfiltered, getAllForAdmin, getById, deactivatePet (~851 tok)
 - `PhotographerRepositoryPort.kt` — canSendMessage, createPhotographyRequest, getMyRequests, getRequestsForPhotographer, getRequestById (~313 tok)
 - `ShelterRepositoryPort.kt` — getById, getAll, create, update, delete (~178 tok)
+- `SmsNotificationPort.kt` — sendUrgentRescueAlert (~68 tok)
 - `SterilizationLocationRepositoryPort.kt` — getById, getAll, create, update, delete (~286 tok)
 - `TemporalHomeRepositoryPort.kt` — Returns (temporalHomeId, rescuerId) and marks the token used, or null if invalid/expired/already used. (~343 tok)
-- `UserRepositoryPort.kt` — getById, getByEmail, getAllUsers, getPhotographers, getRescuers (~810 tok)
+- `UrgentRescueRepositoryPort.kt` — Every currently-active urgent-rescuer profile - matching filters this list by distance in Kotlin. (~631 tok)
+- `UserRepositoryPort.kt` — Grants roles that don't require email verification (e.g. ADOPTER, ADMIN) immediately - (~907 tok)
 - `UserShelterRepositoryPort.kt` — getByUserId, create, update, delete, search (~182 tok)
 - `UserSterilizationLocationRepositoryPort.kt` — getByUserId, create, update, delete, search (~219 tok)
 
 ## backend/src/main/kotlin/com/adoptu/routes/
 
-- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~13586 tok)
+- `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~13640 tok)
 - `CountryRoutes.kt` — HttpRules, regionFromLocale (~320 tok)
 - `PetsRoutes.kt` — HttpRules (~4621 tok)
 - `PhotographerRoutes.kt` — HttpRules, validateUser (~2385 tok)
 - `ShelterRoutes.kt` — HttpRules, HttpRules (~1627 tok)
 - `SterilizationLocationRoutes.kt` — HttpRules, HttpRules (~1754 tok)
 - `TemporalHomeRoutes.kt` — HttpRules (~2738 tok)
+- `UrgentRescueRoutes.kt` — clientIp, HttpRules (~1478 tok)
 - `UserShelterRoutes.kt` — HttpRules (~767 tok)
-- `UsersRoutes.kt` — Data class: UpdateProfileRequest (7 properties) (~5523 tok)
+- `UsersRoutes.kt` — Data class: UpdateProfileRequest (~5793 tok)
 - `UserSterilizationLocationRoutes.kt` — HttpRules (~820 tok)
 
 ## backend/src/main/kotlin/com/adoptu/services/
 
 - `EmailChangeService.kt` — EmailChangeService: requestEmailChange, verifyEmailChange, generateToken, getLocalizedEmailChangeContent (~1867 tok)
 - `EmailVerificationService.kt` — EmailVerificationService: getLocalizedContent, generateAndSendVerificationEmail, verifyToken, verifyTokenAndGetLanguage + 4 more (~1784 tok)
+- `GeoUtils.kt` — Great-circle distance between two lat/lng points, in kilometers. (~169 tok)
 - `ImageCompressor.kt` — compress, compressJpeg, compressPng, calculateDimensions (~842 tok)
 - `MagicLinkService.kt` — Data class: MagicLinkService (~2744 tok)
 - `PasswordService.kt` — PasswordService: isLoginRateLimited, recordLoginAttempt, hasPassword, invalidatePassword + 15 more (~3609 tok)
@@ -548,7 +566,8 @@
 - `ShelterService.kt` — ShelterService: getAll, getById, create, update + 3 more (~507 tok)
 - `SterilizationLocationService.kt` — SterilizationLocationService: getAll, getById, create, update + 5 more (~604 tok)
 - `TemporalHomeService.kt` — Validates and consumes a spam-report token (see sendRequest), then blocks the rescuer it names. (~1332 tok)
-- `UserService.kt` — UserService(userRepository, photographerRepository): getById, getByEmail, getAllUsers, getRescuers; verifyToken/verifyTokenAndGetLanguage now auto-activate PendingRoleActivations via activatePendingRoles() (~1300 tok)
+- `UrgentRescueService.kt` — UrgentRescueService: getProfile, createProfile, updateProfile, activateProfile (~2974 tok)
+- `UserService.kt` — UserService: getById, getByEmail, getAllUsers, getRescuers (~1445 tok)
 - `UserShelterService.kt` — UserShelterService: getByUserId, create, update, delete + 1 more (~993 tok)
 - `UserSterilizationLocationService.kt` — UserSterilizationLocationService: getByUserId, create, update, delete + 1 more (~976 tok)
 - `WebPDimensionValidator.kt` — Data class: Dimensions (~1012 tok)
@@ -556,7 +575,7 @@
 ## backend/src/main/kotlin/com/adoptu/services/auth/
 
 - `SessionUser.kt` — Data class: SessionUser (3 properties) (~36 tok)
-- `WebAuthnService.kt` — Data class: VerificationResendOutcome (~6503 tok)
+- `WebAuthnService.kt` — Data class: VerificationResendOutcome (~7153 tok)
 
 ## backend/src/main/kotlin/com/adoptu/services/crypto/
 
@@ -586,7 +605,7 @@
 
 ## backend/src/main/resources/
 
-- `application.conf` — Declares STRING (~1072 tok)
+- `application.conf` — Declares STRING (~1293 tok)
 - `logback.xml` (~246 tok)
 
 ## backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/
@@ -596,7 +615,7 @@
 
 ## backend/src/test/kotlin/com/adoptu/adapters/db/
 
-- `DatabaseFactoryTest.kt` — Declares DatabaseFactoryTest (~3450 tok)
+- `DatabaseFactoryTest.kt` — Declares DatabaseFactoryTest (~3627 tok)
 
 ## backend/src/test/kotlin/com/adoptu/adapters/db/repositories/
 
@@ -620,7 +639,8 @@
 
 ## backend/src/test/kotlin/com/adoptu/mocks/
 
-- `TestDatabase.kt` — initH2, clearAllData (~1076 tok)
+- `MockNotificationAdapter.kt` — Data class: MockNotificationAdapter (~778 tok)
+- `TestDatabase.kt` — initH2, clearAllData (~1404 tok)
 
 ## backend/src/test/kotlin/com/adoptu/plugins/
 
@@ -693,10 +713,10 @@
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/
 
 - `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~2627 tok)
-- `Common.kt` — rule: NodeList, onCountryChange, initI18n, initClickActions (~3540 tok)
+- `Common.kt` — rule: NodeList, onCountryChange, initI18n, initClickActions (~3575 tok)
 - `I18n.kt` (~60315 tok)
 - `ImageCompression.kt` — compress, attempt (~724 tok)
-- `Main.kt` — main (~1326 tok)
+- `Main.kt` — main (~1534 tok)
 - `WebAuthn.kt` — encodeURIComponent, register, authenticate, parseAssertionOptions, getRegistrationOptions (~2384 tok)
 
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
@@ -705,21 +725,24 @@
 - `AuthFlowPages.kt` — init, showSuccess, showError, init, submit (~2649 tok)
 - `MyPetsPage.kt` — init, clampNonNegative, load, onPetsLoaded, renderPetCard (~6017 tok)
 - `TemporalHomePage.kt` — init, search, displayResults, init, render (~2534 tok)
+- `UrgentRescuePage.kt` — init, captureLocation, submit, init, toggleMode (~3409 tok)
 
 ## frontend/src/jvmMain/kotlin/com/adoptu/site/
 
-- `SiteGenerator.kt` — main, copyMatching (~1072 tok)
+- `SiteGenerator.kt` — main, copyMatching (~1144 tok)
 
 ## frontend/src/jvmMain/kotlin/com/adoptu/site/pages/
 
 - `AdminPage.kt` — HTML (~1219 tok)
 - `AdminSheltersPage.kt` — HTML (~1716 tok)
 - `EmailVerificationPage.kt` — HTML (~1183 tok)
+- `Icons.kt` — Declares val (~131 tok)
 - `LocationSearchFilters.kt` — DIV (~642 tok)
 - `NavParams.kt` — Data class: NavParams (~58 tok)
-- `Shared.kt` — HTML, A, BODY, DIV, NAV (~2152 tok)
+- `Shared.kt` — HTML, A, BODY, DIV, NAV (~2433 tok)
 - `SterilizationLocationsPage.kt` — HTML, HTML (~1539 tok)
 - `TemporalHomePage.kt` — HTML, HTML, HTML, HTML (~973 tok)
+- `UrgentRescuePage.kt` — HTML, HTML, HTML, HTML (~2795 tok)
 
 ## frontend/src/main/scss/
 
@@ -731,13 +754,14 @@
 
 ## infra/
 
-- `cloudfront.tf` (~4439 tok)
-- `ecs.tf` — New, dedicated cluster rather than reusing the account's existing (~1603 tok)
-- `iam.tf` (~1009 tok)
+- `cloudfront.tf` (~4574 tok)
+- `ecs.tf` — New, dedicated cluster rather than reusing the account's existing (~1712 tok)
+- `iam.tf` (~1100 tok)
 - `outputs.tf` (~328 tok)
 - `s3.tf` (~860 tok)
+- `secrets.tf` — RDS master ("postgres" superuser) password - generated, never typed in by (~591 tok)
 - `terraform.tfvars` (~102 tok)
-- `variables.tf` — Declares can (~1728 tok)
+- `variables.tf` — Declares can (~1930 tok)
 
 ## infra/cloudfront-functions/
 

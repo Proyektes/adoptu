@@ -87,9 +87,11 @@ private val SELF_REGISTERABLE_ROLES = UserRole.entries.toSet() - UserRole.ADMIN
 // registration is never verified yet, so none of these can be granted at signup time. Selecting
 // one of these roles at registration just records intent; the user activates it from /profile
 // (through the already-gated POST /api/users/{role}-profile) after verifying.
-private val ROLES_REQUIRING_VERIFICATION_BEFORE_ACTIVATION = setOf(
-    UserRole.PHOTOGRAPHER, UserRole.TEMPORAL_HOME, UserRole.SHELTER, UserRole.STERILIZATION_SERVICE, UserRole.RESCUER
-)
+//
+// Derived (every self-registerable role except ADOPTER), not hand-listed - see the longer
+// explanation on WebAuthnService's copy of this same derivation. Reuses SELF_REGISTERABLE_ROLES
+// above rather than re-deriving from UserRole.entries directly since it's already right there.
+private val ROLES_REQUIRING_VERIFICATION_BEFORE_ACTIVATION = SELF_REGISTERABLE_ROLES - UserRole.ADOPTER
 
 private fun parseSelfRegisteredRoles(rolesStr: String?): Set<UserRole> =
     rolesStr?.split(",")

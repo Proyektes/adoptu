@@ -65,6 +65,11 @@ fun NAV.languageDropdown() {
 fun NAV.commonNav(isLoggedIn: Boolean = false, isAdmin: Boolean = false, isRescuerOrAdmin: Boolean = false, isTemporalHomeOrAdmin: Boolean = false) {
     div(classes = "nav-right") {
         div(classes = "hidden") { attributes["data-auth"] = "user"; commonResourcesDropdown() }
+        // Not data-auth gated - anonymous bystanders reporting a pet in danger is a core
+        // requirement (see UrgentRescueService/SubmitUrgentReportRequest), so this must be
+        // visible to guests too.
+        a("/report-urgent") { id = "nav-report-urgent"; attributes["data-i18n"] = "reportUrgent"; +"Report Urgent" }
+        a("/urgent-rescuer-leaderboard") { id = "nav-urgent-leaderboard"; attributes["data-i18n"] = "topRescuers"; +"Top Rescuers" }
         a("https://paypal.me/adoptu") { target = "_blank"; id = "nav-donate"; attributes["data-i18n"] = "donate"; +"Donate" }
 
         a("/login", classes = "hidden") { attributes["data-auth"] = "guest"; id = "nav-login"; attributes["data-i18n"] = "login"; +"Login" }
@@ -87,6 +92,15 @@ fun NAV.commonNav(isLoggedIn: Boolean = false, isAdmin: Boolean = false, isRescu
                     attributes["data-auth"] = "temporal-home"
                     span { attributes["data-i18n"] = "myTemporalHome"; +"My Temporal Home" }
                     span(classes = "material-symbols-outlined") { +Icons.HOME }
+                }
+                a("/urgent-rescuer-profile") {
+                    span { attributes["data-i18n"] = "urgentRescuerSettings"; +"Urgent Rescuer Settings" }
+                    span(classes = "material-symbols-outlined") { +Icons.URGENT }
+                }
+                a("/urgent-rescuer-dashboard", classes = "hidden") {
+                    attributes["data-auth"] = "urgent-rescuer"
+                    span { attributes["data-i18n"] = "urgentRescueAlerts"; +"Urgent Rescue Alerts" }
+                    span(classes = "material-symbols-outlined") { +Icons.URGENT }
                 }
                 a("/admin", classes = "hidden") {
                     attributes["data-auth"] = "admin"

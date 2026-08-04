@@ -39,6 +39,9 @@ object TestDatabase {
                     PendingRoleActivations,
                     TemporalHomeRequests,
                     BlockedRescuers,
+                    UrgentReportPages,
+                    UrgentReports,
+                    UrgentRescuerProfiles,
                     Photographers,
                     TemporalHomes,
                     SterilizationLocations,
@@ -80,6 +83,9 @@ object TestDatabase {
                 TemporalHomes,
                 BlockedRescuers,
                 TemporalHomeRequests,
+                UrgentRescuerProfiles,
+                UrgentReports,
+                UrgentReportPages,
                 Pets,
                 PetImages,
                 AdoptionRequests,
@@ -105,6 +111,9 @@ object TestDatabase {
             exec("DELETE FROM user_passwords")
             exec("DELETE FROM temporal_home_requests")
             exec("DELETE FROM blocked_rescuers")
+            exec("DELETE FROM urgent_report_pages")
+            exec("DELETE FROM urgent_reports")
+            exec("DELETE FROM urgent_rescuer_profiles")
             exec("DELETE FROM temporal_homes")
             exec("DELETE FROM adoption_requests")
             exec("DELETE FROM pet_images")

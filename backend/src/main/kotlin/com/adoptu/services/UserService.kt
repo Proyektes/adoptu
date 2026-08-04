@@ -101,6 +101,7 @@ class UserService(
                 UserRole.SHELTER -> userRepository.activateShelterProfile(userId)
                 UserRole.STERILIZATION_SERVICE -> userRepository.activateSterilizationProfile(userId)
                 UserRole.PHOTOGRAPHER -> photographerRepository.activatePhotographerProfile(userId)
+                UserRole.URGENT_RESCUER -> userRepository.activateUrgentRescuerProfile(userId)
                 else -> Unit
             }
         }

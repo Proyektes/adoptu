@@ -19,6 +19,7 @@ import com.adoptu.routes.photographerRoutes
 import com.adoptu.routes.shelterRoutes
 import com.adoptu.routes.sterilizationLocationRoutes
 import com.adoptu.routes.temporalHomeRoutes
+import com.adoptu.routes.urgentRescueRoutes
 import com.adoptu.routes.userShelterRoutes
 import com.adoptu.routes.userSterilizationLocationRoutes
 import com.adoptu.routes.usersRoutes
@@ -150,6 +151,7 @@ internal fun configureRouting(routing: HttpRouting.Builder) {
     routing.adminUsersRoutes()
     routing.photographerRoutes()
     routing.temporalHomeRoutes()
+    routing.urgentRescueRoutes()
     routing.shelterRoutes()
     routing.adminShelterRoutes()
     routing.sterilizationLocationRoutes()
