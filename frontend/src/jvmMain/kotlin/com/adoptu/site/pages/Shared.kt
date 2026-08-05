@@ -12,6 +12,15 @@ fun HTML.commonHead(title: String, extraCss: String? = null) {
         link(rel = "icon", href = "https://static.adopt-u.org/favicon.ico", type = "image/x-icon")
         link(rel = "stylesheet", href = "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200")
         extraCss?.let { link(rel = "stylesheet", href = "/static/css/$it") }
+        // Generic site-wide share preview - every page except /pet/{id} gets this (that one route
+        // has its own real per-pet og:image via the CloudFront-Function-routed
+        // GET /api/share/pet/{id} bot path - see infra/cloudfront-functions/site-rewrite.js).
+        // og-image.png doesn't exist yet - upload a real ~1200x630 image at that path.
+        meta { attributes["property"] = "og:type"; attributes["content"] = "website" }
+        meta { attributes["property"] = "og:title"; attributes["content"] = title }
+        meta { attributes["property"] = "og:description"; attributes["content"] = "Adopt-U: pets in need of loving homes." }
+        meta { attributes["property"] = "og:image"; attributes["content"] = "https://static.adopt-u.org/og-image.png" }
+        meta { name = "twitter:card"; content = "summary_large_image" }
     }
 }
 

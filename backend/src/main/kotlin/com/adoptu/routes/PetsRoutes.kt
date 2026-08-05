@@ -1,5 +1,6 @@
 package com.adoptu.routes
 
+import com.adoptu.config.AppConfig
 import com.adoptu.dto.input.CreateAdoptionRequestRequest
 import com.adoptu.dto.input.CreatePetRequest
 import com.adoptu.dto.input.UpdatePetRequest
@@ -20,6 +21,7 @@ import com.adoptu.web.receiveMultipart
 import com.adoptu.web.respondData
 import com.adoptu.web.respondError
 import com.adoptu.web.respondForbidden
+import com.adoptu.web.respondHtml
 import com.adoptu.web.respondInvalidId
 import com.adoptu.web.respondNotFound
 import com.adoptu.web.respondSuccess
@@ -28,11 +30,54 @@ import io.helidon.http.HeaderNames
 import io.helidon.webserver.http.Handler
 import io.helidon.webserver.http.HttpRules
 import kotlinx.coroutines.runBlocking
+import kotlinx.html.a
+import kotlinx.html.body
+import kotlinx.html.head
+import kotlinx.html.link
+import kotlinx.html.meta
+import kotlinx.html.title
 import org.koin.core.component.inject
 
 fun HttpRules.petsRoutes() {
     val petService by Deps.inject<PetService>()
     val validationService by Deps.inject<PetsValidationService>()
+    val config by Deps.inject<AppConfig>()
+
+    // Bot-only route: pet-detail is a client-rendered static shell (real pet data is fetched via
+    // JS after load), which social-preview crawlers never see because they don't run JavaScript.
+    // A CloudFront Function on /pet/{id} (infra/cloudfront-functions/site-rewrite.js) detects known
+    // crawler user-agents and routes just those requests here instead of the static site, so
+    // WhatsApp/Facebook/etc. get real per-pet og:image/title tags. Real visitors never hit this -
+    // they keep getting /pet-detail.html untouched.
+    get("/api/share/pet/{id}", Handler { req, res ->
+        val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondNotFound("Pet not found")
+        val pet = runBlocking { petService.getById(id) } ?: return@Handler res.respondNotFound("Pet not found")
+
+        val baseUrl = config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:4000"
+        val canonicalUrl = "$baseUrl/pet/${pet.id}"
+        val image = pet.images.firstOrNull { it.isPrimary } ?: pet.images.firstOrNull()
+        val pageTitle = "${pet.name} - Adopt-U"
+        val description = pet.description.take(160).ifBlank { "Meet ${pet.name} on Adopt-U." }
+
+        res.respondHtml {
+            head {
+                meta { charset = "utf-8" }
+                title { +pageTitle }
+                meta { name = "description"; content = description }
+                link { rel = "canonical"; href = canonicalUrl }
+                meta { attributes["property"] = "og:type"; attributes["content"] = "website" }
+                meta { attributes["property"] = "og:title"; attributes["content"] = pageTitle }
+                meta { attributes["property"] = "og:description"; attributes["content"] = description }
+                meta { attributes["property"] = "og:url"; attributes["content"] = canonicalUrl }
+                image?.let { meta { attributes["property"] = "og:image"; attributes["content"] = it.imageUrl } }
+                meta { name = "twitter:card"; content = "summary_large_image" }
+                meta { name = "twitter:title"; content = pageTitle }
+                meta { name = "twitter:description"; content = description }
+                image?.let { meta { name = "twitter:image"; content = it.imageUrl } }
+            }
+            body { a(href = canonicalUrl) { +"View $pageTitle" } }
+        }
+    })
 
     get("/api/pets", Handler { req, res ->
         val type = req.queryParam("type")

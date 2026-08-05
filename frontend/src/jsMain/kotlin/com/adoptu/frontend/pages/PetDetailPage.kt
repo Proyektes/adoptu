@@ -7,6 +7,7 @@ import kotlinx.browser.window
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLTextAreaElement
 import org.w3c.dom.events.Event
+import kotlin.js.json
 
 private val emoji = mapOf("DOG" to "🐕", "CAT" to "🐱", "BIRD" to "🐦", "FISH" to "🐟")
 private val currencySymbols = mapOf("USD" to "$", "EUR" to "€", "GBP" to "£", "CAD" to "C$", "AUD" to "A$")
@@ -98,6 +99,8 @@ object PetDetailPageModule {
         if (adoptionFee > 0) sb.append("<div class=\"detail-section\"><strong>${I18n.t("adoptionFee")}:</strong> ${currencySymbols[pet.currency.toString()] ?: "$"}$adoptionFee ${pet.currency}</div>")
         if (pet.isUrgent == true) sb.append("<div class=\"urgent-badge\">${I18n.t("urgentBadge")}</div>")
 
+        sb.append("<button type=\"button\" class=\"btn btn-secondary\" id=\"share-pet-btn\">${I18n.t("share")}</button>")
+
         if (canAdopt) {
             sb.append("<form id=\"adopt-form\"><label for=\"msg\">${I18n.t("messageOptional")}</label><textarea id=\"msg\" name=\"message\"></textarea><button type=\"submit\" class=\"btn\">${I18n.t("requestAdoption")}</button></form>")
         }
@@ -107,6 +110,8 @@ object PetDetailPageModule {
         sb.append("</div>")
 
         container.innerHTML = sb.toString()
+
+        document.getElementById("share-pet-btn")?.addEventListener("click", { shareCurrentPet() })
 
         val form = document.getElementById("adopt-form")
         form?.addEventListener("submit", { e: Event ->
@@ -129,6 +134,21 @@ object PetDetailPageModule {
                 }
             }
         })
+    }
+
+    // Web Share API (mobile browsers - one native tap opens the OS share sheet, WhatsApp included)
+    // where available; desktop/unsupported browsers fall back to a direct WhatsApp share link.
+    private fun shareCurrentPet() {
+        val pet = currentPet ?: return
+        val url = window.location.href
+        val text = "${pet.name} - ${I18n.t("adoptU")}"
+        val share = window.navigator.asDynamic().share
+        if (share != null) {
+            window.navigator.asDynamic().share(json("title" to text, "url" to url))
+        } else {
+            val encoded = window.asDynamic().encodeURIComponent("$text $url")
+            window.open("https://wa.me/?text=$encoded", "_blank")
+        }
     }
 
     private fun petStatusLabel(status: dynamic): String = when (status.toString()) {

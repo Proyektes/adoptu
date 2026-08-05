@@ -4375,6 +4375,54 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-04T18:56:56.135Z"
+    },
+    {
+      "id": "bug-263",
+      "timestamp": "2026-08-04T23:55:05.062Z",
+      "error_message": "Null/undefined access in ",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/PetsRoutes.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T23:55:05.062Z"
+    },
+    {
+      "id": "bug-264",
+      "timestamp": "2026-08-04T23:55:28.623Z",
+      "error_message": "Wrong reference: title should be pageTitle",
+      "file": "backend/src/main/kotlin/com/adoptu/routes/PetsRoutes.kt",
+      "root_cause": "Used \"title\" instead of \"pageTitle\"",
+      "fix": "Changed title → pageTitle",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-04T23:55:28.623Z"
+    },
+    {
+      "id": "bug-265",
+      "timestamp": "2026-08-04T23:57:12.289Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/PetDetailPage.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: // Web Share API (mobile browsers - one native tap opens the; // where available; desktop/unsupported browsers fall back t",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-04T23:57:28.904Z"
     }
   ]
 }

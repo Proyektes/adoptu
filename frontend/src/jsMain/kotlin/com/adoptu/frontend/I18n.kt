@@ -797,6 +797,7 @@ private val englishTranslations = json(
         "rescueAcceptedMessage" to "Thank you - you're on it. Head to the reported location as soon as you can.",
         "rescueAcceptFailedTitle" to "Couldn't Accept",
         "rescueAcceptFailedMessage" to "This report was already accepted by another rescuer, or the link is invalid or expired.",
+        "share" to "Share",
     )
 
     private val spanishTranslations = json(
@@ -1589,6 +1590,7 @@ private val englishTranslations = json(
         "rescueAcceptedMessage" to "Gracias - ya estás en camino. Dirígete al lugar reportado tan pronto como puedas.",
         "rescueAcceptFailedTitle" to "No se pudo aceptar",
         "rescueAcceptFailedMessage" to "Este reporte ya fue aceptado por otro rescatista, o el enlace es inválido o expiró.",
+        "share" to "Compartir",
     )
 
     private val frenchTranslations = json(
@@ -2381,6 +2383,7 @@ private val englishTranslations = json(
         "rescueAcceptedMessage" to "Merci - vous êtes sur le coup. Rendez-vous sur les lieux signalés dès que possible.",
         "rescueAcceptFailedTitle" to "Impossible d'accepter",
         "rescueAcceptFailedMessage" to "Ce signalement a déjà été accepté par un autre sauveteur, ou le lien est invalide ou a expiré.",
+        "share" to "Partager",
 )
 
 private val portugueseTranslations = json(
@@ -3173,6 +3176,7 @@ private val portugueseTranslations = json(
     "rescueAcceptedMessage" to "Obrigado - você está a caminho. Vá até o local relatado assim que possível.",
     "rescueAcceptFailedTitle" to "Não foi possível aceitar",
     "rescueAcceptFailedMessage" to "Este relato já foi aceito por outro resgatista, ou o link é inválido ou expirou.",
+    "share" to "Compartilhar",
 )
 
 private val chineseTranslations = json(
@@ -3965,6 +3969,7 @@ private val chineseTranslations = json(
     "rescueAcceptedMessage" to "谢谢——您已接手此案。请尽快前往报告的地点。",
     "rescueAcceptFailedTitle" to "无法接受",
     "rescueAcceptFailedMessage" to "此举报已被其他救援者接受，或链接无效或已过期。",
+    "share" to "分享",
 )
 
 @JsExport

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-04T18:56:56.115Z
-> Files: 567 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-04T23:59:15.105Z
+> Files: 568 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/37d425e0-d2ad-499f-bde7-97b1baf5c00b/scratchpad/
 
@@ -22,7 +22,7 @@
 ## ../../.claude/plans/
 
 - `concurrent-popping-cloud.md` — Add WebP support: frontend encode + backend pass-through with dimension validation (~1619 tok)
-- `vast-scribbling-goose.md` — Urgent Rescuer: anonymous danger reports, geo-matched paging, first-accept-wins, leaderboard (~3387 tok)
+- `vast-scribbling-goose.md` — Competitive feature gap analysis — Adopt-U vs. named competitors/similar platforms (~1411 tok)
 
 ## ./
 
@@ -541,7 +541,7 @@
 
 - `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~13640 tok)
 - `CountryRoutes.kt` — HttpRules, regionFromLocale (~320 tok)
-- `PetsRoutes.kt` — HttpRules (~4621 tok)
+- `PetsRoutes.kt` — HttpRules (~5322 tok)
 - `PhotographerRoutes.kt` — HttpRules, validateUser (~2385 tok)
 - `ShelterRoutes.kt` — HttpRules, HttpRules (~1627 tok)
 - `SterilizationLocationRoutes.kt` — HttpRules, HttpRules (~1754 tok)
@@ -714,7 +714,7 @@
 
 - `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~2627 tok)
 - `Common.kt` — rule: NodeList, onCountryChange, initI18n, initClickActions (~3575 tok)
-- `I18n.kt` (~64162 tok)
+- `I18n.kt` (~64200 tok)
 - `ImageCompression.kt` — compress, attempt (~724 tok)
 - `Main.kt` — main (~1584 tok)
 - `WebAuthn.kt` — encodeURIComponent, register, authenticate, parseAssertionOptions, getRegistrationOptions (~2384 tok)
@@ -724,6 +724,7 @@
 - `AdminPage.kt` — init, switchTab, formatDate, buildQuery, renderPagination (~4624 tok)
 - `AuthFlowPages.kt` — init, showSuccess, showError, init, submit (~2649 tok)
 - `MyPetsPage.kt` — init, clampNonNegative, load, onPetsLoaded, renderPetCard (~6017 tok)
+- `PetDetailPage.kt` — init, render, shareCurrentPet, petStatusLabel, renderImages (~2618 tok)
 - `TemporalHomePage.kt` — init, search, displayResults, init, render (~2534 tok)
 - `UrgentRescuePage.kt` — init, captureLocation, submit, init, toggleMode (~3712 tok)
 
@@ -739,7 +740,7 @@
 - `Icons.kt` — Declares val (~131 tok)
 - `LocationSearchFilters.kt` — DIV (~642 tok)
 - `NavParams.kt` — Data class: NavParams (~58 tok)
-- `Shared.kt` — HTML, A, BODY, DIV, NAV (~2433 tok)
+- `Shared.kt` — HTML, A, BODY, DIV, NAV (~2660 tok)
 - `SterilizationLocationsPage.kt` — HTML, HTML (~1539 tok)
 - `TemporalHomePage.kt` — HTML, HTML, HTML, HTML (~973 tok)
 - `UrgentRescuePage.kt` — HTML, HTML, HTML, HTML, HTML (~3440 tok)
@@ -765,13 +766,13 @@
 
 ## infra/cloudfront-functions/
 
-- `site-rewrite.js` — Viewer-request rewrite for the adoptu static site (S3 origin behind aws_cloudfront_distribution (~298 tok)
+- `site-rewrite.js` — Viewer-request rewrite for the adoptu static site (S3 origin behind aws_cloudfront_distribution (~553 tok)
 
 ## scripts/
 
 - `benchmark.sh` — Load-tests the backend under the SAME resource ceiling as production (ECS Fargate), (~1580 tok)
 - `deploy.sh` — Builds the backend image from the current git HEAD, pushes it to ECR by (~1569 tok)
-- `serve_site.py` — Local static file server for the generated site (frontend/build/site), mirroring how (~1516 tok)
+- `serve_site.py` — Local static file server for the generated site (frontend/build/site), mirroring how (~1936 tok)
 
 ## shared/
 
