@@ -61,6 +61,10 @@ fun main(args: Array<String>) {
         "urgent-rescuer-dashboard" to { urgentRescuerDashboardPage() },
         "urgent-rescuer-leaderboard" to { urgentRescuerLeaderboardPage() },
         "urgent-rescue-accept" to { urgentRescueAcceptPage() },
+        "report-lost-found" to { reportLostFoundPage() },
+        "lost-found" to { lostFoundBrowsePage() },
+        "lost-found-detail" to { lostFoundDetailPage() },
+        "lost-found-resolve" to { lostFoundResolvePage() },
     )
 
     for ((name, render) in pages) {
@@ -88,7 +92,8 @@ private val SERVE_JSON = """
   "cleanUrls": true,
   "rewrites": [
     { "source": "^/pet/[0-9]+${'$'}", "destination": "/pet-detail.html" },
-    { "source": "^/temporal-home/[0-9]+${'$'}", "destination": "/temporal-home-detail.html" }
+    { "source": "^/temporal-home/[0-9]+${'$'}", "destination": "/temporal-home-detail.html" },
+    { "source": "^/lost-found/[0-9]+${'$'}", "destination": "/lost-found-detail.html" }
   ]
 }
 """.trimIndent()

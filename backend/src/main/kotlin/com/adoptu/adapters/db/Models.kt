@@ -424,6 +424,29 @@ object UrgentReportPages : Table("urgent_report_pages") {
     override val primaryKey = PrimaryKey(id)
 }
 
+// LOST (owner missing a pet) and FOUND (someone found a stray) reports share one table,
+// distinguished by kind - matching cross-references the opposite kind (see LostFoundService).
+object LostFoundReports : Table("lost_found_reports") {
+    val id = integer("id").autoIncrement()
+    val kind = varchar("kind", 10)
+    val reporterUserId = integer("reporter_user_id").references(Users.id).nullable()
+    val reporterEmail = varchar("reporter_email", 255)
+    val reporterPhone = varchar("reporter_phone", 50).nullable()
+    val petType = varchar("pet_type", 50).nullable()
+    val description = text("description")
+    val photoUrl = varchar("photo_url", 500).nullable()
+    val latitude = double("latitude")
+    val longitude = double("longitude")
+    val locationLabel = varchar("location_label", 255)
+    val country = enumerationByName("country", 100, Country::class)
+    val lastSeenAt = long("last_seen_at")
+    val status = varchar("status", 20)
+    val resolveToken = varchar("resolve_token", 255).uniqueIndex()
+    val createdAt = long("created_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
 object AnimalShelters : Table("animal_shelters") {
     val id = integer("id").autoIncrement()
     val userId = integer("user_id").references(Users.id).nullable()

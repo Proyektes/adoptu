@@ -53,6 +53,7 @@ fun appModule(config: AppConfig) = module {
     single<ShelterRepositoryPort> { ShelterRepository(get()) }
     single<SterilizationLocationRepositoryPort> { SterilizationLocationRepository(get()) }
     single<UrgentRescueRepositoryPort> { UrgentRescueRepositoryImpl(get()) }
+    single<LostFoundRepositoryPort> { LostFoundRepositoryImpl(get()) }
     single<GeocodingPort> { NominatimGeocodingAdapter() }
     single<ImageStoragePort> { createImageStorageAdapter(config) }
     single<EmailSenderPort> { emailSenderPortFromConfig(config) }
@@ -72,6 +73,7 @@ fun appModule(config: AppConfig) = module {
     single<PetService> { PetService(get(), get(), get(), get()) }
     single<TemporalHomeService> { TemporalHomeService(get(), get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
     single<UrgentRescueService> { UrgentRescueService(get(), get(), get(), get(), get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
+    single<LostFoundService> { LostFoundService(get(), get(), get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
     single { ProfileEmailVerificationService(get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
     single { UserShelterService(get(), get()) }
     single { UserSterilizationLocationService(get(), get()) }

@@ -42,6 +42,7 @@ object TestDatabase {
                     UrgentReportPages,
                     UrgentReports,
                     UrgentRescuerProfiles,
+                    LostFoundReports,
                     Photographers,
                     TemporalHomes,
                     SterilizationLocations,
@@ -86,6 +87,7 @@ object TestDatabase {
                 UrgentRescuerProfiles,
                 UrgentReports,
                 UrgentReportPages,
+                LostFoundReports,
                 Pets,
                 PetImages,
                 AdoptionRequests,
@@ -114,6 +116,7 @@ object TestDatabase {
             exec("DELETE FROM urgent_report_pages")
             exec("DELETE FROM urgent_reports")
             exec("DELETE FROM urgent_rescuer_profiles")
+            exec("DELETE FROM lost_found_reports")
             exec("DELETE FROM temporal_homes")
             exec("DELETE FROM adoption_requests")
             exec("DELETE FROM pet_images")

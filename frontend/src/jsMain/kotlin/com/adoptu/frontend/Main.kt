@@ -8,6 +8,9 @@ import com.adoptu.frontend.pages.EmailVerificationPageModule
 import com.adoptu.frontend.pages.ForgotPasswordPageModule
 import com.adoptu.frontend.pages.IndexPageModule
 import com.adoptu.frontend.pages.LoginPageModule
+import com.adoptu.frontend.pages.LostFoundBrowsePageModule
+import com.adoptu.frontend.pages.LostFoundDetailPageModule
+import com.adoptu.frontend.pages.LostFoundResolvePageModule
 import com.adoptu.frontend.pages.MagicLinkLoginPageModule
 import com.adoptu.frontend.pages.MyPetsPageModule
 import com.adoptu.frontend.pages.PetDetailPageModule
@@ -23,6 +26,7 @@ import com.adoptu.frontend.pages.TemporalHomeBlockPageModule
 import com.adoptu.frontend.pages.TemporalHomeDetailPageModule
 import com.adoptu.frontend.pages.TemporalHomeProfilePageModule
 import com.adoptu.frontend.pages.TemporalHomeSearchPageModule
+import com.adoptu.frontend.pages.ReportLostFoundPageModule
 import com.adoptu.frontend.pages.ReportUrgentPageModule
 import com.adoptu.frontend.pages.UrgentRescueAcceptPageModule
 import com.adoptu.frontend.pages.UrgentRescuerDashboardPageModule
@@ -83,6 +87,10 @@ fun main() {
                     path == "/urgent-rescuer-dashboard" || path == "/urgent-rescuer-dashboard/" -> UrgentRescuerDashboardPageModule.init()
                     path == "/urgent-rescuer-leaderboard" || path == "/urgent-rescuer-leaderboard/" -> UrgentRescuerLeaderboardPageModule.init()
                     path == "/urgent-rescue-accept" || path == "/urgent-rescue-accept/" -> UrgentRescueAcceptPageModule.init()
+                    path == "/report-lost-found" || path == "/report-lost-found/" -> ReportLostFoundPageModule.init()
+                    path == "/lost-found" || path == "/lost-found/" -> LostFoundBrowsePageModule.init()
+                    path == "/lost-found-resolve" || path == "/lost-found-resolve/" -> LostFoundResolvePageModule.init()
+                    path.startsWith("/lost-found/") -> LostFoundDetailPageModule.init()
                     else -> {}
                 }
             } catch (e: dynamic) {}
