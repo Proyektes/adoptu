@@ -1,6 +1,7 @@
 package com.adoptu.frontend.pages
 
 import com.adoptu.frontend.ApiClientModule
+import com.adoptu.frontend.CommonModule
 import com.adoptu.frontend.I18n
 import kotlinx.browser.document
 import kotlinx.browser.window
@@ -146,6 +147,7 @@ object PetDetailPageModule {
                 (document.getElementById("message") as? HTMLElement)?.let {
                     it.className = "message success"
                     it.textContent = I18n.t("adoptionRequestSubmitted")
+                    CommonModule.showDonationPrompt(it)
                 }
                 form.unsafeCast<HTMLElement>().style.display = "none"
             }.catch { err: dynamic ->

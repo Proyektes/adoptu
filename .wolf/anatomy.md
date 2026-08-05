@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-05T13:10:44.671Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-05T14:07:15.077Z
 > Files: 591 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/37d425e0-d2ad-499f-bde7-97b1baf5c00b/scratchpad/
@@ -731,8 +731,8 @@
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/
 
 - `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~3028 tok)
-- `Common.kt` — rule: NodeList, onCountryChange, initI18n, initClickActions (~3575 tok)
-- `I18n.kt` (~66873 tok)
+- `Common.kt` — rule: NodeList, showDonationPrompt, onCountryChange, initI18n (~3910 tok)
+- `I18n.kt` (~67153 tok)
 - `ImageCompression.kt` — compress, attempt (~724 tok)
 - `Main.kt` — main (~1762 tok)
 - `WebAuthn.kt` — encodeURIComponent, register, authenticate, parseAssertionOptions, getRegistrationOptions (~2384 tok)
@@ -742,12 +742,12 @@
 - `AdminPage.kt` — init, switchTab, formatDate, buildQuery, renderPagination (~4624 tok)
 - `AuthFlowPages.kt` — init, showSuccess, showError, init, submit (~2649 tok)
 - `IndexPage.kt` — init, refreshFavoriteButtons, toggleFavorite, saveCurrentSearch, loadPets (~3194 tok)
-- `LostFoundPage.kt` — init, captureLocation, submit, init, search (~2819 tok)
+- `LostFoundPage.kt` — init, captureLocation, submit, init, search (~2842 tok)
 - `MyPetsPage.kt` — init, clampNonNegative, load, onPetsLoaded, renderPetCard (~6383 tok)
-- `PetDetailPage.kt` — init, render, shareCurrentPet, toggleFavorite, petStatusLabel (~3079 tok)
+- `PetDetailPage.kt` — init, render, shareCurrentPet, toggleFavorite, petStatusLabel (~3104 tok)
 - `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~10646 tok)
 - `TemporalHomePage.kt` — init, search, displayResults, init, render (~2534 tok)
-- `UrgentRescuePage.kt` — init, captureLocation, submit, init, toggleMode (~3712 tok)
+- `UrgentRescuePage.kt` — init, captureLocation, submit, init, toggleMode (~3769 tok)
 
 ## frontend/src/jvmMain/kotlin/com/adoptu/site/
 
@@ -773,7 +773,7 @@
 
 ## frontend/src/main/scss/
 
-- `style.scss` — Styles: 59 rules (~3812 tok)
+- `style.scss` — Styles: 56 rules (~3894 tok)
 
 ## frontend/src/tests/
 

@@ -252,7 +252,10 @@ object UrgentRescuerDashboardPageModule {
         acceptBtn.addEventListener("click", {
             acceptBtn.disabled = true
             apiFetch("/api/urgent-rescuers/reports/${page.reportId}/accept", json("method" to "POST"))
-                .then<Unit> { _: dynamic -> card.remove() }
+                .then<Unit> { _: dynamic ->
+                    CommonModule.showDonationPrompt(document.getElementById("pages-container"))
+                    card.remove()
+                }
                 .catch<Unit> { _: dynamic ->
                     card.innerHTML += "<p class=\"message error\">${I18n.t("alreadyAccepted")}</p>"
                 }
@@ -302,6 +305,7 @@ object UrgentRescueAcceptPageModule {
     private fun showSuccess() {
         document.getElementById("accept-success")?.className = "verification-success"
         document.getElementById("accept-error")?.className = "verification-error hidden"
+        CommonModule.showDonationPrompt(document.getElementById("accept-success"))
     }
 
     private fun showError(message: String?) {

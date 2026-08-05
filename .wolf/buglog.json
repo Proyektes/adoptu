@@ -4727,6 +4727,38 @@
       "related_bugs": [],
       "occurrences": 2,
       "last_seen": "2026-08-05T12:59:54.113Z"
+    },
+    {
+      "id": "bug-285",
+      "timestamp": "2026-08-05T14:04:12.803Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/Common.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-05T14:04:12.803Z"
+    },
+    {
+      "id": "bug-286",
+      "timestamp": "2026-08-05T14:04:46.368Z",
+      "error_message": "Wrong reference: I18n should be CommonModule",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/PetDetailPage.kt",
+      "root_cause": "Used \"I18n\" instead of \"CommonModule\"",
+      "fix": "Changed I18n → CommonModule",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-05T14:04:46.368Z"
     }
   ]
 }

@@ -16,6 +16,23 @@ fun NodeList.forEachElement(action: (Element) -> Unit) {
 @JsExport
 @JsName("Common")
 object CommonModule {
+    // Contextual donation ask at a goodwill moment (adoption request submitted, urgent-rescue/
+    // lost-found accepted) - per STRATEGY.md's "apadrina un rescate" plan, this is deliberately
+    // NOT a new payment integration (no credentials to manage): it's the same paypal.me link
+    // already in the nav, just surfaced where someone has just done something good instead of
+    // buried in a menu nobody clicks. Dismissible, never blocks the actual success flow.
+    fun showDonationPrompt(afterElement: Element?) {
+        val target = afterElement ?: return
+        if (target.parentElement?.querySelector(".donation-prompt") != null) return // already shown once
+        val banner = document.createElement("div")
+        banner.className = "donation-prompt"
+        banner.innerHTML = "<p>${I18n.t("donationPromptText")}</p>" +
+            "<a href=\"https://paypal.me/adoptu/50\" target=\"_blank\" class=\"btn\">${I18n.t("donationPromptCta")}</a> " +
+            "<button type=\"button\" class=\"btn btn-secondary donation-dismiss\">${I18n.t("dismiss")}</button>"
+        target.parentElement?.insertBefore(banner, target.nextSibling)
+        banner.querySelector(".donation-dismiss")?.addEventListener("click", { banner.remove() })
+    }
+
     fun onCountryChange() {
         val countrySelect = window.document.getElementById("profile-country")
         val stateContainer = window.document.getElementById("state-container")

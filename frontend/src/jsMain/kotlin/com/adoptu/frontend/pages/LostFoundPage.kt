@@ -244,6 +244,7 @@ object LostFoundResolvePageModule {
     private fun showSuccess() {
         document.getElementById("resolve-success")?.className = "verification-success"
         document.getElementById("resolve-error")?.className = "verification-error hidden"
+        CommonModule.showDonationPrompt(document.getElementById("resolve-success"))
     }
 
     private fun showError() {

@@ -833,6 +833,9 @@ private val englishTranslations = json(
         "noFavoritesYet" to "No favorites yet",
         "mySavedSearches" to "My Saved Searches",
         "noSavedSearchesYet" to "No saved searches yet",
+        "donationPromptText" to "Thank you for helping a pet today. If you can, consider a small donation to keep Adopt-U free for everyone.",
+        "donationPromptCta" to "Donate",
+        "dismiss" to "Dismiss",
     )
 
     private val spanishTranslations = json(
@@ -1661,6 +1664,9 @@ private val englishTranslations = json(
         "noFavoritesYet" to "Aún no tienes favoritos",
         "mySavedSearches" to "Mis Búsquedas Guardadas",
         "noSavedSearchesYet" to "Aún no tienes búsquedas guardadas",
+        "donationPromptText" to "Gracias por ayudar a una mascota hoy. Si puedes, considera hacer una pequeña donación para que Adopt-U siga siendo gratuito para todos.",
+        "donationPromptCta" to "Donar",
+        "dismiss" to "Cerrar",
     )
 
     private val frenchTranslations = json(
@@ -2489,6 +2495,9 @@ private val englishTranslations = json(
         "noFavoritesYet" to "Aucun favori pour le moment",
         "mySavedSearches" to "Mes Recherches Enregistrées",
         "noSavedSearchesYet" to "Aucune recherche enregistrée pour le moment",
+        "donationPromptText" to "Merci d'avoir aidé un animal aujourd'hui. Si vous le pouvez, envisagez un petit don pour qu'Adopt-U reste gratuit pour tous.",
+        "donationPromptCta" to "Faire un don",
+        "dismiss" to "Fermer",
 )
 
 private val portugueseTranslations = json(
@@ -3317,6 +3326,9 @@ private val portugueseTranslations = json(
     "noFavoritesYet" to "Ainda sem favoritos",
     "mySavedSearches" to "Minhas Buscas Salvas",
     "noSavedSearchesYet" to "Ainda sem buscas salvas",
+    "donationPromptText" to "Obrigado por ajudar um animal hoje. Se puder, considere fazer uma pequena doação para manter o Adopt-U gratuito para todos.",
+    "donationPromptCta" to "Doar",
+    "dismiss" to "Fechar",
 )
 
 private val chineseTranslations = json(
@@ -4145,6 +4157,9 @@ private val chineseTranslations = json(
     "noFavoritesYet" to "暂无收藏",
     "mySavedSearches" to "我的保存搜索",
     "noSavedSearchesYet" to "暂无保存的搜索",
+    "donationPromptText" to "感谢您今天帮助了一只宠物。如果可以的话，请考虑捐款支持，让 Adopt-U 对每个人都保持免费。",
+    "donationPromptCta" to "捐款",
+    "dismiss" to "关闭",
 )
 
 @JsExport

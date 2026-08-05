@@ -592,6 +592,23 @@ form {
     }
 }
 
+.donation-prompt {
+    background: var(--accent, #fff3cd);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+
+    p {
+        margin: 0;
+        flex: 1 1 100%;
+    }
+}
+
 .saved-search-row {
     display: flex;
     align-items: center;
