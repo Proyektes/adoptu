@@ -7,6 +7,7 @@ import com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl
 import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.dto.input.CreatePetRequest
 import com.adoptu.dto.input.Gender
+import com.adoptu.dto.input.PromotedReason
 import com.adoptu.dto.input.UpdatePetRequest
 import com.adoptu.dto.input.UserRole
 import com.adoptu.mocks.MockImageStorage
@@ -226,6 +227,46 @@ class PetServiceTest {
     }
 
     @Test
+    fun `update returns Error when setting isPromoted true without a reason`() = runBlocking {
+        val created = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+
+        val result = petService.update(created.id, 1, setOf("RESCUER"), UpdatePetRequest(isPromoted = true))
+
+        assertTrue(result is ServiceResult.Error)
+        assertEquals("A reason is required when marking a pet as needing a new home", result.message)
+    }
+
+    @Test
+    fun `update succeeds setting isPromoted true with a reason`() = runBlocking {
+        val created = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+
+        val result = petService.update(
+            created.id, 1, setOf("RESCUER"),
+            UpdatePetRequest(isPromoted = true, promotedReason = PromotedReason.PET_CONFLICT, promotedReasonDetail = "Fighting with another dog")
+        )
+
+        assertTrue(result is ServiceResult.Success)
+        val pet = result.data
+        assertTrue(pet.isPromoted)
+        assertEquals(PromotedReason.PET_CONFLICT, pet.promotedReason)
+        assertEquals("Fighting with another dog", pet.promotedReasonDetail)
+    }
+
+    @Test
+    fun `update clears the reason when isPromoted is set back to false`() = runBlocking {
+        val created = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG", isPromoted = true)
+        petService.update(created.id, 1, setOf("RESCUER"), UpdatePetRequest(isPromoted = true, promotedReason = PromotedReason.OTHER))
+
+        val result = petService.update(created.id, 1, setOf("RESCUER"), UpdatePetRequest(isPromoted = false))
+
+        assertTrue(result is ServiceResult.Success)
+        val pet = result.data
+        assertTrue(!pet.isPromoted)
+        assertNull(pet.promotedReason)
+        assertNull(pet.promotedReasonDetail)
+    }
+
+    @Test
     fun `delete returns NotFound for non-existent pet`() = runBlocking {
         val result = petService.delete(999, 1, setOf("ADMIN"))
         assertEquals(ServiceResult.NotFound, result)
@@ -287,6 +328,17 @@ class PetServiceTest {
     }
 
     @Test
+    fun `getAll sorts promoted pets first even when they are older`() = runBlocking {
+        createTestPet(rescuerId = 1, name = "Older Promoted", type = "DOG", isPromoted = true)
+        clock.advanceMillis(60_000)
+        createTestPet(rescuerId = 1, name = "Newer Regular", type = "DOG", isPromoted = false)
+
+        val result = petService.getAll("DOG", country = "United States")
+
+        assertEquals("Older Promoted", result.first().name)
+    }
+
+    @Test
     fun `getAll returns all available pets without filters`() = runBlocking {
         createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
         createTestPet(rescuerId = 1, name = "Whiskers", type = "CAT")
@@ -320,6 +372,47 @@ class PetServiceTest {
         assertEquals(Gender.MALE, result.sex)
         assertEquals("Golden Retriever", result.breed)
         assertEquals("United States", result.country)
+    }
+
+    @Test
+    fun `create throws when isPromoted is true and no reason is given`() = runBlocking {
+        val request = CreatePetRequest(
+            name = "Buddy",
+            type = "DOG",
+            weight = 25.0,
+            ageYears = 3,
+            ageMonths = 0,
+            sex = Gender.MALE,
+            country = "United States",
+            isPromoted = true
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            petService.create(1, request)
+        }
+        assertEquals("A reason is required when marking a pet as needing a new home", exception.message)
+    }
+
+    @Test
+    fun `create succeeds with isPromoted and a reason - no payment involved`() = runBlocking {
+        val request = CreatePetRequest(
+            name = "Buddy",
+            type = "DOG",
+            weight = 25.0,
+            ageYears = 3,
+            ageMonths = 0,
+            sex = Gender.MALE,
+            country = "United States",
+            isPromoted = true,
+            promotedReason = PromotedReason.MOVING,
+            promotedReasonDetail = "Owner relocating abroad"
+        )
+
+        val result = petService.create(1, request)
+
+        assertTrue(result.isPromoted)
+        assertEquals(PromotedReason.MOVING, result.promotedReason)
+        assertEquals("Owner relocating abroad", result.promotedReasonDetail)
     }
 
     @Test

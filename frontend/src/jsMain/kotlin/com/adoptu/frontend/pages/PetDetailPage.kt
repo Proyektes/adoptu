@@ -104,6 +104,16 @@ object PetDetailPageModule {
         val adoptionFee = pet.adoptionFee?.unsafeCast<Double?>() ?: 0.0
         if (adoptionFee > 0) sb.append("<div class=\"detail-section\"><strong>${I18n.t("adoptionFee")}:</strong> ${currencySymbols[pet.currency.toString()] ?: "$"}$adoptionFee ${pet.currency}</div>")
         if (pet.isUrgent == true) sb.append("<div class=\"urgent-badge\">${I18n.t("urgentBadge")}</div>")
+        if (pet.isPromoted == true) {
+            val reasonKey = when (pet.promotedReason?.toString()) {
+                "MOVING" -> "promotedReasonMoving"
+                "COMPLAINTS" -> "promotedReasonComplaints"
+                "PET_CONFLICT" -> "promotedReasonPetConflict"
+                else -> "promotedReasonOther"
+            }
+            val detail = pet.promotedReasonDetail?.toString()?.takeIf { it.isNotEmpty() }
+            sb.append("<div class=\"promoted-badge-detail\">🏠 ${I18n.t("needsNewHomeBadge")}: ${I18n.t(reasonKey)}${if (detail != null) " - ${CommonModule.escapeHtml(detail)}" else ""}</div>")
+        }
 
         sb.append("<button type=\"button\" class=\"btn btn-secondary\" id=\"share-pet-btn\">${I18n.t("share")}</button>")
         val authenticated = user.authenticated == true || user.id != null

@@ -257,6 +257,30 @@ form {
     pointer-events: none;
 }
 
+.promoted-badge {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background: var(--accent, #fff3cd);
+    color: #7a4a00;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    pointer-events: none;
+}
+
+.promoted-badge-detail {
+    margin: 0.5rem 0;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    background: var(--accent, #fff3cd);
+    color: #7a4a00;
+    font-size: 0.9rem;
+}
+
 .favorite-btn {
     position: absolute;
     top: 8px;

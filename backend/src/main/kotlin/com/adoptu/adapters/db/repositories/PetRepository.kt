@@ -10,6 +10,7 @@ import com.adoptu.dto.input.Currency
 import com.adoptu.dto.input.Gender
 import com.adoptu.dto.input.PetDto
 import com.adoptu.dto.input.PetImageDto
+import com.adoptu.dto.input.PromotedReason
 import com.adoptu.dto.input.Status
 import com.adoptu.dto.input.UpdatePetRequest
 import com.adoptu.dto.input.UserRole
@@ -64,6 +65,8 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
             currency = Currency.valueOf(row[Pets.currency]),
             isUrgent = row[Pets.isUrgent],
             isPromoted = row[Pets.isPromoted],
+            promotedReason = row[Pets.promotedReason]?.let { PromotedReason.valueOf(it) },
+            promotedReasonDetail = row[Pets.promotedReasonDetail],
             createdAt = row[Pets.createdAt],
             deactivatedAt = row[Pets.deactivatedAt],
             deactivatedBy = row[Pets.deactivatedBy],
@@ -136,8 +139,11 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
                 .where { UserActiveRoles.role eq UserRole.RESCUER.name }
                 .map { it[UserActiveRoles.userId] }
 
+            // Promoted pets (free, needs-based "urgently needs a new home" flag - not a paid
+            // boost, see PromotedReason) sort first; everything else stays newest-first.
             val rows = Pets.selectAll()
                 .where { finalCondition and (Pets.rescuerId inList rescuerIds) }
+                .orderBy(Pets.isPromoted, SortOrder.DESC)
                 .orderBy(Pets.createdAt, SortOrder.DESC)
                 .toList()
             rowsToPetDtos(rows)
@@ -212,6 +218,8 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
         currency: Currency,
         isUrgent: Boolean,
         isPromoted: Boolean,
+        promotedReason: PromotedReason?,
+        promotedReasonDetail: String?,
         status: String
     ): PetDto = withContext(dbDispatcher) {
         val parsedCountry = country?.let {
@@ -249,6 +257,8 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
             it[Pets.currency] = currency.name
             it[Pets.isUrgent] = isUrgent
             it[Pets.isPromoted] = isPromoted
+            it[Pets.promotedReason] = promotedReason?.name
+            it[Pets.promotedReasonDetail] = promotedReasonDetail
             it[Pets.createdAt] = clock.now().toEpochMilliseconds()
         } get Pets.id
 
@@ -287,7 +297,15 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
             body.adoptionFee?.let { f -> it[Pets.adoptionFee] = BigDecimal(f.toString()) }
             body.currency?.let { c -> it[Pets.currency] = c.name }
             body.isUrgent?.let { u -> it[Pets.isUrgent] = u }
-            body.isPromoted?.let { p -> it[Pets.isPromoted] = p }
+            body.isPromoted?.let { p ->
+                it[Pets.isPromoted] = p
+                if (!p) {
+                    it[Pets.promotedReason] = null
+                    it[Pets.promotedReasonDetail] = null
+                }
+            }
+            body.promotedReason?.let { r -> it[Pets.promotedReason] = r.name }
+            body.promotedReasonDetail?.let { d -> it[Pets.promotedReasonDetail] = d }
         }
         Pets.selectAll().where { Pets.id eq id }.map(::rowToPetDto).firstOrNull()
         }

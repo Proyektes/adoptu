@@ -97,6 +97,21 @@ fun HTML.myPetsPage(navParams: NavParams = NavParams()) {
                     div { classes = setOf("checkbox-group")
                         input(InputType.checkBox) { id = "isUrgent" }; label { htmlFor = "isUrgent"; attributes["data-i18n"] = "urgentAdoption"; +"Urgent adoption needed" }
                     }
+                    div { classes = setOf("checkbox-group")
+                        input(InputType.checkBox) { id = "isPromoted" }; label { htmlFor = "isPromoted"; attributes["data-i18n"] = "needsNewHome"; +"This pet urgently needs a new home" }
+                    }
+                    div { id = "promoted-reason-row"; classes = setOf("hidden")
+                        label { htmlFor = "promotedReason"; attributes["data-i18n"] = "promotedReasonLabel"; +"Reason" }
+                        select { id = "promotedReason"
+                            option { value = ""; attributes["data-i18n"] = "selectReason"; +"Select a reason" }
+                            option { value = "MOVING"; attributes["data-i18n"] = "promotedReasonMoving"; +"Owner is moving" }
+                            option { value = "COMPLAINTS"; attributes["data-i18n"] = "promotedReasonComplaints"; +"Complaints / can't keep more pets" }
+                            option { value = "PET_CONFLICT"; attributes["data-i18n"] = "promotedReasonPetConflict"; +"Conflict with another pet" }
+                            option { value = "OTHER"; attributes["data-i18n"] = "promotedReasonOther"; +"Other" }
+                        }
+                        label { htmlFor = "promotedReasonDetail"; attributes["data-i18n"] = "promotedReasonDetailLabel"; +"Additional details (optional)" }
+                        textArea { id = "promotedReasonDetail" }
+                    }
                     label { attributes["data-i18n"] = "photos"; +"Photos (max 12)" }
                     div(classes = "storage-dropzone") {
                         id = "storage-dropzone"

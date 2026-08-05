@@ -193,6 +193,7 @@ object IndexPageModule {
             "<div class=\"pet-card-placeholder\">${emoji[p.type.toString()] ?: "🐾"}</div>"
         }
         val videoBadge = if (!p.videoUrl?.toString().isNullOrEmpty()) "<span class=\"video-badge\">▶</span>" else ""
+        val promotedBadge = if (p.isPromoted == true) "<span class=\"promoted-badge\">🏠 ${I18n.t("needsNewHomeBadge")}</span>" else ""
         val petId = p.id.toString()
         val isFav = favoritePetIds.contains(petId.toIntOrNull())
         val favClass = if (isFav) "favorite-btn active" else "favorite-btn"
@@ -205,7 +206,7 @@ object IndexPageModule {
             val date = js("new Date(p.rescueDate)").toLocaleDateString()
             "<span class=\"label\">${I18n.t("rescued")}</span><span class=\"value\">$date</span>"
         } else ""
-        return "<a href=\"/pet/${p.id}\" class=\"pet-card\">$imageHtml$videoBadge$favoriteBtn<div class=\"pet-card-body\">" +
+        return "<a href=\"/pet/${p.id}\" class=\"pet-card\">$imageHtml$videoBadge$promotedBadge$favoriteBtn<div class=\"pet-card-body\">" +
             "<span class=\"pet-type\">${I18n.t(p.type.toString().lowercase())}</span>" +
             "<span class=\"pet-sex $sexClass\">${I18n.t(p.sex.toString().lowercase())}</span>$sizeHtml" +
             "<div class=\"pet-name\"><h3>${p.name}$urgent</h3>$breedHtml</div>" +

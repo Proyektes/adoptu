@@ -14,6 +14,12 @@ enum class Status {
     AVAILABLE, ADOPTED, DISABLED, PENDING
 }
 
+// Why a rescuer is asking for priority rehoming - free for everyone, no paid tier. Distinct
+// from isUrgent (pet is in danger); this is about the owner's circumstances.
+enum class PromotedReason {
+    MOVING, COMPLAINTS, PET_CONFLICT, OTHER
+}
+
 data class PetDto(
     val id: Int,
     val rescuerId: Int,
@@ -46,6 +52,8 @@ data class PetDto(
     val currency: Currency = Currency.USD,
     val isUrgent: Boolean = false,
     val isPromoted: Boolean = false,
+    val promotedReason: PromotedReason? = null,
+    val promotedReasonDetail: String? = null,
     val createdAt: Long,
     val deactivatedAt: Long? = null,
     val deactivatedBy: Int? = null,
@@ -90,7 +98,9 @@ data class CreatePetRequest(
     val adoptionFee: Double = 0.0,
     val currency: Currency = Currency.USD,
     val isUrgent: Boolean = false,
-    val isPromoted: Boolean = false
+    val isPromoted: Boolean = false,
+    val promotedReason: PromotedReason? = null,
+    val promotedReasonDetail: String? = null
 )
 
 data class UpdatePetRequest(
@@ -122,7 +132,9 @@ data class UpdatePetRequest(
     val adoptionFee: Double? = null,
     val currency: Currency? = null,
     val isUrgent: Boolean? = null,
-    val isPromoted: Boolean? = null
+    val isPromoted: Boolean? = null,
+    val promotedReason: PromotedReason? = null,
+    val promotedReasonDetail: String? = null
 )
 
 

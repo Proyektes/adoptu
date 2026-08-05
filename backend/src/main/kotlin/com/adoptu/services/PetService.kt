@@ -50,6 +50,9 @@ class PetService(
         require(request.ageMonths >= 0) { "Age (months) must be zero or positive" }
         require(request.ageMonths < 12) { "Age (months) must be less than 12" }
         require(request.adoptionFee >= 0) { "Adoption fee must be zero or positive" }
+        if (request.isPromoted) {
+            requireNotNull(request.promotedReason) { "A reason is required when marking a pet as needing a new home" }
+        }
         val resolvedCountry = request.country?.takeIf { it.isNotBlank() }
             ?: userService.getById(rescuerId)?.country
         require(!resolvedCountry.isNullOrBlank()) {
@@ -84,7 +87,9 @@ class PetService(
             adoptionFee = request.adoptionFee,
             currency = request.currency,
             isUrgent = request.isUrgent,
-            isPromoted = request.isPromoted
+            isPromoted = request.isPromoted,
+            promotedReason = request.promotedReason,
+            promotedReasonDetail = request.promotedReasonDetail
         )
         CoroutineScope(Dispatchers.IO).launch { notifySavedSearchMatches(pet) }
         return pet
@@ -110,6 +115,9 @@ class PetService(
         body.ageMonths?.let { require(it < 12) { "Age (months) must be less than 12" } }
         body.adoptionFee?.let { require(it >= 0) { "Adoption fee must be zero or positive" } }
         val existing = petRepository.getById(id) ?: return ServiceResult.NotFound
+        if (body.isPromoted == true && body.promotedReason == null && existing.promotedReason == null) {
+            return ServiceResult.Error("A reason is required when marking a pet as needing a new home")
+        }
         val isAdmin = userRoles.contains("ADMIN")
         if (!isAdmin && existing.rescuerId != userId) {
             return ServiceResult.Forbidden

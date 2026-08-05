@@ -294,7 +294,12 @@ object Pets : Table("pets") {
     val adoptionFee = decimal("adoption_fee", 10, 2).default(BigDecimal.ZERO)
     val currency = varchar("currency", 10).default("USD")
     val isUrgent = bool("is_urgent").default(false)
+    // isPromoted is a free, needs-based "this pet urgently needs a new home" flag set by the
+    // rescuer themselves - NOT a paid boost. Every promoted pet gets equal, non-monetized
+    // priority (sorted first in getAll()); requires a reason category (see PromotedReason).
     val isPromoted = bool("is_promoted").default(false)
+    val promotedReason = varchar("promoted_reason", 50).nullable()
+    val promotedReasonDetail = text("promoted_reason_detail").nullable()
     // Single video per pet (not a gallery like pet_images) - Adopt-a-Pet's own data shows video
     // listings get far more interest than photo-only ones. No transcoding pipeline; stored as
     // whatever mp4/webm the browser uploaded (see PetService.uploadAndSetVideo).

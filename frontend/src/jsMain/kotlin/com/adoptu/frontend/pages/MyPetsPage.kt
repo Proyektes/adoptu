@@ -40,8 +40,16 @@ object MyPetsPageModule {
 
         setupDropzone()
         document.getElementById("pet-form")?.addEventListener("submit", { e: Event -> onSubmit(e) })
+        document.getElementById("isPromoted")?.addEventListener("change", { togglePromotedReasonRow() })
 
         load()
+    }
+
+    private fun togglePromotedReasonRow() {
+        val checked = (document.getElementById("isPromoted") as? HTMLInputElement)?.checked == true
+        (document.getElementById("promoted-reason-row") as? HTMLElement)?.classList?.let {
+            if (checked) it.remove("hidden") else it.add("hidden")
+        }
     }
 
     private fun clampNonNegative(id: String, maxMonths: Boolean = false) {
@@ -103,6 +111,7 @@ object MyPetsPageModule {
         val sexClass = if (p.sex == "MALE") "male" else "female"
         val sizeHtml = if (p.size != null) "<span class=\"pet-size\">${I18n.t(p.size.toString().lowercase())}</span>" else ""
         val urgent = if (p.isUrgent == true) " ⚠️" else ""
+        val promoted = if (p.isPromoted == true) " 🏠" else ""
         val breedHtml = if (p.breed != null) "<span class=\"pet-breed\">${CommonModule.escapeHtml(p.breed.toString())}</span>" else ""
         val rescueDateHtml = if (p.rescueDate != null) {
             val date = js("new Date(p.rescueDate)").toLocaleDateString()
@@ -111,7 +120,7 @@ object MyPetsPageModule {
         return "<div class=\"pet-card\">$imageHtml<div class=\"pet-card-body\">" +
             "<span class=\"pet-type\">${I18n.t(p.type.toString().lowercase())}</span>" +
             "<span class=\"pet-sex $sexClass\">${I18n.t(p.sex.toString().lowercase())}</span>$sizeHtml" +
-            "<div class=\"pet-name\"><h3>${CommonModule.escapeHtml(p.name?.toString())}$urgent</h3>$breedHtml</div>" +
+            "<div class=\"pet-name\"><h3>${CommonModule.escapeHtml(p.name?.toString())}$urgent$promoted</h3>$breedHtml</div>" +
             "<p class=\"pet-info\"><span class=\"pet-age\"><span class=\"label\">${I18n.t("age")}</span>" +
             "<span class=\"value\">${p.ageYears} ${I18n.t("years")} ${p.ageMonths} ${I18n.t("months")} • ${p.weight} kg</span></span>" +
             "<span class=\"pet-rescue-date\">$rescueDateHtml</span></p>" +
@@ -211,6 +220,10 @@ object MyPetsPageModule {
         (document.getElementById("adoptionFee") as HTMLInputElement).value = (pet.adoptionFee ?: 0).toString()
         (document.getElementById("currency") as HTMLSelectElement).value = pet.currency?.toString() ?: "USD"
         (document.getElementById("isUrgent") as HTMLInputElement).checked = pet.isUrgent == true
+        (document.getElementById("isPromoted") as HTMLInputElement).checked = pet.isPromoted == true
+        (document.getElementById("promotedReason") as HTMLSelectElement).value = pet.promotedReason?.toString() ?: ""
+        (document.getElementById("promotedReasonDetail") as HTMLTextAreaElement).value = pet.promotedReasonDetail?.toString() ?: ""
+        togglePromotedReasonRow()
 
         existingImages = (pet.images as? Array<dynamic>) ?: arrayOf()
         updatePreviews()
@@ -246,6 +259,7 @@ object MyPetsPageModule {
         (document.getElementById("pet-form") as? HTMLFormElement)?.reset()
         (document.getElementById("pet-id") as? HTMLInputElement)?.value = ""
         (document.getElementById("currency") as? HTMLSelectElement)?.value = "USD"
+        togglePromotedReasonRow()
         selectedFiles = mutableListOf()
         existingImages = arrayOf()
         currentPetIdForVideo = null
@@ -343,6 +357,8 @@ object MyPetsPageModule {
         val ageYears = (document.getElementById("ageYears") as HTMLInputElement).value.toIntOrNull() ?: 0
         val ageMonths = (document.getElementById("ageMonths") as HTMLInputElement).value.toIntOrNull() ?: 0
         val adoptionFee = (document.getElementById("adoptionFee") as HTMLInputElement).value.toDoubleOrNull() ?: 0.0
+        val isPromoted = (document.getElementById("isPromoted") as HTMLInputElement).checked
+        val promotedReason = (document.getElementById("promotedReason") as HTMLSelectElement).value.ifEmpty { null }
 
         fun fail(text: String) {
             msg?.className = "message error"
@@ -352,6 +368,7 @@ object MyPetsPageModule {
         if (ageYears < 0) { fail("Age (years) must be zero or positive"); return }
         if (ageMonths < 0 || ageMonths > 11) { fail("Age (months) must be between 0 and 11"); return }
         if (adoptionFee < 0) { fail("Adoption fee must be zero or positive"); return }
+        if (isPromoted && promotedReason == null) { fail(I18n.t("promotedReasonRequired")); return }
 
         val data = js("({})")
         data.name = (document.getElementById("name") as HTMLInputElement).value
@@ -380,6 +397,9 @@ object MyPetsPageModule {
         data.adoptionFee = adoptionFee
         data.currency = (document.getElementById("currency") as HTMLSelectElement).value
         data.isUrgent = (document.getElementById("isUrgent") as HTMLInputElement).checked
+        data.isPromoted = isPromoted
+        data.promotedReason = if (isPromoted) promotedReason else null
+        data.promotedReasonDetail = if (isPromoted) (document.getElementById("promotedReasonDetail") as HTMLTextAreaElement).value.ifEmpty { null } else null
 
         val savePromise: dynamic = if (id.isNotEmpty()) ApiClientModule.updatePet(id, data) else ApiClientModule.createPet(data)
         savePromise.then { pet: dynamic ->

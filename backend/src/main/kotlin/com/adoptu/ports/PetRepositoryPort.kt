@@ -5,6 +5,7 @@ import com.adoptu.dto.input.Currency
 import com.adoptu.dto.input.Gender
 import com.adoptu.dto.input.PetDto
 import com.adoptu.dto.input.PetImageDto
+import com.adoptu.dto.input.PromotedReason
 import com.adoptu.dto.input.UpdatePetRequest
 import com.adoptu.dto.output.PagedResult
 
@@ -51,6 +52,8 @@ interface PetRepositoryPort {
         currency: Currency = Currency.USD,
         isUrgent: Boolean = false,
         isPromoted: Boolean = false,
+        promotedReason: PromotedReason? = null,
+        promotedReasonDetail: String? = null,
         status: String = "AVAILABLE"
     ): PetDto
     suspend fun update(id: Int, body: UpdatePetRequest): PetDto?
