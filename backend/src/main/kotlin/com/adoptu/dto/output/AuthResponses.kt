@@ -13,11 +13,7 @@ data class AuthMeResponse(
     val lastAcceptedTermsAndConditions: Long? = null,
     val emailVerified: Boolean = false,
     val isBanned: Boolean = false,
-    val banReason: String? = null,
-    val photographerFee: Double? = null,
-    val photographerCurrency: String? = null,
-    val photographerCountry: String? = null,
-    val photographerState: String? = null
+    val banReason: String? = null
 )
 
 data class SuccessWithErrorResponse(

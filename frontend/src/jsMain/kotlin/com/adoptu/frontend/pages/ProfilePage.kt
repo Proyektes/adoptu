@@ -119,7 +119,7 @@ object ProfilePageModule {
     private fun loadRoleSections(user: dynamic) {
         if (currentRoles.contains("PHOTOGRAPHER")) {
             (document.querySelector(".photographer-section") as? HTMLElement)?.style?.display = "block"
-            loadPhotographer(user)
+            loadPhotographer()
         }
         if (currentRoles.contains("TEMPORAL_HOME")) {
             (document.querySelector(".temporal-home-section") as? HTMLElement)?.style?.display = "block"
@@ -135,11 +135,14 @@ object ProfilePageModule {
         }
     }
 
-    private fun loadPhotographer(user: dynamic) {
-        (document.getElementById("photographerFee") as? HTMLInputElement)?.value = user.photographerFee?.toString() ?: "0"
-        (document.getElementById("photographerCurrency") as? HTMLSelectElement)?.value = user.photographerCurrency ?: "USD"
-        (document.getElementById("photographerCountry") as? HTMLSelectElement)?.value = user.photographerCountry ?: ""
-        (document.getElementById("photographerState") as? HTMLInputElement)?.value = user.photographerState ?: ""
+    private fun loadPhotographer() {
+        ApiClientModule.getMyPhotographerSettings().then<Unit> { photographer ->
+            (document.getElementById("photographerFee") as? HTMLInputElement)?.value = photographer.photographerFee?.toString() ?: "0"
+            (document.getElementById("photographerCurrency") as? HTMLSelectElement)?.value = photographer.photographerCurrency ?: "USD"
+            (document.getElementById("photographerCountry") as? HTMLSelectElement)?.value = photographer.country ?: ""
+            (document.getElementById("photographerState") as? HTMLInputElement)?.value = photographer.state ?: ""
+            undefined
+        }
     }
 
     private fun loadTemporalHome() {

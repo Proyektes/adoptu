@@ -55,6 +55,21 @@ fun HttpRules.photographerRoutes() {
         res.send(photographers)
     })
 
+    // Own photographer settings - a second call rather than denormalizing these fields onto
+    // AuthMeResponse/UserDto, so /api/auth/me stays a plain identity/session payload.
+    get("/api/photographers/me", Handler { req, res ->
+        runBlocking {
+            val sessionResult = validationService.validateSession(req.getSession())
+            if (sessionResult is ServiceResult.Forbidden) {
+                return@runBlocking res.respondUnauthorized()
+            }
+            val session = (sessionResult as ServiceResult.Success).data
+            val photographer = photographerService.getPhotographerById(session.userId)
+                ?: return@runBlocking res.respondNotFound()
+            res.send(photographer)
+        }
+    })
+
     post("/api/photographers/profile", Handler { req, res ->
         runBlocking {
             val sessionResult = validationService.validateSession(req.getSession())

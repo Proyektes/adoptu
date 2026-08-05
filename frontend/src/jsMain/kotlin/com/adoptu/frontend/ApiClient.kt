@@ -122,6 +122,8 @@ object ApiClientModule {
         return apiFetch("/api/photographers/settings", js("({method: 'PUT', body: JSON.stringify(body)})"))
     }
 
+    fun getMyPhotographerSettings(): Promise<dynamic> = apiFetch("/api/photographers/me")
+
     fun getShelter(): Promise<dynamic> = apiFetch("/api/users/shelter")
 
     fun updateShelter(data: dynamic): Promise<dynamic> = apiFetch("/api/users/shelter", js("({method: 'PUT', body: JSON.stringify(data)})"))

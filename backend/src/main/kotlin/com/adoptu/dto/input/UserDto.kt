@@ -19,11 +19,7 @@ data class UserDto(
     val isBanned: Boolean = false,
     val banReason: String? = null,
     val deactivatedAt: Long? = null,
-    val deactivatedBy: Int? = null,
-    val photographerFee: Double? = null,
-    val photographerCurrency: String? = null,
-    val photographerCountry: String? = null,
-    val photographerState: String? = null
+    val deactivatedBy: Int? = null
 )
 
 data class BanUserRequest(

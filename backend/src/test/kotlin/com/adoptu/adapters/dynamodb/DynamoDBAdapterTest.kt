@@ -63,11 +63,7 @@ class DynamoDBAdapterTest {
             lastAcceptedPrivacyPolicy = 1000L,
             lastAcceptedTermsAndConditions = 2000L,
             isBanned = false,
-            banReason = null,
-            photographerFee = 50.0,
-            photographerCurrency = "USD",
-            photographerCountry = "US",
-            photographerState = "CA"
+            banReason = null
         )
 
         @Test

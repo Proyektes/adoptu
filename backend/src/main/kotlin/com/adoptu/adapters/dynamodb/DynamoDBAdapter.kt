@@ -38,10 +38,6 @@ class DynamoDBAdapter(
         user.lastAcceptedTermsAndConditions?.let { item["last_accepted_terms_and_conditions"] = AttributeValue.builder().n(it.toString()).build() }
         item["is_banned"] = AttributeValue.builder().bool(user.isBanned).build()
         user.banReason?.let { item["ban_reason"] = AttributeValue.builder().s(it).build() }
-        user.photographerFee?.let { item["photographer_fee"] = AttributeValue.builder().n(it.toString()).build() }
-        user.photographerCurrency?.let { item["photographer_currency"] = AttributeValue.builder().s(it).build() }
-        user.photographerCountry?.let { item["photographer_country"] = AttributeValue.builder().s(it).build() }
-        user.photographerState?.let { item["photographer_state"] = AttributeValue.builder().s(it).build() }
 
         val request = PutItemRequest.builder()
             .tableName(tableName(USERS_TABLE))
@@ -545,10 +541,6 @@ class DynamoDBAdapter(
         val lastAcceptedTermsAndConditions = this["last_accepted_terms_and_conditions"]?.n()?.toLong()
         val isBanned = this["is_banned"]?.bool() ?: false
         val banReason = this["ban_reason"]?.s()
-        val photographerFee = this["photographer_fee"]?.n()?.toDouble()
-        val photographerCurrency = this["photographer_currency"]?.s()
-        val photographerCountry = this["photographer_country"]?.s()
-        val photographerState = this["photographer_state"]?.s()
 
         return UserDto(
             id = id,
@@ -561,11 +553,7 @@ class DynamoDBAdapter(
             lastAcceptedPrivacyPolicy = lastAcceptedPrivacyPolicy,
             lastAcceptedTermsAndConditions = lastAcceptedTermsAndConditions,
             isBanned = isBanned,
-            banReason = banReason,
-            photographerFee = photographerFee,
-            photographerCurrency = photographerCurrency,
-            photographerCountry = photographerCountry,
-            photographerState = photographerState
+            banReason = banReason
         )
     }
 

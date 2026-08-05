@@ -783,11 +783,7 @@ private fun userAuthenticationSuccess(
             lastAcceptedTermsAndConditions = user.lastAcceptedTermsAndConditions,
             emailVerified = runBlocking { userService.isUserVerified(userId) },
             isBanned = user.isBanned,
-            banReason = user.banReason,
-            photographerFee = user.photographerFee,
-            photographerCurrency = user.photographerCurrency,
-            photographerCountry = user.photographerCountry,
-            photographerState = user.photographerState
+            banReason = user.banReason
         )
     )
 }

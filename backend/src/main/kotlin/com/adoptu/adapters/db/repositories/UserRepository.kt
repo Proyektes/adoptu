@@ -59,11 +59,6 @@ class UserRepository(private val clock: Clock) : UserRepositoryPort {
                 .firstOrNull()
                 ?.let { user ->
                     val activeRoles = getActiveRolesForUser(userId)
-                    val photographerSettings = if (activeRoles.contains(UserRole.PHOTOGRAPHER)) {
-                        Photographers.selectAll()
-                            .where { Photographers.userId eq userId }
-                            .firstOrNull()
-                    } else null
                     UserDto(
                         id = user[Users.id],
                         username = user[Users.username],
@@ -78,11 +73,7 @@ class UserRepository(private val clock: Clock) : UserRepositoryPort {
                         isBanned = user[Users.isBanned],
                         banReason = user[Users.banReason],
                         deactivatedAt = user[Users.deactivatedAt],
-                        deactivatedBy = user[Users.deactivatedBy],
-                        photographerFee = photographerSettings?.get(Photographers.photographerFee)?.toDouble(),
-                        photographerCurrency = photographerSettings?.get(Photographers.photographerCurrency),
-                        photographerCountry = photographerSettings?.get(Photographers.country)?.displayName,
-                        photographerState = photographerSettings?.get(Photographers.state)
+                        deactivatedBy = user[Users.deactivatedBy]
                     )
                 }
         }

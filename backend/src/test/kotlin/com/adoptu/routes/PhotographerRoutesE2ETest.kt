@@ -195,6 +195,48 @@ class PhotographerRoutesE2ETest {
         )
     }
 
+    // ==================== GET /api/photographers/me ====================
+
+    @Test
+    fun `GET me returns 401 when no session`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/photographers/me")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET me returns 404 when the caller is not a photographer`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer only
+            val response = TestHttp.get("${handle.baseUrl}/api/photographers/me", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET me returns the caller's own settings, not another photographer's`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
+            val response = TestHttp.get("${handle.baseUrl}/api/photographers/me", cookie)
+            assertEquals(200, response.statusCode())
+            val body = response.body()
+            assertTrue(body.contains("Test Photographer"))
+            assertTrue(body.contains("50.0"))
+            assertTrue(body.contains("CA"))
+            assertTrue(!body.contains("75.0")) // user 5's fee must not leak into user 2's response
+        } finally {
+            handle.stop()
+        }
+    }
+
     // ==================== GET /api/photographers ====================
 
     @Test
