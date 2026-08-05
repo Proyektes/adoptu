@@ -823,6 +823,16 @@ private val englishTranslations = json(
         "lostFoundReportSubmitted" to "Report submitted. Thank you - we'll check it against other reports nearby.",
         "video" to "Video (optional)",
         "removeVideo" to "Remove video",
+        "saveThisSearch" to "Save this search",
+        "savedSearchSaved" to "Search saved! We'll email you when a new match is listed.",
+        "savedSearchFailed" to "Failed to save search",
+        "favorite" to "Favorite",
+        "addToFavorites" to "Add to Favorites",
+        "removeFromFavorites" to "Remove from Favorites",
+        "myFavorites" to "My Favorites",
+        "noFavoritesYet" to "No favorites yet",
+        "mySavedSearches" to "My Saved Searches",
+        "noSavedSearchesYet" to "No saved searches yet",
     )
 
     private val spanishTranslations = json(
@@ -1641,6 +1651,16 @@ private val englishTranslations = json(
         "lostFoundReportSubmitted" to "Reporte enviado. Gracias - lo compararemos con otros reportes cercanos.",
         "video" to "Video (opcional)",
         "removeVideo" to "Eliminar video",
+        "saveThisSearch" to "Guardar esta búsqueda",
+        "savedSearchSaved" to "¡Búsqueda guardada! Te avisaremos por correo cuando haya una nueva coincidencia.",
+        "savedSearchFailed" to "Error al guardar la búsqueda",
+        "favorite" to "Favorito",
+        "addToFavorites" to "Añadir a Favoritos",
+        "removeFromFavorites" to "Quitar de Favoritos",
+        "myFavorites" to "Mis Favoritos",
+        "noFavoritesYet" to "Aún no tienes favoritos",
+        "mySavedSearches" to "Mis Búsquedas Guardadas",
+        "noSavedSearchesYet" to "Aún no tienes búsquedas guardadas",
     )
 
     private val frenchTranslations = json(
@@ -2459,6 +2479,16 @@ private val englishTranslations = json(
         "lostFoundReportSubmitted" to "Signalement envoyé. Merci - nous le comparerons aux autres signalements à proximité.",
         "video" to "Vidéo (facultatif)",
         "removeVideo" to "Supprimer la vidéo",
+        "saveThisSearch" to "Enregistrer cette recherche",
+        "savedSearchSaved" to "Recherche enregistrée ! Nous vous enverrons un e-mail lorsqu'une nouvelle correspondance sera publiée.",
+        "savedSearchFailed" to "Échec de l'enregistrement de la recherche",
+        "favorite" to "Favori",
+        "addToFavorites" to "Ajouter aux favoris",
+        "removeFromFavorites" to "Retirer des favoris",
+        "myFavorites" to "Mes Favoris",
+        "noFavoritesYet" to "Aucun favori pour le moment",
+        "mySavedSearches" to "Mes Recherches Enregistrées",
+        "noSavedSearchesYet" to "Aucune recherche enregistrée pour le moment",
 )
 
 private val portugueseTranslations = json(
@@ -3277,6 +3307,16 @@ private val portugueseTranslations = json(
     "lostFoundReportSubmitted" to "Relato enviado. Obrigado - vamos compará-lo com outros relatos próximos.",
     "video" to "Vídeo (opcional)",
     "removeVideo" to "Remover vídeo",
+    "saveThisSearch" to "Salvar esta busca",
+    "savedSearchSaved" to "Busca salva! Enviaremos um e-mail quando um novo resultado for listado.",
+    "savedSearchFailed" to "Falha ao salvar a busca",
+    "favorite" to "Favorito",
+    "addToFavorites" to "Adicionar aos Favoritos",
+    "removeFromFavorites" to "Remover dos Favoritos",
+    "myFavorites" to "Meus Favoritos",
+    "noFavoritesYet" to "Ainda sem favoritos",
+    "mySavedSearches" to "Minhas Buscas Salvas",
+    "noSavedSearchesYet" to "Ainda sem buscas salvas",
 )
 
 private val chineseTranslations = json(
@@ -4095,6 +4135,16 @@ private val chineseTranslations = json(
     "lostFoundReportSubmitted" to "举报已提交。谢谢——我们会将其与附近的其他举报进行比对。",
     "video" to "视频（可选）",
     "removeVideo" to "删除视频",
+    "saveThisSearch" to "保存此搜索",
+    "savedSearchSaved" to "搜索已保存！有新匹配时我们会发邮件通知您。",
+    "savedSearchFailed" to "保存搜索失败",
+    "favorite" to "收藏",
+    "addToFavorites" to "加入收藏",
+    "removeFromFavorites" to "取消收藏",
+    "myFavorites" to "我的收藏",
+    "noFavoritesYet" to "暂无收藏",
+    "mySavedSearches" to "我的保存搜索",
+    "noSavedSearchesYet" to "暂无保存的搜索",
 )
 
 @JsExport

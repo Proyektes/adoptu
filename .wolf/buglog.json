@@ -4631,6 +4631,102 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-05T03:37:49.489Z"
+    },
+    {
+      "id": "bug-279",
+      "timestamp": "2026-08-05T04:04:51.829Z",
+      "error_message": "Wrong reference: Photographers should be SavedSearches",
+      "file": "backend/src/test/kotlin/com/adoptu/mocks/TestDatabase.kt",
+      "root_cause": "Used \"Photographers\" instead of \"SavedSearches\"",
+      "fix": "Changed Photographers → SavedSearches",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-05T04:04:51.829Z"
+    },
+    {
+      "id": "bug-280",
+      "timestamp": "2026-08-05T04:05:27.739Z",
+      "error_message": "Incorrect value in code",
+      "file": "backend/src/test/kotlin/com/adoptu/adapters/db/DatabaseFactoryTest.kt",
+      "root_cause": "Had `DatabaseFactory has 35 tables`",
+      "fix": "Changed to `DatabaseFactory has 37 tables`",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-05T04:05:27.739Z"
+    },
+    {
+      "id": "bug-281",
+      "timestamp": "2026-08-05T04:08:18.892Z",
+      "error_message": "Null/undefined access in ",
+      "file": "backend/src/main/kotlin/com/adoptu/di/AppModule.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-05T04:08:18.892Z"
+    },
+    {
+      "id": "bug-282",
+      "timestamp": "2026-08-05T12:57:05.153Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/IndexPage.kt",
+      "root_cause": "Had \">$imageHtml$videoBadge<div class=\\\"",
+      "fix": "Changed to \">$imageHtml$videoBadge$favoriteBtn<div class=\\\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-05T12:57:05.153Z"
+    },
+    {
+      "id": "bug-283",
+      "timestamp": "2026-08-05T12:57:36.885Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/IndexPage.kt",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-05T12:57:36.885Z"
+    },
+    {
+      "id": "bug-284",
+      "timestamp": "2026-08-05T12:59:21.744Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/PetDetailPage.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: private fun toggleFavorite(btn: org.w3c.dom.Element?) {; val pet = currentPet ?: return",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-05T12:59:54.113Z"
     }
   ]
 }

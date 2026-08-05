@@ -451,6 +451,28 @@ object LostFoundReports : Table("lost_found_reports") {
     override val primaryKey = PrimaryKey(id)
 }
 
+// null type = "any type" for this country. No state/city - the pets browse page only ever
+// filters by type+country server-side (sex is client-side only) - see PetService/PetsRoutes.
+object SavedSearches : Table("saved_searches") {
+    val id = integer("id").autoIncrement()
+    val userId = integer("user_id").references(Users.id)
+    val type = varchar("type", 50).nullable()
+    val country = enumerationByName("country", 100, Country::class)
+    val createdAt = long("created_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+object PetFavorites : Table("pet_favorites") {
+    val id = integer("id").autoIncrement()
+    val userId = integer("user_id").references(Users.id)
+    val petId = integer("pet_id").references(Pets.id)
+    val createdAt = long("created_at")
+
+    override val primaryKey = PrimaryKey(id)
+    init { uniqueIndex(userId, petId) }
+}
+
 object AnimalShelters : Table("animal_shelters") {
     val id = integer("id").autoIncrement()
     val userId = integer("user_id").references(Users.id).nullable()

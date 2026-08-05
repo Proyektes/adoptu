@@ -6,6 +6,7 @@ import com.adoptu.frontend.I18n
 import com.adoptu.frontend.forEachElement
 import kotlinx.browser.document
 import kotlinx.browser.window
+import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLSelectElement
 import kotlin.js.Promise
@@ -34,6 +35,8 @@ object IndexPageModule {
     private var renderedCount = 0
     private var loadRequestId = 0
     private var scrollObserver: dynamic = null
+    private var favoritePetIds: Set<Int> = emptySet()
+    private var isAuthenticated = false
 
     fun init() {
         val countrySelect = document.getElementById("pets-country") as? HTMLSelectElement
@@ -57,6 +60,70 @@ object IndexPageModule {
         countrySelect?.addEventListener("change", { loadPets() })
 
         CommonModule.initCountrySelect("pets-country") { loadPets() }
+
+        document.getElementById("pets")?.addEventListener("click", { event ->
+            val origin = event.target as? Element
+            val target = origin?.closest(".favorite-btn") as? HTMLElement
+            if (target != null) {
+                event.preventDefault()
+                event.stopPropagation()
+                toggleFavorite(target)
+            }
+        })
+
+        document.getElementById("save-search-btn")?.addEventListener("click", { saveCurrentSearch() })
+
+        ApiClientModule.me().then<Unit> { result: dynamic ->
+            isAuthenticated = result.authenticated == true
+            if (isAuthenticated) {
+                ApiClientModule.getFavoritePetIds().then<Unit> { ids: dynamic ->
+                    favoritePetIds = (ids as? Array<dynamic>)?.mapNotNull { it.toString().toIntOrNull() }?.toSet() ?: emptySet()
+                    refreshFavoriteButtons()
+                }
+            }
+        }
+    }
+
+    private fun refreshFavoriteButtons() {
+        document.querySelectorAll(".favorite-btn").forEachElement { node ->
+            val btn = node.unsafeCast<HTMLElement>()
+            val id = btn.asDynamic().dataset.petId?.toString()?.toIntOrNull()
+            val isFav = id != null && favoritePetIds.contains(id)
+            btn.classList.toggle("active", isFav)
+            btn.textContent = if (isFav) "♥" else "♡"
+        }
+    }
+
+    private fun toggleFavorite(btn: HTMLElement) {
+        val petId = btn.asDynamic().dataset.petId?.toString() ?: return
+        if (!isAuthenticated) {
+            window.location.href = "/login"
+            return
+        }
+        val id = petId.toIntOrNull() ?: return
+        val nowFavorited = !favoritePetIds.contains(id)
+        val call = if (nowFavorited) ApiClientModule.addFavorite(petId) else ApiClientModule.removeFavorite(petId)
+        call.then<Unit> {
+            favoritePetIds = if (nowFavorited) favoritePetIds + id else favoritePetIds - id
+            refreshFavoriteButtons()
+        }
+    }
+
+    private fun saveCurrentSearch() {
+        val country = (document.getElementById("pets-country") as? HTMLSelectElement)?.value ?: ""
+        val msg = document.getElementById("save-search-message")
+        if (country.isEmpty()) {
+            msg?.className = "message error"
+            msg?.textContent = I18n.t("countryRequired")
+            return
+        }
+        ApiClientModule.createSavedSearch(currentType.ifEmpty { null }, country).then<Unit> {
+            msg?.className = "message success"
+            msg?.textContent = I18n.t("savedSearchSaved")
+        }.catch<Unit> { err: dynamic ->
+            msg?.className = "message error"
+            msg?.textContent = err?.message?.toString() ?: I18n.t("savedSearchFailed")
+        }
     }
 
     fun loadPets(): Promise<Unit> {
@@ -126,6 +193,10 @@ object IndexPageModule {
             "<div class=\"pet-card-placeholder\">${emoji[p.type.toString()] ?: "🐾"}</div>"
         }
         val videoBadge = if (!p.videoUrl?.toString().isNullOrEmpty()) "<span class=\"video-badge\">▶</span>" else ""
+        val petId = p.id.toString()
+        val isFav = favoritePetIds.contains(petId.toIntOrNull())
+        val favClass = if (isFav) "favorite-btn active" else "favorite-btn"
+        val favoriteBtn = "<button type=\"button\" class=\"$favClass\" data-pet-id=\"$petId\" aria-label=\"${I18n.t("favorite")}\">${if (isFav) "♥" else "♡"}</button>"
         val sexClass = if (p.sex == "MALE") "male" else "female"
         val sizeHtml = if (p.size != null) "<span class=\"pet-size\">${I18n.t(p.size.toString().lowercase())}</span>" else ""
         val urgent = if (p.isUrgent == true) " ⚠️" else ""
@@ -134,7 +205,7 @@ object IndexPageModule {
             val date = js("new Date(p.rescueDate)").toLocaleDateString()
             "<span class=\"label\">${I18n.t("rescued")}</span><span class=\"value\">$date</span>"
         } else ""
-        return "<a href=\"/pet/${p.id}\" class=\"pet-card\">$imageHtml$videoBadge<div class=\"pet-card-body\">" +
+        return "<a href=\"/pet/${p.id}\" class=\"pet-card\">$imageHtml$videoBadge$favoriteBtn<div class=\"pet-card-body\">" +
             "<span class=\"pet-type\">${I18n.t(p.type.toString().lowercase())}</span>" +
             "<span class=\"pet-sex $sexClass\">${I18n.t(p.sex.toString().lowercase())}</span>$sizeHtml" +
             "<div class=\"pet-name\"><h3>${p.name}$urgent</h3>$breedHtml</div>" +

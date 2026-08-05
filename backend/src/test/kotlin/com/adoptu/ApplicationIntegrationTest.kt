@@ -133,6 +133,7 @@ class ApplicationIntegrationTest {
             single { WebAuthnService(get(), get(), get(), get(), get(), config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com", config.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost", config.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption", listOf(config.propertyOrNull("webauthn.origin")?.getString() ?: "http://localhost:80")) }
             single<UserRepositoryPort> { com.adoptu.adapters.db.repositories.UserRepository(get()) }
             single<PetRepositoryPort> { com.adoptu.adapters.db.repositories.PetRepositoryImpl(get()) }
+            single<com.adoptu.ports.SavedSearchRepositoryPort> { com.adoptu.adapters.db.repositories.SavedSearchRepositoryImpl(get()) }
             single<PhotographerRepositoryPort> { com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl(get(), get(), get()) }
             single<TemporalHomeRepositoryPort> { com.adoptu.adapters.db.repositories.TemporalHomeRepositoryImpl(get(), get(), get()) }
             single<ShelterRepositoryPort> { com.adoptu.adapters.db.repositories.ShelterRepository(get()) }
@@ -149,7 +150,7 @@ class ApplicationIntegrationTest {
             single<EmailSenderPort> { emailSenderPortFromConfig(config) }
             single<NotificationPort> { NotificationEmailAdapter(get()) }
             single<UserService> { UserService(get(), get()) }
-            single<PetService> { PetService(get(), get(), get(), get()) }
+            single<PetService> { PetService(get(), get(), get(), get(), get()) }
             single<PhotographerService> { PhotographerService(get(), get(), get(), get()) }
             single<TemporalHomeService> { TemporalHomeService(get(), get(), get(), get()) }
             single { ShelterService(get()) }

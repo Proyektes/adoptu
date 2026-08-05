@@ -32,6 +32,7 @@ object TestDatabase {
                     PetImages,
                     AdoptionRequests,
                     PhotographyRequests,
+                    PetFavorites,
                     Pets,
                     WebAuthnCredentials,
                     UserPasswords,
@@ -43,6 +44,7 @@ object TestDatabase {
                     UrgentReports,
                     UrgentRescuerProfiles,
                     LostFoundReports,
+                    SavedSearches,
                     Photographers,
                     TemporalHomes,
                     SterilizationLocations,
@@ -88,10 +90,12 @@ object TestDatabase {
                 UrgentReports,
                 UrgentReportPages,
                 LostFoundReports,
+                SavedSearches,
                 Pets,
                 PetImages,
                 AdoptionRequests,
                 PhotographyRequests,
+                PetFavorites,
                 RateLimitStateTable,
                 AuthKitJwtKeys,
                 AuthKitPasskeyCeremonies,
@@ -117,9 +121,11 @@ object TestDatabase {
             exec("DELETE FROM urgent_reports")
             exec("DELETE FROM urgent_rescuer_profiles")
             exec("DELETE FROM lost_found_reports")
+            exec("DELETE FROM saved_searches")
             exec("DELETE FROM temporal_homes")
             exec("DELETE FROM adoption_requests")
             exec("DELETE FROM pet_images")
+            exec("DELETE FROM pet_favorites")
             exec("DELETE FROM pets")
             exec("DELETE FROM webauthn_credentials")
             exec("DELETE FROM photography_requests")

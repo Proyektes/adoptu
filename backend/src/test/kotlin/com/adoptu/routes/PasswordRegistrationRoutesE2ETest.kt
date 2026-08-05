@@ -75,9 +75,10 @@ class PasswordRegistrationRoutesE2ETest {
         single { mockNotificationAdapter }
         single<NotificationPort> { mockNotificationAdapter }
         single<PetRepositoryPort> { PetRepositoryImpl(get()) }
+        single<com.adoptu.ports.SavedSearchRepositoryPort> { com.adoptu.adapters.db.repositories.SavedSearchRepositoryImpl(get()) }
         single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
         single { PhotographerService(get(), get(), get(), get()) }
-        single { PetService(get(), get(), get(), get()) }
+        single { PetService(get(), get(), get(), get(), get()) }
         single { com.adoptu.services.validation.AuthValidationService() }
         single { com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter() }
         single { com.adoptu.adapters.authkit.AdoptuPasskeyCredentialRepositoryAdapter() }

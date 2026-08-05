@@ -11,6 +11,7 @@ import com.adoptu.dto.output.PagedResult
 import com.adoptu.ports.ImageStoragePort
 import com.adoptu.ports.NotificationPort
 import com.adoptu.ports.PetRepositoryPort
+import com.adoptu.ports.SavedSearchRepositoryPort
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,7 +20,9 @@ class PetService(
     private val petRepository: PetRepositoryPort,
     private val imageStorage: ImageStoragePort,
     private val notificationPort: NotificationPort,
-    private val userService: UserService
+    private val userService: UserService,
+    private val savedSearchRepository: SavedSearchRepositoryPort,
+    private val baseUrl: String = "http://localhost:80"
 ) {
 
     suspend fun getAll(type: String? = null, showPromotedOnly: Boolean = false, country: String): List<PetDto> {
@@ -52,7 +55,7 @@ class PetService(
         require(!resolvedCountry.isNullOrBlank()) {
             "Country is required - set one on your profile or specify one for this pet"
         }
-        return petRepository.create(
+        val pet = petRepository.create(
             rescuerId = rescuerId,
             name = request.name,
             type = request.type,
@@ -83,6 +86,21 @@ class PetService(
             isUrgent = request.isUrgent,
             isPromoted = request.isPromoted
         )
+        CoroutineScope(Dispatchers.IO).launch { notifySavedSearchMatches(pet) }
+        return pet
+    }
+
+    private suspend fun notifySavedSearchMatches(pet: PetDto) {
+        val country = pet.country ?: return
+        val matches = savedSearchRepository.getMatching(pet.type, country)
+        matches.forEach { search ->
+            val user = userService.getById(search.userId) ?: return@forEach
+            notificationPort.sendEmail(
+                to = user.username,
+                subject = "A new pet matching your saved search - Adopt-U",
+                body = "${pet.name} (${pet.type.lowercase()}) was just listed in $country - take a look: $baseUrl/pet/${pet.id}"
+            )
+        }
     }
 
     suspend fun update(id: Int, userId: Int, userRoles: Set<String>, body: UpdatePetRequest): ServiceResult<PetDto> {

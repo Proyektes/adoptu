@@ -60,6 +60,16 @@ object ApiClientModule {
 
     fun getPet(id: String): Promise<dynamic> = apiFetch("/api/pets/$id")
 
+    fun getFavoritePetIds(): Promise<dynamic> = apiFetch("/api/pets/favorite-ids")
+    fun getFavoritePets(): Promise<dynamic> = apiFetch("/api/pets/favorites")
+    fun addFavorite(petId: String): Promise<dynamic> = apiFetch("/api/pets/$petId/favorite", js("({method: 'POST'})"))
+    fun removeFavorite(petId: String): Promise<dynamic> = apiFetch("/api/pets/$petId/favorite", js("({method: 'DELETE'})"))
+
+    fun getSavedSearches(): Promise<dynamic> = apiFetch("/api/saved-searches")
+    fun createSavedSearch(type: String?, country: String): Promise<dynamic> =
+        apiFetch("/api/saved-searches", js("({method: 'POST', body: JSON.stringify({type: type, country: country})})"))
+    fun deleteSavedSearch(id: Int): Promise<dynamic> = apiFetch("/api/saved-searches/$id", js("({method: 'DELETE'})"))
+
     fun createPet(pet: dynamic): Promise<dynamic> = apiFetch("/api/pets", js("({method: 'POST', body: JSON.stringify(pet)})"))
 
     fun updatePet(id: String, pet: dynamic): Promise<dynamic> = apiFetch("/api/pets/$id", js("({method: 'PUT', body: JSON.stringify(pet)})"))

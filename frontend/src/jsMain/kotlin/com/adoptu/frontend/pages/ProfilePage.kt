@@ -4,6 +4,7 @@ import com.adoptu.frontend.ApiClientModule
 import com.adoptu.frontend.I18n
 import com.adoptu.frontend.RsaCryptoModule
 import com.adoptu.frontend.WebAuthnModule
+import com.adoptu.frontend.forEachElement
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.*
@@ -42,6 +43,9 @@ object ProfilePageModule {
         (document.getElementById("country") as? HTMLSelectElement)?.value = user.country ?: ""
 
         currentRoles = (user.activeRoles as? Array<*>)?.map { it.toString() } ?: emptyList()
+
+        loadFavorites()
+        loadSavedSearches()
 
         listOf("role-rescuer", "role-photographer", "role-temporal-home", "role-shelter", "role-sterilization").forEach { id ->
             (document.getElementById(id) as? HTMLInputElement)?.checked = when (id) {
@@ -680,6 +684,53 @@ object ProfilePageModule {
                     passkeyStatus?.textContent = I18n.t("noPasskey")
                 }
                 undefined
+            }
+        }
+    }
+
+    private fun loadFavorites() {
+        ApiClientModule.getFavoritePets().then<Unit> { pets: dynamic ->
+            val list = (pets as? Array<dynamic>) ?: arrayOf()
+            val container = document.getElementById("favorites-list")
+            val empty = document.getElementById("favorites-empty")
+            if (list.isEmpty()) {
+                empty?.textContent = I18n.t("noFavoritesYet")
+                container?.innerHTML = ""
+                return@then
+            }
+            empty?.textContent = ""
+            container?.innerHTML = list.joinToString("") { pet ->
+                "<div class=\"card-bg profile-section\"><h3>${pet.name}</h3>" +
+                    "<a class=\"btn\" href=\"/pet/${pet.id}\">${I18n.t("viewDetails")}</a> " +
+                    "<button type=\"button\" class=\"btn btn-secondary remove-favorite-btn\" data-pet-id=\"${pet.id}\">${I18n.t("removeFromFavorites")}</button></div>"
+            }
+            document.querySelectorAll(".remove-favorite-btn").forEachElement { node ->
+                val petId = node.asDynamic().dataset.petId?.toString() ?: return@forEachElement
+                node.addEventListener("click", { ApiClientModule.removeFavorite(petId).then<Unit> { loadFavorites() } })
+            }
+        }
+    }
+
+    private fun loadSavedSearches() {
+        ApiClientModule.getSavedSearches().then<Unit> { searches: dynamic ->
+            val list = (searches as? Array<dynamic>) ?: arrayOf()
+            val container = document.getElementById("saved-searches-list")
+            val empty = document.getElementById("saved-searches-empty")
+            if (list.isEmpty()) {
+                empty?.textContent = I18n.t("noSavedSearchesYet")
+                container?.innerHTML = ""
+                return@then
+            }
+            empty?.textContent = ""
+            container?.innerHTML = list.joinToString("") { search ->
+                val type = search.type?.toString()?.takeIf { it.isNotEmpty() }?.let { I18n.t(it.lowercase()) } ?: I18n.t("all")
+                "<div class=\"saved-search-row\">" +
+                    "<span>$type - ${search.country}</span> " +
+                    "<button type=\"button\" class=\"btn btn-secondary remove-saved-search-btn\" data-id=\"${search.id}\">${I18n.t("delete")}</button></div>"
+            }
+            document.querySelectorAll(".remove-saved-search-btn").forEachElement { node ->
+                val id = node.asDynamic().dataset.id?.toString()?.toIntOrNull() ?: return@forEachElement
+                node.addEventListener("click", { ApiClientModule.deleteSavedSearch(id).then<Unit> { loadSavedSearches() } })
             }
         }
     }

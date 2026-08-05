@@ -23,6 +23,13 @@ fun HTML.petsPage(navParams: NavParams = NavParams()) {
                 }
             }
             div { id = "pets-error"; classes = setOf("error-message", "hidden") }
+            button(classes = "btn btn-secondary hidden", type = ButtonType.button) {
+                id = "save-search-btn"
+                attributes["data-auth"] = "user"
+                attributes["data-i18n"] = "saveThisSearch"
+                +"Save this search"
+            }
+            p { id = "save-search-message"; +"" }
             div { id = "pets-filters"; classes = setOf("hidden")
                 div(classes = "filter-buttons") {
                     button(classes = "filter-btn active", type = ButtonType.button) { attributes["data-type"] = ""; attributes["data-i18n"] = "all"; +"All" }

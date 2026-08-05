@@ -105,6 +105,10 @@ object PetDetailPageModule {
         if (pet.isUrgent == true) sb.append("<div class=\"urgent-badge\">${I18n.t("urgentBadge")}</div>")
 
         sb.append("<button type=\"button\" class=\"btn btn-secondary\" id=\"share-pet-btn\">${I18n.t("share")}</button>")
+        val authenticated = user.authenticated == true || user.id != null
+        if (authenticated) {
+            sb.append("<button type=\"button\" class=\"btn btn-secondary\" id=\"favorite-pet-btn\">${I18n.t("addToFavorites")}</button>")
+        }
 
         if (canAdopt) {
             sb.append("<form id=\"adopt-form\"><label for=\"msg\">${I18n.t("messageOptional")}</label><textarea id=\"msg\" name=\"message\"></textarea><button type=\"submit\" class=\"btn\">${I18n.t("requestAdoption")}</button></form>")
@@ -117,6 +121,18 @@ object PetDetailPageModule {
         container.innerHTML = sb.toString()
 
         document.getElementById("share-pet-btn")?.addEventListener("click", { shareCurrentPet() })
+
+        if (authenticated) {
+            val favBtn = document.getElementById("favorite-pet-btn")
+            favBtn?.addEventListener("click", { toggleFavorite(favBtn) })
+            ApiClientModule.getFavoritePetIds().then<Unit> { ids: dynamic ->
+                val list = (ids as? Array<dynamic>)?.map { it.toString() } ?: emptyList()
+                if (list.contains(pet.id.toString())) {
+                    favBtn?.textContent = I18n.t("removeFromFavorites")
+                    favBtn?.asDynamic()?.dataset?.favorited = "true"
+                }
+            }
+        }
 
         val form = document.getElementById("adopt-form")
         form?.addEventListener("submit", { e: Event ->
@@ -153,6 +169,22 @@ object PetDetailPageModule {
         } else {
             val encoded = window.asDynamic().encodeURIComponent("$text $url")
             window.open("https://wa.me/?text=$encoded", "_blank")
+        }
+    }
+
+    private fun toggleFavorite(btn: org.w3c.dom.Element?) {
+        val pet = currentPet ?: return
+        val petId = pet.id.toString()
+        val currentlyFavorited = btn?.asDynamic()?.dataset?.favorited == "true"
+        val call = if (currentlyFavorited) ApiClientModule.removeFavorite(petId) else ApiClientModule.addFavorite(petId)
+        call.then<Unit> {
+            if (currentlyFavorited) {
+                btn?.textContent = I18n.t("addToFavorites")
+                btn?.asDynamic()?.dataset?.favorited = "false"
+            } else {
+                btn?.textContent = I18n.t("removeFromFavorites")
+                btn?.asDynamic()?.dataset?.favorited = "true"
+            }
         }
     }
 

@@ -64,9 +64,10 @@ class EmailVerificationRoutesE2ETest {
             single { mockNotificationAdapter }
             single<com.adoptu.ports.NotificationPort> { mockNotificationAdapter }
             single<com.adoptu.ports.PetRepositoryPort> { com.adoptu.adapters.db.repositories.PetRepositoryImpl(get()) }
+            single<com.adoptu.ports.SavedSearchRepositoryPort> { com.adoptu.adapters.db.repositories.SavedSearchRepositoryImpl(get()) }
             single<com.adoptu.ports.PhotographerRepositoryPort> { com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl(get(), get(), get()) }
             single { com.adoptu.services.PhotographerService(get(), get(), get(), get()) }
-            single { com.adoptu.services.PetService(get(), get(), get(), get()) }
+            single { com.adoptu.services.PetService(get(), get(), get(), get(), get()) }
             single { com.adoptu.services.validation.AuthValidationService() }
             single { com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter() }
             single { com.adoptu.adapters.authkit.AdoptuPasskeyCredentialRepositoryAdapter() }

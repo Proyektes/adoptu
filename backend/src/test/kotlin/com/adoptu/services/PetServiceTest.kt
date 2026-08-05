@@ -101,7 +101,8 @@ class PetServiceTest {
         val photographerRepository = PhotographerRepositoryImpl(petRepository, userRepository, clock)
         val photographerService = PhotographerService(photographerRepository, null, userRepository, clock)
         val userService = UserService(userRepository, photographerRepository)
-        petService = PetService(petRepository, mockImageStorage, mockNotificationAdapter, userService)
+        val savedSearchRepository = com.adoptu.adapters.db.repositories.SavedSearchRepositoryImpl(clock)
+        petService = PetService(petRepository, mockImageStorage, mockNotificationAdapter, userService, savedSearchRepository)
     }
 
     @Test

@@ -288,6 +288,18 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
             }
 
             div(classes = "card-bg profile-section") {
+                h2 { attributes["data-i18n"] = "myFavorites"; +"My Favorites" }
+                div { id = "favorites-empty"; +"" }
+                div { id = "favorites-list"; classes = setOf("pet-grid"); +"" }
+            }
+
+            div(classes = "card-bg profile-section") {
+                h2 { attributes["data-i18n"] = "mySavedSearches"; +"My Saved Searches" }
+                div { id = "saved-searches-empty"; +"" }
+                div { id = "saved-searches-list"; +"" }
+            }
+
+            div(classes = "card-bg profile-section") {
                 h2 { attributes["data-i18n"] = "emailChange"; +"Change Email" }
                 p { attributes["data-i18n"] = "emailChangeDesc"; +"Update your email address. A verification link will be sent to the new email." }
                 div(classes = "form-row") {

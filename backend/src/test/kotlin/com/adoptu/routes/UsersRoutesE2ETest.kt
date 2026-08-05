@@ -139,13 +139,14 @@ class UsersRoutesE2ETest {
             single { mockNotificationAdapter }
             single<NotificationPort> { mockNotificationAdapter }
             single<PetRepositoryPort> { PetRepositoryImpl(get()) }
+            single<com.adoptu.ports.SavedSearchRepositoryPort> { com.adoptu.adapters.db.repositories.SavedSearchRepositoryImpl(get()) }
             single<UserRepositoryPort> { UserRepository(get()) }
             single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
             single { PhotographerService(get(), get(), get(), get()) }
             single { UserService(get(), get()) }
             single { com.universaliun.ratelimit.common.RateLimiter(com.universaliun.ratelimit.common.InMemoryRateLimitStateAdapter()) }
             single { ProfileEmailVerificationService(get(), get(), get(), "http://localhost:80") }
-            single { PetService(get(), get(), get(), get()) }
+            single { PetService(get(), get(), get(), get(), get()) }
             single { PasswordService(get(), get(), get(), "http://localhost:80", get()) }
             single { EmailChangeService(get(), get(), get(), "http://localhost:80") }
             single { com.adoptu.services.EmailVerificationService(get(), get(), get(), "http://localhost:80", get()) }

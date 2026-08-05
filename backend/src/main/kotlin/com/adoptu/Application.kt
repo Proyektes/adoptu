@@ -15,6 +15,7 @@ import com.adoptu.routes.adminUsersRoutes
 import com.adoptu.routes.authRoutes
 import com.adoptu.routes.countryRoutes
 import com.adoptu.routes.lostFoundRoutes
+import com.adoptu.routes.savedSearchRoutes
 import com.adoptu.routes.petsRoutes
 import com.adoptu.routes.photographerRoutes
 import com.adoptu.routes.shelterRoutes
@@ -154,6 +155,7 @@ internal fun configureRouting(routing: HttpRouting.Builder) {
     routing.temporalHomeRoutes()
     routing.urgentRescueRoutes()
     routing.lostFoundRoutes()
+    routing.savedSearchRoutes()
     routing.shelterRoutes()
     routing.adminShelterRoutes()
     routing.sterilizationLocationRoutes()

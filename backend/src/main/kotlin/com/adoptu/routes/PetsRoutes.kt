@@ -5,6 +5,7 @@ import com.adoptu.dto.input.CreateAdoptionRequestRequest
 import com.adoptu.dto.input.CreatePetRequest
 import com.adoptu.dto.input.UpdatePetRequest
 import com.adoptu.dto.input.UserRole
+import com.adoptu.services.PetFavoriteService
 import com.adoptu.services.PetService
 import com.adoptu.services.ServiceResult
 import com.adoptu.services.UserService
@@ -40,6 +41,7 @@ import org.koin.core.component.inject
 
 fun HttpRules.petsRoutes() {
     val petService by Deps.inject<PetService>()
+    val petFavoriteService by Deps.inject<PetFavoriteService>()
     val validationService by Deps.inject<PetsValidationService>()
     val config by Deps.inject<AppConfig>()
 
@@ -124,6 +126,16 @@ fun HttpRules.petsRoutes() {
             val requests = petService.getMyAdoptionRequests(session.userId)
             res.send(requests)
         }
+    })
+
+    get("/api/pets/favorites", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        runBlocking { res.send(petFavoriteService.getFavoritePets(session.userId)) }
+    })
+
+    get("/api/pets/favorite-ids", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        runBlocking { res.send(petFavoriteService.getFavoritePetIds(session.userId)) }
     })
 
     get("/api/pets/{id}", Handler { req, res ->
@@ -287,6 +299,18 @@ fun HttpRules.petsRoutes() {
                 is ServiceResult.Error -> res.respondError(result.message)
             }
         }
+    })
+
+    post("/api/pets/{id}/favorite", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val petId = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
+        runBlocking { res.respondSuccess(petFavoriteService.add(session.userId, petId)) }
+    })
+
+    delete("/api/pets/{id}/favorite", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val petId = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
+        runBlocking { res.respondSuccess(petFavoriteService.remove(session.userId, petId)) }
     })
 
     delete("/api/pets/{petId}/images/{imageId}", Handler { req, res ->
