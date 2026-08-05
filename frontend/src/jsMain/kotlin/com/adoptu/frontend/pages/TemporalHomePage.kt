@@ -6,6 +6,7 @@ import com.adoptu.frontend.I18n
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.HTMLSelectElement
 import org.w3c.dom.HTMLTextAreaElement
 import org.w3c.dom.events.Event
 
@@ -110,12 +111,16 @@ object TemporalHomeDetailPageModule {
                     "<textarea id=\"contact-message\" rows=\"4\" placeholder=\"${I18n.t("yourMessage")}\"></textarea>" +
                     "<button type=\"submit\" class=\"btn\">${I18n.t("sendRequestBtn")}</button></form>"
             )
+            sb.append("<h2>${I18n.t("placePetHere")}</h2>")
+            sb.append("<div id=\"placement-section\"><p>${I18n.t("loading")}</p></div>")
         } else {
             sb.append("<p>${I18n.t("loginAsRescuerToContact")}</p>")
         }
         sb.append("</div>")
 
         container?.innerHTML = sb.toString()
+
+        if (isRescuer) loadMyPetsForPlacement(user)
 
         val form = document.getElementById("contact-form")
         form?.addEventListener("submit", { e: Event ->
@@ -135,6 +140,51 @@ object TemporalHomeDetailPageModule {
             }
         })
     }
+
+    private fun loadMyPetsForPlacement(user: dynamic) {
+        val section = document.getElementById("placement-section") ?: return
+        val roles = user.activeRoles as? Array<String>
+        val isAdmin = roles?.contains("ADMIN") == true
+        ApiClientModule.getMyPets().then<Unit> { petsRaw: dynamic ->
+            val pets = ((petsRaw as? Array<dynamic>) ?: arrayOf())
+                .filter { it.status == "AVAILABLE" && (isAdmin || it.rescuerId.toString() == user.id.toString()) }
+            if (pets.isEmpty()) {
+                section.innerHTML = "<p>${I18n.t("noAvailablePetsToPlace")}</p>"
+                return@then
+            }
+            val options = pets.joinToString("") { "<option value=\"${it.id}\">${CommonModule.escapeHtml(it.name?.toString())}</option>" }
+            section.innerHTML = "<form id=\"placement-form\">" +
+                "<label for=\"placement-pet\">${I18n.t("selectPet")}</label>" +
+                "<select id=\"placement-pet\">$options</select>" +
+                "<label for=\"placement-notes\">${I18n.t("notesOptional")}</label>" +
+                "<textarea id=\"placement-notes\" rows=\"2\"></textarea>" +
+                "<button type=\"submit\" class=\"btn\">${I18n.t("startPlacementBtn")}</button></form>"
+
+            document.getElementById("placement-form")?.addEventListener("submit", { e: Event ->
+                e.preventDefault()
+                startPlacement()
+            })
+        }.catch {
+            section.innerHTML = "<p>${I18n.t("noAvailablePetsToPlace")}</p>"
+        }
+    }
+
+    private fun startPlacement() {
+        val petId = (document.getElementById("placement-pet") as? HTMLSelectElement)?.value ?: return
+        val notes = (document.getElementById("placement-notes") as? HTMLTextAreaElement)?.value?.ifEmpty { null }
+        ApiClientModule.createFosterPlacement(petId, temporalHomeId, notes).then<Unit> {
+            (document.getElementById("message") as? HTMLElement)?.let {
+                it.className = "message success"
+                it.textContent = I18n.t("placementStarted")
+            }
+            document.getElementById("placement-section")?.innerHTML = ""
+        }.catch { err: dynamic ->
+            (document.getElementById("message") as? HTMLElement)?.let {
+                it.className = "message error"
+                it.textContent = err?.message?.toString() ?: "Error"
+            }
+        }
+    }
 }
 
 @JsExport
@@ -153,7 +203,26 @@ object TemporalHomeProfilePageModule {
                 return@then
             }
             loadRequests()
+            loadFosterPlacements()
         }.catch { window.location.href = "/login" }
+    }
+
+    private fun loadFosterPlacements() {
+        val container = document.getElementById("foster-placements-container").unsafeCast<HTMLElement?>()
+        ApiClientModule.getMyActiveFosterPlacements().then<Unit> { placementsRaw: dynamic ->
+            val list = (placementsRaw as? Array<dynamic>) ?: arrayOf()
+            if (list.isEmpty()) {
+                container?.innerHTML = "<p>${I18n.t("noPetsCurrentlyFostered")}</p>"
+                return@then
+            }
+            container?.innerHTML = list.joinToString("") { p ->
+                val since = js("new Date(p.startDate)").toLocaleDateString()
+                val petName = p.petName?.toString()?.takeIf { it.isNotEmpty() } ?: "a pet"
+                "<div class=\"request-card\"><p><strong>${CommonModule.escapeHtml(petName)}</strong></p>" +
+                    "<p>${I18n.t("sinceLabel")} $since</p>" +
+                    "<a class=\"btn btn-small\" href=\"/pet/${p.petId}\">${I18n.t("viewDetails")}</a></div>"
+            }
+        }.catch { err: dynamic -> console.error(err) }
     }
 
     private fun loadRequests() {

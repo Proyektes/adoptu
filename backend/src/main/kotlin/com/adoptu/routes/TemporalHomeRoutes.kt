@@ -1,6 +1,7 @@
 package com.adoptu.routes
 
 import com.adoptu.dto.input.*
+import com.adoptu.services.PetFosterPlacementService
 import com.adoptu.services.ServiceResult
 import com.adoptu.services.TemporalHomeService
 import com.adoptu.services.validation.TemporalHomesValidationService
@@ -22,6 +23,7 @@ import org.koin.core.component.inject
 
 fun HttpRules.temporalHomeRoutes() {
     val temporalHomeService by Deps.inject<TemporalHomeService>()
+    val placementService by Deps.inject<PetFosterPlacementService>()
     val validationService by Deps.inject<TemporalHomesValidationService>()
 
     post("/api/users/temporal-home", Handler { req, res ->
@@ -112,6 +114,29 @@ fun HttpRules.temporalHomeRoutes() {
 
             val requests = temporalHomeService.getMyRequests(session.userId)
             res.send(requests)
+        }
+    })
+
+    get("/api/users/temporal-home/foster-placements", Handler { req, res ->
+        runBlocking {
+            val sessionResult = validationService.validateSession(req.getSession())
+            if (sessionResult is ServiceResult.Forbidden) {
+                return@runBlocking res.respondUnauthorized()
+            }
+            val session = (sessionResult as ServiceResult.Success).data
+
+            val userResult = validationService.validateUserById(session.userId)
+            if (userResult is ServiceResult.NotFound) {
+                return@runBlocking res.respondNotFound()
+            }
+            val user = (userResult as ServiceResult.Success).data
+
+            val roleResult = validationService.validateRole(user, "TEMPORAL_HOME")
+            if (roleResult is ServiceResult.Forbidden) {
+                return@runBlocking res.respondForbidden()
+            }
+
+            res.send(placementService.getMyActivePlacements(session.userId))
         }
     })
 

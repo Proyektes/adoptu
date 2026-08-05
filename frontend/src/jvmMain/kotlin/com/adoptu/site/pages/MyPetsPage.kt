@@ -150,6 +150,11 @@ fun HTML.myPetsPage(navParams: NavParams = NavParams()) {
                         button(classes = "btn btn-secondary", type = ButtonType.button) { id = "add-medical-event-btn"; attributes["data-i18n"] = "addRecord"; +"Add Record" }
                     }
                 }
+                div { id = "foster-placement-section"; classes = setOf("hidden", "card-bg", "profile-section")
+                    h3 { attributes["data-i18n"] = "fosterPlacement"; +"Foster Placement" }
+                    p { id = "foster-placement-status"; +"" }
+                    button(classes = "btn btn-secondary hidden", type = ButtonType.button) { id = "end-placement-btn"; attributes["data-i18n"] = "endPlacement"; +"End Placement" }
+                }
             }
             button(classes = "btn") { id = "add-btn"; attributes["data-i18n"] = "addPet"; +"Add Pet" }
             div { id = "pets"; classes = setOf("pet-grid", "mt-2rem"); +"" }

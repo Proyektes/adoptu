@@ -249,6 +249,10 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
                         input(InputType.text) { id = "th-neighborhood" }
                     }
                 }
+                div(classes = "form-row") {
+                    label { htmlFor = "th-max-capacity"; attributes["data-i18n"] = "maxCapacity"; +"Max pets at once (optional)" }
+                    input(InputType.number) { id = "th-max-capacity"; this.min = "1" }
+                }
             }
 
             div(classes = "card-bg profile-section") {

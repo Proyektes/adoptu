@@ -62,6 +62,7 @@ class TemporalHomeRepositoryImpl(
                     city = result[TemporalHomes.city],
                     zip = result[TemporalHomes.zip],
                     neighborhood = result[TemporalHomes.neighborhood],
+                    maxCapacity = result[TemporalHomes.maxCapacity],
                     createdAt = result[TemporalHomes.createdAt]
                 )
             } else null
@@ -82,6 +83,7 @@ class TemporalHomeRepositoryImpl(
                     it[TemporalHomes.city] = request.city
                     it[TemporalHomes.zip] = request.zip
                     it[TemporalHomes.neighborhood] = request.neighborhood
+                    it[TemporalHomes.maxCapacity] = request.maxCapacity
                     it[TemporalHomes.createdAt] = createdAt
                 }
 
@@ -93,6 +95,7 @@ class TemporalHomeRepositoryImpl(
                     city = request.city,
                     zip = request.zip,
                     neighborhood = request.neighborhood,
+                    maxCapacity = request.maxCapacity,
                     createdAt = createdAt
                 )
             }
@@ -114,6 +117,7 @@ class TemporalHomeRepositoryImpl(
             val updatedCity = request.city ?: existing[TemporalHomes.city]
             val updatedZip = request.zip ?: existing[TemporalHomes.zip]
             val updatedNeighborhood = request.neighborhood ?: existing[TemporalHomes.neighborhood]
+            val updatedMaxCapacity = request.maxCapacity ?: existing[TemporalHomes.maxCapacity]
 
             TemporalHomes.update({ TemporalHomes.userId eq userId }) {
                 it[TemporalHomes.alias] = updatedAlias
@@ -122,6 +126,7 @@ class TemporalHomeRepositoryImpl(
                 it[TemporalHomes.city] = updatedCity
                 it[TemporalHomes.zip] = updatedZip
                 it[TemporalHomes.neighborhood] = updatedNeighborhood
+                it[TemporalHomes.maxCapacity] = updatedMaxCapacity
             }
 
             TemporalHomeDto(
@@ -132,6 +137,7 @@ class TemporalHomeRepositoryImpl(
                 city = updatedCity,
                 zip = updatedZip,
                 neighborhood = updatedNeighborhood,
+                maxCapacity = updatedMaxCapacity,
                 createdAt = existing[TemporalHomes.createdAt]
             )
         }
@@ -173,6 +179,7 @@ class TemporalHomeRepositoryImpl(
                     city = row[TemporalHomes.city],
                     zip = row[TemporalHomes.zip],
                     neighborhood = row[TemporalHomes.neighborhood],
+                    maxCapacity = row[TemporalHomes.maxCapacity],
                     createdAt = row[TemporalHomes.createdAt]
                 )
             }

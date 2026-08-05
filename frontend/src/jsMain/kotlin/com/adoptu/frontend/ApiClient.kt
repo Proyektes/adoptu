@@ -254,4 +254,15 @@ object ApiClientModule {
     }
 
     fun deleteMedicalEvent(eventId: Int): Promise<dynamic> = apiFetch("/api/pets/medical-events/$eventId", js("({method: 'DELETE'})"))
+
+    fun createFosterPlacement(petId: String, temporalHomeId: Int, notes: String?): Promise<dynamic> {
+        val body = js("({temporalHomeId: temporalHomeId, notes: notes})")
+        return apiFetch("/api/pets/$petId/foster-placements", js("({method: 'POST', body: JSON.stringify(body)})"))
+    }
+
+    fun getFosterPlacementHistory(petId: String): Promise<dynamic> = apiFetch("/api/pets/$petId/foster-placements")
+
+    fun endFosterPlacement(placementId: Int): Promise<dynamic> = apiFetch("/api/pets/foster-placements/$placementId/end", js("({method: 'PUT'})"))
+
+    fun getMyActiveFosterPlacements(): Promise<dynamic> = apiFetch("/api/users/temporal-home/foster-placements")
 }

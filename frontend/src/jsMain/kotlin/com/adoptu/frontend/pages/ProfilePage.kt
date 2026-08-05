@@ -155,6 +155,7 @@ object ProfilePageModule {
                 (document.getElementById("th-city") as? HTMLInputElement)?.value = th.city ?: ""
                 (document.getElementById("th-zip") as? HTMLInputElement)?.value = th.zip ?: ""
                 (document.getElementById("th-neighborhood") as? HTMLInputElement)?.value = th.neighborhood ?: ""
+                (document.getElementById("th-max-capacity") as? HTMLInputElement)?.value = th.maxCapacity?.toString() ?: ""
             }
             undefined
         }
@@ -416,6 +417,7 @@ object ProfilePageModule {
                 thData.city = (document.getElementById("th-city") as? HTMLInputElement)?.value?.trim() ?: ""
                 thData.zip = (document.getElementById("th-zip") as? HTMLInputElement)?.value?.trim()
                 thData.neighborhood = (document.getElementById("th-neighborhood") as? HTMLInputElement)?.value?.trim()
+            thData.maxCapacity = (document.getElementById("th-max-capacity") as? HTMLInputElement)?.value?.trim()?.toIntOrNull()
 
                 if (hasTemporalHomeProfile) {
                     promises.add(ApiClientModule.updateTemporalHome(thData))
@@ -434,6 +436,7 @@ object ProfilePageModule {
             thData.city = (document.getElementById("th-city") as? HTMLInputElement)?.value?.trim() ?: ""
             thData.zip = (document.getElementById("th-zip") as? HTMLInputElement)?.value?.trim()
             thData.neighborhood = (document.getElementById("th-neighborhood") as? HTMLInputElement)?.value?.trim()
+            thData.maxCapacity = (document.getElementById("th-max-capacity") as? HTMLInputElement)?.value?.trim()?.toIntOrNull()
 
             if (hasTemporalHomeProfile) {
                 promises.add(ApiClientModule.updateTemporalHome(thData))

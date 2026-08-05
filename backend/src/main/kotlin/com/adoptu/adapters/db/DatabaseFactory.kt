@@ -40,6 +40,7 @@ object DatabaseFactory {
         TemporalHomes,
         BlockedRescuers,
         TemporalHomeRequests,
+        PetFosterPlacements,
         UrgentRescuerProfiles,
         UrgentReports,
         UrgentReportPages,

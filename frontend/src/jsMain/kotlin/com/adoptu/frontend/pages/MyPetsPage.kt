@@ -23,6 +23,7 @@ object MyPetsPageModule {
     private var existingImages: Array<dynamic> = arrayOf()
     private var selectedFiles: MutableList<dynamic> = mutableListOf()
     private var currentPetIdForVideo: String? = null
+    private var activePlacementId: Int? = null
 
     fun init() {
         window.asDynamic().edit = { id: dynamic -> editPet(id.toString().toInt()) }
@@ -38,6 +39,7 @@ object MyPetsPageModule {
         document.getElementById("add-btn")?.addEventListener("click", { openAddForm() })
         document.getElementById("cancel-btn")?.addEventListener("click", { closeForm() })
         document.getElementById("add-medical-event-btn")?.addEventListener("click", { addMedicalEvent() })
+        document.getElementById("end-placement-btn")?.addEventListener("click", { endCurrentPlacement() })
 
         listOf("weight", "ageYears", "ageMonths").forEach { id -> clampNonNegative(id, maxMonths = id == "ageMonths") }
         clampNonNegative("adoptionFee")
@@ -54,6 +56,37 @@ object MyPetsPageModule {
         (document.getElementById("promoted-reason-row") as? HTMLElement)?.classList?.let {
             if (checked) it.remove("hidden") else it.add("hidden")
         }
+    }
+
+    private fun loadFosterPlacementStatus(petId: String) {
+        val statusEl = document.getElementById("foster-placement-status")
+        val endBtn = document.getElementById("end-placement-btn") as? HTMLElement
+        ApiClientModule.getFosterPlacementHistory(petId).then<Unit> { historyRaw: dynamic ->
+            val history = (historyRaw as? Array<dynamic>) ?: arrayOf()
+            val active = history.firstOrNull { it.endDate == null }
+            if (active != null) {
+                activePlacementId = active.id?.toString()?.toIntOrNull()
+                val since = js("new Date(active.startDate)").toLocaleDateString()
+                val alias = active.temporalHomeAlias?.toString()?.takeIf { it.isNotEmpty() } ?: I18n.t("aTemporalHome")
+                statusEl?.textContent = "${I18n.t("currentlyWithLabel")} $alias ${I18n.t("sinceLabel")} $since"
+                endBtn?.classList?.remove("hidden")
+            } else {
+                activePlacementId = null
+                statusEl?.textContent = I18n.t("notCurrentlyFostered")
+                endBtn?.classList?.add("hidden")
+            }
+        }.catch {
+            statusEl?.textContent = I18n.t("notCurrentlyFostered")
+            endBtn?.classList?.add("hidden")
+        }
+    }
+
+    private fun endCurrentPlacement() {
+        val placementId = activePlacementId ?: return
+        if (!window.confirm(I18n.t("confirmEndPlacement"))) return
+        val petId = currentPetIdForVideo ?: return
+        ApiClientModule.endFosterPlacement(placementId).then<Unit> { loadFosterPlacementStatus(petId) }
+            .catch { err: dynamic -> window.alert(err?.message?.toString() ?: "Error") }
     }
 
     private fun loadMedicalEvents(petId: String) {
@@ -358,6 +391,8 @@ object MyPetsPageModule {
         currentPetIdForVideo = pet.id?.toString()
         (document.getElementById("medical-events-section") as? HTMLElement)?.classList?.remove("hidden")
         loadMedicalEvents(currentPetIdForVideo!!)
+        (document.getElementById("foster-placement-section") as? HTMLElement)?.classList?.remove("hidden")
+        loadFosterPlacementStatus(currentPetIdForVideo!!)
         val existingVideoDiv = document.getElementById("existing-video")
         val videoUrl = pet.videoUrl?.toString()
         if (videoUrl.isNullOrEmpty()) {
@@ -395,6 +430,9 @@ object MyPetsPageModule {
         (document.getElementById("medical-events-section") as? HTMLElement)?.classList?.add("hidden")
         document.getElementById("medical-events-list")?.innerHTML = ""
         (document.getElementById("medical-event-message"))?.textContent = ""
+        (document.getElementById("foster-placement-section") as? HTMLElement)?.classList?.add("hidden")
+        document.getElementById("foster-placement-status")?.textContent = ""
+        (document.getElementById("end-placement-btn") as? HTMLElement)?.classList?.add("hidden")
         document.getElementById("existing-video")?.innerHTML = ""
         updatePreviews()
         document.getElementById("form-title")?.textContent = "Add Pet"

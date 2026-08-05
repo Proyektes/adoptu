@@ -386,6 +386,9 @@ object TemporalHomes : Table("temporal_homes") {
     val city = varchar("city", 100)
     val zip = varchar("zip", 20).nullable()
     val neighborhood = varchar("neighborhood", 100).nullable()
+    // Null = unlimited. Checked against PetFosterPlacements' active (endDate null) count for this
+    // temporal home before a new placement is created - see PetFosterPlacementService.
+    val maxCapacity = integer("max_capacity").nullable()
     val createdAt = long("created_at")
 
     override val primaryKey = PrimaryKey(userId)
@@ -407,6 +410,22 @@ object TemporalHomeRequests : Table("temporal_home_requests") {
     val petId = integer("pet_id").references(Pets.id).nullable()
     val message = text("message")
     val status = varchar("status", 50) // SENT, READ
+    val createdAt = long("created_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+// A pet with no active (endDate null) row here is implicitly "with the rescuer" - that's already
+// true via Pets.rescuerId, so it needs no row of its own. A row only exists for the exception:
+// custody has moved to a TEMPORAL_HOME. At most one active row per pet, enforced in
+// PetFosterPlacementService (not the DB) alongside the ownership/capacity checks.
+object PetFosterPlacements : Table("pet_foster_placements") {
+    val id = integer("id").autoIncrement()
+    val petId = integer("pet_id").references(Pets.id)
+    val temporalHomeId = integer("temporal_home_id").references(Users.id)
+    val startDate = long("start_date")
+    val endDate = long("end_date").nullable()
+    val notes = text("notes").nullable()
     val createdAt = long("created_at")
 
     override val primaryKey = PrimaryKey(id)

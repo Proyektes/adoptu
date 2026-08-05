@@ -91,6 +91,7 @@ data class TemporalHomeDto(
     val city: String,
     val zip: String? = null,
     val neighborhood: String? = null,
+    val maxCapacity: Int? = null,
     val createdAt: Long
 )
 
@@ -110,7 +111,8 @@ data class CreateTemporalHomeRequest(
     val zip: String? = null,
     val neighborhood: String? = null,
     val streetAddress: String? = null,
-    val phone: String? = null
+    val phone: String? = null,
+    val maxCapacity: Int? = null
 )
 
 data class UpdateTemporalHomeRequest(
@@ -121,7 +123,8 @@ data class UpdateTemporalHomeRequest(
     val zip: String? = null,
     val neighborhood: String? = null,
     val streetAddress: String? = null,
-    val phone: String? = null
+    val phone: String? = null,
+    val maxCapacity: Int? = null
 )
 
 data class SendTemporalHomeRequestRequest(

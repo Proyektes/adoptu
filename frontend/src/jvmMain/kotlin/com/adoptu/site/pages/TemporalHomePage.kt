@@ -15,6 +15,10 @@ fun HTML.temporalHomeProfilePage(navParams: NavParams = NavParams()) {
                 h2 { attributes["data-i18n"] = "requestsFromRescuers"; +"Requests from Rescuers" }
                 div { id = "requests-container"; +"" }
             }
+            div(classes = "requests-section") {
+                h2 { attributes["data-i18n"] = "petsCurrentlyWithMe"; +"Pets Currently With Me" }
+                div { id = "foster-placements-container"; +"" }
+            }
         }
         footer()
         commonScripts()

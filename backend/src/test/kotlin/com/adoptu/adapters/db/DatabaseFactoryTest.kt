@@ -29,8 +29,13 @@ class DatabaseFactoryTest {
     }
 
     @Test
-    fun `DatabaseFactory has 38 tables`() {
-        assertEquals(38, DatabaseFactory.listOfTables.size)
+    fun `DatabaseFactory has 39 tables`() {
+        assertEquals(39, DatabaseFactory.listOfTables.size)
+    }
+
+    @Test
+    fun `PetFosterPlacements table is in listOfTables`() {
+        assertTrue(DatabaseFactory.listOfTables.contains(PetFosterPlacements))
     }
 
     @Test
@@ -138,6 +143,7 @@ class DatabaseFactoryTest {
             TemporalHomes,
             BlockedRescuers,
             TemporalHomeRequests,
+            PetFosterPlacements,
             UrgentRescuerProfiles,
             UrgentReports,
             UrgentReportPages,
