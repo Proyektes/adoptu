@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-05T03:06:31.236Z
-> Files: 576 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-05T03:37:49.469Z
+> Files: 577 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/37d425e0-d2ad-499f-bde7-97b1baf5c00b/scratchpad/
 
@@ -728,6 +728,7 @@
 
 - `AdminPage.kt` — init, switchTab, formatDate, buildQuery, renderPagination (~4624 tok)
 - `AuthFlowPages.kt` — init, showSuccess, showError, init, submit (~2649 tok)
+- `IndexPage.kt` — init, loadPets, updateCountryHint, showEmptyState, hideEmptyState (~2334 tok)
 - `LostFoundPage.kt` — init, captureLocation, submit, init, search (~2819 tok)
 - `MyPetsPage.kt` — init, clampNonNegative, load, onPetsLoaded, renderPetCard (~6383 tok)
 - `PetDetailPage.kt` — init, render, shareCurrentPet, petStatusLabel, renderImages (~2670 tok)
@@ -755,7 +756,7 @@
 
 ## frontend/src/main/scss/
 
-- `style.scss` — Styles: 60 rules (~3552 tok)
+- `style.scss` — Styles: 60 rules (~3639 tok)
 
 ## frontend/src/tests/
 
