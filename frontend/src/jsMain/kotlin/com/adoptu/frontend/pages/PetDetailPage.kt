@@ -6,6 +6,8 @@ import com.adoptu.frontend.I18n
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.HTMLSelectElement
 import org.w3c.dom.HTMLTextAreaElement
 import org.w3c.dom.events.Event
 import kotlin.js.json
@@ -122,7 +124,21 @@ object PetDetailPageModule {
         }
 
         if (canAdopt) {
-            sb.append("<form id=\"adopt-form\"><label for=\"msg\">${I18n.t("messageOptional")}</label><textarea id=\"msg\" name=\"message\"></textarea><button type=\"submit\" class=\"btn\">${I18n.t("requestAdoption")}</button></form>")
+            sb.append(
+                "<form id=\"adopt-form\">" +
+                    "<label for=\"msg\">${I18n.t("messageOptional")}</label><textarea id=\"msg\" name=\"message\"></textarea>" +
+                    "<label for=\"adopt-housing\">${I18n.t("housingType")}</label>" +
+                    "<select id=\"adopt-housing\"><option value=\"\">${I18n.t("preferNotToSay")}</option>" +
+                    "<option value=\"HOUSE\">${I18n.t("houseHousing")}</option><option value=\"APARTMENT\">${I18n.t("apartmentHousing")}</option></select>" +
+                    "<div class=\"checkbox-group\">" +
+                    "<input type=\"checkbox\" id=\"adopt-has-yard\"><label for=\"adopt-has-yard\">${I18n.t("hasYard")}</label>" +
+                    "<input type=\"checkbox\" id=\"adopt-has-other-pets\"><label for=\"adopt-has-other-pets\">${I18n.t("hasOtherPets")}</label>" +
+                    "</div>" +
+                    "<label for=\"adopt-experience\">${I18n.t("adoptionExperience")}</label>" +
+                    "<select id=\"adopt-experience\"><option value=\"\">${I18n.t("preferNotToSay")}</option>" +
+                    "<option value=\"FIRST_TIME\">${I18n.t("firstTimeAdopter")}</option><option value=\"EXPERIENCED\">${I18n.t("experiencedAdopter")}</option></select>" +
+                    "<button type=\"submit\" class=\"btn\">${I18n.t("requestAdoption")}</button></form>"
+            )
         }
         if (isOwner) {
             sb.append("<a href=\"/my-pets?edit=${pet.id}\" class=\"btn\">${I18n.t("editPet")}</a>")
@@ -153,7 +169,11 @@ object PetDetailPageModule {
                 return@addEventListener
             }
             val msg = (document.getElementById("msg") as? HTMLTextAreaElement)?.value ?: ""
-            ApiClientModule.adoptPet(petId, msg).then<Unit> {
+            val housingType = (document.getElementById("adopt-housing") as? HTMLSelectElement)?.value?.ifEmpty { null }
+            val hasYard = (document.getElementById("adopt-has-yard") as? HTMLInputElement)?.checked
+            val hasOtherPets = (document.getElementById("adopt-has-other-pets") as? HTMLInputElement)?.checked
+            val experienceLevel = (document.getElementById("adopt-experience") as? HTMLSelectElement)?.value?.ifEmpty { null }
+            ApiClientModule.adoptPet(petId, msg, housingType, hasYard, hasOtherPets, experienceLevel).then<Unit> {
                 (document.getElementById("message") as? HTMLElement)?.let {
                     it.className = "message success"
                     it.textContent = I18n.t("adoptionRequestSubmitted")

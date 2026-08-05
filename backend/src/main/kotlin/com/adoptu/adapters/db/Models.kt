@@ -330,7 +330,16 @@ object AdoptionRequests : Table("adoption_requests") {
     val petId = integer("pet_id").references(Pets.id)
     val adopterId = integer("adopter_id").references(Users.id)
     val message = text("message")
-    val status = varchar("status", 50) // PENDING, APPROVED, REJECTED
+    val status = varchar("status", 50) // PENDING, UNDER_REVIEW, APPROVED, REJECTED
+    // Lightweight screening fields, all optional - kept off the fast "message-only" path so a
+    // legacy client/test that only sends `message` still works.
+    val housingType = varchar("housing_type", 20).nullable() // HOUSE, APARTMENT
+    val hasYard = bool("has_yard").nullable()
+    val hasOtherPets = bool("has_other_pets").nullable()
+    val experienceLevel = varchar("experience_level", 20).nullable() // FIRST_TIME, EXPERIENCED
+    // Rescuer-private - PetService.getMyAdoptionRequests() strips this before returning to the
+    // adopter, since AdoptionRequestDto is shared between both sides of the review.
+    val reviewNote = text("review_note").nullable()
     val createdAt = long("created_at")
 
     override val primaryKey = PrimaryKey(id)

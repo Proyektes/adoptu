@@ -1,7 +1,9 @@
 package com.adoptu.services
 
+import com.adoptu.dto.input.AdoptionExperience
 import com.adoptu.dto.input.AdoptionRequestDto
 import com.adoptu.dto.input.CreatePetRequest
+import com.adoptu.dto.input.HousingType
 import com.adoptu.dto.input.PetDto
 import com.adoptu.dto.input.PetImageDto
 import com.adoptu.dto.input.Status
@@ -290,8 +292,16 @@ class PetService(
 
     suspend fun getImages(petId: Int): List<PetImageDto> = petRepository.getImages(petId)
 
-    suspend fun createAdoptionRequest(petId: Int, adopterId: Int, message: String): AdoptionRequestDto {
-        val request = petRepository.createAdoptionRequest(petId, adopterId, message)
+    suspend fun createAdoptionRequest(
+        petId: Int,
+        adopterId: Int,
+        message: String,
+        housingType: HousingType? = null,
+        hasYard: Boolean? = null,
+        hasOtherPets: Boolean? = null,
+        experienceLevel: AdoptionExperience? = null
+    ): AdoptionRequestDto {
+        val request = petRepository.createAdoptionRequest(petId, adopterId, message, housingType, hasYard, hasOtherPets, experienceLevel)
 
         val pet = petRepository.getById(petId)
         if (pet != null) {
@@ -321,30 +331,65 @@ class PetService(
         return ServiceResult.Success(petRepository.getAdoptionRequestsForPet(petId))
     }
 
+    // Adopter's own view of their requests - reviewNote is rescuer-private and must never reach
+    // the person being reviewed, so it's stripped here rather than at the DTO/repository level
+    // (which is shared with the rescuer-facing getAdoptionRequestsForPet above).
     suspend fun getMyAdoptionRequests(userId: Int): List<AdoptionRequestDto> {
-        return petRepository.getAdoptionRequestsForUser(userId)
+        return petRepository.getAdoptionRequestsForUser(userId).map { it.copy(reviewNote = null) }
     }
 
-    suspend fun updateAdoptionRequest(requestId: Int, status: String, userId: Int, userRoles: Set<String>): ServiceResult<AdoptionRequestDto> {
+    suspend fun updateAdoptionRequest(
+        requestId: Int,
+        status: String,
+        userId: Int,
+        userRoles: Set<String>,
+        reviewNote: String? = null
+    ): ServiceResult<AdoptionRequestDto> {
         val request = petRepository.getAdoptionRequestById(requestId) ?: return ServiceResult.NotFound
         val pet = petRepository.getById(request.petId) ?: return ServiceResult.NotFound
         val isAdmin = userRoles.contains("ADMIN")
         if (!isAdmin && pet.rescuerId != userId) {
             return ServiceResult.Forbidden
         }
-        if (!listOf("APPROVED", "REJECTED").contains(status)) {
+        // A note-only save re-sends the request's current status (which may still be PENDING)
+        // rather than a real transition - allow that even though PENDING itself is never a valid
+        // transition *target*.
+        val isRealTransition = status != request.status
+        if (isRealTransition && status !in listOf("UNDER_REVIEW", "APPROVED", "REJECTED")) {
             return ServiceResult.Forbidden
         }
-        petRepository.updateAdoptionRequestStatus(requestId, status)
+        petRepository.updateAdoptionRequestStatus(requestId, status, reviewNote)
 
-        if (status == "APPROVED") {
+        if (isRealTransition && status == "APPROVED") {
             petRepository.update(request.petId, UpdatePetRequest(status = Status.ADOPTED))
             petRepository.getAdoptionRequestsForPet(request.petId)
-                .filter { it.id != requestId && it.status == "PENDING" }
+                .filter { it.id != requestId && it.status in listOf("PENDING", "UNDER_REVIEW") }
                 .forEach { petRepository.updateAdoptionRequestStatus(it.id, "REJECTED") }
+        }
+
+        if (isRealTransition) {
+            notifyAdopterOfStatusChange(request, pet, status)
         }
 
         val updatedRequest = petRepository.getAdoptionRequestById(requestId)
         return if (updatedRequest != null) ServiceResult.Success(updatedRequest) else ServiceResult.NotFound
+    }
+
+    private suspend fun notifyAdopterOfStatusChange(request: AdoptionRequestDto, pet: PetDto, status: String) {
+        val adopter = userService.getById(request.adopterId) ?: return
+        val statusText = when (status) {
+            "UNDER_REVIEW" -> "is now under review"
+            "APPROVED" -> "was approved"
+            "REJECTED" -> "was not approved this time"
+            else -> return
+        }
+        CoroutineScope(Dispatchers.IO).launch {
+            notificationPort.sendEmail(
+                to = adopter.username,
+                subject = "Update on your adoption request for ${pet.name} - Adopt-U",
+                body = "Hi ${adopter.displayName},\n\nYour adoption request for ${pet.name} $statusText. " +
+                    "$baseUrl/pet/${pet.id}"
+            )
+        }
     }
 }

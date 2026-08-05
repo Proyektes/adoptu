@@ -1,8 +1,10 @@
 package com.adoptu.ports
 
+import com.adoptu.dto.input.AdoptionExperience
 import com.adoptu.dto.input.AdoptionRequestDto
 import com.adoptu.dto.input.Currency
 import com.adoptu.dto.input.Gender
+import com.adoptu.dto.input.HousingType
 import com.adoptu.dto.input.PetDto
 import com.adoptu.dto.input.PetImageDto
 import com.adoptu.dto.input.PromotedReason
@@ -58,10 +60,18 @@ interface PetRepositoryPort {
     ): PetDto
     suspend fun update(id: Int, body: UpdatePetRequest): PetDto?
     suspend fun delete(petId: Int)
-    suspend fun createAdoptionRequest(petId: Int, adopterId: Int, message: String): AdoptionRequestDto
+    suspend fun createAdoptionRequest(
+        petId: Int,
+        adopterId: Int,
+        message: String,
+        housingType: HousingType? = null,
+        hasYard: Boolean? = null,
+        hasOtherPets: Boolean? = null,
+        experienceLevel: AdoptionExperience? = null
+    ): AdoptionRequestDto
     suspend fun getAdoptionRequestsForPet(petId: Int): List<AdoptionRequestDto>
     suspend fun getAdoptionRequestsForUser(userId: Int): List<AdoptionRequestDto>
-    suspend fun updateAdoptionRequestStatus(requestId: Int, status: String): Boolean
+    suspend fun updateAdoptionRequestStatus(requestId: Int, status: String, reviewNote: String? = null): Boolean
     suspend fun getAdoptionRequestById(requestId: Int): AdoptionRequestDto?
     suspend fun addImage(petId: Int, imageUrl: String, isPrimary: Boolean = false, sortOrder: Int = 0): PetImageDto
     suspend fun removeImage(petId: Int, imageId: Int): Boolean

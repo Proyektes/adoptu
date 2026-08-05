@@ -4,6 +4,7 @@ import com.adoptu.frontend.ApiClientModule
 import com.adoptu.frontend.CommonModule
 import com.adoptu.frontend.I18n
 import com.adoptu.frontend.ImageCompression
+import com.adoptu.frontend.forEachElement
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.HTMLElement
@@ -28,6 +29,7 @@ object MyPetsPageModule {
         window.asDynamic().del = { id: dynamic -> deletePet(id.toString().toInt()) }
         window.asDynamic().approveRequest = { id: dynamic -> approveRequest(id.toString().toInt()) }
         window.asDynamic().rejectRequest = { id: dynamic -> rejectRequest(id.toString().toInt()) }
+        window.asDynamic().markUnderReview = { id: dynamic -> markUnderReview(id.toString().toInt()) }
         window.asDynamic().setPrimaryImage = { index: dynamic -> setPrimaryImage(index.toString().toInt()) }
         window.asDynamic().removeExistingImage = { index: dynamic -> removeExistingImage(index.toString().toInt()) }
         window.asDynamic().removePreview = { index: dynamic -> removePreview(index.toString().toInt()) }
@@ -163,20 +165,65 @@ object MyPetsPageModule {
 
     private fun renderAdoptionRequests(allRequests: List<dynamic>, container: HTMLElement?) {
         if (allRequests.isEmpty()) {
-            container?.innerHTML = "<p>No adoption requests</p>"
+            container?.innerHTML = "<p>${I18n.t("noAdoptionRequests")}</p>"
             return
         }
-        container?.innerHTML = allRequests.joinToString("") { r ->
-            val date = js("new Date(r.createdAt)").toLocaleDateString()
-            val message = if (r.message != null) CommonModule.escapeHtml(r.message.toString()) else "No message"
-            val actions = if (r.status == "PENDING") {
-                "<div class=\"ar-actions\"><button class=\"btn btn-secondary\" data-action=\"approveRequest\" data-arg=\"${r.id}\">Approve</button>" +
-                    "<button class=\"btn btn-secondary\" data-action=\"rejectRequest\" data-arg=\"${r.id}\">Reject</button></div>"
-            } else ""
-            "<div class=\"adoption-request-card\"><div class=\"ar-pet\">${emoji[r.petType.toString()] ?: "🐾"} ${CommonModule.escapeHtml(r.petName?.toString())}</div>" +
-                "<div class=\"ar-status status-${r.status.toString().lowercase()}\">${CommonModule.escapeHtml(r.status?.toString())}</div>" +
-                "<div class=\"ar-message\">$message</div><div class=\"ar-date\">$date</div>$actions</div>"
+        container?.innerHTML = allRequests.joinToString("") { r -> renderAdoptionRequestCard(r) }
+        document.querySelectorAll(".save-review-note-btn").forEachElement { node ->
+            val requestId = node.asDynamic().dataset.arg?.toString()?.toIntOrNull() ?: return@forEachElement
+            val status = node.asDynamic().dataset.status?.toString() ?: "PENDING"
+            node.addEventListener("click", { saveReviewNote(requestId, status) })
         }
+    }
+
+    private fun renderAdoptionRequestCard(r: dynamic): String {
+        val date = js("new Date(r.createdAt)").toLocaleDateString()
+        val message = if (r.message != null) CommonModule.escapeHtml(r.message.toString()) else I18n.t("noMessage")
+        val status = r.status?.toString() ?: "PENDING"
+        val actions = when (status) {
+            "PENDING" -> "<div class=\"ar-actions\"><button class=\"btn btn-secondary\" data-action=\"markUnderReview\" data-arg=\"${r.id}\">${I18n.t("markUnderReview")}</button>" +
+                "<button class=\"btn btn-secondary\" data-action=\"approveRequest\" data-arg=\"${r.id}\">${I18n.t("approve")}</button>" +
+                "<button class=\"btn btn-secondary\" data-action=\"rejectRequest\" data-arg=\"${r.id}\">${I18n.t("reject")}</button></div>"
+            "UNDER_REVIEW" -> "<div class=\"ar-actions\"><button class=\"btn btn-secondary\" data-action=\"approveRequest\" data-arg=\"${r.id}\">${I18n.t("approve")}</button>" +
+                "<button class=\"btn btn-secondary\" data-action=\"rejectRequest\" data-arg=\"${r.id}\">${I18n.t("reject")}</button></div>"
+            else -> ""
+        }
+        val screening = renderScreeningFields(r)
+        val reviewNote = r.reviewNote?.toString() ?: ""
+        val statusLabel = when (status) {
+            "UNDER_REVIEW" -> I18n.t("adoptionStatusUnderReview")
+            "APPROVED" -> I18n.t("adoptionStatusApproved")
+            "REJECTED" -> I18n.t("adoptionStatusRejected")
+            else -> I18n.t("adoptionStatusPending")
+        }
+        return "<div class=\"adoption-request-card\"><div class=\"ar-pet\">${emoji[r.petType.toString()] ?: "🐾"} ${CommonModule.escapeHtml(r.petName?.toString())}</div>" +
+            "<div class=\"ar-status status-${status.lowercase()}\">$statusLabel</div>" +
+            "<div class=\"ar-message\">$message</div>$screening<div class=\"ar-date\">$date</div>" +
+            "<div class=\"ar-review-note\"><label for=\"review-note-${r.id}\">${I18n.t("reviewNoteLabel")}</label>" +
+            "<textarea id=\"review-note-${r.id}\">${CommonModule.escapeHtml(reviewNote)}</textarea>" +
+            "<button type=\"button\" class=\"btn btn-secondary save-review-note-btn\" data-arg=\"${r.id}\" data-status=\"$status\">${I18n.t("saveNote")}</button></div>" +
+            "$actions</div>"
+    }
+
+    private fun renderScreeningFields(r: dynamic): String {
+        val parts = mutableListOf<String>()
+        r.housingType?.toString()?.let { parts.add(I18n.t(if (it == "HOUSE") "houseHousing" else "apartmentHousing")) }
+        if (r.hasYard == true) parts.add(I18n.t("hasYard"))
+        if (r.hasOtherPets == true) parts.add(I18n.t("hasOtherPets"))
+        r.experienceLevel?.toString()?.let { parts.add(I18n.t(if (it == "FIRST_TIME") "firstTimeAdopter" else "experiencedAdopter")) }
+        if (parts.isEmpty()) return ""
+        return "<div class=\"ar-screening\">${parts.joinToString(" • ")}</div>"
+    }
+
+    private fun saveReviewNote(requestId: Int, status: String) {
+        val note = (document.getElementById("review-note-$requestId") as? HTMLTextAreaElement)?.value ?: ""
+        ApiClientModule.updateAdoptionRequest(requestId, status, note).then<Unit> { load() }
+            .catch { err: dynamic -> window.alert(err?.message?.toString() ?: "Error") }
+    }
+
+    private fun markUnderReview(requestId: Int) {
+        ApiClientModule.updateAdoptionRequest(requestId, "UNDER_REVIEW").then<Unit> { load() }
+            .catch { err: dynamic -> window.alert(err?.message?.toString() ?: "Error") }
     }
 
     private fun approveRequest(requestId: Int) {

@@ -642,6 +642,58 @@ form {
     border-bottom: 1px solid var(--border);
 }
 
+.adoption-request-card {
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+
+    .ar-pet {
+        font-weight: 600;
+    }
+
+    .ar-status {
+        display: inline-block;
+        padding: 0.15rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin: 0.35rem 0;
+
+        &.status-pending { background: #fff3cd; color: #7a4a00; }
+        &.status-under_review { background: #cfe2ff; color: #084298; }
+        &.status-approved { background: #d1e7dd; color: #0f5132; }
+        &.status-rejected { background: #f8d7da; color: #842029; }
+    }
+
+    .ar-screening {
+        font-size: 0.85rem;
+        color: var(--text-muted, #666);
+        margin: 0.35rem 0;
+    }
+
+    .ar-review-note {
+        margin: 0.5rem 0;
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 60px;
+        }
+    }
+
+    .ar-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+}
+
 .profile-header {
     display: flex;
     justify-content: space-between;

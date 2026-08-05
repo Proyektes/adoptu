@@ -373,9 +373,11 @@ fun HttpRules.petsRoutes() {
 
             val id = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondError(ValidationConstants.INVALID_ID)
             val body = req.receiveJson<CreateAdoptionRequestRequest>()
-            val message = body.message
 
-            val request = petService.createAdoptionRequest(id, session.userId, message)
+            val request = petService.createAdoptionRequest(
+                id, session.userId, body.message,
+                body.housingType, body.hasYard, body.hasOtherPets, body.experienceLevel
+            )
             res.send(request)
         }
     })
@@ -409,8 +411,9 @@ fun HttpRules.petsRoutes() {
             val requestId = req.pathParam("requestId").toIntOrNull() ?: return@runBlocking res.respondError(ValidationConstants.INVALID_ID)
             val params = req.receiveFormParameters()
             val status = params["status"] ?: return@runBlocking res.respondError("status required")
+            val reviewNote = params["reviewNote"]?.takeIf { it.isNotBlank() }
 
-            res.respondData(petService.updateAdoptionRequest(requestId, status, session.userId, activeRoles))
+            res.respondData(petService.updateAdoptionRequest(requestId, status, session.userId, activeRoles, reviewNote))
         }
     })
 }

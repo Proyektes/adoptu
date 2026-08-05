@@ -5,8 +5,10 @@ import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.repositories.PetRepositoryImpl
 import com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl
 import com.adoptu.adapters.db.repositories.UserRepository
+import com.adoptu.dto.input.AdoptionExperience
 import com.adoptu.dto.input.CreatePetRequest
 import com.adoptu.dto.input.Gender
+import com.adoptu.dto.input.HousingType
 import com.adoptu.dto.input.PromotedReason
 import com.adoptu.dto.input.UpdatePetRequest
 import com.adoptu.dto.input.UserRole
@@ -691,6 +693,21 @@ class PetServiceTest {
     }
 
     @Test
+    fun `createAdoptionRequest persists screening fields`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+
+        val result = petService.createAdoptionRequest(
+            pet.id, 2, "I would love to adopt this pet!",
+            housingType = HousingType.HOUSE, hasYard = true, hasOtherPets = false, experienceLevel = AdoptionExperience.EXPERIENCED
+        )
+
+        assertEquals(HousingType.HOUSE, result.housingType)
+        assertEquals(true, result.hasYard)
+        assertEquals(false, result.hasOtherPets)
+        assertEquals(AdoptionExperience.EXPERIENCED, result.experienceLevel)
+    }
+
+    @Test
     fun `getAdoptionRequestsForPet returns requests for owner`() = runBlocking {
         val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
         petService.createAdoptionRequest(pet.id, 2, "Request 1")
@@ -733,6 +750,80 @@ class PetServiceTest {
 
         assertEquals(2, result.size)
         assertTrue(result.all { it.adopterId == 2 })
+    }
+
+    @Test
+    fun `getMyAdoptionRequests strips the rescuer-private review note`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+        val request = petService.createAdoptionRequest(pet.id, 2, "My request")
+        petService.updateAdoptionRequest(request.id, "UNDER_REVIEW", 1, setOf("RESCUER"), reviewNote = "Checking references")
+
+        val result = petService.getMyAdoptionRequests(2)
+
+        assertEquals(1, result.size)
+        assertNull(result.first().reviewNote)
+    }
+
+    @Test
+    fun `getAdoptionRequestsForPet still exposes the review note to the rescuer`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+        val request = petService.createAdoptionRequest(pet.id, 2, "My request")
+        petService.updateAdoptionRequest(request.id, "UNDER_REVIEW", 1, setOf("RESCUER"), reviewNote = "Checking references")
+
+        val result = petService.getAdoptionRequestsForPet(pet.id, 1, setOf("RESCUER"))
+
+        assertTrue(result is ServiceResult.Success)
+        assertEquals("Checking references", result.data.first().reviewNote)
+    }
+
+    @Test
+    fun `updateAdoptionRequest allows saving a review note without changing a still-PENDING status`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+        val request = petService.createAdoptionRequest(pet.id, 2, "I want to adopt")
+
+        val result = petService.updateAdoptionRequest(request.id, "PENDING", 1, setOf("RESCUER"), reviewNote = "Looks promising")
+
+        assertTrue(result is ServiceResult.Success)
+        assertEquals("PENDING", result.data.status)
+        assertEquals("Looks promising", result.data.reviewNote)
+    }
+
+    @Test
+    fun `updateAdoptionRequest still rejects an illegitimate transition back to PENDING`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+        val request = petService.createAdoptionRequest(pet.id, 2, "I want to adopt")
+        petService.updateAdoptionRequest(request.id, "APPROVED", 1, setOf("RESCUER"))
+
+        val result = petService.updateAdoptionRequest(request.id, "PENDING", 1, setOf("RESCUER"))
+
+        assertEquals(ServiceResult.Forbidden, result)
+    }
+
+    @Test
+    fun `updateAdoptionRequest transitions request to UNDER_REVIEW`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+        val request = petService.createAdoptionRequest(pet.id, 2, "I want to adopt")
+
+        val result = petService.updateAdoptionRequest(request.id, "UNDER_REVIEW", 1, setOf("RESCUER"))
+
+        assertTrue(result is ServiceResult.Success)
+        assertEquals("UNDER_REVIEW", result.data.status)
+    }
+
+    @Test
+    fun `updateAdoptionRequest approving one request also rejects other PENDING and UNDER_REVIEW requests`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+        val pending = petService.createAdoptionRequest(pet.id, 2, "Request A")
+        val underReview = petService.createAdoptionRequest(pet.id, 3, "Request B")
+        petService.updateAdoptionRequest(underReview.id, "UNDER_REVIEW", 1, setOf("RESCUER"))
+        val toApprove = petService.createAdoptionRequest(pet.id, 2, "Request C - second application")
+
+        petService.updateAdoptionRequest(toApprove.id, "APPROVED", 1, setOf("RESCUER"))
+
+        val requests = (petService.getAdoptionRequestsForPet(pet.id, 1, setOf("RESCUER")) as ServiceResult.Success).data
+        assertEquals("REJECTED", requests.first { it.id == pending.id }.status)
+        assertEquals("REJECTED", requests.first { it.id == underReview.id }.status)
+        assertEquals("APPROVED", requests.first { it.id == toApprove.id }.status)
     }
 
     @Test

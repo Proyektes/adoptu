@@ -300,6 +300,12 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
             }
 
             div(classes = "card-bg profile-section") {
+                h2 { attributes["data-i18n"] = "myAdoptionRequests"; +"My Adoption Requests" }
+                div { id = "my-adoption-requests-empty"; +"" }
+                div { id = "my-adoption-requests-list"; +"" }
+            }
+
+            div(classes = "card-bg profile-section") {
                 h2 { attributes["data-i18n"] = "emailChange"; +"Change Email" }
                 p { attributes["data-i18n"] = "emailChangeDesc"; +"Update your email address. A verification link will be sent to the new email." }
                 div(classes = "form-row") {

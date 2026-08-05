@@ -46,6 +46,7 @@ object ProfilePageModule {
 
         loadFavorites()
         loadSavedSearches()
+        loadMyAdoptionRequests()
 
         listOf("role-rescuer", "role-photographer", "role-temporal-home", "role-shelter", "role-sterilization").forEach { id ->
             (document.getElementById(id) as? HTMLInputElement)?.checked = when (id) {
@@ -712,6 +713,46 @@ object ProfilePageModule {
                 node.addEventListener("click", { ApiClientModule.removeFavorite(petId).then<Unit> { loadFavorites() } })
             }
         }
+    }
+
+    private fun loadMyAdoptionRequests() {
+        ApiClientModule.getMyAdoptionRequests().then<Unit> { requestsRaw: dynamic ->
+            val requests = (requestsRaw as? Array<dynamic>) ?: arrayOf()
+            val container = document.getElementById("my-adoption-requests-list")
+            val empty = document.getElementById("my-adoption-requests-empty")
+            if (requests.isEmpty()) {
+                empty?.textContent = I18n.t("noAdoptionRequestsYet")
+                container?.innerHTML = ""
+                return@then
+            }
+            empty?.textContent = ""
+            var remaining = requests.size
+            val rows = arrayOfNulls<String>(requests.size)
+            requests.forEachIndexed { index, request ->
+                ApiClientModule.getPet(request.petId.toString()).then<Unit> { pet: dynamic ->
+                    rows[index] = renderMyAdoptionRequestRow(request, pet.name?.toString() ?: "")
+                }.catch {
+                    rows[index] = renderMyAdoptionRequestRow(request, "")
+                }.finally {
+                    remaining--
+                    if (remaining == 0) container?.innerHTML = rows.joinToString("")
+                }
+            }
+        }
+    }
+
+    private fun renderMyAdoptionRequestRow(request: dynamic, petName: String): String {
+        val date = js("new Date(request.createdAt)").toLocaleDateString()
+        val status = request.status?.toString() ?: "PENDING"
+        val statusLabel = when (status) {
+            "UNDER_REVIEW" -> I18n.t("adoptionStatusUnderReview")
+            "APPROVED" -> I18n.t("adoptionStatusApproved")
+            "REJECTED" -> I18n.t("adoptionStatusRejected")
+            else -> I18n.t("adoptionStatusPending")
+        }
+        return "<div class=\"adoption-request-card\"><a href=\"/pet/${request.petId}\">$petName</a>" +
+            "<span class=\"ar-status status-${status.lowercase()}\">$statusLabel</span>" +
+            "<span class=\"ar-date\">$date</span></div>"
     }
 
     private fun loadSavedSearches() {

@@ -168,8 +168,15 @@ object ApiClientModule {
 
     fun getMyPets(): Promise<dynamic> = apiFetch("/api/pets/mine")
 
-    fun adoptPet(id: String, message: String): Promise<dynamic> {
-        val body = js("({message: message})")
+    fun adoptPet(
+        id: String,
+        message: String,
+        housingType: String? = null,
+        hasYard: Boolean? = null,
+        hasOtherPets: Boolean? = null,
+        experienceLevel: String? = null
+    ): Promise<dynamic> {
+        val body = js("({message: message, housingType: housingType, hasYard: hasYard, hasOtherPets: hasOtherPets, experienceLevel: experienceLevel})")
         return apiFetch("/api/pets/$id/adopt", js("({method: 'POST', body: JSON.stringify(body)})"))
     }
 
@@ -187,9 +194,15 @@ object ApiClientModule {
 
     fun getAdoptionRequests(petId: Int): Promise<dynamic> = apiFetch("/api/pets/$petId/adoption-requests")
 
-    fun updateAdoptionRequest(requestId: Int, status: String): Promise<dynamic> {
+    fun getMyAdoptionRequests(): Promise<dynamic> = apiFetch("/api/pets/my-adoption-requests")
+
+    fun updateAdoptionRequest(requestId: Int, status: String, reviewNote: String? = null): Promise<dynamic> {
         val opts = js("({method: 'PUT', headers: {'Content-Type': 'application/x-www-form-urlencoded'}})")
-        opts.body = "status=" + window.asDynamic().encodeURIComponent(status)
+        var formBody = "status=" + window.asDynamic().encodeURIComponent(status)
+        if (!reviewNote.isNullOrEmpty()) {
+            formBody += "&reviewNote=" + window.asDynamic().encodeURIComponent(reviewNote)
+        }
+        opts.body = formBody
         return apiFetch("/api/pets/adoption-requests/$requestId", opts)
     }
 

@@ -5,9 +5,11 @@ import com.adoptu.adapters.db.PetImages
 import com.adoptu.adapters.db.Pets
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.common.Country
+import com.adoptu.dto.input.AdoptionExperience
 import com.adoptu.dto.input.AdoptionRequestDto
 import com.adoptu.dto.input.Currency
 import com.adoptu.dto.input.Gender
+import com.adoptu.dto.input.HousingType
 import com.adoptu.dto.input.PetDto
 import com.adoptu.dto.input.PetImageDto
 import com.adoptu.dto.input.PromotedReason
@@ -339,7 +341,29 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
         }
     }
 
-    override suspend fun createAdoptionRequest(petId: Int, adopterId: Int, message: String): AdoptionRequestDto = withContext(dbDispatcher) {
+    private fun rowToAdoptionRequestDto(row: ResultRow): AdoptionRequestDto = AdoptionRequestDto(
+        id = row[AdoptionRequests.id],
+        petId = row[AdoptionRequests.petId],
+        adopterId = row[AdoptionRequests.adopterId],
+        message = row[AdoptionRequests.message],
+        status = row[AdoptionRequests.status],
+        housingType = row[AdoptionRequests.housingType]?.let { HousingType.valueOf(it) },
+        hasYard = row[AdoptionRequests.hasYard],
+        hasOtherPets = row[AdoptionRequests.hasOtherPets],
+        experienceLevel = row[AdoptionRequests.experienceLevel]?.let { AdoptionExperience.valueOf(it) },
+        reviewNote = row[AdoptionRequests.reviewNote],
+        createdAt = row[AdoptionRequests.createdAt]
+    )
+
+    override suspend fun createAdoptionRequest(
+        petId: Int,
+        adopterId: Int,
+        message: String,
+        housingType: HousingType?,
+        hasYard: Boolean?,
+        hasOtherPets: Boolean?,
+        experienceLevel: AdoptionExperience?
+    ): AdoptionRequestDto = withContext(dbDispatcher) {
         transaction {
         val createdAt = clock.now().toEpochMilliseconds()
         val id = AdoptionRequests.insert {
@@ -347,6 +371,10 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
             it[AdoptionRequests.adopterId] = adopterId
             it[AdoptionRequests.message] = message
             it[AdoptionRequests.status] = "PENDING"
+            it[AdoptionRequests.housingType] = housingType?.name
+            it[AdoptionRequests.hasYard] = hasYard
+            it[AdoptionRequests.hasOtherPets] = hasOtherPets
+            it[AdoptionRequests.experienceLevel] = experienceLevel?.name
             it[AdoptionRequests.createdAt] = createdAt
         } get AdoptionRequests.id
 
@@ -356,6 +384,10 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
             adopterId = adopterId,
             message = message,
             status = "PENDING",
+            housingType = housingType,
+            hasYard = hasYard,
+            hasOtherPets = hasOtherPets,
+            experienceLevel = experienceLevel,
             createdAt = createdAt
         )
         }
@@ -365,16 +397,7 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
         transaction {
             AdoptionRequests.selectAll()
                 .where { AdoptionRequests.petId eq petId }
-                .map { row ->
-                    AdoptionRequestDto(
-                        id = row[AdoptionRequests.id],
-                        petId = row[AdoptionRequests.petId],
-                        adopterId = row[AdoptionRequests.adopterId],
-                        message = row[AdoptionRequests.message],
-                        status = row[AdoptionRequests.status],
-                        createdAt = row[AdoptionRequests.createdAt]
-                    )
-                }
+                .map(::rowToAdoptionRequestDto)
         }
     }
 
@@ -382,23 +405,15 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
         transaction {
             AdoptionRequests.selectAll()
                 .where { AdoptionRequests.adopterId eq userId }
-                .map { row ->
-                    AdoptionRequestDto(
-                        id = row[AdoptionRequests.id],
-                        petId = row[AdoptionRequests.petId],
-                        adopterId = row[AdoptionRequests.adopterId],
-                        message = row[AdoptionRequests.message],
-                        status = row[AdoptionRequests.status],
-                        createdAt = row[AdoptionRequests.createdAt]
-                    )
-                }
+                .map(::rowToAdoptionRequestDto)
         }
     }
 
-    override suspend fun updateAdoptionRequestStatus(requestId: Int, status: String): Boolean = withContext(dbDispatcher) {
+    override suspend fun updateAdoptionRequestStatus(requestId: Int, status: String, reviewNote: String?): Boolean = withContext(dbDispatcher) {
         transaction {
             val updated = AdoptionRequests.update({ AdoptionRequests.id eq requestId }) {
                 it[AdoptionRequests.status] = status
+                reviewNote?.let { note -> it[AdoptionRequests.reviewNote] = note }
             }
             updated > 0
         }
@@ -409,16 +424,7 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
             AdoptionRequests.selectAll()
                 .where { AdoptionRequests.id eq requestId }
                 .firstOrNull()
-                ?.let { row ->
-                    AdoptionRequestDto(
-                        id = row[AdoptionRequests.id],
-                        petId = row[AdoptionRequests.petId],
-                        adopterId = row[AdoptionRequests.adopterId],
-                        message = row[AdoptionRequests.message],
-                        status = row[AdoptionRequests.status],
-                        createdAt = row[AdoptionRequests.createdAt]
-                    )
-                }
+                ?.let(::rowToAdoptionRequestDto)
         }
     }
 
