@@ -62,6 +62,8 @@ interface PetRepositoryPort {
     suspend fun getAdoptionRequestById(requestId: Int): AdoptionRequestDto?
     suspend fun addImage(petId: Int, imageUrl: String, isPrimary: Boolean = false, sortOrder: Int = 0): PetImageDto
     suspend fun removeImage(petId: Int, imageId: Int): Boolean
+    // Single video per pet - null clears it (see PetService.removeVideo).
+    suspend fun setVideo(petId: Int, videoUrl: String?): PetDto?
     suspend fun setPrimaryImage(petId: Int, imageId: Int): Boolean
     suspend fun getImages(petId: Int): List<PetImageDto>
 }

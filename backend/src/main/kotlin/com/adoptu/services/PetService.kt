@@ -170,6 +170,49 @@ class PetService(
         // Client compresses to ~2MB before upload; this is a defense-in-depth ceiling for
         // clients that skip/bypass that step, not the expected upload size.
         private const val MAX_IMAGE_BYTES = 5 * 1024 * 1024
+        private val ALLOWED_VIDEO_CONTENT_TYPES = setOf("video/mp4", "video/webm")
+        // No transcoding pipeline (unlike images) - stored as whatever the browser uploaded, so
+        // this ceiling is the real expected max, not just a defense-in-depth backstop.
+        private const val MAX_VIDEO_BYTES = 50 * 1024 * 1024
+    }
+
+    suspend fun uploadAndSetVideo(
+        petId: Int,
+        userId: Int,
+        userRoles: Set<String>,
+        videoName: String,
+        contentType: String,
+        videoData: ByteArray
+    ): ServiceResult<PetDto> {
+        val existing = petRepository.getById(petId) ?: return ServiceResult.NotFound
+        val isAdmin = userRoles.contains("ADMIN")
+        if (!isAdmin && existing.rescuerId != userId) {
+            return ServiceResult.Forbidden
+        }
+
+        val normalizedContentType = contentType.substringBefore(";").trim().lowercase()
+        if (normalizedContentType !in ALLOWED_VIDEO_CONTENT_TYPES) {
+            return ServiceResult.Error("Unsupported video type. Allowed: MP4, WebM")
+        }
+        if (videoData.size > MAX_VIDEO_BYTES) {
+            return ServiceResult.Error("Video exceeds maximum size of ${MAX_VIDEO_BYTES / (1024 * 1024)}MB")
+        }
+
+        existing.videoUrl?.let { imageStorage.deleteImage(it) }
+        val videoUrl = imageStorage.uploadImage(petId, videoName, normalizedContentType, videoData.inputStream())
+        val updated = petRepository.setVideo(petId, videoUrl) ?: return ServiceResult.NotFound
+        return ServiceResult.Success(updated)
+    }
+
+    suspend fun removeVideo(petId: Int, userId: Int, userRoles: Set<String>): ServiceResult<PetDto> {
+        val existing = petRepository.getById(petId) ?: return ServiceResult.NotFound
+        val isAdmin = userRoles.contains("ADMIN")
+        if (!isAdmin && existing.rescuerId != userId) {
+            return ServiceResult.Forbidden
+        }
+        existing.videoUrl?.let { imageStorage.deleteImage(it) }
+        val updated = petRepository.setVideo(petId, null) ?: return ServiceResult.NotFound
+        return ServiceResult.Success(updated)
     }
 
     suspend fun removeImage(petId: Int, imageId: Int, userId: Int, userRoles: Set<String>): ServiceResult<Unit> {

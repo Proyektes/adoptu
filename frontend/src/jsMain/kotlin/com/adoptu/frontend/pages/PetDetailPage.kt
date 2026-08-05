@@ -65,6 +65,11 @@ object PetDetailPageModule {
         sb.append("<p><strong>${I18n.t("weight")}:</strong> ${pet.weight} kg | <strong>${I18n.t("age")}:</strong> ${pet.ageYears} ${I18n.t("years")} ${pet.ageMonths} ${I18n.t("months")} | <strong>${I18n.t("sex")}:</strong> ${I18n.t(pet.sex.toString().lowercase())}</p>")
         sb.append("<p><strong>${I18n.t("status")}:</strong> ${petStatusLabel(pet.status)}</p></div>")
 
+        val videoUrl = pet.videoUrl?.toString()
+        if (!videoUrl.isNullOrEmpty()) {
+            sb.append("<video src=\"$videoUrl\" controls class=\"pet-main-video\"></video>")
+        }
+
         sb.append("<div class=\"pet-detail-body\">")
         if (isOwner) {
             sb.append("<div class=\"storage-management\"><h3>${I18n.t("photos")}</h3><div class=\"pet-images-grid\" id=\"pet-images\">${renderImages()}</div></div>")

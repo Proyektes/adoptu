@@ -49,7 +49,8 @@ data class PetDto(
     val createdAt: Long,
     val deactivatedAt: Long? = null,
     val deactivatedBy: Int? = null,
-    val images: List<PetImageDto> = emptyList()
+    val images: List<PetImageDto> = emptyList(),
+    val videoUrl: String? = null
 )
 
 data class PetImageDto(

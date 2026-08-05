@@ -21,6 +21,7 @@ object MyPetsPageModule {
     private var user: dynamic = null
     private var existingImages: Array<dynamic> = arrayOf()
     private var selectedFiles: MutableList<dynamic> = mutableListOf()
+    private var currentPetIdForVideo: String? = null
 
     fun init() {
         window.asDynamic().edit = { id: dynamic -> editPet(id.toString().toInt()) }
@@ -213,6 +214,19 @@ object MyPetsPageModule {
 
         existingImages = (pet.images as? Array<dynamic>) ?: arrayOf()
         updatePreviews()
+
+        currentPetIdForVideo = pet.id?.toString()
+        val existingVideoDiv = document.getElementById("existing-video")
+        val videoUrl = pet.videoUrl?.toString()
+        if (videoUrl.isNullOrEmpty()) {
+            existingVideoDiv?.innerHTML = ""
+        } else {
+            existingVideoDiv?.innerHTML = "<video src=\"$videoUrl\" controls style=\"max-width:300px\"></video><br><button type=\"button\" class=\"btn btn-secondary\" id=\"remove-video-btn\">${I18n.t("removeVideo")}</button>"
+            document.getElementById("remove-video-btn")?.addEventListener("click", {
+                val petId = currentPetIdForVideo ?: return@addEventListener
+                ApiClientModule.removeVideo(petId).then<Unit> { existingVideoDiv?.innerHTML = "" }
+            })
+        }
     }
 
     private fun editPet(id: Int) {
@@ -234,6 +248,8 @@ object MyPetsPageModule {
         (document.getElementById("currency") as? HTMLSelectElement)?.value = "USD"
         selectedFiles = mutableListOf()
         existingImages = arrayOf()
+        currentPetIdForVideo = null
+        document.getElementById("existing-video")?.innerHTML = ""
         updatePreviews()
         document.getElementById("form-title")?.textContent = "Add Pet"
         (document.getElementById("form-container") as? HTMLElement)?.style?.display = "block"
@@ -369,12 +385,20 @@ object MyPetsPageModule {
         savePromise.then { pet: dynamic ->
             val petId = if (id.isNotEmpty()) id else pet.id.toString()
             uploadImages(petId).then<Unit> {
+                uploadVideoIfSelected(petId)
+            }.then<Unit> {
                 msg?.className = "message success"
                 msg?.textContent = "Saved!"
                 (document.getElementById("form-container") as? HTMLElement)?.style?.display = "none"
                 load()
             }
         }.catch { err: dynamic -> fail(err?.message?.toString() ?: "Failed to save pet") }
+    }
+
+    private fun uploadVideoIfSelected(petId: String): kotlin.js.Promise<Unit> {
+        val fileInput = document.getElementById("pet-video").unsafeCast<HTMLInputElement?>()
+        val file = fileInput?.asDynamic()?.files?.item(0) ?: return kotlin.js.Promise.resolve<Unit>(Unit)
+        return ApiClientModule.addVideo(petId, file).then<Unit> { Unit }
     }
 
     private fun uploadImages(petId: String): kotlin.js.Promise<Unit> {

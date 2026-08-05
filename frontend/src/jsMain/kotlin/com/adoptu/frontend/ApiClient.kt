@@ -197,5 +197,20 @@ object ApiClientModule {
 
     fun removeImage(petId: String, imageId: Int): Promise<dynamic> = apiFetch("/api/pets/$petId/images/$imageId", js("({method: 'DELETE'})"))
 
+    fun addVideo(petId: String, file: dynamic): Promise<dynamic> {
+        val formData = js("new FormData()")
+        val name = (file.name as? String) ?: "video.mp4"
+        formData.append("file", file, name)
+        return window.asDynamic().fetch("/api/pets/$petId/video", js("({method: 'POST', body: formData, credentials: 'include'})")).then { res: dynamic ->
+            if (res.ok != true) {
+                res.text().then { text: dynamic -> throw js("new Error('Request failed: ' + text)") }
+            } else {
+                res.json()
+            }
+        }
+    }
+
+    fun removeVideo(petId: String): Promise<dynamic> = apiFetch("/api/pets/$petId/video", js("({method: 'DELETE'})"))
+
     fun setPrimaryImage(petId: String, imageId: Int): Promise<dynamic> = apiFetch("/api/pets/$petId/images/$imageId/primary", js("({method: 'PUT'})"))
 }

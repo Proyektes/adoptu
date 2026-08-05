@@ -67,7 +67,8 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
             createdAt = row[Pets.createdAt],
             deactivatedAt = row[Pets.deactivatedAt],
             deactivatedBy = row[Pets.deactivatedBy],
-            images = images
+            images = images,
+            videoUrl = row[Pets.videoUrl]
         )
     }
 
@@ -444,6 +445,16 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
             } else {
                 false
             }
+        }
+    }
+
+    override suspend fun setVideo(petId: Int, videoUrl: String?): PetDto? = withContext(dbDispatcher) {
+        transaction {
+            val updated = Pets.update({ Pets.id eq petId }) {
+                it[Pets.videoUrl] = videoUrl
+            }
+            if (updated == 0) return@transaction null
+            Pets.selectAll().where { Pets.id eq petId }.firstOrNull()?.let(::rowToPetDto)
         }
     }
 

@@ -295,6 +295,10 @@ object Pets : Table("pets") {
     val currency = varchar("currency", 10).default("USD")
     val isUrgent = bool("is_urgent").default(false)
     val isPromoted = bool("is_promoted").default(false)
+    // Single video per pet (not a gallery like pet_images) - Adopt-a-Pet's own data shows video
+    // listings get far more interest than photo-only ones. No transcoding pipeline; stored as
+    // whatever mp4/webm the browser uploaded (see PetService.uploadAndSetVideo).
+    val videoUrl = text("video_url").nullable()
     val createdAt = long("created_at")
     // Auditable soft-deactivation - a non-destructive alternative to the existing hard
     // delete() (which cascades to pet_images/adoption_requests). Independent of `status`

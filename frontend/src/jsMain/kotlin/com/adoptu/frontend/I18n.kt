@@ -821,6 +821,8 @@ private val englishTranslations = json(
         "contactSent" to "Message sent",
         "contactFailed" to "Failed to send message",
         "lostFoundReportSubmitted" to "Report submitted. Thank you - we'll check it against other reports nearby.",
+        "video" to "Video (optional)",
+        "removeVideo" to "Remove video",
     )
 
     private val spanishTranslations = json(
@@ -1637,6 +1639,8 @@ private val englishTranslations = json(
         "contactSent" to "Mensaje enviado",
         "contactFailed" to "Error al enviar el mensaje",
         "lostFoundReportSubmitted" to "Reporte enviado. Gracias - lo compararemos con otros reportes cercanos.",
+        "video" to "Video (opcional)",
+        "removeVideo" to "Eliminar video",
     )
 
     private val frenchTranslations = json(
@@ -2453,6 +2457,8 @@ private val englishTranslations = json(
         "contactSent" to "Message envoyé",
         "contactFailed" to "Échec de l'envoi du message",
         "lostFoundReportSubmitted" to "Signalement envoyé. Merci - nous le comparerons aux autres signalements à proximité.",
+        "video" to "Vidéo (facultatif)",
+        "removeVideo" to "Supprimer la vidéo",
 )
 
 private val portugueseTranslations = json(
@@ -3269,6 +3275,8 @@ private val portugueseTranslations = json(
     "contactSent" to "Mensagem enviada",
     "contactFailed" to "Falha ao enviar a mensagem",
     "lostFoundReportSubmitted" to "Relato enviado. Obrigado - vamos compará-lo com outros relatos próximos.",
+    "video" to "Vídeo (opcional)",
+    "removeVideo" to "Remover vídeo",
 )
 
 private val chineseTranslations = json(
@@ -4085,6 +4093,8 @@ private val chineseTranslations = json(
     "contactSent" to "消息已发送",
     "contactFailed" to "消息发送失败",
     "lostFoundReportSubmitted" to "举报已提交。谢谢——我们会将其与附近的其他举报进行比对。",
+    "video" to "视频（可选）",
+    "removeVideo" to "删除视频",
 )
 
 @JsExport

@@ -250,6 +250,45 @@ fun HttpRules.petsRoutes() {
         }
     })
 
+    post("/api/pets/{id}/video", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        runBlocking {
+            val userResult = validationService.validateUserById(session.userId)
+            if (userResult is ServiceResult.NotFound) return@runBlocking res.respondNotFound()
+            val user = (userResult as ServiceResult.Success).data
+            val activeRoles = user.activeRoles.map { it.name }.toSet()
+            val petId = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondError(ValidationConstants.INVALID_ID)
+
+            val (filePart, _) = req.receiveMultipart()
+            if (filePart == null) return@runBlocking res.respondError("No video provided")
+
+            when (val result = petService.uploadAndSetVideo(petId, session.userId, activeRoles, filePart.fileName, filePart.contentType, filePart.bytes)) {
+                is ServiceResult.Success -> res.send(result.data)
+                is ServiceResult.NotFound -> res.respondError(ValidationConstants.NOT_FOUND, 404)
+                is ServiceResult.Forbidden -> res.respondError("Forbidden", 403)
+                is ServiceResult.Error -> res.respondError(result.message)
+            }
+        }
+    })
+
+    delete("/api/pets/{id}/video", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        runBlocking {
+            val userResult = validationService.validateUserById(session.userId)
+            if (userResult is ServiceResult.NotFound) return@runBlocking res.respondNotFound()
+            val user = (userResult as ServiceResult.Success).data
+            val activeRoles = user.activeRoles.map { it.name }.toSet()
+            val petId = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondError(ValidationConstants.INVALID_ID)
+
+            when (val result = petService.removeVideo(petId, session.userId, activeRoles)) {
+                is ServiceResult.Success -> res.send(result.data)
+                is ServiceResult.NotFound -> res.respondError(ValidationConstants.NOT_FOUND, 404)
+                is ServiceResult.Forbidden -> res.respondError("Forbidden", 403)
+                is ServiceResult.Error -> res.respondError(result.message)
+            }
+        }
+    })
+
     delete("/api/pets/{petId}/images/{imageId}", Handler { req, res ->
         val session = req.getSession()
             ?: return@Handler res.respondUnauthorized()

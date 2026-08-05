@@ -104,6 +104,11 @@ fun HTML.myPetsPage(navParams: NavParams = NavParams()) {
                         input(InputType.file) { id = "pet-images"; accept = "storage/*"; multiple = true; classes = setOf("file-input") }
                     }
                     div { id = "storage-previews"; classes = setOf("storage-previews") }
+                    div(classes = "form-row") {
+                        label { htmlFor = "pet-video"; attributes["data-i18n"] = "video"; +"Video (optional)" }
+                        input(InputType.file) { id = "pet-video"; accept = "video/mp4,video/webm" }
+                        div { id = "existing-video"; +"" }
+                    }
                     div(classes = "form-actions") {
                         button(classes = "btn", type = ButtonType.submit) { attributes["data-i18n"] = "save"; +"Save" }
                         button(classes = "btn btn-secondary", type = ButtonType.button) { id = "cancel-btn"; attributes["data-i18n"] = "cancel"; +"Cancel" }
