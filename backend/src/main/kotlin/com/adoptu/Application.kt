@@ -16,6 +16,7 @@ import com.adoptu.routes.authRoutes
 import com.adoptu.routes.countryRoutes
 import com.adoptu.routes.lostFoundRoutes
 import com.adoptu.routes.savedSearchRoutes
+import com.adoptu.routes.petMedicalEventRoutes
 import com.adoptu.routes.petsRoutes
 import com.adoptu.routes.photographerRoutes
 import com.adoptu.routes.shelterRoutes
@@ -25,6 +26,7 @@ import com.adoptu.routes.urgentRescueRoutes
 import com.adoptu.routes.userShelterRoutes
 import com.adoptu.routes.userSterilizationLocationRoutes
 import com.adoptu.routes.usersRoutes
+import com.adoptu.services.MedicalReminderScheduler
 import com.adoptu.services.crypto.CryptoService
 import com.adoptu.web.AccessLogFilter
 import com.adoptu.web.JsonSupport
@@ -39,6 +41,8 @@ import io.helidon.http.Status
 import io.helidon.webserver.WebServer
 import io.helidon.webserver.http.Handler
 import io.helidon.webserver.http.HttpRouting
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.logger.slf4jLogger
@@ -113,6 +117,8 @@ fun main() {
         .start()
 
     logger.info("Adopt-U listening on port ${server.port()}")
+
+    MedicalReminderScheduler.start(CoroutineScope(Dispatchers.IO), GlobalContext.get().get())
 }
 
 internal fun configureRouting(routing: HttpRouting.Builder) {
@@ -148,6 +154,7 @@ internal fun configureRouting(routing: HttpRouting.Builder) {
     routing.authRoutes()
     routing.countryRoutes()
     routing.petsRoutes()
+    routing.petMedicalEventRoutes()
     routing.adminPetsRoutes()
     routing.usersRoutes()
     routing.adminUsersRoutes()

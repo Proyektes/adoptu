@@ -129,6 +129,27 @@ fun HTML.myPetsPage(navParams: NavParams = NavParams()) {
                         button(classes = "btn btn-secondary", type = ButtonType.button) { id = "cancel-btn"; attributes["data-i18n"] = "cancel"; +"Cancel" }
                     }
                 }
+                div { id = "medical-events-section"; classes = setOf("hidden", "card-bg", "profile-section")
+                    h3 { attributes["data-i18n"] = "medicalSchedule"; +"Vaccination & Deworming Schedule" }
+                    div { id = "medical-events-list"; +"" }
+                    div(classes = "form-row") {
+                        label { htmlFor = "medical-category"; attributes["data-i18n"] = "recordType"; +"Type" }
+                        select { id = "medical-category"
+                            option { value = "VACCINATION"; attributes["data-i18n"] = "vaccination"; +"Vaccination" }
+                            option { value = "DEWORMING"; attributes["data-i18n"] = "deworming"; +"Deworming" }
+                        }
+                        label { htmlFor = "medical-name"; attributes["data-i18n"] = "recordName"; +"Name" }
+                        input(InputType.text) { id = "medical-name"; placeholder = "e.g. Rabies" }
+                        label { htmlFor = "medical-administered-date"; attributes["data-i18n"] = "dateGiven"; +"Date given" }
+                        input(InputType.date) { id = "medical-administered-date" }
+                        label { htmlFor = "medical-next-due-date"; attributes["data-i18n"] = "nextDueDate"; +"Next due (optional)" }
+                        input(InputType.date) { id = "medical-next-due-date" }
+                        label { htmlFor = "medical-notes"; attributes["data-i18n"] = "notesOptional"; +"Notes (optional)" }
+                        input(InputType.text) { id = "medical-notes" }
+                        p { id = "medical-event-message"; +"" }
+                        button(classes = "btn btn-secondary", type = ButtonType.button) { id = "add-medical-event-btn"; attributes["data-i18n"] = "addRecord"; +"Add Record" }
+                    }
+                }
             }
             button(classes = "btn") { id = "add-btn"; attributes["data-i18n"] = "addPet"; +"Add Pet" }
             div { id = "pets"; classes = setOf("pet-grid", "mt-2rem"); +"" }

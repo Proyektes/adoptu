@@ -101,6 +101,7 @@ object PetDetailPageModule {
         sb.append("</div>")
 
         if (pet.vaccinations != null && pet.vaccinations.toString().isNotEmpty()) sb.append("<div class=\"detail-section\"><strong>${I18n.t("vaccinations")}:</strong><p>${pet.vaccinations}</p></div>")
+        sb.append("<div class=\"detail-section\" id=\"medical-schedule-section\"></div>")
         if (pet.rescueLocation != null && pet.rescueLocation.toString().isNotEmpty()) sb.append("<div class=\"detail-section\"><strong>${I18n.t("rescueLocation")}:</strong> ${pet.rescueLocation}</div>")
         if (pet.specialNeeds != null && pet.specialNeeds.toString().isNotEmpty()) sb.append("<div class=\"detail-section\"><strong>${I18n.t("specialNeeds")}:</strong><p>${pet.specialNeeds}</p></div>")
         val adoptionFee = pet.adoptionFee?.unsafeCast<Double?>() ?: 0.0
@@ -147,6 +148,8 @@ object PetDetailPageModule {
 
         container.innerHTML = sb.toString()
 
+        loadMedicalSchedule()
+
         document.getElementById("share-pet-btn")?.addEventListener("click", { shareCurrentPet() })
 
         if (authenticated) {
@@ -191,6 +194,33 @@ object PetDetailPageModule {
 
     // Web Share API (mobile browsers - one native tap opens the OS share sheet, WhatsApp included)
     // where available; desktop/unsupported browsers fall back to a direct WhatsApp share link.
+    private fun loadMedicalSchedule() {
+        ApiClientModule.getMedicalEvents(petId).then<Unit> { eventsRaw: dynamic ->
+            val events = (eventsRaw as? Array<dynamic>) ?: arrayOf()
+            val section = document.getElementById("medical-schedule-section") ?: return@then
+            if (events.isEmpty()) {
+                section.innerHTML = ""
+                return@then
+            }
+            val rows = events.joinToString("") { event ->
+                val categoryLabel = I18n.t(if (event.category == "VACCINATION") "vaccination" else "deworming")
+                val administeredDate = js("new Date(event.administeredDate)").toLocaleDateString()
+                val dueHtml = if (event.nextDueDate != null) {
+                    val dueDateStr = js("new Date(event.nextDueDate)").toLocaleDateString()
+                    val daysUntil = js("Math.floor((event.nextDueDate - Date.now()) / 86400000)").unsafeCast<Int>()
+                    val (statusClass, statusLabel) = when {
+                        daysUntil < 0 -> "overdue" to I18n.t("overdue")
+                        daysUntil <= 7 -> "due-soon" to I18n.t("dueSoon")
+                        else -> "ok" to I18n.t("upToDate")
+                    }
+                    "<span class=\"medical-due-badge $statusClass\">${I18n.t("nextDueLabel")}: $dueDateStr ($statusLabel)</span>"
+                } else ""
+                "<li>$categoryLabel: ${CommonModule.escapeHtml(event.name?.toString())} - ${I18n.t("givenLabel")} $administeredDate $dueHtml</li>"
+            }
+            section.innerHTML = "<strong>${I18n.t("medicalSchedule")}</strong><ul class=\"medical-schedule-list\">$rows</ul>"
+        }
+    }
+
     private fun shareCurrentPet() {
         val pet = currentPet ?: return
         val url = window.location.href

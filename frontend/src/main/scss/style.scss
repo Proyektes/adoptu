@@ -694,6 +694,43 @@ form {
     }
 }
 
+.medical-event-row {
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+
+    .medical-notes {
+        font-size: 0.85rem;
+        color: var(--text-muted, #666);
+        margin: 0.25rem 0;
+    }
+}
+
+.medical-schedule-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0;
+
+    li {
+        padding: 0.35rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+}
+
+.medical-due-badge {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+
+    &.ok { background: #d1e7dd; color: #0f5132; }
+    &.due-soon { background: #fff3cd; color: #7a4a00; }
+    &.overdue { background: #f8d7da; color: #842029; }
+}
+
 .profile-header {
     display: flex;
     justify-content: space-between;

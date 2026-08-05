@@ -34,6 +34,7 @@ object DatabaseFactory {
         WebAuthnCredentials,
         Pets,
         PetImages,
+        PetMedicalEvents,
         AdoptionRequests,
         PhotographyRequests,
         TemporalHomes,

@@ -238,4 +238,20 @@ object ApiClientModule {
     fun removeVideo(petId: String): Promise<dynamic> = apiFetch("/api/pets/$petId/video", js("({method: 'DELETE'})"))
 
     fun setPrimaryImage(petId: String, imageId: Int): Promise<dynamic> = apiFetch("/api/pets/$petId/images/$imageId/primary", js("({method: 'PUT'})"))
+
+    fun getMedicalEvents(petId: String): Promise<dynamic> = apiFetch("/api/pets/$petId/medical-events")
+
+    fun createMedicalEvent(
+        petId: String,
+        category: String,
+        name: String,
+        administeredDate: Double,
+        nextDueDate: Double?,
+        notes: String?
+    ): Promise<dynamic> {
+        val body = js("({category: category, name: name, administeredDate: administeredDate, nextDueDate: nextDueDate, notes: notes})")
+        return apiFetch("/api/pets/$petId/medical-events", js("({method: 'POST', body: JSON.stringify(body)})"))
+    }
+
+    fun deleteMedicalEvent(eventId: Int): Promise<dynamic> = apiFetch("/api/pets/medical-events/$eventId", js("({method: 'DELETE'})"))
 }

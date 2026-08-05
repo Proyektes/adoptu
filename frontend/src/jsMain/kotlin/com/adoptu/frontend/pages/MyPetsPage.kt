@@ -33,9 +33,11 @@ object MyPetsPageModule {
         window.asDynamic().setPrimaryImage = { index: dynamic -> setPrimaryImage(index.toString().toInt()) }
         window.asDynamic().removeExistingImage = { index: dynamic -> removeExistingImage(index.toString().toInt()) }
         window.asDynamic().removePreview = { index: dynamic -> removePreview(index.toString().toInt()) }
+        window.asDynamic().deleteMedicalEvent = { id: dynamic -> deleteMedicalEvent(id.toString().toInt()) }
 
         document.getElementById("add-btn")?.addEventListener("click", { openAddForm() })
         document.getElementById("cancel-btn")?.addEventListener("click", { closeForm() })
+        document.getElementById("add-medical-event-btn")?.addEventListener("click", { addMedicalEvent() })
 
         listOf("weight", "ageYears", "ageMonths").forEach { id -> clampNonNegative(id, maxMonths = id == "ageMonths") }
         clampNonNegative("adoptionFee")
@@ -52,6 +54,84 @@ object MyPetsPageModule {
         (document.getElementById("promoted-reason-row") as? HTMLElement)?.classList?.let {
             if (checked) it.remove("hidden") else it.add("hidden")
         }
+    }
+
+    private fun loadMedicalEvents(petId: String) {
+        ApiClientModule.getMedicalEvents(petId).then<Unit> { eventsRaw: dynamic ->
+            val events = (eventsRaw as? Array<dynamic>) ?: arrayOf()
+            val container = document.getElementById("medical-events-list")
+            if (events.isEmpty()) {
+                container?.innerHTML = "<p>${I18n.t("noMedicalRecords")}</p>"
+                return@then
+            }
+            container?.innerHTML = events.joinToString("") { renderMedicalEventRow(it) }
+        }
+    }
+
+    private fun renderMedicalEventRow(event: dynamic): String {
+        val categoryLabel = I18n.t(if (event.category == "VACCINATION") "vaccination" else "deworming")
+        val administeredDate = js("new Date(event.administeredDate)").toLocaleDateString()
+        val dueHtml = if (event.nextDueDate != null) {
+            val dueDateStr = js("new Date(event.nextDueDate)").toLocaleDateString()
+            val daysUntil = js("Math.floor((event.nextDueDate - Date.now()) / 86400000)").unsafeCast<Int>()
+            val (statusClass, statusLabel) = when {
+                daysUntil < 0 -> "overdue" to I18n.t("overdue")
+                daysUntil <= 7 -> "due-soon" to I18n.t("dueSoon")
+                else -> "ok" to I18n.t("upToDate")
+            }
+            "<span class=\"medical-due-badge $statusClass\">${I18n.t("nextDueLabel")}: $dueDateStr ($statusLabel)</span>"
+        } else ""
+        val notes = event.notes?.toString()
+        val notesHtml = if (!notes.isNullOrEmpty()) "<p class=\"medical-notes\">${CommonModule.escapeHtml(notes)}</p>" else ""
+        return "<div class=\"medical-event-row\">" +
+            "<strong>$categoryLabel: ${CommonModule.escapeHtml(event.name?.toString())}</strong> " +
+            "<span class=\"medical-administered\">${I18n.t("givenLabel")}: $administeredDate</span> $dueHtml" +
+            notesHtml +
+            "<button type=\"button\" class=\"btn btn-secondary\" data-action=\"deleteMedicalEvent\" data-arg=\"${event.id}\">${I18n.t("delete")}</button>" +
+            "</div>"
+    }
+
+    private fun addMedicalEvent() {
+        val petId = currentPetIdForVideo ?: return
+        val msg = document.getElementById("medical-event-message")
+        val category = (document.getElementById("medical-category") as HTMLSelectElement).value
+        val name = (document.getElementById("medical-name") as HTMLInputElement).value.trim()
+        val administeredDateVal = (document.getElementById("medical-administered-date") as HTMLInputElement).value
+        val nextDueDateVal = (document.getElementById("medical-next-due-date") as HTMLInputElement).value
+        val notes = (document.getElementById("medical-notes") as HTMLInputElement).value.ifEmpty { null }
+
+        if (name.isEmpty()) {
+            msg?.className = "message error"
+            msg?.textContent = I18n.t("recordNameRequired")
+            return
+        }
+        if (administeredDateVal.isEmpty()) {
+            msg?.className = "message error"
+            msg?.textContent = I18n.t("dateGivenRequired")
+            return
+        }
+        val administeredDate = js("new Date(administeredDateVal)").getTime().unsafeCast<Double>()
+        val nextDueDate = if (nextDueDateVal.isNotEmpty()) js("new Date(nextDueDateVal)").getTime().unsafeCast<Double>() else null
+
+        ApiClientModule.createMedicalEvent(petId, category, name, administeredDate, nextDueDate, notes).then<Unit> {
+            msg?.className = ""
+            msg?.textContent = ""
+            (document.getElementById("medical-name") as HTMLInputElement).value = ""
+            (document.getElementById("medical-administered-date") as HTMLInputElement).value = ""
+            (document.getElementById("medical-next-due-date") as HTMLInputElement).value = ""
+            (document.getElementById("medical-notes") as HTMLInputElement).value = ""
+            loadMedicalEvents(petId)
+        }.catch { err: dynamic ->
+            msg?.className = "message error"
+            msg?.textContent = err?.message?.toString() ?: I18n.t("failedToAddRecord")
+        }
+    }
+
+    private fun deleteMedicalEvent(id: Int) {
+        if (!window.confirm(I18n.t("confirmDeleteRecord"))) return
+        val petId = currentPetIdForVideo ?: return
+        ApiClientModule.deleteMedicalEvent(id).then<Unit> { loadMedicalEvents(petId) }
+            .catch { err: dynamic -> window.alert(err?.message?.toString() ?: "Error") }
     }
 
     private fun clampNonNegative(id: String, maxMonths: Boolean = false) {
@@ -276,6 +356,8 @@ object MyPetsPageModule {
         updatePreviews()
 
         currentPetIdForVideo = pet.id?.toString()
+        (document.getElementById("medical-events-section") as? HTMLElement)?.classList?.remove("hidden")
+        loadMedicalEvents(currentPetIdForVideo!!)
         val existingVideoDiv = document.getElementById("existing-video")
         val videoUrl = pet.videoUrl?.toString()
         if (videoUrl.isNullOrEmpty()) {
@@ -310,6 +392,9 @@ object MyPetsPageModule {
         selectedFiles = mutableListOf()
         existingImages = arrayOf()
         currentPetIdForVideo = null
+        (document.getElementById("medical-events-section") as? HTMLElement)?.classList?.add("hidden")
+        document.getElementById("medical-events-list")?.innerHTML = ""
+        (document.getElementById("medical-event-message"))?.textContent = ""
         document.getElementById("existing-video")?.innerHTML = ""
         updatePreviews()
         document.getElementById("form-title")?.textContent = "Add Pet"

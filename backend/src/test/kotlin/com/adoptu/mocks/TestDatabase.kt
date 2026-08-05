@@ -30,6 +30,7 @@ object TestDatabase {
                     MagicLinkTokens,
                     SpamReportTokens,
                     PetImages,
+                    PetMedicalEvents,
                     AdoptionRequests,
                     PhotographyRequests,
                     PetFavorites,
@@ -93,6 +94,7 @@ object TestDatabase {
                 SavedSearches,
                 Pets,
                 PetImages,
+                PetMedicalEvents,
                 AdoptionRequests,
                 PhotographyRequests,
                 PetFavorites,
@@ -125,6 +127,7 @@ object TestDatabase {
             exec("DELETE FROM temporal_homes")
             exec("DELETE FROM adoption_requests")
             exec("DELETE FROM pet_images")
+            exec("DELETE FROM pet_medical_events")
             exec("DELETE FROM pet_favorites")
             exec("DELETE FROM pets")
             exec("DELETE FROM webauthn_credentials")

@@ -55,6 +55,7 @@ fun appModule(config: AppConfig) = module {
     single<UrgentRescueRepositoryPort> { UrgentRescueRepositoryImpl(get()) }
     single<LostFoundRepositoryPort> { LostFoundRepositoryImpl(get()) }
     single<SavedSearchRepositoryPort> { SavedSearchRepositoryImpl(get()) }
+    single<PetMedicalEventRepositoryPort> { PetMedicalEventRepositoryImpl(get()) }
     single<PetFavoriteRepositoryPort> { PetFavoriteRepositoryImpl(get()) }
     single<GeocodingPort> { NominatimGeocodingAdapter() }
     single<ImageStoragePort> { createImageStorageAdapter(config) }
@@ -74,6 +75,10 @@ fun appModule(config: AppConfig) = module {
     single<UserService> { UserService(get(), get()) }
     single<PetService> { PetService(get(), get(), get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
     single<SavedSearchService> { SavedSearchService(get()) }
+    single<PetMedicalEventService> { PetMedicalEventService(get(), get()) }
+    single<MedicalReminderService> {
+        MedicalReminderService(get(), get(), get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80")
+    }
     single<PetFavoriteService> { PetFavoriteService(get(), get()) }
     single<TemporalHomeService> { TemporalHomeService(get(), get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
     single<UrgentRescueService> { UrgentRescueService(get(), get(), get(), get(), get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }

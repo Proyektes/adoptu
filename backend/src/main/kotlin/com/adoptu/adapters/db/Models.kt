@@ -325,6 +325,26 @@ object PetImages : Table("pet_images") {
     override val primaryKey = PrimaryKey(id)
 }
 
+object PetMedicalEvents : Table("pet_medical_events") {
+    val id = integer("id").autoIncrement()
+    val petId = integer("pet_id").references(Pets.id)
+    val category = varchar("category", 20) // VACCINATION, DEWORMING
+    val name = varchar("name", 255) // e.g. "Rabies", "DHPP", "Pyrantel"
+    val administeredDate = long("administered_date")
+    val nextDueDate = long("next_due_date").nullable()
+    val notes = text("notes").nullable()
+    // Idempotency guards for MedicalReminderService's in-process scheduler (see
+    // Application.kt's main()) - each stage fires at most once per record, and stays correct
+    // even if ECS ever runs more than the current single replica (see infra/variables.tf's
+    // desired_count doc comment) since a second replica's scan would just see these already true.
+    val reminder7dSent = bool("reminder_7d_sent").default(false)
+    val reminderDueSent = bool("reminder_due_sent").default(false)
+    val reminderOverdueSent = bool("reminder_overdue_sent").default(false)
+    val createdAt = long("created_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
 object AdoptionRequests : Table("adoption_requests") {
     val id = integer("id").autoIncrement()
     val petId = integer("pet_id").references(Pets.id)
