@@ -7,6 +7,9 @@ import io.helidon.http.SetCookie
 import io.helidon.webserver.http.ServerRequest
 import io.helidon.webserver.http.ServerResponse
 import java.time.Duration
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import java.util.Base64
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -77,10 +80,14 @@ fun ServerResponse.setSession(session: SessionUser) {
 }
 
 fun ServerResponse.clearSession() {
-    // Explicit Path=/ + Max-Age=0: Helidon's clearCookie(name) omits Path, so the deletion is
-    // scoped to the request's directory and never matches this cookie (stored with Path=/).
+    // Explicit Path=/ + Expires in the past: Helidon's clearCookie(name) omits Path, so the
+    // deletion is scoped to the request's directory and never matches this cookie (stored with
+    // Path=/). Also, .maxAge(Duration.ZERO) is silently treated as "no Max-Age attribute at all"
+    // by Helidon's SetCookie (it skips the attribute when the duration isZero()), so it must not
+    // be used here - use .expires(EPOCH) instead to force actual deletion.
     headers().addCookie(
-        SetCookie.builder(COOKIE_NAME, "").path("/").maxAge(Duration.ZERO)
+        SetCookie.builder(COOKIE_NAME, "").path("/")
+            .expires(ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC))
             .httpOnly(true).secure(true).sameSite(SetCookie.SameSite.STRICT).build()
     )
 }
