@@ -142,7 +142,27 @@ fun HttpRules.petsRoutes() {
         val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
         runBlocking {
             val pet = petService.getById(id)
-            if (pet != null) res.send(pet) else res.respondError(ValidationConstants.NOT_FOUND, 404)
+            if (pet != null) {
+                petService.incrementViewCount(id)
+                res.send(pet)
+            } else {
+                res.respondError(ValidationConstants.NOT_FOUND, 404)
+            }
+        }
+    })
+
+    get("/api/pets/{id}/analytics", Handler { req, res ->
+        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        runBlocking {
+            val userResult = validationService.validateUserById(session.userId)
+            if (userResult is ServiceResult.NotFound) {
+                return@runBlocking res.respondNotFound()
+            }
+            val user = (userResult as ServiceResult.Success).data
+            val activeRoles = user.activeRoles.map { it.name }.toSet()
+            val petId = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondError(ValidationConstants.INVALID_ID)
+
+            res.respondData(petService.getAnalytics(petId, session.userId, activeRoles))
         }
     })
 

@@ -213,6 +213,23 @@ object MyPetsPageModule {
         }
 
         loadAdoptionRequests(pets)
+        loadPetAnalytics(pets)
+    }
+
+    private fun loadPetAnalytics(pets: Array<dynamic>) {
+        pets.forEach { pet ->
+            ApiClientModule.getPetAnalytics(pet.id.toString()).then<Unit> { analytics: dynamic ->
+                val el = document.getElementById("pet-analytics-${pet.id}") ?: return@then
+                val views = analytics.viewCount?.toString() ?: "0"
+                val inquiries = analytics.inquiryCount?.toString() ?: "0"
+                val conversionRate = analytics.conversionRate as? Double
+                val conversionHtml = if (conversionRate != null) {
+                    val pct = kotlin.math.round(conversionRate * 100 * 10) / 10
+                    " • ${I18n.t("conversionLabel")}: $pct%"
+                } else ""
+                el.textContent = "${I18n.t("viewsLabel")}: $views • ${I18n.t("inquiriesLabel")}: $inquiries$conversionHtml"
+            }.catch { }
+        }
     }
 
     private fun renderPetCard(p: dynamic): String {
@@ -240,6 +257,7 @@ object MyPetsPageModule {
             "<span class=\"value\">${p.ageYears} ${I18n.t("years")} ${p.ageMonths} ${I18n.t("months")} • ${p.weight} kg</span></span>" +
             "<span class=\"pet-rescue-date\">$rescueDateHtml</span></p>" +
             "<p class=\"pet-status\">${petStatusLabel(p.status)}</p>" +
+            "<div class=\"pet-analytics\" id=\"pet-analytics-${p.id}\"></div>" +
             "<div class=\"pet-card-actions\"><a href=\"/pet/${p.id}\" class=\"btn\">${I18n.t("viewDetails")}</a>" +
             "<button class=\"btn btn-secondary\" data-action=\"edit\" data-arg=\"${p.id}\">${I18n.t("edit")}</button>" +
             "<button class=\"btn btn-secondary\" data-action=\"del\" data-arg=\"${p.id}\">${I18n.t("delete")}</button></div></div></div>"

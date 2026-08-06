@@ -304,6 +304,10 @@ object Pets : Table("pets") {
     // listings get far more interest than photo-only ones. No transcoding pipeline; stored as
     // whatever mp4/webm the browser uploaded (see PetService.uploadAndSetVideo).
     val videoUrl = text("video_url").nullable()
+    // Rescuer-private (see PetService.getAnalytics) - a raw increment-on-every-load counter, not
+    // deduplicated per visitor. Never included in PetDto/the public pet response; only surfaced
+    // through the gated analytics endpoint.
+    val viewCount = long("view_count").default(0)
     val createdAt = long("created_at")
     // Auditable soft-deactivation - a non-destructive alternative to the existing hard
     // delete() (which cascades to pet_images/adoption_requests). Independent of `status`

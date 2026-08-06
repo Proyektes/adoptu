@@ -4,6 +4,7 @@ import com.adoptu.dto.input.AdoptionExperience
 import com.adoptu.dto.input.AdoptionRequestDto
 import com.adoptu.dto.input.CreatePetRequest
 import com.adoptu.dto.input.HousingType
+import com.adoptu.dto.input.PetAnalyticsDto
 import com.adoptu.dto.input.PetDto
 import com.adoptu.dto.input.PetImageDto
 import com.adoptu.dto.input.Status
@@ -291,6 +292,18 @@ class PetService(
     }
 
     suspend fun getImages(petId: Int): List<PetImageDto> = petRepository.getImages(petId)
+
+    suspend fun incrementViewCount(petId: Int) = petRepository.incrementViewCount(petId)
+
+    suspend fun getAnalytics(petId: Int, userId: Int, userRoles: Set<String>): ServiceResult<PetAnalyticsDto> {
+        val pet = petRepository.getById(petId) ?: return ServiceResult.NotFound
+        val isAdmin = userRoles.contains("ADMIN")
+        if (!isAdmin && pet.rescuerId != userId) {
+            return ServiceResult.Forbidden
+        }
+        val analytics = petRepository.getAnalytics(petId) ?: return ServiceResult.NotFound
+        return ServiceResult.Success(analytics)
+    }
 
     suspend fun createAdoptionRequest(
         petId: Int,

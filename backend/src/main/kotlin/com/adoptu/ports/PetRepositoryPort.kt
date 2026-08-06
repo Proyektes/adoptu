@@ -5,6 +5,7 @@ import com.adoptu.dto.input.AdoptionRequestDto
 import com.adoptu.dto.input.Currency
 import com.adoptu.dto.input.Gender
 import com.adoptu.dto.input.HousingType
+import com.adoptu.dto.input.PetAnalyticsDto
 import com.adoptu.dto.input.PetDto
 import com.adoptu.dto.input.PetImageDto
 import com.adoptu.dto.input.PromotedReason
@@ -79,4 +80,6 @@ interface PetRepositoryPort {
     suspend fun setVideo(petId: Int, videoUrl: String?): PetDto?
     suspend fun setPrimaryImage(petId: Int, imageId: Int): Boolean
     suspend fun getImages(petId: Int): List<PetImageDto>
+    suspend fun incrementViewCount(petId: Int)
+    suspend fun getAnalytics(petId: Int): PetAnalyticsDto?
 }

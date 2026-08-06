@@ -265,4 +265,6 @@ object ApiClientModule {
     fun endFosterPlacement(placementId: Int): Promise<dynamic> = apiFetch("/api/pets/foster-placements/$placementId/end", js("({method: 'PUT'})"))
 
     fun getMyActiveFosterPlacements(): Promise<dynamic> = apiFetch("/api/users/temporal-home/foster-placements")
+
+    fun getPetAnalytics(petId: String): Promise<dynamic> = apiFetch("/api/pets/$petId/analytics")
 }

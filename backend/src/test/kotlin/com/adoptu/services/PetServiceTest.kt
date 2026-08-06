@@ -886,6 +886,83 @@ class PetServiceTest {
         assertEquals("APPROVED", result.data.status)
     }
 
+    @Test
+    fun `getAnalytics returns zero views and inquiries for a fresh pet`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+
+        val result = petService.getAnalytics(pet.id, 1, setOf("RESCUER"))
+
+        assertTrue(result is ServiceResult.Success)
+        assertEquals(0L, result.data.viewCount)
+        assertEquals(0, result.data.inquiryCount)
+        assertNull(result.data.conversionRate)
+    }
+
+    @Test
+    fun `incrementViewCount increases the view count seen by getAnalytics`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+
+        petService.incrementViewCount(pet.id)
+        petService.incrementViewCount(pet.id)
+        petService.incrementViewCount(pet.id)
+
+        val result = petService.getAnalytics(pet.id, 1, setOf("RESCUER"))
+        assertTrue(result is ServiceResult.Success)
+        assertEquals(3L, result.data.viewCount)
+    }
+
+    @Test
+    fun `getAnalytics computes conversion rate from views and inquiries`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+        repeat(10) { petService.incrementViewCount(pet.id) }
+        petService.createAdoptionRequest(pet.id, 2, "Interested")
+        petService.createAdoptionRequest(pet.id, 3, "Also interested")
+
+        val result = petService.getAnalytics(pet.id, 1, setOf("RESCUER"))
+
+        assertTrue(result is ServiceResult.Success)
+        assertEquals(10L, result.data.viewCount)
+        assertEquals(2, result.data.inquiryCount)
+        assertEquals(0.2, result.data.conversionRate)
+    }
+
+    @Test
+    fun `getAnalytics counts approved requests separately`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+        val request = petService.createAdoptionRequest(pet.id, 2, "Interested")
+        petService.updateAdoptionRequest(request.id, "APPROVED", 1, setOf("RESCUER"))
+
+        val result = petService.getAnalytics(pet.id, 1, setOf("RESCUER"))
+
+        assertTrue(result is ServiceResult.Success)
+        assertEquals(1, result.data.approvedCount)
+    }
+
+    @Test
+    fun `getAnalytics returns Forbidden for a non-owner`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+
+        val result = petService.getAnalytics(pet.id, 2, setOf("RESCUER"))
+
+        assertEquals(ServiceResult.Forbidden, result)
+    }
+
+    @Test
+    fun `getAnalytics allows admin regardless of ownership`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+
+        val result = petService.getAnalytics(pet.id, 999, setOf("ADMIN"))
+
+        assertTrue(result is ServiceResult.Success)
+    }
+
+    @Test
+    fun `getAnalytics returns NotFound for a non-existent pet`() = runBlocking {
+        val result = petService.getAnalytics(999, 1, setOf("RESCUER"))
+
+        assertEquals(ServiceResult.NotFound, result)
+    }
+
     private suspend fun createTestPet(
         rescuerId: Int,
         name: String,

@@ -10,6 +10,7 @@ import com.adoptu.dto.input.AdoptionRequestDto
 import com.adoptu.dto.input.Currency
 import com.adoptu.dto.input.Gender
 import com.adoptu.dto.input.HousingType
+import com.adoptu.dto.input.PetAnalyticsDto
 import com.adoptu.dto.input.PetDto
 import com.adoptu.dto.input.PetImageDto
 import com.adoptu.dto.input.PromotedReason
@@ -503,5 +504,30 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
 
     override suspend fun getImages(petId: Int): List<PetImageDto> = withContext(dbDispatcher) {
         getPetImages(petId)
+    }
+
+    override suspend fun incrementViewCount(petId: Int): Unit = withContext(dbDispatcher) {
+        transaction {
+            val current = Pets.selectAll().where { Pets.id eq petId }.firstOrNull()?.get(Pets.viewCount) ?: return@transaction
+            Pets.update({ Pets.id eq petId }) {
+                it[Pets.viewCount] = current + 1
+            }
+        }
+    }
+
+    override suspend fun getAnalytics(petId: Int): PetAnalyticsDto? = withContext(dbDispatcher) {
+        transaction {
+            val viewCount = Pets.selectAll().where { Pets.id eq petId }.firstOrNull()?.get(Pets.viewCount) ?: return@transaction null
+            val statuses = AdoptionRequests.selectAll()
+                .where { AdoptionRequests.petId eq petId }
+                .map { it[AdoptionRequests.status] }
+            PetAnalyticsDto(
+                petId = petId,
+                viewCount = viewCount,
+                inquiryCount = statuses.size,
+                approvedCount = statuses.count { it == "APPROVED" },
+                conversionRate = if (viewCount > 0) statuses.size.toDouble() / viewCount else null
+            )
+        }
     }
 }
