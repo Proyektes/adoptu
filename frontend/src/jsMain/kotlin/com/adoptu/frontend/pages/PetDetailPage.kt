@@ -145,6 +145,7 @@ object PetDetailPageModule {
             sb.append("<a href=\"/my-pets?edit=${pet.id}\" class=\"btn\">${I18n.t("editPet")}</a>")
         }
         if (!isOwner && authenticated) {
+            sb.append(sponsorFormHtml())
             sb.append("<div id=\"suggest-edit-section\"></div>")
         }
         sb.append("</div>")
@@ -152,7 +153,10 @@ object PetDetailPageModule {
         container.innerHTML = sb.toString()
 
         loadMedicalSchedule()
-        if (!isOwner && authenticated) loadSuggestEditSection(pet)
+        if (!isOwner && authenticated) {
+            loadSuggestEditSection(pet)
+            initSponsorForm()
+        }
 
         document.getElementById("share-pet-btn")?.addEventListener("click", { shareCurrentPet() })
 
@@ -194,6 +198,74 @@ object PetDetailPageModule {
                 }
             }
         })
+    }
+
+    // Open to any authenticated non-owner (not gated to a role) - anyone might want to help with
+    // a specific pet's costs. See RescuersPageModule for the "sponsor the rescuer in general"
+    // equivalent on the rescuer detail page.
+    private fun sponsorFormHtml(): String {
+        return "<h3>${I18n.t("sponsorThisPetTitle")}</h3>" +
+            "<p>${I18n.t("sponsorExplanation")}</p>" +
+            "<form id=\"sponsor-form\">" +
+            "<label for=\"sponsor-type\">${I18n.t("sponsorTypeLabel")}</label>" +
+            "<select id=\"sponsor-type\">" +
+            "<option value=\"MONEY\">${I18n.t("sponsorTypeMoney")}</option>" +
+            "<option value=\"IN_KIND\">${I18n.t("sponsorTypeInKind")}</option>" +
+            "</select>" +
+            "<div id=\"sponsor-money-fields\">" +
+            "<label for=\"sponsor-amount\">${I18n.t("amountLabel")}</label>" +
+            "<input type=\"number\" id=\"sponsor-amount\" min=\"0\" step=\"0.01\">" +
+            "<label for=\"sponsor-currency\">${I18n.t("currencyLabel")}</label>" +
+            "<select id=\"sponsor-currency\"><option value=\"USD\">USD</option><option value=\"MXN\">MXN</option><option value=\"EUR\">EUR</option></select>" +
+            "</div>" +
+            "<div id=\"sponsor-in-kind-fields\" class=\"hidden\">" +
+            "<label for=\"sponsor-in-kind-description\">${I18n.t("inKindDescriptionLabel")}</label>" +
+            "<textarea id=\"sponsor-in-kind-description\"></textarea>" +
+            "</div>" +
+            "<label for=\"sponsor-message\">${I18n.t("messageLabel")}</label>" +
+            "<textarea id=\"sponsor-message\" required></textarea>" +
+            "<button type=\"submit\" class=\"btn btn-secondary\">${I18n.t("sendOfferBtn")}</button></form>" +
+            "<div id=\"sponsor-form-message\"></div>"
+    }
+
+    private fun initSponsorForm() {
+        val typeSelect = document.getElementById("sponsor-type") as? HTMLSelectElement
+        typeSelect?.addEventListener("change", { toggleSponsorFields() })
+        document.getElementById("sponsor-form")?.addEventListener("submit", { e: Event ->
+            e.preventDefault()
+            submitSponsorOffer(currentPet.rescuerId, petId)
+        })
+    }
+
+    private fun toggleSponsorFields() {
+        val isMoney = (document.getElementById("sponsor-type") as? HTMLSelectElement)?.value == "MONEY"
+        (document.getElementById("sponsor-money-fields") as? HTMLElement)?.classList?.let { if (isMoney) it.remove("hidden") else it.add("hidden") }
+        (document.getElementById("sponsor-in-kind-fields") as? HTMLElement)?.classList?.let { if (isMoney) it.add("hidden") else it.remove("hidden") }
+    }
+
+    private fun submitSponsorOffer(rescuerId: dynamic, targetPetId: String) {
+        val offerType = (document.getElementById("sponsor-type") as? HTMLSelectElement)?.value ?: "MONEY"
+        val message = (document.getElementById("sponsor-message") as? HTMLTextAreaElement)?.value ?: ""
+        val body = if (offerType == "MONEY") {
+            val amount = (document.getElementById("sponsor-amount") as? HTMLInputElement)?.value?.toDoubleOrNull()
+            val currency = (document.getElementById("sponsor-currency") as? HTMLSelectElement)?.value
+            json("rescuerId" to rescuerId, "petId" to targetPetId.toInt(), "offerType" to offerType, "amount" to amount, "currency" to currency, "message" to message)
+        } else {
+            val description = (document.getElementById("sponsor-in-kind-description") as? HTMLTextAreaElement)?.value
+            json("rescuerId" to rescuerId, "petId" to targetPetId.toInt(), "offerType" to offerType, "inKindDescription" to description, "message" to message)
+        }
+        ApiClientModule.createSponsorshipOffer(body).then<Unit> {
+            (document.getElementById("sponsor-form-message") as? HTMLElement)?.let {
+                it.className = "message success"
+                it.textContent = I18n.t("sponsorOfferSent")
+            }
+            document.getElementById("sponsor-form")?.unsafeCast<HTMLElement>()?.style?.display = "none"
+        }.catch { err: dynamic ->
+            (document.getElementById("sponsor-form-message") as? HTMLElement)?.let {
+                it.className = "message error"
+                it.textContent = err?.message?.toString() ?: "Error"
+            }
+        }
     }
 
     // Only rendered for an active volunteer of this pet's rescuer - checked by fetching the

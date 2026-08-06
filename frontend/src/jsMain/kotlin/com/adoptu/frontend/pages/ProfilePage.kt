@@ -49,6 +49,7 @@ object ProfilePageModule {
         loadSavedSearches()
         loadMyAdoptionRequests()
         loadMyVolunteerApplications()
+        loadMySponsorshipOffers()
 
         listOf("role-rescuer", "role-photographer", "role-temporal-home", "role-shelter", "role-sterilization").forEach { id ->
             (document.getElementById(id) as? HTMLInputElement)?.checked = when (id) {
@@ -785,6 +786,33 @@ object ProfilePageModule {
         }
         val rescuerName = CommonModule.escapeHtml(application.rescuerName?.toString() ?: "")
         return "<div class=\"adoption-request-card\"><a href=\"/rescuer/${application.rescuerId}\">$rescuerName</a>" +
+            "<span class=\"ar-status status-${status.lowercase()}\">$statusLabel</span>" +
+            "<span class=\"ar-date\">$date</span></div>"
+    }
+
+    private fun loadMySponsorshipOffers() {
+        ApiClientModule.getMySponsorshipOffers().then<Unit> { offersRaw: dynamic ->
+            val offers = (offersRaw as? Array<dynamic>) ?: arrayOf()
+            val container = document.getElementById("my-sponsorship-offers-list")
+            val empty = document.getElementById("my-sponsorship-offers-empty")
+            if (offers.isEmpty()) {
+                empty?.textContent = I18n.t("noSponsorshipOffersYet")
+                container?.innerHTML = ""
+                return@then
+            }
+            empty?.textContent = ""
+            container?.innerHTML = offers.joinToString("") { renderMySponsorshipOfferRow(it) }
+        }
+    }
+
+    private fun renderMySponsorshipOfferRow(o: dynamic): String {
+        val date = js("new Date(o.createdAt)").toLocaleDateString()
+        val rescuerName = CommonModule.escapeHtml(o.rescuerName?.toString() ?: "")
+        val petName = o.petName?.toString()?.takeIf { it.isNotEmpty() }
+        val target = if (petName != null) CommonModule.escapeHtml(petName) else I18n.t("generalFundLabel")
+        val status = o.status?.toString() ?: "SENT"
+        val statusLabel = if (status == "READ") I18n.t("sponsorshipStatusRead") else I18n.t("sponsorshipStatusSent")
+        return "<div class=\"adoption-request-card\"><a href=\"/rescuer/${o.rescuerId}\">$rescuerName</a> - $target" +
             "<span class=\"ar-status status-${status.lowercase()}\">$statusLabel</span>" +
             "<span class=\"ar-date\">$date</span></div>"
     }

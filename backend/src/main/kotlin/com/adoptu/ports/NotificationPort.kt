@@ -25,6 +25,17 @@ interface NotificationPort {
         message: String,
         spamReportLink: String
     ): Boolean
+    suspend fun sendSponsorshipOffer(
+        rescuerEmail: String,
+        rescuerName: String,
+        sponsorName: String,
+        petName: String?,
+        offerType: String,
+        amount: Double?,
+        currency: String?,
+        inKindDescription: String?,
+        message: String
+    ): Boolean
     suspend fun sendUrgentRescueAlert(
         rescuerEmail: String,
         rescuerName: String,

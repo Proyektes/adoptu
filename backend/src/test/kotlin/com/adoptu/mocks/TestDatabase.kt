@@ -36,6 +36,7 @@ object TestDatabase {
                     PetFavorites,
                     Volunteers,
                     PetEditSuggestions,
+                    SponsorshipOffers,
                     PetFosterPlacements,
                     Pets,
                     WebAuthnCredentials,
@@ -104,6 +105,7 @@ object TestDatabase {
                 Volunteers,
                 PetFosterPlacements,
                 PetEditSuggestions,
+                SponsorshipOffers,
                 RateLimitStateTable,
                 AuthKitJwtKeys,
                 AuthKitPasskeyCeremonies,
@@ -138,6 +140,7 @@ object TestDatabase {
             exec("DELETE FROM pet_favorites")
             exec("DELETE FROM volunteers")
             exec("DELETE FROM pet_edit_suggestions")
+            exec("DELETE FROM sponsorship_offers")
             exec("DELETE FROM pets")
             exec("DELETE FROM webauthn_credentials")
             exec("DELETE FROM photography_requests")

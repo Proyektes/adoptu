@@ -73,6 +73,22 @@ class MockNotificationAdapter : NotificationPort {
         return sendEmail(temporalHomeEmail, subject, body)
     }
 
+    override suspend fun sendSponsorshipOffer(
+        rescuerEmail: String,
+        rescuerName: String,
+        sponsorName: String,
+        petName: String?,
+        offerType: String,
+        amount: Double?,
+        currency: String?,
+        inKindDescription: String?,
+        message: String
+    ): Boolean {
+        val subject = "New Sponsorship Offer - Adopt-U"
+        val body = "From: $sponsorName, Pet: $petName, Type: $offerType, Amount: $amount $currency, InKind: $inKindDescription, Message: $message"
+        return sendEmail(rescuerEmail, subject, body)
+    }
+
     override suspend fun sendUrgentRescueAlert(
         rescuerEmail: String,
         rescuerName: String,

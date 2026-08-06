@@ -60,6 +60,7 @@ fun appModule(config: AppConfig) = module {
     single<PetFavoriteRepositoryPort> { PetFavoriteRepositoryImpl(get()) }
     single<VolunteerRepositoryPort> { VolunteerRepositoryImpl(get(), get()) }
     single<PetEditSuggestionRepositoryPort> { PetEditSuggestionRepositoryImpl(get(), get(), get()) }
+    single<SponsorshipOfferRepositoryPort> { SponsorshipOfferRepositoryImpl(get(), get(), get()) }
     single<GeocodingPort> { NominatimGeocodingAdapter() }
     single<ImageStoragePort> { createImageStorageAdapter(config) }
     single<EmailSenderPort> { emailSenderPortFromConfig(config) }
@@ -87,6 +88,7 @@ fun appModule(config: AppConfig) = module {
     single { RescuerDirectoryService(get(), get()) }
     single { VolunteerService(get(), get()) }
     single { PetEditSuggestionService(get(), get(), get(), get()) }
+    single { SponsorshipService(get(), get(), get(), get()) }
     single<TemporalHomeService> { TemporalHomeService(get(), get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
     single<UrgentRescueService> { UrgentRescueService(get(), get(), get(), get(), get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
     single<LostFoundService> { LostFoundService(get(), get(), get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }

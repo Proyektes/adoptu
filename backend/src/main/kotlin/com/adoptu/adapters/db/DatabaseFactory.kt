@@ -63,7 +63,8 @@ object DatabaseFactory {
         SavedSearches,
         PetFavorites,
         Volunteers,
-        PetEditSuggestions)
+        PetEditSuggestions,
+        SponsorshipOffers)
     fun init(config: AppConfig) {
         val env = config.propertyOrNull("env")?.getString() ?: "prod"
         val prefix = "db.$env"

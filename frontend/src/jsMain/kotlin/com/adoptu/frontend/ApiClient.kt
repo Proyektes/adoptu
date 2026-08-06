@@ -187,6 +187,16 @@ object ApiClientModule {
 
     fun getMyPetEditSuggestions(): Promise<dynamic> = apiFetch("/api/users/volunteer/edit-suggestions")
 
+    fun createSponsorshipOffer(body: dynamic): Promise<dynamic> =
+        apiFetch("/api/sponsorships", js("({method: 'POST', body: JSON.stringify(body)})"))
+
+    fun markSponsorshipOfferRead(id: Int): Promise<dynamic> =
+        apiFetch("/api/sponsorships/$id/read", js("({method: 'PUT'})"))
+
+    fun getSponsorshipOffersForRescuer(): Promise<dynamic> = apiFetch("/api/users/rescuer/sponsorships")
+
+    fun getMySponsorshipOffers(): Promise<dynamic> = apiFetch("/api/users/sponsorships/mine")
+
     fun searchTemporalHomes(query: dynamic): Promise<dynamic> = apiFetch("/api/temporal-homes/search", js("({method: 'POST', body: JSON.stringify(query)})"))
 
     fun getTemporalHomeById(id: String): Promise<dynamic> = apiFetch("/api/temporal-homes/$id")

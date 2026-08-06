@@ -39,6 +39,7 @@ object MyPetsPageModule {
         window.asDynamic().rejectVolunteer = { id: dynamic -> updateVolunteerStatus(id.toString().toInt(), "REJECTED") }
         window.asDynamic().approveEditSuggestion = { id: dynamic -> updateEditSuggestionStatus(id.toString().toInt(), "APPROVED") }
         window.asDynamic().rejectEditSuggestion = { id: dynamic -> updateEditSuggestionStatus(id.toString().toInt(), "REJECTED") }
+        window.asDynamic().markSponsorshipRead = { id: dynamic -> markSponsorshipOfferRead(id.toString().toInt()) }
 
         document.getElementById("add-btn")?.addEventListener("click", { openAddForm() })
         document.getElementById("cancel-btn")?.addEventListener("click", { closeForm() })
@@ -220,6 +221,47 @@ object MyPetsPageModule {
         loadPetAnalytics(pets)
         loadVolunteerApplications()
         loadPetEditSuggestions()
+        loadSponsorshipOffers()
+    }
+
+    private fun loadSponsorshipOffers() {
+        val container = document.getElementById("sponsorship-offers").unsafeCast<HTMLElement?>()
+        ApiClientModule.getSponsorshipOffersForRescuer().then<Unit> { offersRaw: dynamic ->
+            val offers = (offersRaw as? Array<dynamic>) ?: arrayOf()
+            if (offers.isEmpty()) {
+                container?.innerHTML = "<p>${I18n.t("noSponsorshipOffers")}</p>"
+                return@then
+            }
+            container?.innerHTML = offers.joinToString("") { renderSponsorshipOfferCard(it) }
+        }.catch { }
+    }
+
+    private fun renderSponsorshipOfferCard(o: dynamic): String {
+        val date = js("new Date(o.createdAt)").toLocaleDateString()
+        val sponsorName = CommonModule.escapeHtml(o.sponsorName?.toString() ?: "")
+        val petName = o.petName?.toString()?.takeIf { it.isNotEmpty() }
+        val target = if (petName != null) CommonModule.escapeHtml(petName) else I18n.t("generalFundLabel")
+        val offerDetail = if (o.offerType == "MONEY") {
+            "${o.amount} ${o.currency ?: ""}"
+        } else {
+            CommonModule.escapeHtml(o.inKindDescription?.toString() ?: "")
+        }
+        val message = CommonModule.escapeHtml(o.message?.toString() ?: "")
+        val status = o.status?.toString() ?: "SENT"
+        val statusLabel = if (status == "READ") I18n.t("sponsorshipStatusRead") else I18n.t("sponsorshipStatusSent")
+        val markReadBtn = if (status != "READ") {
+            "<button class=\"btn btn-secondary\" data-action=\"markSponsorshipRead\" data-arg=\"${o.id}\">${I18n.t("markAsReadBtn")}</button>"
+        } else ""
+        return "<div class=\"adoption-request-card\"><div class=\"ar-pet\">$sponsorName - $target</div>" +
+            "<p><strong>${I18n.t("offeringLabel")}:</strong> $offerDetail</p>" +
+            "<p>$message</p>" +
+            "<span class=\"ar-status status-${status.lowercase()}\">$statusLabel</span>" +
+            "<span class=\"ar-date\">$date</span>$markReadBtn</div>"
+    }
+
+    private fun markSponsorshipOfferRead(id: Int) {
+        ApiClientModule.markSponsorshipOfferRead(id).then<Unit> { loadSponsorshipOffers() }
+            .catch { err: dynamic -> window.alert(err?.message?.toString() ?: "Error") }
     }
 
     private fun loadPetEditSuggestions() {

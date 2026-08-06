@@ -125,6 +125,46 @@ class NotificationEmailAdapter(
         return sendEmail(temporalHomeEmail, subject, body)
     }
 
+    override suspend fun sendSponsorshipOffer(
+        rescuerEmail: String,
+        rescuerName: String,
+        sponsorName: String,
+        petName: String?,
+        offerType: String,
+        amount: Double?,
+        currency: String?,
+        inKindDescription: String?,
+        message: String
+    ): Boolean {
+        val subject = "New Sponsorship Offer - Adopt-U"
+        val body = buildString {
+            appendLine("Hello $rescuerName,")
+            appendLine()
+            appendLine("You have received a new sponsorship offer!")
+            appendLine()
+            appendLine("From: $sponsorName")
+            if (petName != null) {
+                appendLine("For: $petName")
+            } else {
+                appendLine("For: your general fund")
+            }
+            if (offerType == "MONEY" && amount != null) {
+                appendLine("Offering: $amount ${currency ?: ""}")
+            } else if (inKindDescription != null) {
+                appendLine("Offering (in-kind): $inKindDescription")
+            }
+            appendLine()
+            appendLine("Message:")
+            appendLine(message)
+            appendLine()
+            appendLine("Reply directly to this email or reach out via the contact details they provided to arrange the details.")
+            appendLine()
+            appendLine("Best regards,")
+            appendLine("The Adopt-U Team")
+        }
+        return sendEmail(rescuerEmail, subject, body)
+    }
+
     override suspend fun sendUrgentRescueAlert(
         rescuerEmail: String,
         rescuerName: String,

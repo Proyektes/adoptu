@@ -565,6 +565,28 @@ object PetEditSuggestions : Table("pet_edit_suggestions") {
     override val primaryKey = PrimaryKey(id)
 }
 
+// Matching/agreement only - no payment processing lives here. A sponsor offers help (money or
+// in-kind) to a rescuer, either for a specific pet (petId set) or the rescuer's general fund
+// (petId null); rescuerId is always the recipient, denormalized even for a pet-targeted offer so
+// the "my incoming offers" query never needs a join through Pets. Actual payment/shipping happens
+// off-platform once the two sides connect - see SponsorshipService's email notification, which
+// mirrors TemporalHomeRequests/PhotographyRequests' contact-request pattern.
+object SponsorshipOffers : Table("sponsorship_offers") {
+    val id = integer("id").autoIncrement()
+    val sponsorId = integer("sponsor_id").references(Users.id)
+    val rescuerId = integer("rescuer_id").references(Users.id)
+    val petId = integer("pet_id").references(Pets.id).nullable()
+    val offerType = varchar("offer_type", 20) // MONEY, IN_KIND
+    val amount = decimal("amount", 10, 2).nullable()
+    val currency = varchar("currency", 10).nullable()
+    val inKindDescription = text("in_kind_description").nullable()
+    val message = text("message")
+    val status = varchar("status", 50) // SENT, READ
+    val createdAt = long("created_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
 object AnimalShelters : Table("animal_shelters") {
     val id = integer("id").autoIncrement()
     val userId = integer("user_id").references(Users.id).nullable()

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-06T03:33:46.671Z
-> Files: 626 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-06T13:21:56.720Z
+> Files: 632 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/37d425e0-d2ad-499f-bde7-97b1baf5c00b/scratchpad/
 
@@ -448,7 +448,7 @@
 
 ## backend/src/main/kotlin/com/adoptu/
 
-- `Application.kt` — main, configureRouting (~2145 tok)
+- `Application.kt` — main, configureRouting (~2165 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/aws/
 
@@ -460,9 +460,9 @@
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/
 
-- `DatabaseFactory.kt` — init, createDefaultAdmin (~1593 tok)
+- `DatabaseFactory.kt` — init, createDefaultAdmin (~1600 tok)
 - `DbDispatcher.kt` — Shared, bounded dispatcher for repository DB calls. (~705 tok)
-- `Models.kt` — Declares val (~8489 tok)
+- `Models.kt` — Declares val (~8826 tok)
 - `PoolSizing.kt` — Single source of truth for how many DB-bound worker threads/connections this (~365 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/repositories/
@@ -476,6 +476,7 @@
 - `PhotographerRepository.kt` — Data class: PhotographerRepositoryImpl (12 properties) (~3820 tok)
 - `SavedSearchRepository.kt` — SavedSearchRepositoryImpl: rowToDto, create, getByUser, getById (~837 tok)
 - `ShelterRepository.kt` — ShelterRepository: rowToDto, getById, getAll, create + 4 more (~2132 tok)
+- `SponsorshipOfferRepository.kt` — Data class: RawOffer (~1653 tok)
 - `SterilizationLocationRepository.kt` — SterilizationLocationRepository: rowToDto, getById, getAll, create + 6 more (~2658 tok)
 - `TemporalHomeRepository.kt` — Data class: TemporalHomeRepositoryImpl (~3636 tok)
 - `UrgentRescueRepository.kt` — UrgentRescueRepositoryImpl: generateToken, rowToProfile, rowToReport, rowToPage (~3893 tok)
@@ -494,7 +495,7 @@
 
 ## backend/src/main/kotlin/com/adoptu/adapters/notification/
 
-- `NotificationEmailAdapter.kt` — [NotificationPort] implementation delegating actual dispatch to EmailKit's [EmailSenderPort] (~1587 tok)
+- `NotificationEmailAdapter.kt` — [NotificationPort] implementation delegating actual dispatch to EmailKit's [EmailSenderPort] (~1979 tok)
 - `SesEmailAdapter.kt` — SesEmailAdapter: sendEmail, sendEmailViaSmtp, sendEmailViaSes, sendPhotographerRequest (~2249 tok)
 - `SnsSmsAdapter.kt` — AWS SNS direct-to-phone SMS (Publish with a phoneNumber destination, not a topic ARN); credential chain mirrors S3ImageStorageAdapter (~760 tok)
 
@@ -512,7 +513,7 @@
 
 ## backend/src/main/kotlin/com/adoptu/di/
 
-- `AppModule.kt` — appModule, getOrigins, createImageStorageAdapter (~2416 tok)
+- `AppModule.kt` — appModule, createImageStorageAdapter (~2268 tok)
 
 ## backend/src/main/kotlin/com/adoptu/dto/input/
 
@@ -527,6 +528,7 @@
 - `RescuerDirectoryDto.kt` — Data class: RescuerDirectoryDto (~153 tok)
 - `SavedSearchDto.kt` — Data class: SavedSearchDto (~94 tok)
 - `ShelterDto.kt` — Data class: ShelterDto (~1043 tok)
+- `SponsorshipOfferDto.kt` — Data class: SponsorshipOfferType (~219 tok)
 - `SterilizationLocationDto.kt` — Data class: SterilizationLocationDto (~765 tok)
 - `UrgentRescueDto.kt` — Data class: LocationInputMode (~1020 tok)
 - `UserDto.kt` — Data class: UserRole (~1008 tok)
@@ -545,7 +547,7 @@
 - `GeocodingPort.kt` — Resolves a country/state/city into a center point + a radius that fully covers the zone's bounding b (~99 tok)
 - `ImageStoragePort.kt` — uploadImage, deleteImage, getImageUrl (~83 tok)
 - `LostFoundRepositoryPort.kt` — Every currently-OPEN report of [kind] - matching/browsing filter this list in Kotlin (small volume, (~280 tok)
-- `NotificationPort.kt` — sendEmail, sendPhotographerRequest, sendAdoptionRequestNotification, sendTemporalHomeRequest, sendUr (~280 tok)
+- `NotificationPort.kt` — sendEmail, sendPhotographerRequest, sendAdoptionRequestNotification, sendTemporalHomeRequest, sendSp (~362 tok)
 - `PetEditSuggestionRepositoryPort.kt` — create, getById, getPendingForRescuer, getForVolunteer, updateStatus (~223 tok)
 - `PetFavoriteRepositoryPort.kt` — No-op (not an error) if already favorited - idempotent, matches the unique(userId, petId) constraint (~107 tok)
 - `PetFosterPlacementRepositoryPort.kt` — create, getActiveForPet, getHistoryForPet, getActiveForTemporalHome, countActiveForTemporalHome (~210 tok)
@@ -555,6 +557,7 @@
 - `SavedSearchRepositoryPort.kt` — create, getByUser, getById, delete, getMatching (~165 tok)
 - `ShelterRepositoryPort.kt` — getById, getAll, create, update, delete (~178 tok)
 - `SmsNotificationPort.kt` — sendUrgentRescueAlert (~68 tok)
+- `SponsorshipOfferRepositoryPort.kt` — create, getById, getForRescuer, getForSponsor, markRead (~140 tok)
 - `SterilizationLocationRepositoryPort.kt` — getById, getAll, create, update, delete (~286 tok)
 - `TemporalHomeRepositoryPort.kt` — Returns (temporalHomeId, rescuerId) and marks the token used, or null if invalid/expired/already used. (~343 tok)
 - `UrgentRescueRepositoryPort.kt` — Every currently-active urgent-rescuer profile - matching filters this list by distance in Kotlin. (~631 tok)
@@ -575,6 +578,7 @@
 - `PhotographerRoutes.kt` — HttpRules, validateUser (~2585 tok)
 - `SavedSearchRoutes.kt` — HttpRules (~488 tok)
 - `ShelterRoutes.kt` — HttpRules, HttpRules (~1627 tok)
+- `SponsorshipRoutes.kt` — HttpRules (~758 tok)
 - `SterilizationLocationRoutes.kt` — HttpRules, HttpRules (~1754 tok)
 - `TemporalHomeRoutes.kt` — HttpRules (~3030 tok)
 - `UrgentRescueRoutes.kt` — clientIp, HttpRules (~1478 tok)
@@ -605,6 +609,7 @@
 - `SavedSearchService.kt` — SavedSearchService: create, list, delete (~223 tok)
 - `ServiceResult.kt` — Data class: ServiceResult (2 properties) (~82 tok)
 - `ShelterService.kt` — ShelterService: getAll, getById, create, update + 3 more (~507 tok)
+- `SponsorshipService.kt` — SponsorshipService: createOffer, getForRescuer, getForSponsor, markRead (~1091 tok)
 - `SterilizationLocationService.kt` — SterilizationLocationService: getAll, getById, create, update + 5 more (~604 tok)
 - `TemporalHomeService.kt` — Validates and consumes a spam-report token (see sendRequest), then blocks the rescuer it names. (~1332 tok)
 - `UrgentRescueService.kt` — UrgentRescueService: getProfile, createProfile, updateProfile, activateProfile (~3026 tok)
@@ -661,7 +666,7 @@
 
 ## backend/src/test/kotlin/com/adoptu/adapters/db/
 
-- `DatabaseFactoryTest.kt` — Declares DatabaseFactoryTest (~3839 tok)
+- `DatabaseFactoryTest.kt` — Declares DatabaseFactoryTest (~3888 tok)
 
 ## backend/src/test/kotlin/com/adoptu/adapters/db/repositories/
 
@@ -689,8 +694,8 @@
 
 ## backend/src/test/kotlin/com/adoptu/mocks/
 
-- `MockNotificationAdapter.kt` — Data class: MockNotificationAdapter (~778 tok)
-- `TestDatabase.kt` — initH2, clearAllData (~1626 tok)
+- `MockNotificationAdapter.kt` — Data class: MockNotificationAdapter (~933 tok)
+- `TestDatabase.kt` — initH2, clearAllData (~1659 tok)
 
 ## backend/src/test/kotlin/com/adoptu/plugins/
 
@@ -725,6 +730,7 @@
 - `PetMedicalEventServiceTest.kt` — PetMedicalEventServiceTest: setup, createTestPet, sampleRequest (~1577 tok)
 - `PetServiceTest.kt` — PetServiceTest: setup (~10242 tok)
 - `ProfileEmailVerificationServiceTest.kt` — ProfileEmailVerificationServiceTest: setup (~4165 tok)
+- `SponsorshipServiceTest.kt` — SponsorshipServiceTest: setup, user, role, createTestPet (~1994 tok)
 - `TemporalHomeServiceTest.kt` — TemporalHomeServiceTest: setup, cleanup (~4427 tok)
 - `UserServiceTest.kt` — UserServiceTest: setup (~5055 tok)
 - `UserShelterServiceTest.kt` — UserShelterServiceTest: setup (~5325 tok)
@@ -768,9 +774,9 @@
 
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/
 
-- `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~3999 tok)
+- `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~4131 tok)
 - `Common.kt` — rule: NodeList, showDonationPrompt, onCountryChange, initI18n (~3910 tok)
-- `I18n.kt` (~73544 tok)
+- `I18n.kt` (~75198 tok)
 - `ImageCompression.kt` — compress, attempt (~724 tok)
 - `Main.kt` — main (~1838 tok)
 - `WebAuthn.kt` — encodeURIComponent, register, authenticate, parseAssertionOptions, getRegistrationOptions (~2384 tok)
@@ -781,10 +787,10 @@
 - `AuthFlowPages.kt` — init, showSuccess, showError, init, submit (~2649 tok)
 - `IndexPage.kt` — init, refreshFavoriteButtons, toggleFavorite, saveCurrentSearch, loadPets (~3234 tok)
 - `LostFoundPage.kt` — init, captureLocation, submit, init, search (~2842 tok)
-- `MyPetsPage.kt` — init, togglePromotedReasonRow, loadFosterPlacementStatus, endCurrentPlacement, loadMedicalEvents (~11176 tok)
-- `PetDetailPage.kt` — init, render (~5383 tok)
-- `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~11758 tok)
-- `RescuersPage.kt` — init, render, init, render, applyToVolunteer (~1578 tok)
+- `MyPetsPage.kt` — init, togglePromotedReasonRow, loadFosterPlacementStatus, endCurrentPlacement, loadMedicalEvents (~11818 tok)
+- `PetDetailPage.kt` — init, render (~6566 tok)
+- `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~12176 tok)
+- `RescuersPage.kt` — init, render, init, render, sponsorFormHtml (~2710 tok)
 - `TemporalHomePage.kt` — init, search, displayResults, init, render (~3534 tok)
 - `UrgentRescuePage.kt` — init, captureLocation, submit, init, toggleMode (~3769 tok)
 
@@ -801,10 +807,10 @@
 - `IndexPage.kt` — HTML (~951 tok)
 - `LocationSearchFilters.kt` — DIV (~642 tok)
 - `LostFoundPage.kt` — HTML, HTML, HTML, HTML (~2376 tok)
-- `MyPetsPage.kt` — HTML (~3779 tok)
+- `MyPetsPage.kt` — HTML (~3845 tok)
 - `NavParams.kt` — Data class: NavParams (~58 tok)
 - `PetsPage.kt` — HTML (~900 tok)
-- `ProfilePage.kt` — HTML (~5155 tok)
+- `ProfilePage.kt` — HTML (~5233 tok)
 - `RescuersPage.kt` — HTML, HTML (~356 tok)
 - `Shared.kt` — HTML, A, BODY, DIV, NAV (~2783 tok)
 - `SterilizationLocationsPage.kt` — HTML, HTML (~1539 tok)
