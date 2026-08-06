@@ -144,6 +144,7 @@ class UsersRoutesE2ETest {
             single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
             single { PhotographerService(get(), get(), get(), get()) }
             single { UserService(get(), get()) }
+            single { com.adoptu.services.RescuerDirectoryService(get(), get()) }
             single { com.universaliun.ratelimit.common.RateLimiter(com.universaliun.ratelimit.common.InMemoryRateLimitStateAdapter()) }
             single { ProfileEmailVerificationService(get(), get(), get(), "http://localhost:80") }
             single { PetService(get(), get(), get(), get(), get()) }
@@ -1023,7 +1024,33 @@ class UsersRoutesE2ETest {
         try {
             val response = TestHttp.get("${handle.baseUrl}/api/users/rescuers")
             assertEquals(200, response.statusCode())
-            assertTrue(response.body().contains("rescuer@test.com"))
+            // Public directory must never leak email/username - only the redacted directory shape.
+            assertTrue(response.body().contains("Test Rescuer"))
+            assertFalse(response.body().contains("rescuer@test.com"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET rescuers by id returns 404 for a non-rescuer user`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/users/rescuers/2")
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET rescuers by id returns rescuer detail without auth`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/users/rescuers/1")
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("Test Rescuer"))
+            assertFalse(response.body().contains("rescuer@test.com"))
         } finally {
             handle.stop()
         }

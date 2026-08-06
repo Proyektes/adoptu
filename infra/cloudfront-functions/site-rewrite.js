@@ -35,6 +35,10 @@ function handler(event) {
         request.uri = "/lost-found-detail.html";
         return request;
     }
+    if (/^\/rescuer\/[0-9]+$/.test(uri)) {
+        request.uri = "/rescuer-detail.html";
+        return request;
+    }
     if (uri === "/") {
         request.uri = "/index.html";
         return request;

@@ -14,4 +14,5 @@ object Icons {
     const val SYRINGE = "vaccines"
     const val CAMERA = "camera"
     const val URGENT = "emergency"
+    const val GROUP = "group"
 }

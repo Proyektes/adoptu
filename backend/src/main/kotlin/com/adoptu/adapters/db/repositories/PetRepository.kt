@@ -530,4 +530,14 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
             )
         }
     }
+
+    override suspend fun getAvailableForRescuer(rescuerId: Int): List<PetDto> = withContext(dbDispatcher) {
+        transaction {
+            val rows = Pets.selectAll()
+                .where { (Pets.rescuerId eq rescuerId) and (Pets.status eq "AVAILABLE") and Pets.deactivatedAt.isNull() }
+                .orderBy(Pets.createdAt, SortOrder.DESC)
+                .toList()
+            rowsToPetDtos(rows)
+        }
+    }
 }

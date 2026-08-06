@@ -157,6 +157,10 @@ object ApiClientModule {
 
     fun getShelters(): Promise<dynamic> = apiFetch("/api/shelters")
 
+    fun getRescuers(): Promise<dynamic> = apiFetch("/api/users/rescuers")
+
+    fun getRescuerById(id: String): Promise<dynamic> = apiFetch("/api/users/rescuers/$id")
+
     fun searchTemporalHomes(query: dynamic): Promise<dynamic> = apiFetch("/api/temporal-homes/search", js("({method: 'POST', body: JSON.stringify(query)})"))
 
     fun getTemporalHomeById(id: String): Promise<dynamic> = apiFetch("/api/temporal-homes/$id")

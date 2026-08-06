@@ -19,6 +19,8 @@ import com.adoptu.frontend.pages.PhotographersPageModule
 import com.adoptu.frontend.pages.ProfileEmailVerificationPageModule
 import com.adoptu.frontend.pages.ProfilePageModule
 import com.adoptu.frontend.pages.RegisterPageModule
+import com.adoptu.frontend.pages.RescuerDetailPageModule
+import com.adoptu.frontend.pages.RescuersPageModule
 import com.adoptu.frontend.pages.ResetPasswordPageModule
 import com.adoptu.frontend.pages.SheltersPageModule
 import com.adoptu.frontend.pages.SterilizationLocationsPageModule
@@ -91,6 +93,8 @@ fun main() {
                     path == "/lost-found" || path == "/lost-found/" -> LostFoundBrowsePageModule.init()
                     path == "/lost-found-resolve" || path == "/lost-found-resolve/" -> LostFoundResolvePageModule.init()
                     path.startsWith("/lost-found/") -> LostFoundDetailPageModule.init()
+                    path == "/rescuers" || path == "/rescuers/" -> RescuersPageModule.init()
+                    path.startsWith("/rescuer/") -> RescuerDetailPageModule.init()
                     else -> {}
                 }
             } catch (e: dynamic) {}

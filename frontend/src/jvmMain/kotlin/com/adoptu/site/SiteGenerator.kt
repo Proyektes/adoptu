@@ -47,6 +47,8 @@ fun main(args: Array<String>) {
         "temporal-home-block" to { temporalHomeBlockPage() },
         "temporal-home-detail" to { temporalHomeDetailPage() },
         "shelters" to { sheltersPage() },
+        "rescuers" to { rescuersPage() },
+        "rescuer-detail" to { rescuerDetailPage() },
         "sterilization-locations" to { sterilizationLocationsPage() },
         "admin-sterilization-locations" to { adminSterilizationLocationsPage() },
         "verify" to { emailVerificationPage() },
@@ -93,6 +95,7 @@ private val SERVE_JSON = """
   "rewrites": [
     { "source": "^/pet/[0-9]+${'$'}", "destination": "/pet-detail.html" },
     { "source": "^/temporal-home/[0-9]+${'$'}", "destination": "/temporal-home-detail.html" },
+    { "source": "^/rescuer/[0-9]+${'$'}", "destination": "/rescuer-detail.html" },
     { "source": "^/lost-found/[0-9]+${'$'}", "destination": "/lost-found-detail.html" }
   ]
 }

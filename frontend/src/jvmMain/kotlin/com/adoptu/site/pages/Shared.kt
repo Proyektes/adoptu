@@ -162,9 +162,13 @@ fun DIV.commonResourcesDropdown() {
                 span { attributes["data-i18n"] = "sterilizationLocations"; +"Sterilization Locations" }
                 span(classes = "material-symbols-outlined") { +Icons.SYRINGE }
             }
-            a("/temporal-homes") { 
+            a("/temporal-homes") {
                 span { attributes["data-i18n"] = "findTemporalHomes"; +"Temporal Homes" }
                 span(classes = "material-symbols-outlined") { +Icons.HOME }
+            }
+            a("/rescuers") {
+                span { attributes["data-i18n"] = "rescuerDirectory"; +"Rescuers" }
+                span(classes = "material-symbols-outlined") { +Icons.GROUP }
             }
         }
     }

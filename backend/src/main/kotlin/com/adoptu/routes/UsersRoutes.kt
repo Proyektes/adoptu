@@ -11,6 +11,7 @@ import com.adoptu.services.EmailChangeService
 import com.adoptu.services.PasswordService
 import com.adoptu.services.PhotographerService
 import com.adoptu.services.ProfileEmailVerificationService
+import com.adoptu.services.RescuerDirectoryService
 import com.adoptu.services.UrgentRescueService
 import com.adoptu.services.UserService
 import com.adoptu.services.VerifiableProfileType
@@ -49,6 +50,7 @@ fun HttpRules.usersRoutes() {
     val emailChangeService by Deps.inject<EmailChangeService>()
     val profileEmailVerificationService by Deps.inject<ProfileEmailVerificationService>()
     val urgentRescueService by Deps.inject<UrgentRescueService>()
+    val rescuerDirectoryService by Deps.inject<RescuerDirectoryService>()
 
     post("/api/users/accept-terms", Handler { req, res ->
         val session = req.getSession() ?: return@Handler res.respondUnauthorized()
@@ -93,10 +95,20 @@ fun HttpRules.usersRoutes() {
         }
     })
 
+    // Public directory - deliberately returns RescuerDirectoryDto (name/country/pet count only),
+    // never the full UserDto (which carries email/ban status) to an unauthenticated caller.
     get("/api/users/rescuers", Handler { _, res ->
         runBlocking {
-            val rescuers = userService.getRescuers()
-            res.send(rescuers)
+            res.send(rescuerDirectoryService.getDirectory())
+        }
+    })
+
+    get("/api/users/rescuers/{id}", Handler { req, res ->
+        val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondInvalidId(ValidationConstants.INVALID_ID)
+
+        runBlocking {
+            val detail = rescuerDirectoryService.getDetail(id) ?: return@runBlocking res.respondNotFound()
+            res.send(detail)
         }
     })
 

@@ -82,4 +82,7 @@ interface PetRepositoryPort {
     suspend fun getImages(petId: Int): List<PetImageDto>
     suspend fun incrementViewCount(petId: Int)
     suspend fun getAnalytics(petId: Int): PetAnalyticsDto?
+    // Backs the public rescuer directory detail page - available, non-deactivated pets only,
+    // regardless of country (unlike getAll(), which requires one).
+    suspend fun getAvailableForRescuer(rescuerId: Int): List<PetDto>
 }
