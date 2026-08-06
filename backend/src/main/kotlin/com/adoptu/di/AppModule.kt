@@ -9,7 +9,9 @@ import com.adoptu.adapters.db.repositories.*
 import com.adoptu.adapters.geocoding.NominatimGeocodingAdapter
 import com.adoptu.adapters.notification.NotificationEmailAdapter
 import com.adoptu.adapters.notification.SnsSmsAdapter
-import com.adoptu.adapters.storage.S3ImageStorageAdapter
+import com.adoptu.adapters.aws.EcsTaskCredentialsProvider
+import com.adoptu.adapters.aws.ecsTaskCredentialsAvailable
+import com.adoptu.adapters.storage.AdoptuImageStorageAdapter
 import com.universaliun.auth.backend.domain.port.out.PasskeyCeremonyStorePort
 import com.universaliun.auth.backend.domain.port.out.PasskeyCredentialRepositoryPort
 import com.universaliun.auth.backend.domain.port.out.RefreshTokenRepositoryPort
@@ -17,6 +19,10 @@ import com.universaliun.auth.backend.domain.port.out.UserRepositoryPort as KitUs
 import com.universaliun.email.common.EmailSenderPort
 import com.universaliun.ratelimit.backend.adapter.out.persistence.ExposedRateLimitStateAdapter
 import com.universaliun.ratelimit.common.RateLimiter
+import com.universaliun.storagekit.backend.adapter.out.storage.ReturnFormat
+import com.universaliun.storagekit.backend.adapter.out.storage.S3ObjectStorageAdapter
+import com.universaliun.storagekit.backend.adapter.out.storage.S3StorageConfig as StorageKitS3Config
+import com.universaliun.storagekit.common.ObjectStoragePort
 import com.adoptu.config.AppConfig
 import com.adoptu.ports.*
 import com.adoptu.services.*
@@ -122,13 +128,44 @@ internal fun createImageStorageAdapter(config: AppConfig): ImageStoragePort {
     val pathStyleAccess = config.propertyOrNull("$prefix.path_style_access")?.getString()?.toBoolean() ?: false
     val publicUrl = config.propertyOrNull("$prefix.public_url")?.getString()
 
-    return S3ImageStorageAdapter(
-        bucketName = bucketName,
-        region = region,
-        accessKeyId = accessKeyId,
-        secretAccessKey = secretAccessKey,
-        endpoint = endpoint,
-        pathStyleAccess = pathStyleAccess,
-        publicUrl = publicUrl
+    // Built here, not via StorageKit's own createS3Client() -- that doesn't know about
+    // EcsTaskCredentialsProvider (a GraalVM-native-image-safe ECS credential fetch; see that
+    // class's own doc comment for why the SDK's own reflective ContainerCredentialsProvider
+    // can't be used in this app's native-image build). S3ObjectStorageAdapter takes a pre-built
+    // S3Client for exactly this reason -- a host with custom client needs builds its own.
+    @Suppress("DEPRECATION")
+    val s3ClientBuilder = software.amazon.awssdk.services.s3.S3Client.builder()
+        .region(software.amazon.awssdk.regions.Region.of(region))
+    if (!accessKeyId.isNullOrEmpty() && !secretAccessKey.isNullOrEmpty()) {
+        s3ClientBuilder.credentialsProvider(
+            software.amazon.awssdk.auth.credentials.StaticCredentialsProvider.create(
+                software.amazon.awssdk.auth.credentials.AwsBasicCredentials.create(accessKeyId, secretAccessKey)
+            )
+        )
+    } else {
+        @Suppress("DEPRECATION")
+        s3ClientBuilder.credentialsProvider(
+            if (ecsTaskCredentialsAvailable()) EcsTaskCredentialsProvider()
+            else software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider.create()
+        )
+    }
+    if (!endpoint.isNullOrEmpty()) {
+        s3ClientBuilder.endpointOverride(java.net.URI.create(endpoint))
+    }
+    val s3Client = s3ClientBuilder.forcePathStyle(pathStyleAccess).build()
+
+    val storage: ObjectStoragePort = S3ObjectStorageAdapter(
+        s3Client,
+        StorageKitS3Config(
+            region = region,
+            sseEnabled = false, // preserves original behavior exactly -- no SSE header was ever sent
+            autoCreateBucket = true, // preserves the original's create-bucket-on-first-upload behavior
+            // Return value is unused -- AdoptuImageStorageAdapter computes its own URL (see that
+            // class's doc comment for why: the publicUrl/endpoint cases have different shapes
+            // this single ReturnFormat can't both represent).
+            returnFormat = ReturnFormat.PublicUrl(urlBase = endpoint),
+        ),
     )
+
+    return AdoptuImageStorageAdapter(storage, bucketName, region, endpoint, publicUrl, pathStyleAccess)
 }

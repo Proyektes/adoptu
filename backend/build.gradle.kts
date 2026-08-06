@@ -66,6 +66,20 @@ repositories {
         }
         content { includeGroup("com.universaliun.auth") }
     }
+
+    // StorageKit (object storage) -- see Libraries/StorageKit/README.md and Bitakore's
+    // docs/StorageKitExtraction.md. GITHUB_ACTOR / STORAGE_KIT_TOKEN in the environment. Artifact
+    // ids are "storagekit-backend"/"storagekit-common", not the bare "backend"/"common" every
+    // other Kit uses -- see StorageKit's own build.gradle.kts comment for why.
+    maven {
+        name = "StorageKitGitHubPackages"
+        url = uri("https://maven.pkg.github.com/ULibraries/StorageKit")
+        credentials {
+            username = credential("GITHUB_ACTOR")
+            password = credential("STORAGE_KIT_TOKEN")
+        }
+        content { includeGroup("com.universaliun.storagekit") }
+    }
 }
 
 // EmailKit is consumed as a `1.0-SNAPSHOT` ("changing") dependency -- same reasoning as the other
@@ -82,7 +96,7 @@ kotlin {
 
 val helidonVersion = "4.5.0"
 val jacksonKotlinVersion = "2.22.0"
-val exposedVersion = "1.3.0"
+val exposedVersion = "1.3.1"
 val postgresVersion = "42.7.12"
 val koinVersion = "4.2.2"
 val kotlinxDatetimeVersion = "0.8.0"
@@ -127,6 +141,14 @@ dependencies {
     implementation("software.amazon.awssdk:s3") {
         exclude(group = "net.bytebuddy")
     }
+
+    // Object storage's actual PutObject/DeleteObject calls moved onto StorageKit (Libraries/
+    // StorageKit, see Bitakore's docs/StorageKitExtraction.md) -- AppModule.kt still builds the
+    // S3Client itself (EcsTaskCredentialsProvider is a GraalVM-native-image-safe workaround
+    // StorageKit's own createS3Client() doesn't know about; see that file's comment) and passes
+    // it into StorageKit's S3ObjectStorageAdapter directly, so software.amazon.awssdk:s3 above
+    // stays a direct dependency regardless.
+    implementation("com.universaliun.storagekit:storagekit-backend:1.0-SNAPSHOT")
     implementation("software.amazon.awssdk:ses") {
         exclude(group = "net.bytebuddy")
     }

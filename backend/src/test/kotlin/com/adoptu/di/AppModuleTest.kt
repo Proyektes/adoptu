@@ -1,6 +1,6 @@
 package com.adoptu.di
 
-import com.adoptu.adapters.storage.S3ImageStorageAdapter
+import com.adoptu.adapters.storage.AdoptuImageStorageAdapter
 import com.adoptu.config.AppConfig
 import com.adoptu.services.auth.WebAuthnService
 import org.junit.jupiter.api.Assertions
@@ -36,7 +36,7 @@ class AppModuleTest {
 
         val adapter = createImageStorageAdapter(config)
 
-        Assertions.assertTrue(adapter is S3ImageStorageAdapter)
+        Assertions.assertTrue(adapter is AdoptuImageStorageAdapter)
     }
 
     @Test
@@ -49,7 +49,7 @@ class AppModuleTest {
 
         val adapter = createImageStorageAdapter(config)
 
-        Assertions.assertTrue(adapter is S3ImageStorageAdapter)
+        Assertions.assertTrue(adapter is AdoptuImageStorageAdapter)
     }
 
     @Test
@@ -61,7 +61,7 @@ class AppModuleTest {
 
         val adapter = createImageStorageAdapter(config)
 
-        Assertions.assertTrue(adapter is S3ImageStorageAdapter)
+        Assertions.assertTrue(adapter is AdoptuImageStorageAdapter)
     }
 
     @Test
@@ -73,7 +73,7 @@ class AppModuleTest {
 
         val adapter = createImageStorageAdapter(config)
 
-        Assertions.assertTrue(adapter is S3ImageStorageAdapter)
+        Assertions.assertTrue(adapter is AdoptuImageStorageAdapter)
     }
 
     @Test
@@ -84,7 +84,7 @@ class AppModuleTest {
 
         val adapter = createImageStorageAdapter(config)
 
-        Assertions.assertTrue(adapter is S3ImageStorageAdapter)
+        Assertions.assertTrue(adapter is AdoptuImageStorageAdapter)
     }
 
     @Test

@@ -4,7 +4,10 @@ import com.adoptu.adapters.db.*
 import com.adoptu.adapters.notification.NotificationEmailAdapter
 import com.adoptu.di.emailSenderPortFromConfig
 import com.universaliun.email.common.EmailSenderPort
-import com.adoptu.adapters.storage.S3ImageStorageAdapter
+import com.adoptu.adapters.storage.AdoptuImageStorageAdapter
+import com.universaliun.storagekit.backend.adapter.out.storage.ReturnFormat
+import com.universaliun.storagekit.backend.adapter.out.storage.S3ObjectStorageAdapter
+import com.universaliun.storagekit.backend.adapter.out.storage.S3StorageConfig as StorageKitS3Config
 import com.adoptu.config.AppConfig
 import com.adoptu.mocks.TestClock
 import com.adoptu.ports.*
@@ -138,14 +141,24 @@ class ApplicationIntegrationTest {
             single<TemporalHomeRepositoryPort> { com.adoptu.adapters.db.repositories.TemporalHomeRepositoryImpl(get(), get(), get()) }
             single<ShelterRepositoryPort> { com.adoptu.adapters.db.repositories.ShelterRepository(get()) }
             single<ImageStoragePort> {
-                S3ImageStorageAdapter(
-                    bucketName = "test-bucket",
-                    region = localstackContainer.region,
-                    accessKeyId = localstackContainer.accessKey,
-                    secretAccessKey = localstackContainer.secretKey,
-                    endpoint = localstackContainer.getEndpointOverride(LocalStackContainer.Service.S3).toString(),
-                    pathStyleAccess = true
+                val endpoint = localstackContainer.getEndpointOverride(LocalStackContainer.Service.S3).toString()
+                val s3Client = software.amazon.awssdk.services.s3.S3Client.builder()
+                    .region(software.amazon.awssdk.regions.Region.of(localstackContainer.region))
+                    .credentialsProvider(
+                        software.amazon.awssdk.auth.credentials.StaticCredentialsProvider.create(
+                            software.amazon.awssdk.auth.credentials.AwsBasicCredentials.create(
+                                localstackContainer.accessKey, localstackContainer.secretKey
+                            )
+                        )
+                    )
+                    .endpointOverride(java.net.URI.create(endpoint))
+                    .forcePathStyle(true)
+                    .build()
+                val storage = S3ObjectStorageAdapter(
+                    s3Client,
+                    StorageKitS3Config(sseEnabled = false, autoCreateBucket = true, returnFormat = ReturnFormat.PublicUrl(urlBase = endpoint)),
                 )
+                AdoptuImageStorageAdapter(storage, "test-bucket", localstackContainer.region, endpoint, publicUrl = null, pathStyleAccess = true)
             }
             single<EmailSenderPort> { emailSenderPortFromConfig(config) }
             single<NotificationPort> { NotificationEmailAdapter(get()) }
