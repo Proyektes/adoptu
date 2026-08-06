@@ -19,9 +19,6 @@ import com.adoptu.services.auth.WebAuthnService
 import com.adoptu.testsupport.TestHttp
 import com.adoptu.testsupport.TestServer
 import com.adoptu.testsupport.TestServerHandle
-import org.jetbrains.exposed.v1.jdbc.Database
-import org.jetbrains.exposed.v1.jdbc.SchemaUtils
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInfo
@@ -77,43 +74,11 @@ class ApplicationTestcontainersIT {
     }
 
     private fun initDatabase(config: AppConfig) {
-        val driverClassName = config.property("db.test.postgres.driver").getString()
-        val jdbcURL = config.property("db.test.postgres.url").getString()
-        val user = config.property("db.test.postgres.user").getString()
-        val password = config.property("db.test.postgres.password").getString()
-
-        Database.connect(jdbcURL, driverClassName, user = user, password = password)
-
-        transaction {
-            SchemaUtils.drop(
-                EmailVerificationTokens,
-                TemporalHomeRequests,
-                BlockedRescuers,
-                TemporalHomes,
-                AdoptionRequests,
-                PetImages,
-                PhotographyRequests,
-                Pets,
-                Photographers,
-                WebAuthnCredentials,
-                UserActiveRoles,
-                Users
-            )
-            SchemaUtils.create(
-                Users,
-                UserActiveRoles,
-                WebAuthnCredentials,
-                Photographers,
-                Pets,
-                PetImages,
-                AdoptionRequests,
-                PhotographyRequests,
-                TemporalHomes,
-                BlockedRescuers,
-                TemporalHomeRequests,
-                EmailVerificationTokens
-            )
-        }
+        // Delegates to the canonical schema (DatabaseFactory.listOfTables) instead of a
+        // hand-rolled table list here, which drifted out of sync with AuthKit's tables
+        // (AuthKitJwtKeys, AuthKitRefreshTokens, ...) and broke TestServer.start()'s
+        // AuthKitJwtKeyProvider.loadOrCreate() call with "relation ... does not exist".
+        DatabaseFactory.init(config)
     }
 
     private fun startTestServer(): TestServerHandle {
