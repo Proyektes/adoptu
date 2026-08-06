@@ -26,6 +26,9 @@ import com.adoptu.web.respondError
 import com.adoptu.web.respondHtml
 import com.adoptu.web.respondRedirect
 import com.adoptu.web.setSession
+import com.universaliun.auth.backend.adapter.`in`.web.clearAuthCookies
+import com.universaliun.auth.backend.adapter.`in`.web.cookie.CookieConfig
+import com.universaliun.auth.backend.adapter.`in`.web.setAuthCookies
 import com.universaliun.auth.backend.domain.exception.EmailAlreadyRegisteredException
 import com.universaliun.auth.backend.domain.exception.InvalidCredentialsException
 import com.universaliun.auth.backend.domain.exception.InvalidMagicLinkTokenException
@@ -34,6 +37,7 @@ import com.universaliun.auth.backend.domain.exception.InvalidPasswordResetTokenE
 import com.universaliun.auth.backend.domain.exception.PasskeyLoginFailedException
 import com.universaliun.auth.backend.domain.exception.PasskeyRegistrationFailedException
 import com.universaliun.auth.backend.domain.exception.WeakPasswordException
+import com.universaliun.auth.backend.domain.model.auth.TokenPair
 import com.universaliun.auth.backend.domain.port.`in`.FinishPasskeyLoginUseCase
 import com.universaliun.auth.backend.domain.port.`in`.FinishPasskeyRegistrationUseCase
 import com.universaliun.auth.backend.domain.port.`in`.FinishPasskeySignupUseCase
@@ -64,6 +68,8 @@ import java.security.MessageDigest
 import java.security.SecureRandom
 import java.time.Duration
 import java.time.Instant
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import java.util.Base64
 import java.util.UUID
 
@@ -129,33 +135,42 @@ fun HttpRules.authRoutes() {
     val cookieSecure = config.propertyOrNull("session.cookieSecure")?.getString()?.toBoolean() ?: true
     val userRepository = UserRepository(clock = kotlin.time.Clock.System)
 
+    // csrfCookieName = null: adoptu doesn't wire AuthKit's installCsrfGuard double-submit check on
+    // its frontend (no-SPA, per-page vanilla JS -- see cerebrum.md), so skip issuing a CSRF cookie
+    // nothing will ever echo back.
+    val cookieConfig = CookieConfig(
+        accessTokenCookieName = ACCESS_COOKIE,
+        refreshTokenCookieName = REFRESH_COOKIE,
+        secure = cookieSecure,
+        csrfCookieName = null,
+    )
+    val accessTokenExpiryMs = Duration.ofMinutes(15).toMillis()
+    val refreshTokenExpiryMs = Duration.ofDays(30).toMillis()
+
     // sessionUser also (re)issues the legacy `user_session` HMAC cookie: server-rendered pages
     // (UIRoutes' getNavParams/isAdmin gates) and the pre-AuthKit routes (Photographer/Shelter/
     // SterilizationLocation) still authenticate via getSession() — after the AuthKit cutover
-    // nothing set that cookie anymore, so every login looked anonymous to them.
-    fun ServerResponse.setAuthCookies(accessToken: String, refreshToken: String, sessionUser: SessionUser?) {
-        headers().addCookie(
-            SetCookie.builder(ACCESS_COOKIE, accessToken).secure(cookieSecure).httpOnly(true)
-                .sameSite(SetCookie.SameSite.STRICT).path("/").maxAge(Duration.ofMinutes(15)).build()
-        )
-        headers().addCookie(
-            SetCookie.builder(REFRESH_COOKIE, refreshToken).secure(cookieSecure).httpOnly(true)
-                .sameSite(SetCookie.SameSite.STRICT).path("/").maxAge(Duration.ofDays(30)).build()
-        )
+    // nothing set that cookie anymore, so every login looked anonymous to them. That cookie is a
+    // genuinely separate mechanism from AuthKit's JWT pair (an HMAC-signed session payload, not a
+    // token -- see Sessions.kt), so it isn't part of CookieConfig and stays set separately here.
+    fun ServerResponse.setAuthCookies(tokens: TokenPair, sessionUser: SessionUser?) {
+        setAuthCookies(tokens, cookieConfig, accessTokenExpiryMs, refreshTokenExpiryMs)
         sessionUser?.let { setSession(it) }
     }
 
-    // Explicit Path=/ + Max-Age=0, NOT headers().clearCookie(name): Helidon's clearCookie emits
-    // the expiry cookie without a Path, so the browser scopes it to the request's directory
-    // (/api/auth) and never deletes cookies stored with Path=/ — logout left every auth cookie
-    // alive in the browser.
+    // AuthKit's clearAuthCookies() only clears the access/refresh (and, if configured, CSRF)
+    // cookies -- the legacy `user_session` cookie is adoptu-specific and still cleared here
+    // explicitly, using the same Path=/ + epoch-Expires approach (NOT Max-Age=0: Helidon's
+    // SetCookie silently omits Max-Age when given Duration.ZERO, which would leave `user_session`
+    // as a value-overwritten session cookie instead of actually deleting it -- see AuthKit's
+    // CookieAuthRoutes.kt clearAuthCookies() doc comment for the same gotcha on the token cookies).
     fun ServerResponse.clearAuthCookies() {
-        for (name in listOf(ACCESS_COOKIE, REFRESH_COOKIE, "user_session")) {
-            headers().addCookie(
-                SetCookie.builder(name, "").path("/").maxAge(Duration.ZERO)
-                    .secure(cookieSecure).httpOnly(true).sameSite(SetCookie.SameSite.STRICT).build()
-            )
-        }
+        clearAuthCookies(cookieConfig)
+        headers().addCookie(
+            SetCookie.builder("user_session", "").path("/")
+                .expires(ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC))
+                .secure(cookieSecure).httpOnly(true).sameSite(SetCookie.SameSite.STRICT).build()
+        )
     }
 
     fun ServerRequest.cookieValue(name: String): String? {
@@ -469,8 +484,7 @@ fun HttpRules.authRoutes() {
             }
             logger.info("Passkey auth success: userId=$userId")
             res.setAuthCookies(
-                result.tokens.accessToken,
-                result.tokens.refreshToken,
+                result.tokens,
                 user?.let { SessionUser(it.id, it.username, it.displayName) },
             )
             res.send(SuccessResponse(success = true))
@@ -608,7 +622,7 @@ fun HttpRules.authRoutes() {
             logger.info("Magic link login success: userId=$tokenUserId")
             val sessionUser = runBlocking { userService.getById(tokenUserId) }
                 ?.let { SessionUser(it.id, it.username, it.displayName) }
-            res.setAuthCookies(result.tokens.accessToken, result.tokens.refreshToken, sessionUser)
+            res.setAuthCookies(result.tokens, sessionUser)
             // Same-origin bounce instead of a 302: the click from the mail client is a cross-site
             // navigation, and SameSite=Strict cookies are withheld for the whole redirect chain it
             // initiates — a direct redirect would render /profile logged-out. The meta refresh
@@ -655,7 +669,7 @@ fun HttpRules.authRoutes() {
             logger.info("Password login success: userId=$userId username=${body.email}")
             val sessionUser = userId.toIntOrNull()?.let { id -> runBlocking { userService.getById(id) } }
                 ?.let { SessionUser(it.id, it.username, it.displayName) }
-            res.setAuthCookies(result.tokens.accessToken, result.tokens.refreshToken, sessionUser)
+            res.setAuthCookies(result.tokens, sessionUser)
             res.send(SuccessResponse(success = true))
         } catch (e: InvalidCredentialsException) {
             runBlocking { passwordService.recordLoginAttempt(body.email, successful = false) }
