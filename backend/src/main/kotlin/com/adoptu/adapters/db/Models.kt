@@ -544,6 +544,27 @@ object Volunteers : Table("volunteers") {
     override val primaryKey = PrimaryKey(id)
 }
 
+// Curated safe subset of Pets' editable fields - deliberately NOT every field UpdatePetRequest
+// allows (e.g. name, adoptionFee, status stay rescuer-only). Each column is nullable and means
+// "no change suggested to this field", not "clear this field" - PetEditSuggestionService only
+// applies the non-null ones when approving. Restricted to ACTIVE volunteers only (see
+// Volunteers.status), checked at the service layer, not enforced here.
+object PetEditSuggestions : Table("pet_edit_suggestions") {
+    val id = integer("id").autoIncrement()
+    val petId = integer("pet_id").references(Pets.id)
+    val volunteerId = integer("volunteer_id").references(Users.id)
+    val description = text("description").nullable()
+    val temperament = varchar("temperament", 100).nullable()
+    val energyLevel = varchar("energy_level", 20).nullable()
+    val specialNeeds = text("special_needs").nullable()
+    val vaccinations = text("vaccinations").nullable()
+    val status = varchar("status", 20) // PENDING, APPROVED, REJECTED
+    val createdAt = long("created_at")
+    val reviewedAt = long("reviewed_at").nullable()
+
+    override val primaryKey = PrimaryKey(id)
+}
+
 object AnimalShelters : Table("animal_shelters") {
     val id = integer("id").autoIncrement()
     val userId = integer("user_id").references(Users.id).nullable()

@@ -144,11 +144,15 @@ object PetDetailPageModule {
         if (isOwner) {
             sb.append("<a href=\"/my-pets?edit=${pet.id}\" class=\"btn\">${I18n.t("editPet")}</a>")
         }
+        if (!isOwner && authenticated) {
+            sb.append("<div id=\"suggest-edit-section\"></div>")
+        }
         sb.append("</div>")
 
         container.innerHTML = sb.toString()
 
         loadMedicalSchedule()
+        if (!isOwner && authenticated) loadSuggestEditSection(pet)
 
         document.getElementById("share-pet-btn")?.addEventListener("click", { shareCurrentPet() })
 
@@ -190,6 +194,68 @@ object PetDetailPageModule {
                 }
             }
         })
+    }
+
+    // Only rendered for an active volunteer of this pet's rescuer - checked by fetching the
+    // volunteer's own applications and filtering client-side (there's no dedicated
+    // "am I an active volunteer for rescuer X" endpoint; the authorization that actually matters
+    // is re-checked server-side in PetEditSuggestionService.createSuggestion).
+    private fun loadSuggestEditSection(pet: dynamic) {
+        val section = document.getElementById("suggest-edit-section") ?: return
+        ApiClientModule.getMyVolunteerApplications().then<Unit> { appsRaw: dynamic ->
+            val apps = (appsRaw as? Array<dynamic>) ?: arrayOf()
+            val isActiveVolunteer = apps.any { it.rescuerId.toString() == pet.rescuerId.toString() && it.status == "ACTIVE" }
+            if (!isActiveVolunteer) return@then
+
+            section.innerHTML = "<h3>${I18n.t("suggestAnEditTitle")}</h3>" +
+                "<p>${I18n.t("suggestAnEditExplanation")}</p>" +
+                "<form id=\"suggest-edit-form\">" +
+                "<label for=\"se-description\">${I18n.t("description")}</label>" +
+                "<textarea id=\"se-description\">${CommonModule.escapeHtml(pet.description?.toString() ?: "")}</textarea>" +
+                "<label for=\"se-temperament\">${I18n.t("temperament")}</label>" +
+                "<input type=\"text\" id=\"se-temperament\" value=\"${CommonModule.escapeHtml(pet.temperament?.toString() ?: "")}\">" +
+                "<label for=\"se-energyLevel\">${I18n.t("energyLevel")}</label>" +
+                "<select id=\"se-energyLevel\">" +
+                "<option value=\"\">${I18n.t("preferNotToSay")}</option>" +
+                "<option value=\"LOW\"${if (pet.energyLevel == "LOW") " selected" else ""}>${I18n.t("low")}</option>" +
+                "<option value=\"MEDIUM\"${if (pet.energyLevel == "MEDIUM") " selected" else ""}>${I18n.t("medium")}</option>" +
+                "<option value=\"HIGH\"${if (pet.energyLevel == "HIGH") " selected" else ""}>${I18n.t("high")}</option>" +
+                "</select>" +
+                "<label for=\"se-specialNeeds\">${I18n.t("specialNeeds")}</label>" +
+                "<textarea id=\"se-specialNeeds\">${CommonModule.escapeHtml(pet.specialNeeds?.toString() ?: "")}</textarea>" +
+                "<label for=\"se-vaccinations\">${I18n.t("vaccinations")}</label>" +
+                "<textarea id=\"se-vaccinations\">${CommonModule.escapeHtml(pet.vaccinations?.toString() ?: "")}</textarea>" +
+                "<button type=\"submit\" class=\"btn btn-secondary\">${I18n.t("suggestEditBtn")}</button></form>"
+
+            document.getElementById("suggest-edit-form")?.addEventListener("submit", { e: Event ->
+                e.preventDefault()
+                submitEditSuggestion(pet)
+            })
+        }.catch { }
+    }
+
+    private fun submitEditSuggestion(pet: dynamic) {
+        fun changedOrNull(fieldId: String, original: String?): String? {
+            val value = (document.getElementById(fieldId) as? HTMLElement)?.asDynamic()?.value?.toString() ?: ""
+            val originalValue = original ?: ""
+            return if (value != originalValue) value else null
+        }
+        val body = json(
+            "description" to changedOrNull("se-description", pet.description?.toString()),
+            "temperament" to changedOrNull("se-temperament", pet.temperament?.toString()),
+            "energyLevel" to changedOrNull("se-energyLevel", pet.energyLevel?.toString()),
+            "specialNeeds" to changedOrNull("se-specialNeeds", pet.specialNeeds?.toString()),
+            "vaccinations" to changedOrNull("se-vaccinations", pet.vaccinations?.toString())
+        )
+        ApiClientModule.createPetEditSuggestion(petId, body).then<Unit> {
+            (document.getElementById("suggest-edit-section") as? HTMLElement)?.innerHTML =
+                "<p class=\"message success\">${I18n.t("editSuggestionSent")}</p>"
+        }.catch { err: dynamic ->
+            (document.getElementById("message") as? HTMLElement)?.let {
+                it.className = "message error"
+                it.textContent = err?.message?.toString() ?: "Error"
+            }
+        }
     }
 
     // Web Share API (mobile browsers - one native tap opens the OS share sheet, WhatsApp included)

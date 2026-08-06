@@ -37,6 +37,8 @@ object MyPetsPageModule {
         window.asDynamic().deleteMedicalEvent = { id: dynamic -> deleteMedicalEvent(id.toString().toInt()) }
         window.asDynamic().approveVolunteer = { id: dynamic -> updateVolunteerStatus(id.toString().toInt(), "ACTIVE") }
         window.asDynamic().rejectVolunteer = { id: dynamic -> updateVolunteerStatus(id.toString().toInt(), "REJECTED") }
+        window.asDynamic().approveEditSuggestion = { id: dynamic -> updateEditSuggestionStatus(id.toString().toInt(), "APPROVED") }
+        window.asDynamic().rejectEditSuggestion = { id: dynamic -> updateEditSuggestionStatus(id.toString().toInt(), "REJECTED") }
 
         document.getElementById("add-btn")?.addEventListener("click", { openAddForm() })
         document.getElementById("cancel-btn")?.addEventListener("click", { closeForm() })
@@ -217,6 +219,41 @@ object MyPetsPageModule {
         loadAdoptionRequests(pets)
         loadPetAnalytics(pets)
         loadVolunteerApplications()
+        loadPetEditSuggestions()
+    }
+
+    private fun loadPetEditSuggestions() {
+        val container = document.getElementById("pet-edit-suggestions").unsafeCast<HTMLElement?>()
+        ApiClientModule.getPetEditSuggestionsForRescuer().then<Unit> { suggestionsRaw: dynamic ->
+            val suggestions = (suggestionsRaw as? Array<dynamic>) ?: arrayOf()
+            if (suggestions.isEmpty()) {
+                container?.innerHTML = "<p>${I18n.t("noPetEditSuggestions")}</p>"
+                return@then
+            }
+            container?.innerHTML = suggestions.joinToString("") { renderEditSuggestionCard(it) }
+        }.catch { }
+    }
+
+    private fun renderEditSuggestionCard(s: dynamic): String {
+        val date = js("new Date(s.createdAt)").toLocaleDateString()
+        val petName = CommonModule.escapeHtml(s.petName?.toString() ?: "")
+        val volunteerName = CommonModule.escapeHtml(s.volunteerName?.toString() ?: "")
+        val fields = mutableListOf<String>()
+        s.description?.toString()?.let { fields.add("<strong>${I18n.t("description")}:</strong> ${CommonModule.escapeHtml(it)}") }
+        s.temperament?.toString()?.let { fields.add("<strong>${I18n.t("temperament")}:</strong> ${CommonModule.escapeHtml(it)}") }
+        s.energyLevel?.toString()?.let { fields.add("<strong>${I18n.t("energyLevel")}:</strong> ${I18n.t(it.lowercase())}") }
+        s.specialNeeds?.toString()?.let { fields.add("<strong>${I18n.t("specialNeeds")}:</strong> ${CommonModule.escapeHtml(it)}") }
+        s.vaccinations?.toString()?.let { fields.add("<strong>${I18n.t("vaccinations")}:</strong> ${CommonModule.escapeHtml(it)}") }
+        return "<div class=\"adoption-request-card\"><div class=\"ar-pet\">$petName - ${I18n.t("suggestedByLabel")} $volunteerName</div>" +
+            fields.joinToString("") { "<p>$it</p>" } +
+            "<div class=\"ar-date\">$date</div>" +
+            "<div class=\"ar-actions\"><button class=\"btn btn-secondary\" data-action=\"approveEditSuggestion\" data-arg=\"${s.id}\">${I18n.t("approve")}</button>" +
+            "<button class=\"btn btn-secondary\" data-action=\"rejectEditSuggestion\" data-arg=\"${s.id}\">${I18n.t("reject")}</button></div></div>"
+    }
+
+    private fun updateEditSuggestionStatus(id: Int, status: String) {
+        ApiClientModule.updatePetEditSuggestionStatus(id, status).then<Unit> { load() }
+            .catch { err: dynamic -> window.alert(err?.message?.toString() ?: "Error") }
     }
 
     private fun loadVolunteerApplications() {

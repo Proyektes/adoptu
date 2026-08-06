@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-06T02:31:46.646Z
-> Files: 620 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-06T03:33:46.671Z
+> Files: 626 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/37d425e0-d2ad-499f-bde7-97b1baf5c00b/scratchpad/
 
@@ -448,7 +448,7 @@
 
 ## backend/src/main/kotlin/com/adoptu/
 
-- `Application.kt` — main, configureRouting (~2122 tok)
+- `Application.kt` — main, configureRouting (~2145 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/aws/
 
@@ -460,14 +460,15 @@
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/
 
-- `DatabaseFactory.kt` — init, createDefaultAdmin (~1585 tok)
+- `DatabaseFactory.kt` — init, createDefaultAdmin (~1593 tok)
 - `DbDispatcher.kt` — Shared, bounded dispatcher for repository DB calls. (~705 tok)
-- `Models.kt` — Declares val (~8178 tok)
+- `Models.kt` — Declares val (~8489 tok)
 - `PoolSizing.kt` — Single source of truth for how many DB-bound worker threads/connections this (~365 tok)
 
 ## backend/src/main/kotlin/com/adoptu/adapters/db/repositories/
 
 - `LostFoundRepository.kt` — LostFoundRepositoryImpl: generateToken, rowToReport, createReport, getReport (~1620 tok)
+- `PetEditSuggestionRepository.kt` — Data class: RawSuggestion (~1744 tok)
 - `PetFavoriteRepository.kt` — PetFavoriteRepositoryImpl: add, remove, getFavoritePetIds, isFavorited (~557 tok)
 - `PetFosterPlacementRepository.kt` — Data class: RawPlacement (~1551 tok)
 - `PetMedicalEventRepository.kt` — PetMedicalEventRepositoryImpl: rowToDto, create, getForPet, getById (~1357 tok)
@@ -511,7 +512,7 @@
 
 ## backend/src/main/kotlin/com/adoptu/di/
 
-- `AppModule.kt` — appModule, getOrigins, createImageStorageAdapter (~2371 tok)
+- `AppModule.kt` — appModule, getOrigins, createImageStorageAdapter (~2416 tok)
 
 ## backend/src/main/kotlin/com/adoptu/dto/input/
 
@@ -520,6 +521,7 @@
 - `LostFoundDto.kt` — Data class: LostFoundKind (~529 tok)
 - `PetAnalyticsDto.kt` — Data class: PetAnalyticsDto (~96 tok)
 - `PetDto.kt` — Data class: Gender (~1170 tok)
+- `PetEditSuggestionDto.kt` — Data class: PetEditSuggestionStatus (~259 tok)
 - `PetFosterPlacementDto.kt` — Data class: PetFosterPlacementDto (~113 tok)
 - `PetMedicalEventDto.kt` — Data class: MedicalEventCategory (~182 tok)
 - `RescuerDirectoryDto.kt` — Data class: RescuerDirectoryDto (~153 tok)
@@ -544,6 +546,7 @@
 - `ImageStoragePort.kt` — uploadImage, deleteImage, getImageUrl (~83 tok)
 - `LostFoundRepositoryPort.kt` — Every currently-OPEN report of [kind] - matching/browsing filter this list in Kotlin (small volume, (~280 tok)
 - `NotificationPort.kt` — sendEmail, sendPhotographerRequest, sendAdoptionRequestNotification, sendTemporalHomeRequest, sendUr (~280 tok)
+- `PetEditSuggestionRepositoryPort.kt` — create, getById, getPendingForRescuer, getForVolunteer, updateStatus (~223 tok)
 - `PetFavoriteRepositoryPort.kt` — No-op (not an error) if already favorited - idempotent, matches the unique(userId, petId) constraint (~107 tok)
 - `PetFosterPlacementRepositoryPort.kt` — create, getActiveForPet, getHistoryForPet, getActiveForTemporalHome, countActiveForTemporalHome (~210 tok)
 - `PetMedicalEventRepositoryPort.kt` — create, getForPet, getById, delete, getEventsWithPendingReminders (~228 tok)
@@ -565,6 +568,7 @@
 - `AuthRoutes.kt` — Data class: EncryptedLoginRequest (~13578 tok)
 - `CountryRoutes.kt` — HttpRules, regionFromLocale (~320 tok)
 - `LostFoundRoutes.kt` — clientIp, HttpRules (~1247 tok)
+- `PetEditSuggestionRoutes.kt` — HttpRules (~917 tok)
 - `PetFosterPlacementRoutes.kt` — HttpRules (~943 tok)
 - `PetMedicalEventRoutes.kt` — HttpRules (~820 tok)
 - `PetsRoutes.kt` — HttpRules (~6558 tok)
@@ -590,6 +594,7 @@
 - `MedicalReminderScheduler.kt` — start (~373 tok)
 - `MedicalReminderService.kt` — MedicalReminderService: sendDueReminders, processEvent, sendReminder (~1027 tok)
 - `PasswordService.kt` — PasswordService: isLoginRateLimited, recordLoginAttempt, hasPassword, invalidatePassword + 15 more (~3609 tok)
+- `PetEditSuggestionService.kt` — PetEditSuggestionService: createSuggestion, updateStatus, getPendingForRescuer, getMySuggestions (~1027 tok)
 - `PetFavoriteService.kt` — PetFavoriteService: add, remove, getFavoritePetIds, getFavoritePets (~262 tok)
 - `PetFosterPlacementService.kt` — PetFosterPlacementService: createPlacement, endPlacement, getHistoryForPet, getMyActivePlacements (~925 tok)
 - `PetMedicalEventService.kt` — PetMedicalEventService: getForPet, create, delete (~408 tok)
@@ -656,7 +661,7 @@
 
 ## backend/src/test/kotlin/com/adoptu/adapters/db/
 
-- `DatabaseFactoryTest.kt` — Declares DatabaseFactoryTest (~3790 tok)
+- `DatabaseFactoryTest.kt` — Declares DatabaseFactoryTest (~3839 tok)
 
 ## backend/src/test/kotlin/com/adoptu/adapters/db/repositories/
 
@@ -685,7 +690,7 @@
 ## backend/src/test/kotlin/com/adoptu/mocks/
 
 - `MockNotificationAdapter.kt` — Data class: MockNotificationAdapter (~778 tok)
-- `TestDatabase.kt` — initH2, clearAllData (~1591 tok)
+- `TestDatabase.kt` — initH2, clearAllData (~1626 tok)
 
 ## backend/src/test/kotlin/com/adoptu/plugins/
 
@@ -715,6 +720,7 @@
 - `MagicLinkServiceTest.kt` — MagicLinkServiceTest: setup (~4136 tok)
 - `MedicalReminderServiceTest.kt` — MedicalReminderServiceTest: setup, createEventDueIn (~1514 tok)
 - `PasswordServiceTest.kt` — PasswordServiceTest: setup (~3959 tok)
+- `PetEditSuggestionServiceTest.kt` — PetEditSuggestionServiceTest: setup, user, role, createTestPet (~2349 tok)
 - `PetFosterPlacementServiceTest.kt` — PetFosterPlacementServiceTest: setup, user, role, createTestPet (~2486 tok)
 - `PetMedicalEventServiceTest.kt` — PetMedicalEventServiceTest: setup, createTestPet, sampleRequest (~1577 tok)
 - `PetServiceTest.kt` — PetServiceTest: setup (~10242 tok)
@@ -762,9 +768,9 @@
 
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/
 
-- `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~3824 tok)
+- `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~3999 tok)
 - `Common.kt` — rule: NodeList, showDonationPrompt, onCountryChange, initI18n (~3910 tok)
-- `I18n.kt` (~72919 tok)
+- `I18n.kt` (~73544 tok)
 - `ImageCompression.kt` — compress, attempt (~724 tok)
 - `Main.kt` — main (~1838 tok)
 - `WebAuthn.kt` — encodeURIComponent, register, authenticate, parseAssertionOptions, getRegistrationOptions (~2384 tok)
@@ -775,8 +781,8 @@
 - `AuthFlowPages.kt` — init, showSuccess, showError, init, submit (~2649 tok)
 - `IndexPage.kt` — init, refreshFavoriteButtons, toggleFavorite, saveCurrentSearch, loadPets (~3234 tok)
 - `LostFoundPage.kt` — init, captureLocation, submit, init, search (~2842 tok)
-- `MyPetsPage.kt` — init, togglePromotedReasonRow, loadFosterPlacementStatus, endCurrentPlacement, loadMedicalEvents (~10451 tok)
-- `PetDetailPage.kt` — init, render, loadMedicalSchedule (~4225 tok)
+- `MyPetsPage.kt` — init, togglePromotedReasonRow, loadFosterPlacementStatus, endCurrentPlacement, loadMedicalEvents (~11176 tok)
+- `PetDetailPage.kt` — init, render (~5383 tok)
 - `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~11758 tok)
 - `RescuersPage.kt` — init, render, init, render, applyToVolunteer (~1578 tok)
 - `TemporalHomePage.kt` — init, search, displayResults, init, render (~3534 tok)
@@ -795,7 +801,7 @@
 - `IndexPage.kt` — HTML (~951 tok)
 - `LocationSearchFilters.kt` — DIV (~642 tok)
 - `LostFoundPage.kt` — HTML, HTML, HTML, HTML (~2376 tok)
-- `MyPetsPage.kt` — HTML (~3712 tok)
+- `MyPetsPage.kt` — HTML (~3779 tok)
 - `NavParams.kt` — Data class: NavParams (~58 tok)
 - `PetsPage.kt` — HTML (~900 tok)
 - `ProfilePage.kt` — HTML (~5155 tok)

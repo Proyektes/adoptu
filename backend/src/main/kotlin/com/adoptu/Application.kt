@@ -16,6 +16,7 @@ import com.adoptu.routes.authRoutes
 import com.adoptu.routes.countryRoutes
 import com.adoptu.routes.lostFoundRoutes
 import com.adoptu.routes.savedSearchRoutes
+import com.adoptu.routes.petEditSuggestionRoutes
 import com.adoptu.routes.petFosterPlacementRoutes
 import com.adoptu.routes.volunteerRoutes
 import com.adoptu.routes.petMedicalEventRoutes
@@ -158,6 +159,7 @@ internal fun configureRouting(routing: HttpRouting.Builder) {
     routing.petsRoutes()
     routing.petMedicalEventRoutes()
     routing.petFosterPlacementRoutes()
+    routing.petEditSuggestionRoutes()
     routing.adminPetsRoutes()
     routing.usersRoutes()
     routing.adminUsersRoutes()
