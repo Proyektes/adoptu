@@ -19,9 +19,7 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalTime::class)
 class WebAuthnServiceTest {
 
     private lateinit var userService: UserService
@@ -36,64 +34,36 @@ class WebAuthnServiceTest {
         userService = mockk(relaxed = true)
         passwordService = mockk(relaxed = true)
         webAuthnService = WebAuthnService(
-            clock = com.adoptu.mocks.TestClock(kotlin.time.Instant.parse("2024-01-15T10:00:00Z")),
-            emailVerificationService = mockk(relaxed = true),
             userService = userService,
             passwordService = passwordService,
-            magicLinkService = mockk(relaxed = true),
-            adminEmail = "admin@adopt-u.com",
-            rpId = "localhost",
-            rpName = "Adopt-U Pet Adoption",
-            origins = listOf("http://localhost:80")
         )
     }
 
     @Nested
-    inner class GenerateRegistrationOptions {
+    inner class VerifyTokenAndGetLanguage {
         @Test
-        fun `generates valid registration options with correct structure`() {
-            val result = webAuthnService.generateRegistrationOptions("test@example.com", "Test User")
+        fun `delegates to userService and returns its result verbatim`() = runBlocking {
+            coEvery { userService.verifyTokenAndGetLanguage("legacy-token") } returns (true to "es")
 
-            assertEquals("localhost", result.publicKey.rp.id)
-            assertEquals("Adopt-U Pet Adoption", result.publicKey.rp.name)
-            assertEquals("test@example.com", result.publicKey.user.name)
-            assertEquals("Test User", result.publicKey.user.displayName)
-            assertTrue(result.publicKey.challenge.isNotEmpty())
-            assertEquals(2, result.publicKey.pubKeyCredParams.size)
+            val result = webAuthnService.verifyTokenAndGetLanguage("legacy-token")
+
+            assertEquals(true to "es", result)
+            coVerify { userService.verifyTokenAndGetLanguage("legacy-token") }
         }
 
         @Test
-        fun `includes ES256 and RS256 algorithms`() {
-            val result = webAuthnService.generateRegistrationOptions("test@example.com", "Test User")
+        fun `returns false with default language for an invalid token`() = runBlocking {
+            coEvery { userService.verifyTokenAndGetLanguage("bad-token") } returns (false to "en")
 
-            val es256 = result.publicKey.pubKeyCredParams.find { it.alg == -7 }
-            val rs256 = result.publicKey.pubKeyCredParams.find { it.alg == -257 }
+            val result = webAuthnService.verifyTokenAndGetLanguage("bad-token")
 
-            assertTrue(es256?.type == "public-key")
-            assertTrue(rs256?.type == "public-key")
-        }
-    }
-
-    @Nested
-    inner class GenerateAssertionOptions {
-        @Test
-        fun `generates valid assertion options`() {
-            val result = webAuthnService.generateAssertionOptions()
-
-            assertEquals("localhost", result.rpId)
-            assertEquals("required", result.userVerification)
-            assertTrue(result.challenge.isNotEmpty())
+            assertFalse(result.first)
+            assertEquals("en", result.second)
         }
     }
 
     @Nested
     inner class ForcePasswordReset {
-        @BeforeEach
-        fun setupDb() {
-            TestDatabase.initH2()
-            TestDatabase.clearAllData()
-        }
-
         @Test
         fun `deletes passkeys, invalidates the password, and re-sends the reset email`() = runBlocking {
             val user = UserDto(id = 42, username = "target@example.com", email = "target@example.com", displayName = "Target User", language = "es")

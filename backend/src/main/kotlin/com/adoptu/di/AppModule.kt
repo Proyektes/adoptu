@@ -30,7 +30,7 @@ import kotlin.time.ExperimentalTime
 fun appModule(config: AppConfig) = module {
     single { config }
     single<Clock> { Clock.System }
-    single { WebAuthnService(get(), get(), get(), get(), get(), config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com", config.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost", config.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption", getOrigins(config)) }
+    single { WebAuthnService(get(), get()) }
     // AuthKit bridge adapters -- registered as their own concrete type (so AuthRoutes.kt can
     // inject them directly, e.g. for the has-passkey check and post-registration role
     // assignment) AND bound to the AuthKit port they implement (so authKoinModule(...) in
@@ -104,19 +104,6 @@ fun appModule(config: AppConfig) = module {
     single { SterilizationLocationsValidationService() }
     single { TemporalHomesValidationService() }
     single { AuthValidationService() }
-}
-
-private fun getOrigins(config: AppConfig): List<String> {
-    // Comma-separated string, not a HOCON list - see application.conf's
-    // webauthn.origins comment for why.
-    val originsList = config.propertyOrNull("webauthn.origins")?.getString()
-        ?.split(",")
-        ?.map { it.trim() }
-        ?.filter { it.isNotEmpty() }
-    if (!originsList.isNullOrEmpty()) {
-        return originsList
-    }
-    return listOf("http://localhost:80")
 }
 
 internal fun createImageStorageAdapter(config: AppConfig): ImageStoragePort {

@@ -127,13 +127,7 @@ class UsersRoutesE2ETest {
             single { config }
             single<Clock> { Clock.System }
             single {
-                WebAuthnService(
-                    get(), get(), get(), get(), get(),
-                    config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com",
-                    config.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost",
-                    config.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption",
-                    listOf(config.propertyOrNull("webauthn.origin")?.getString() ?: "http://localhost:80")
-                )
+                WebAuthnService(get(), get())
             }
             single<ImageStoragePort> { MockImageStorage() }
             single { mockNotificationAdapter }

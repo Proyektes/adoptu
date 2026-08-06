@@ -130,7 +130,7 @@ class ApplicationIntegrationTest {
         val testModules = module {
             single { config }
             single<Clock> { testClock }
-            single { WebAuthnService(get(), get(), get(), get(), get(), config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com", config.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost", config.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption", listOf(config.propertyOrNull("webauthn.origin")?.getString() ?: "http://localhost:80")) }
+            single { WebAuthnService(get(), get()) }
             single<UserRepositoryPort> { com.adoptu.adapters.db.repositories.UserRepository(get()) }
             single<PetRepositoryPort> { com.adoptu.adapters.db.repositories.PetRepositoryImpl(get()) }
             single<com.adoptu.ports.SavedSearchRepositoryPort> { com.adoptu.adapters.db.repositories.SavedSearchRepositoryImpl(get()) }

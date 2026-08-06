@@ -63,13 +63,7 @@ class PasswordRegistrationRoutesE2ETest {
         single { PasswordService(get(), mockNotificationAdapter, get(), "http://localhost:80", get()) }
         single { MagicLinkService(get(), mockNotificationAdapter, get(), "http://localhost:80", get(), get()) }
         single {
-            WebAuthnService(
-                get(), get(), get(), get(), get(),
-                testConfig.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com",
-                testConfig.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost",
-                testConfig.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption",
-                listOf(testConfig.propertyOrNull("webauthn.origin")?.getString() ?: "http://localhost:80")
-            )
+            WebAuthnService(get(), get())
         }
         single { MockImageStorage() }
         single { mockNotificationAdapter }

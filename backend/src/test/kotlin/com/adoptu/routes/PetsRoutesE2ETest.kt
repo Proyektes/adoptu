@@ -110,13 +110,7 @@ class PetsRoutesE2ETest {
                 single { com.adoptu.config.AppConfig.fromMap(mapOf("admin.email" to "admin@adopt-u.com")) }
                 single<Clock> { Clock.System }
                 single {
-                    WebAuthnService(
-                        get(), get(), get(), get(), get(),
-                        "admin@adopt-u.com",
-                        "localhost",
-                        "Adopt-U Pet Adoption",
-                        listOf("http://localhost:80")
-                    )
+                    WebAuthnService(get(), get())
                 }
                 single<ImageStoragePort> { MockImageStorage() }
                 single { MockNotificationAdapter() }

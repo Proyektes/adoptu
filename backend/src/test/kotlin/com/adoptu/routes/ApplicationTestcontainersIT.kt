@@ -131,7 +131,7 @@ class ApplicationTestcontainersIT {
             single<com.adoptu.services.MagicLinkService> { com.adoptu.services.MagicLinkService(get(), get(), get(), "http://localhost:80", get(), get()) }
             single<EmailSenderPort> { emailSenderPortFromConfig(config) }
             single<NotificationPort> { NotificationEmailAdapter(get()) }
-            single { WebAuthnService(get(), get(), get(), get(), get(), config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com", config.propertyOrNull("webauthn.rpId")?.getString() ?: "localhost", config.propertyOrNull("webauthn.rpName")?.getString() ?: "Adopt-U Pet Adoption", listOf(config.propertyOrNull("webauthn.origin")?.getString() ?: "http://localhost:80")) }
+            single { WebAuthnService(get(), get()) }
             single<PetRepositoryPort> { PetRepositoryImpl(get()) }
             single<com.adoptu.ports.SavedSearchRepositoryPort> { com.adoptu.adapters.db.repositories.SavedSearchRepositoryImpl(get()) }
             single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
