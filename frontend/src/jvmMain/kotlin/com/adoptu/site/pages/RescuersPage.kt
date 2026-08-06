@@ -29,6 +29,7 @@ fun HTML.rescuerDetailPage(navParams: NavParams = NavParams()) {
         }
         main {
             div { id = "rescuer-detail"; classes = setOf("rescuer-detail"); +"" }
+            div { id = "message"; +"" }
         }
         footer()
         commonScripts()

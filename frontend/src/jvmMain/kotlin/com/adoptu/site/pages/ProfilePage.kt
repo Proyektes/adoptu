@@ -310,6 +310,12 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
             }
 
             div(classes = "card-bg profile-section") {
+                h2 { attributes["data-i18n"] = "myVolunteering"; +"My Volunteering" }
+                div { id = "my-volunteer-applications-empty"; +"" }
+                div { id = "my-volunteer-applications-list"; +"" }
+            }
+
+            div(classes = "card-bg profile-section") {
                 h2 { attributes["data-i18n"] = "emailChange"; +"Change Email" }
                 p { attributes["data-i18n"] = "emailChangeDesc"; +"Update your email address. A verification link will be sent to the new email." }
                 div(classes = "form-row") {

@@ -530,6 +530,20 @@ object PetFavorites : Table("pet_favorites") {
     init { uniqueIndex(userId, petId) }
 }
 
+// A user can hold independent applications to multiple rescuers (approved by one, pending or
+// rejected by another) - status is scoped to the (rescuerId, volunteerId) pair, not a global
+// per-user flag. No uniqueIndex on that pair: a REJECTED application can be re-applied for later,
+// which would need a new row anyway since nothing here is mutated back to PENDING.
+object Volunteers : Table("volunteers") {
+    val id = integer("id").autoIncrement()
+    val rescuerId = integer("rescuer_id").references(Users.id)
+    val volunteerId = integer("volunteer_id").references(Users.id)
+    val status = varchar("status", 20) // PENDING, ACTIVE, REJECTED
+    val createdAt = long("created_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
 object AnimalShelters : Table("animal_shelters") {
     val id = integer("id").autoIncrement()
     val userId = integer("user_id").references(Users.id).nullable()

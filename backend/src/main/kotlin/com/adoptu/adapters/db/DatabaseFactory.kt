@@ -61,7 +61,8 @@ object DatabaseFactory {
         AuthKitRefreshTokens,
         LostFoundReports,
         SavedSearches,
-        PetFavorites)
+        PetFavorites,
+        Volunteers)
     fun init(config: AppConfig) {
         val env = config.propertyOrNull("env")?.getString() ?: "prod"
         val prefix = "db.$env"

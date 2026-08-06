@@ -35,6 +35,8 @@ object MyPetsPageModule {
         window.asDynamic().removeExistingImage = { index: dynamic -> removeExistingImage(index.toString().toInt()) }
         window.asDynamic().removePreview = { index: dynamic -> removePreview(index.toString().toInt()) }
         window.asDynamic().deleteMedicalEvent = { id: dynamic -> deleteMedicalEvent(id.toString().toInt()) }
+        window.asDynamic().approveVolunteer = { id: dynamic -> updateVolunteerStatus(id.toString().toInt(), "ACTIVE") }
+        window.asDynamic().rejectVolunteer = { id: dynamic -> updateVolunteerStatus(id.toString().toInt(), "REJECTED") }
 
         document.getElementById("add-btn")?.addEventListener("click", { openAddForm() })
         document.getElementById("cancel-btn")?.addEventListener("click", { closeForm() })
@@ -214,6 +216,42 @@ object MyPetsPageModule {
 
         loadAdoptionRequests(pets)
         loadPetAnalytics(pets)
+        loadVolunteerApplications()
+    }
+
+    private fun loadVolunteerApplications() {
+        val container = document.getElementById("volunteer-applications").unsafeCast<HTMLElement?>()
+        ApiClientModule.getVolunteerApplicationsForRescuer().then<Unit> { applicationsRaw: dynamic ->
+            val applications = (applicationsRaw as? Array<dynamic>) ?: arrayOf()
+            if (applications.isEmpty()) {
+                container?.innerHTML = "<p>${I18n.t("noVolunteerApplications")}</p>"
+                return@then
+            }
+            container?.innerHTML = applications.joinToString("") { renderVolunteerApplicationCard(it) }
+        }.catch { }
+    }
+
+    private fun renderVolunteerApplicationCard(a: dynamic): String {
+        val date = js("new Date(a.createdAt)").toLocaleDateString()
+        val status = a.status?.toString() ?: "PENDING"
+        val statusLabel = when (status) {
+            "ACTIVE" -> I18n.t("volunteerStatusActive")
+            "REJECTED" -> I18n.t("volunteerStatusRejected")
+            else -> I18n.t("volunteerStatusPending")
+        }
+        val volunteerName = CommonModule.escapeHtml(a.volunteerName?.toString() ?: "")
+        val actions = if (status == "PENDING") {
+            "<div class=\"ar-actions\"><button class=\"btn btn-secondary\" data-action=\"approveVolunteer\" data-arg=\"${a.id}\">${I18n.t("approve")}</button>" +
+                "<button class=\"btn btn-secondary\" data-action=\"rejectVolunteer\" data-arg=\"${a.id}\">${I18n.t("reject")}</button></div>"
+        } else ""
+        return "<div class=\"adoption-request-card\"><div class=\"ar-pet\">$volunteerName</div>" +
+            "<div class=\"ar-status status-${status.lowercase()}\">$statusLabel</div>" +
+            "<div class=\"ar-date\">$date</div>$actions</div>"
+    }
+
+    private fun updateVolunteerStatus(id: Int, status: String) {
+        ApiClientModule.updateVolunteerStatus(id, status).then<Unit> { loadVolunteerApplications() }
+            .catch { err: dynamic -> window.alert(err?.message?.toString() ?: "Error") }
     }
 
     private fun loadPetAnalytics(pets: Array<dynamic>) {

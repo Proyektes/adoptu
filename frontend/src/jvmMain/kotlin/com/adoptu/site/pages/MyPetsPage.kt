@@ -16,6 +16,10 @@ fun HTML.myPetsPage(navParams: NavParams = NavParams()) {
                 h2 { attributes["data-i18n"] = "adoptionRequests"; +"Adoption Requests" }
                 div { id = "adoption-requests"; +"" }
             }
+            div { id = "volunteer-applications-section"; classes = setOf("mb-2rem")
+                h2 { attributes["data-i18n"] = "volunteerApplications"; +"Volunteer Applications" }
+                div { id = "volunteer-applications"; +"" }
+            }
             div { id = "form-container"; classes = setOf("hidden")
                 h2 { id = "form-title"; attributes["data-i18n"] = "addPet"; +"Add Pet" }
                 form { id = "pet-form"

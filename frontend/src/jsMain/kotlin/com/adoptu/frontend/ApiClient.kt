@@ -161,6 +161,20 @@ object ApiClientModule {
 
     fun getRescuerById(id: String): Promise<dynamic> = apiFetch("/api/users/rescuers/$id")
 
+    fun applyToVolunteer(rescuerId: Int): Promise<dynamic> {
+        val body = js("({rescuerId: rescuerId})")
+        return apiFetch("/api/volunteers", js("({method: 'POST', body: JSON.stringify(body)})"))
+    }
+
+    fun updateVolunteerStatus(id: Int, status: String): Promise<dynamic> {
+        val body = js("({status: status})")
+        return apiFetch("/api/volunteers/$id/status", js("({method: 'PUT', body: JSON.stringify(body)})"))
+    }
+
+    fun getMyVolunteerApplications(): Promise<dynamic> = apiFetch("/api/users/volunteer/applications")
+
+    fun getVolunteerApplicationsForRescuer(): Promise<dynamic> = apiFetch("/api/users/rescuer/volunteers")
+
     fun searchTemporalHomes(query: dynamic): Promise<dynamic> = apiFetch("/api/temporal-homes/search", js("({method: 'POST', body: JSON.stringify(query)})"))
 
     fun getTemporalHomeById(id: String): Promise<dynamic> = apiFetch("/api/temporal-homes/$id")

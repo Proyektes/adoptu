@@ -1,6 +1,7 @@
 package com.adoptu.frontend.pages
 
 import com.adoptu.frontend.ApiClientModule
+import com.adoptu.frontend.CommonModule
 import com.adoptu.frontend.I18n
 import com.adoptu.frontend.RsaCryptoModule
 import com.adoptu.frontend.WebAuthnModule
@@ -47,6 +48,7 @@ object ProfilePageModule {
         loadFavorites()
         loadSavedSearches()
         loadMyAdoptionRequests()
+        loadMyVolunteerApplications()
 
         listOf("role-rescuer", "role-photographer", "role-temporal-home", "role-shelter", "role-sterilization").forEach { id ->
             (document.getElementById(id) as? HTMLInputElement)?.checked = when (id) {
@@ -754,6 +756,35 @@ object ProfilePageModule {
             else -> I18n.t("adoptionStatusPending")
         }
         return "<div class=\"adoption-request-card\"><a href=\"/pet/${request.petId}\">$petName</a>" +
+            "<span class=\"ar-status status-${status.lowercase()}\">$statusLabel</span>" +
+            "<span class=\"ar-date\">$date</span></div>"
+    }
+
+    private fun loadMyVolunteerApplications() {
+        ApiClientModule.getMyVolunteerApplications().then<Unit> { applicationsRaw: dynamic ->
+            val applications = (applicationsRaw as? Array<dynamic>) ?: arrayOf()
+            val container = document.getElementById("my-volunteer-applications-list")
+            val empty = document.getElementById("my-volunteer-applications-empty")
+            if (applications.isEmpty()) {
+                empty?.textContent = I18n.t("noVolunteerApplicationsYet")
+                container?.innerHTML = ""
+                return@then
+            }
+            empty?.textContent = ""
+            container?.innerHTML = applications.joinToString("") { renderVolunteerApplicationRow(it) }
+        }
+    }
+
+    private fun renderVolunteerApplicationRow(application: dynamic): String {
+        val date = js("new Date(application.createdAt)").toLocaleDateString()
+        val status = application.status?.toString() ?: "PENDING"
+        val statusLabel = when (status) {
+            "ACTIVE" -> I18n.t("volunteerStatusActive")
+            "REJECTED" -> I18n.t("volunteerStatusRejected")
+            else -> I18n.t("volunteerStatusPending")
+        }
+        val rescuerName = CommonModule.escapeHtml(application.rescuerName?.toString() ?: "")
+        return "<div class=\"adoption-request-card\"><a href=\"/rescuer/${application.rescuerId}\">$rescuerName</a>" +
             "<span class=\"ar-status status-${status.lowercase()}\">$statusLabel</span>" +
             "<span class=\"ar-date\">$date</span></div>"
     }
