@@ -16,6 +16,7 @@ import com.adoptu.services.auth.SessionUser
 import com.adoptu.services.ServiceResult
 import com.adoptu.services.UserService
 import com.adoptu.services.crypto.CryptoService
+import com.adoptu.web.AuthRateLimitRules
 import com.adoptu.web.Deps
 import com.adoptu.web.SuccessResponse
 import com.adoptu.web.queryParam
@@ -50,6 +51,9 @@ import com.universaliun.auth.backend.domain.port.`in`.StartPasskeyRegistrationUs
 import com.universaliun.auth.backend.domain.port.`in`.StartPasskeySignupUseCase
 import com.universaliun.auth.backend.infrastructure.currentPrincipal
 import com.universaliun.auth.common.identity.AuthUserId
+import com.universaliun.ratelimit.backend.adapter.`in`.web.enforceAccountRateLimit
+import com.universaliun.ratelimit.backend.adapter.`in`.web.enforceIpRateLimit
+import com.universaliun.ratelimit.common.RateLimiter
 import io.helidon.http.HeaderNames
 import io.helidon.http.SetCookie
 import io.helidon.webserver.http.Handler
@@ -131,6 +135,7 @@ fun HttpRules.authRoutes() {
     val logoutUseCase by Deps.inject<LogoutUseCase>()
     val forgotPasswordUseCase by Deps.inject<ForgotPasswordUseCase>()
     val resetPasswordUseCase by Deps.inject<ResetPasswordUseCase>()
+    val rateLimiter by Deps.inject<RateLimiter>()
     val adminEmail = config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com"
     val cookieSecure = config.propertyOrNull("session.cookieSecure")?.getString()?.toBoolean() ?: true
     val userRepository = UserRepository(clock = kotlin.time.Clock.System)
@@ -216,8 +221,10 @@ fun HttpRules.authRoutes() {
     }
 
     post("/api/auth/registration-options", Handler { req, res ->
+        if (!rateLimiter.enforceIpRateLimit(req, res, AuthRateLimitRules.REGISTRATION_OPTIONS_IP)) return@Handler
         val params = req.receiveFormParameters()
         val email = params["email"] ?: return@Handler res.respondError("email required")
+        if (!rateLimiter.enforceAccountRateLimit(res, email, AuthRateLimitRules.REGISTRATION_OPTIONS_ACCOUNT)) return@Handler
         val displayName = params["displayName"] ?: return@Handler res.respondError("displayName required")
         val language = params["language"] ?: "en"
         val emailRegex = Regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")
@@ -247,6 +254,7 @@ fun HttpRules.authRoutes() {
     })
 
     post("/api/auth/register", Handler { req, res ->
+        if (!rateLimiter.enforceIpRateLimit(req, res, AuthRateLimitRules.REGISTER_IP)) return@Handler
         val body = req.receiveJson<PasskeyFinishRequestWithProfile>()
 
         val roles = parseSelfRegisteredRoles(null) // roles selection isn't sent on this legacy path today; defaults to ADOPTER
@@ -277,9 +285,11 @@ fun HttpRules.authRoutes() {
     })
 
     post("/api/auth/register-password", Handler { req, res ->
+        if (!rateLimiter.enforceIpRateLimit(req, res, AuthRateLimitRules.REGISTER_PASSWORD_IP)) return@Handler
         val body = req.receiveText()
         val json = com.adoptu.web.JsonSupport.objectMapper.readTree(body) as com.fasterxml.jackson.databind.node.ObjectNode
         val email = json.get("email")?.asText() ?: return@Handler res.respondError("email required")
+        if (!rateLimiter.enforceAccountRateLimit(res, email, AuthRateLimitRules.REGISTER_PASSWORD_ACCOUNT)) return@Handler
         val displayName = json.get("displayName")?.asText() ?: return@Handler res.respondError("displayName required")
         val encryptedPassword = json.get("encryptedPassword")?.asText() ?: return@Handler res.respondError("password required")
         val rolesStr = json.get("roles")?.asText()
@@ -407,6 +417,7 @@ fun HttpRules.authRoutes() {
     })
 
     post("/api/auth/resend-verification", Handler { req, res ->
+        if (!rateLimiter.enforceIpRateLimit(req, res, AuthRateLimitRules.RESEND_VERIFICATION_IP)) return@Handler
         val principal = req.currentPrincipal()
         if (principal == null) {
             val contentType = req.headers().contentType().map { it.text() }.orElse("")
@@ -448,7 +459,8 @@ fun HttpRules.authRoutes() {
         res.send(VerificationResponse(success = sent, message = if (sent) "Verification email sent" else "Failed to send verification email"))
     })
 
-    get("/api/auth/assertion-options", Handler { _, res ->
+    get("/api/auth/assertion-options", Handler { req, res ->
+        if (!rateLimiter.enforceIpRateLimit(req, res, AuthRateLimitRules.ASSERTION_OPTIONS_IP)) return@Handler
         // Adopt-u never prompted for a username before showing the passkey prompt (fully
         // discoverable/usernameless login) -- email = null now produces a real usernameless
         // ceremony instead of AuthKit wrapping "" in its Email value class and throwing.
@@ -457,6 +469,7 @@ fun HttpRules.authRoutes() {
     })
 
     post("/api/auth/authenticate", Handler { req, res ->
+        if (!rateLimiter.enforceIpRateLimit(req, res, AuthRateLimitRules.AUTHENTICATE_IP)) return@Handler
         val body = req.receiveJson<PasskeyFinishRequest>()
         try {
             val result = finishPasskeyLogin.finish(FinishPasskeyLoginUseCase.Command(body.requestId, body.credentialJson))
@@ -532,6 +545,7 @@ fun HttpRules.authRoutes() {
     })
 
     post("/api/auth/request-magic-link", Handler { req, res ->
+        if (!rateLimiter.enforceIpRateLimit(req, res, AuthRateLimitRules.MAGIC_LINK_REQUEST_IP)) return@Handler
         logger.info("Received magic link request")
         val body = try {
             req.receiveJson<EncryptedLoginRequest>()
@@ -546,6 +560,7 @@ fun HttpRules.authRoutes() {
             return@Handler res.respondError(emailResult.message, 400)
         }
         val email = (emailResult as ServiceResult.Success).data
+        if (!rateLimiter.enforceAccountRateLimit(res, email, AuthRateLimitRules.MAGIC_LINK_REQUEST_ACCOUNT)) return@Handler
         logger.info("Processing magic link request for: $email")
 
         // Preserves the native "auto-resend activation instead of a magic link, for an
@@ -579,6 +594,7 @@ fun HttpRules.authRoutes() {
     })
 
     get("/api/auth/magic-link-login", Handler { req, res ->
+        if (!rateLimiter.enforceIpRateLimit(req, res, AuthRateLimitRules.MAGIC_LINK_LOGIN_IP)) return@Handler
         val token = req.queryParam("token")
         if (token.isNullOrBlank()) {
             res.respondRedirect("/login?error=invalid_token")
@@ -640,6 +656,10 @@ fun HttpRules.authRoutes() {
     })
 
     post("/api/auth/login-with-password", Handler { req, res ->
+        // IP dimension only -- the account dimension is already covered by PasswordService's own
+        // failed-attempt lockout below (isLoginRateLimited/recordLoginAttempt), which is better
+        // targeted than a generic policy since it only counts actual failures.
+        if (!rateLimiter.enforceIpRateLimit(req, res, AuthRateLimitRules.LOGIN_IP)) return@Handler
         val body = try {
             req.receiveJson<PasswordLoginRequest>()
         } catch (e: Exception) {
@@ -698,6 +718,7 @@ fun HttpRules.authRoutes() {
     })
 
     post("/api/auth/forgot-password", Handler { req, res ->
+        if (!rateLimiter.enforceIpRateLimit(req, res, AuthRateLimitRules.FORGOT_PASSWORD_IP)) return@Handler
         val body = try {
             req.receiveJson<EncryptedLoginRequest>()
         } catch (e: Exception) {
@@ -709,6 +730,7 @@ fun HttpRules.authRoutes() {
             return@Handler res.respondError(emailResult.message, 400)
         }
         val email = (emailResult as ServiceResult.Success).data
+        if (!rateLimiter.enforceAccountRateLimit(res, email, AuthRateLimitRules.FORGOT_PASSWORD_ACCOUNT)) return@Handler
         val result = forgotPasswordUseCase.request(ForgotPasswordUseCase.Command(email))
         if (result != null) {
             val resetUrl = "${config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:8080"}/reset-password?token=${result.rawToken}"
@@ -723,6 +745,7 @@ fun HttpRules.authRoutes() {
     })
 
     post("/api/auth/reset-password", Handler { req, res ->
+        if (!rateLimiter.enforceIpRateLimit(req, res, AuthRateLimitRules.RESET_PASSWORD_IP)) return@Handler
         val token = req.queryParam("token")
         if (token.isNullOrBlank()) {
             res.respondError("Token is required", 400)

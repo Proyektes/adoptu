@@ -642,6 +642,7 @@
 ## backend/src/main/kotlin/com/adoptu/web/
 
 - `AccessLogFilter.kt` — Replaces Ktor's `install(CallLogging) { ... }` (plugins/Logging.kt). (~261 tok)
+- `AuthRateLimitRules.kt` — Risk-calibrated (limitKind, RateLimitPolicy) pairs for AuthRoutes.kt, applied inline via RateLimitKit's enforceIpRateLimit/enforceAccountRateLimit (~700 tok)
 - `Deps.kt` — Replaces Ktor's `org.koin.ktor.ext.inject` (which resolved via the Application's attached (~122 tok)
 - `Html.kt` — Replaces Ktor's `call.respondHtml { ... }` (ktor-server-html-builder). (~157 tok)
 - `JsonSupport.kt` — Jackson's DefaultPrettyPrinter differs from kotlinx.serialization's prettyPrint - what every (~650 tok)

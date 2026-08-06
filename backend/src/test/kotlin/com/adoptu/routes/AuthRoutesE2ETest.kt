@@ -2005,4 +2005,78 @@ class AuthRoutesE2ETest {
             handle.stop()
         }
     }
+
+    // ==================== Rate limiting (AuthRateLimitRules) ====================
+
+    @Test
+    fun `POST forgot-password is throttled after 3 attempts within the window, with a Retry-After header`() {
+        val handle = startTestServer()
+        try {
+            repeat(3) { i ->
+                val response = TestHttp.postJson(
+                    "${handle.baseUrl}/api/auth/forgot-password",
+                    JsonSupport.objectMapper.writeValueAsString(mapOf("encryptedData" to encryptValue("nobody-$i@example.com")))
+                )
+                assertEquals(200, response.statusCode())
+            }
+            val throttled = TestHttp.postJson(
+                "${handle.baseUrl}/api/auth/forgot-password",
+                JsonSupport.objectMapper.writeValueAsString(mapOf("encryptedData" to encryptValue("nobody-3@example.com")))
+            )
+            assertEquals(429, throttled.statusCode())
+            assertTrue(throttled.headers().firstValue("Retry-After").isPresent)
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST login-with-password is IP-throttled independent of PasswordService's own account lockout`() {
+        val handle = startTestServer()
+        try {
+            // 10 attempts, a distinct never-seen account each time, so PasswordService's own
+            // per-account failed-attempt lockout (5 failures/account) never triggers -- only the
+            // new IP-keyed RateLimitKit layer this migration added can be what blocks the 11th.
+            repeat(10) { i ->
+                val response = TestHttp.postJson(
+                    "${handle.baseUrl}/api/auth/login-with-password",
+                    JsonSupport.objectMapper.writeValueAsString(PasswordLoginRequest("ip-throttle-$i@example.com", encryptValue("wrong-password")))
+                )
+                assertEquals(200, response.statusCode()) // route always 200s; failure is in the JSON body
+            }
+            val throttled = TestHttp.postJson(
+                "${handle.baseUrl}/api/auth/login-with-password",
+                JsonSupport.objectMapper.writeValueAsString(PasswordLoginRequest("ip-throttle-10@example.com", encryptValue("wrong-password")))
+            )
+            assertEquals(429, throttled.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `exhausting forgot-password does not affect a distinct endpoint's limit`() {
+        val handle = startTestServer()
+        try {
+            repeat(3) { i ->
+                TestHttp.postJson(
+                    "${handle.baseUrl}/api/auth/forgot-password",
+                    JsonSupport.objectMapper.writeValueAsString(mapOf("encryptedData" to encryptValue("nobody-$i@example.com")))
+                )
+            }
+            assertEquals(429, TestHttp.postJson(
+                "${handle.baseUrl}/api/auth/forgot-password",
+                JsonSupport.objectMapper.writeValueAsString(mapOf("encryptedData" to encryptValue("nobody-3@example.com")))
+            ).statusCode())
+
+            // Distinct limitKind (auth:reset-password:ip) -- exhausting forgot-password must not affect it.
+            val resetResponse = TestHttp.postJson(
+                "${handle.baseUrl}/api/auth/reset-password?token=nonexistent-token",
+                JsonSupport.objectMapper.writeValueAsString(mapOf("encryptedData" to encryptValue("NewPassw0rd!")))
+            )
+            assertEquals(200, resetResponse.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
 }
