@@ -6,7 +6,7 @@ import com.adoptu.services.ServiceResult
 import com.adoptu.services.validation.PetsValidationService
 import com.adoptu.services.validation.ValidationConstants
 import com.adoptu.web.Deps
-import com.adoptu.web.getSession
+import com.universaliun.auth.backend.infrastructure.currentPrincipal
 import com.adoptu.web.pathParam
 import com.adoptu.web.receiveJson
 import com.adoptu.web.respondData
@@ -26,9 +26,9 @@ fun HttpRules.petFosterPlacementRoutes() {
     val validationService by Deps.inject<PetsValidationService>()
 
     post("/api/pets/{id}/foster-placements", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -37,14 +37,14 @@ fun HttpRules.petFosterPlacementRoutes() {
             val petId = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondError(ValidationConstants.INVALID_ID)
 
             val body = req.receiveJson<CreateFosterPlacementRequest>()
-            res.respondData(placementService.createPlacement(petId, session.userId, activeRoles, body))
+            res.respondData(placementService.createPlacement(petId, principal.userId.value.toInt(), activeRoles, body))
         }
     })
 
     get("/api/pets/{id}/foster-placements", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -52,14 +52,14 @@ fun HttpRules.petFosterPlacementRoutes() {
             val activeRoles = user.activeRoles.map { it.name }.toSet()
             val petId = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondError(ValidationConstants.INVALID_ID)
 
-            res.respondData(placementService.getHistoryForPet(petId, session.userId, activeRoles))
+            res.respondData(placementService.getHistoryForPet(petId, principal.userId.value.toInt(), activeRoles))
         }
     })
 
     put("/api/pets/foster-placements/{id}/end", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -67,7 +67,7 @@ fun HttpRules.petFosterPlacementRoutes() {
             val activeRoles = user.activeRoles.map { it.name }.toSet()
             val placementId = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondError(ValidationConstants.INVALID_ID)
 
-            res.respondData(placementService.endPlacement(placementId, session.userId, activeRoles))
+            res.respondData(placementService.endPlacement(placementId, principal.userId.value.toInt(), activeRoles))
         }
     })
 }

@@ -7,7 +7,6 @@ import com.adoptu.services.TemporalHomeService
 import com.adoptu.services.validation.TemporalHomesValidationService
 import com.adoptu.services.validation.ValidationConstants
 import com.adoptu.web.Deps
-import com.adoptu.web.getSession
 import com.adoptu.web.pathParam
 import com.adoptu.web.queryParam
 import com.adoptu.web.receiveJson
@@ -15,6 +14,7 @@ import com.adoptu.web.respondError
 import com.adoptu.web.respondForbidden
 import com.adoptu.web.respondNotFound
 import com.adoptu.web.respondUnauthorized
+import com.universaliun.auth.backend.infrastructure.currentPrincipal
 import io.helidon.http.HeaderNames
 import io.helidon.webserver.http.Handler
 import io.helidon.webserver.http.HttpRules
@@ -27,22 +27,18 @@ fun HttpRules.temporalHomeRoutes() {
     val validationService by Deps.inject<TemporalHomesValidationService>()
 
     post("/api/users/temporal-home", Handler { req, res ->
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val sessionResult = validationService.validateSession(req.getSession())
-            if (sessionResult is ServiceResult.Forbidden) {
-                return@runBlocking res.respondUnauthorized()
-            }
-            val session = (sessionResult as ServiceResult.Success).data
-
+            val userId = principal.userId.value.toInt()
             val body = req.receiveJson<CreateTemporalHomeRequest>()
-            val validationResult = validationService.validateCreateTemporalHomeRequest(session.userId, body)
+            val validationResult = validationService.validateCreateTemporalHomeRequest(userId, body)
             if (validationResult is ServiceResult.Error) {
                 return@runBlocking res.respondError(validationResult.message, 400)
             }
 
             try {
-                val temporalHome = temporalHomeService.createTemporalHome(session.userId, body)
-                temporalHomeService.activateTemporalHomeProfile(session.userId)
+                val temporalHome = temporalHomeService.createTemporalHome(userId, body)
+                temporalHomeService.activateTemporalHomeProfile(userId)
                 res.send(temporalHome)
             } catch (e: Exception) {
                 res.respondError(e.message ?: "Failed to create temporal home", 500)
@@ -51,14 +47,9 @@ fun HttpRules.temporalHomeRoutes() {
     })
 
     get("/api/users/temporal-home", Handler { req, res ->
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val sessionResult = validationService.validateSession(req.getSession())
-            if (sessionResult is ServiceResult.Forbidden) {
-                return@runBlocking res.respondUnauthorized()
-            }
-            val session = (sessionResult as ServiceResult.Success).data
-
-            val temporalHome = temporalHomeService.getTemporalHome(session.userId)
+            val temporalHome = temporalHomeService.getTemporalHome(principal.userId.value.toInt())
             if (temporalHome == null) {
                 return@runBlocking res.respondError(ValidationConstants.TEMPORAL_HOME_PROFILE_NOT_FOUND, 404)
             }
@@ -67,14 +58,10 @@ fun HttpRules.temporalHomeRoutes() {
     })
 
     put("/api/users/temporal-home", Handler { req, res ->
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val sessionResult = validationService.validateSession(req.getSession())
-            if (sessionResult is ServiceResult.Forbidden) {
-                return@runBlocking res.respondUnauthorized()
-            }
-            val session = (sessionResult as ServiceResult.Success).data
-
-            val profileResult = validationService.validateTemporalHomeProfile(session.userId)
+            val userId = principal.userId.value.toInt()
+            val profileResult = validationService.validateTemporalHomeProfile(userId)
             if (profileResult is ServiceResult.Error) {
                 return@runBlocking res.respondError(profileResult.message, 404)
             }
@@ -82,7 +69,7 @@ fun HttpRules.temporalHomeRoutes() {
             val body = req.receiveJson<UpdateTemporalHomeRequest>()
 
             try {
-                val updated = temporalHomeService.updateTemporalHome(session.userId, body)
+                val updated = temporalHomeService.updateTemporalHome(userId, body)
                 if (updated == null) {
                     return@runBlocking res.respondError("Failed to update temporal home", 500)
                 }
@@ -94,14 +81,10 @@ fun HttpRules.temporalHomeRoutes() {
     })
 
     get("/api/users/temporal-home/requests", Handler { req, res ->
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val sessionResult = validationService.validateSession(req.getSession())
-            if (sessionResult is ServiceResult.Forbidden) {
-                return@runBlocking res.respondUnauthorized()
-            }
-            val session = (sessionResult as ServiceResult.Success).data
-
-            val userResult = validationService.validateUserById(session.userId)
+            val userId = principal.userId.value.toInt()
+            val userResult = validationService.validateUserById(userId)
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -112,20 +95,16 @@ fun HttpRules.temporalHomeRoutes() {
                 return@runBlocking res.respondForbidden()
             }
 
-            val requests = temporalHomeService.getMyRequests(session.userId)
+            val requests = temporalHomeService.getMyRequests(userId)
             res.send(requests)
         }
     })
 
     get("/api/users/temporal-home/foster-placements", Handler { req, res ->
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val sessionResult = validationService.validateSession(req.getSession())
-            if (sessionResult is ServiceResult.Forbidden) {
-                return@runBlocking res.respondUnauthorized()
-            }
-            val session = (sessionResult as ServiceResult.Success).data
-
-            val userResult = validationService.validateUserById(session.userId)
+            val userId = principal.userId.value.toInt()
+            val userResult = validationService.validateUserById(userId)
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -136,7 +115,7 @@ fun HttpRules.temporalHomeRoutes() {
                 return@runBlocking res.respondForbidden()
             }
 
-            res.send(placementService.getMyActivePlacements(session.userId))
+            res.send(placementService.getMyActivePlacements(userId))
         }
     })
 
@@ -204,14 +183,10 @@ fun HttpRules.temporalHomeRoutes() {
     })
 
     post("/api/temporal-homes/request", Handler { req, res ->
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val sessionResult = validationService.validateSession(req.getSession())
-            if (sessionResult is ServiceResult.Forbidden) {
-                return@runBlocking res.respondUnauthorized()
-            }
-            val session = (sessionResult as ServiceResult.Success).data
-
-            val userResult = validationService.validateRescuerRole(session.userId)
+            val userId = principal.userId.value.toInt()
+            val userResult = validationService.validateRescuerRole(userId)
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -226,7 +201,7 @@ fun HttpRules.temporalHomeRoutes() {
                 return@runBlocking res.respondError(messageResult.message, 400)
             }
 
-            val result = temporalHomeService.sendRequest(session.userId, body)
+            val result = temporalHomeService.sendRequest(userId, body)
             if (result.isFailure) {
                 return@runBlocking res.respondError(ValidationConstants.FAILED_TO_SEND_REQUEST, 400)
             }
@@ -235,14 +210,10 @@ fun HttpRules.temporalHomeRoutes() {
     })
 
     post("/api/temporal-homes/block", Handler { req, res ->
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val sessionResult = validationService.validateSession(req.getSession())
-            if (sessionResult is ServiceResult.Forbidden) {
-                return@runBlocking res.respondUnauthorized()
-            }
-            val session = (sessionResult as ServiceResult.Success).data
-
-            val userResult = validationService.validateBlockRescuerRequest(session.userId)
+            val userId = principal.userId.value.toInt()
+            val userResult = validationService.validateBlockRescuerRequest(userId)
             when (userResult) {
                 is ServiceResult.NotFound -> return@runBlocking res.respondNotFound()
                 is ServiceResult.Forbidden -> return@runBlocking res.respondForbidden()
@@ -252,7 +223,7 @@ fun HttpRules.temporalHomeRoutes() {
 
             val body = req.receiveJson<BlockRescuerRequest>()
 
-            val blocked = temporalHomeService.blockRescuer(session.userId, body.rescuerId)
+            val blocked = temporalHomeService.blockRescuer(userId, body.rescuerId)
             res.send(mapOf("blocked" to blocked))
         }
     })

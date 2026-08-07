@@ -1,13 +1,12 @@
 package com.adoptu.routes
 
+import com.adoptu.adapters.authkit.AdoptuRole
 import com.adoptu.dto.input.CreateShelterRequest
 import com.adoptu.dto.input.UpdateShelterRequest
-import com.adoptu.dto.input.UserRole
-import com.adoptu.ports.UserRepositoryPort
 import com.adoptu.services.ShelterService
 import com.adoptu.services.validation.ValidationConstants
 import com.adoptu.web.Deps
-import com.adoptu.web.getSession
+import com.universaliun.auth.backend.infrastructure.currentPrincipal
 import com.adoptu.web.pathParam
 import com.adoptu.web.queryParam
 import com.adoptu.web.receiveJson
@@ -68,12 +67,11 @@ fun HttpRules.shelterRoutes() {
 
 fun HttpRules.adminShelterRoutes() {
     val shelterService by Deps.inject<ShelterService>()
-    val userRepository by Deps.inject<UserRepositoryPort>()
 
     get("/api/admin/shelters", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
             val country = req.queryParam("country")
@@ -91,10 +89,10 @@ fun HttpRules.adminShelterRoutes() {
     })
 
     get("/api/admin/shelters/{id}", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
         runBlocking {
-            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
             val shelter = shelterService.getById(id)
@@ -107,9 +105,9 @@ fun HttpRules.adminShelterRoutes() {
     })
 
     post("/api/admin/shelters", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
             val request = req.receiveJson<CreateShelterRequest>()
@@ -123,10 +121,10 @@ fun HttpRules.adminShelterRoutes() {
     })
 
     put("/api/admin/shelters/{id}", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
         runBlocking {
-            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
             val request = req.receiveJson<UpdateShelterRequest>()
@@ -135,10 +133,10 @@ fun HttpRules.adminShelterRoutes() {
     })
 
     delete("/api/admin/shelters/{id}", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
         runBlocking {
-            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
             res.respondSuccess(shelterService.delete(id))

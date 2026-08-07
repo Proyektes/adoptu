@@ -1,10 +1,11 @@
 package com.adoptu.routes
 
+import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.dto.input.CreateUserShelterRequest
 import com.adoptu.dto.input.UpdateUserShelterRequest
 import com.adoptu.services.UserShelterService
 import com.adoptu.web.Deps
-import com.adoptu.web.getSession
+import com.universaliun.auth.backend.infrastructure.currentPrincipal
 import com.adoptu.web.queryParam
 import com.adoptu.web.receiveJson
 import com.adoptu.web.respondData
@@ -17,14 +18,21 @@ import org.koin.core.component.inject
 
 fun HttpRules.userShelterRoutes() {
     val service by Deps.inject<UserShelterService>()
+    // Constructed directly rather than injected, same as AuthRoutes.kt's own UserRepository use -
+    // avoids adding a new Koin binding every route-level test module would otherwise need.
+    val userRepository = UserRepository(clock = kotlin.time.Clock.System)
 
     post("/api/users/shelter", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
+            // AuthPrincipal carries userId/email from the JWT, not displayName - a DB lookup
+            // is the only source for it now (the old SessionUser cookie stored it directly).
+            val displayName = userRepository.getById(principal.userId.value.toInt())?.displayName
+                ?: return@runBlocking res.respondUnauthorized()
             val body = req.receiveJson<CreateUserShelterRequest>()
             try {
-                val shelter = service.create(session.userId, session.email, session.displayName, body)
+                val shelter = service.create(principal.userId.value.toInt(), principal.email, displayName, body)
                 res.send(shelter)
             } catch (e: IllegalArgumentException) {
                 res.respondError(e.message ?: "Invalid request", 400)
@@ -35,10 +43,10 @@ fun HttpRules.userShelterRoutes() {
     })
 
     get("/api/users/shelter", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            val shelter = service.getByUserId(session.userId)
+            val shelter = service.getByUserId(principal.userId.value.toInt())
             if (shelter == null) {
                 res.respondError("Shelter profile not found", 404)
             } else {
@@ -48,19 +56,21 @@ fun HttpRules.userShelterRoutes() {
     })
 
     put("/api/users/shelter", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
+            val displayName = userRepository.getById(principal.userId.value.toInt())?.displayName
+                ?: return@runBlocking res.respondUnauthorized()
             val body = req.receiveJson<UpdateUserShelterRequest>()
-            res.respondData(service.update(session.userId, session.email, session.displayName, body))
+            res.respondData(service.update(principal.userId.value.toInt(), principal.email, displayName, body))
         }
     })
 
     delete("/api/users/shelter", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            res.respondData(service.delete(session.userId))
+            res.respondData(service.delete(principal.userId.value.toInt()))
         }
     })
 

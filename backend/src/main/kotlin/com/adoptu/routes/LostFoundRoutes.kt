@@ -7,7 +7,7 @@ import com.adoptu.services.LostFoundService
 import com.adoptu.services.UserService
 import com.adoptu.services.validation.ValidationConstants
 import com.adoptu.web.Deps
-import com.adoptu.web.getSession
+import com.universaliun.auth.backend.infrastructure.currentPrincipal
 import com.adoptu.web.pathParam
 import com.adoptu.web.queryParam
 import com.adoptu.web.receiveJson
@@ -34,8 +34,8 @@ fun HttpRules.lostFoundRoutes() {
 
     post("/api/lost-found/reports", Handler { req, res ->
         runBlocking {
-            val session = req.getSession()
-            val sessionUser = session?.let { userService.getById(it.userId) }
+            val principal = req.currentPrincipal()
+            val sessionUser = principal?.let { userService.getById(it.userId.value.toInt()) }
             val body = req.receiveJson<SubmitLostFoundReportRequest>()
 
             lostFoundService.submitReport(body, sessionUser, clientIp(req)).fold(
@@ -92,10 +92,10 @@ fun HttpRules.lostFoundRoutes() {
     })
 
     post("/api/lost-found/reports/{id}/resolve", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError("Invalid report id")
         runBlocking {
-            lostFoundService.resolveAsOwner(id, session.userId).fold(
+            lostFoundService.resolveAsOwner(id, principal.userId.value.toInt()).fold(
                 onSuccess = { res.send(it) },
                 onFailure = { res.respondError(it.message ?: "Could not resolve report", 409) }
             )

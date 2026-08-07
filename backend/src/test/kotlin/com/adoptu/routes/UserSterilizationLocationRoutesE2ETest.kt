@@ -207,8 +207,14 @@ class UserSterilizationLocationRoutesE2ETest {
         }
     }
 
+    // Was "returns 500" pre-AuthKit-cutover: the old HMAC session cookie was accepted purely on
+    // signature, so a nonexistent user id reached service.create() and blew up on a DB FK
+    // constraint. currentPrincipal() now resolves a displayName via a DB lookup before that point
+    // (AuthPrincipal carries no displayName - see UserSterilizationLocationRoutes.kt) and treats
+    // "no such user" as unauthenticated, which is the more correct read of a principal whose
+    // backing row is gone.
     @Test
-    fun `POST users sterilization-location returns 500 for session user that does not exist`() {
+    fun `POST users sterilization-location returns 401 for session user that does not exist`() {
         val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
         try {
             val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
@@ -226,7 +232,7 @@ class UserSterilizationLocationRoutesE2ETest {
                 cookie
             )
 
-            assertEquals(500, response.statusCode())
+            assertEquals(401, response.statusCode())
         } finally {
             handle.stop()
         }

@@ -1,13 +1,12 @@
 package com.adoptu.routes
 
+import com.adoptu.adapters.authkit.AdoptuRole
 import com.adoptu.dto.input.CreateSterilizationLocationRequest
 import com.adoptu.dto.input.UpdateSterilizationLocationRequest
-import com.adoptu.dto.input.UserRole
-import com.adoptu.ports.UserRepositoryPort
 import com.adoptu.services.SterilizationLocationService
 import com.adoptu.services.validation.ValidationConstants
 import com.adoptu.web.Deps
-import com.adoptu.web.getSession
+import com.universaliun.auth.backend.infrastructure.currentPrincipal
 import com.adoptu.web.pathParam
 import com.adoptu.web.queryParam
 import com.adoptu.web.receiveJson
@@ -77,12 +76,11 @@ fun HttpRules.sterilizationLocationRoutes() {
 
 fun HttpRules.adminSterilizationLocationRoutes() {
     val service by Deps.inject<SterilizationLocationService>()
-    val userRepository by Deps.inject<UserRepositoryPort>()
 
     get("/api/admin/sterilization-locations", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
             val country = req.queryParam("country")
@@ -95,10 +93,10 @@ fun HttpRules.adminSterilizationLocationRoutes() {
     })
 
     get("/api/admin/sterilization-locations/{id}", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
         runBlocking {
-            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
             val location = service.getById(id)
@@ -111,9 +109,9 @@ fun HttpRules.adminSterilizationLocationRoutes() {
     })
 
     post("/api/admin/sterilization-locations", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
             val request = req.receiveJson<CreateSterilizationLocationRequest>()
@@ -127,10 +125,10 @@ fun HttpRules.adminSterilizationLocationRoutes() {
     })
 
     put("/api/admin/sterilization-locations/{id}", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
         runBlocking {
-            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
             val request = req.receiveJson<UpdateSterilizationLocationRequest>()
@@ -139,10 +137,10 @@ fun HttpRules.adminSterilizationLocationRoutes() {
     })
 
     delete("/api/admin/sterilization-locations/{id}", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
         runBlocking {
-            if (!userRepository.isRoleActive(session.userId, UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
             res.respondSuccess(service.delete(id))

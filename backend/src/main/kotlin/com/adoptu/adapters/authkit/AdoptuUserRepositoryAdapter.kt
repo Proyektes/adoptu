@@ -1,5 +1,6 @@
 package com.adoptu.adapters.authkit
 
+import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.UserPasswords
 import com.adoptu.adapters.db.Users
 import com.universaliun.auth.backend.domain.model.user.AuthUser
@@ -36,11 +37,14 @@ import java.time.Instant
  *
  * ## Fields AuthKit doesn't own — never touched by [save]
  * `country`/`language`/`isBanned`/`banReason`/`lastAcceptedPrivacyPolicy`/
- * `lastAcceptedTermsAndConditions` and every role/photographer/pet table are Adopt-u's own and
+ * `lastAcceptedTermsAndConditions` and every photographer/pet table are Adopt-u's own and
  * completely untouched by this bridge — [save] only ever writes the columns AuthKit's own
  * `RegisterService`/`ConfirmEmailService`/`ResetPasswordService`/passkey services actually set
  * (`displayName`/`isEmailVerified`/`resetTokenHash`/`resetTokenExpiresAt`, plus `UserPasswords`
- * when a password hash is present).
+ * when a password hash is present). `user_active_roles` is likewise Adopt-u's own table (managed
+ * entirely through `UserRepository`'s native `addActiveRoles`/`addPendingRoleActivations`, never
+ * through this bridge's [save]) — [toAuthUser] only *reads* it, to populate [AuthUser.roles]/
+ * [AuthUser.permissions] for the JWT AuthKit issues (see [AdoptuRole]/[AdoptuResource]).
  *
  * ## `enabled` is derived, not stored
  * This app has no single `enabled` column — the real login gate is
@@ -170,6 +174,15 @@ class AdoptuUserRepositoryAdapter : UserRepositoryPort {
     private fun userRow(condition: Op<Boolean>): ResultRow? =
         Users.selectAll().where { condition }.singleOrNull()
 
+    // Nested query within the caller's own transaction { } block (same pattern as the
+    // UserPasswords lookup below) - reads user_active_roles directly rather than going through
+    // the native (suspend) UserRepository, same reasoning as this whole adapter's own doc comment.
+    private fun activeRolesFor(userId: Int): Set<AdoptuRole> =
+        UserActiveRoles.selectAll()
+            .where { UserActiveRoles.userId eq userId }
+            .mapNotNull { row -> runCatching { AdoptuRole.valueOf(row[UserActiveRoles.role]) }.getOrNull() }
+            .toSet()
+
     private fun ResultRow.toAuthUser(): AuthUser {
         val userId = this[Users.id]
         val passwordHash = UserPasswords.select(UserPasswords.passwordHash)
@@ -180,14 +193,15 @@ class AdoptuUserRepositoryAdapter : UserRepositoryPort {
         val isEmailVerified = this[Users.isEmailVerified]
         val isBanned = this[Users.isBanned]
         val deactivatedAt = this[Users.deactivatedAt]
+        val activeRoles = activeRolesFor(userId)
 
         return AuthUser(
             id = AuthUserId(userId.toString()),
             email = Email(this[Users.username]),
             displayName = this[Users.displayName],
             passwordHash = passwordHash,
-            roles = emptySet(), // this app's own RBAC (UserRole/UserActiveRoles) is untouched by AuthKit
-            permissions = PermissionSet.empty(0),
+            roles = activeRoles,
+            permissions = PermissionSet.fromResources(activeRoles.flatMap { it.resources }.toSet(), ADOPTU_RESOURCE_COUNT),
             enabled = isEmailVerified && !isBanned && deactivatedAt == null,
             emailVerified = isEmailVerified,
             createdAt = Instant.ofEpochMilli(this[Users.createdAt]),

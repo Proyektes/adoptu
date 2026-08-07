@@ -1,10 +1,12 @@
 package com.adoptu
 
+import com.adoptu.adapters.authkit.ADOPTU_RESOURCE_COUNT
 import com.adoptu.adapters.authkit.AdoptuPasskeyCeremonyStoreAdapter
 import com.adoptu.adapters.authkit.AdoptuPasskeyCredentialRepositoryAdapter
 import com.adoptu.adapters.authkit.AdoptuRefreshTokenRepositoryAdapter
 import com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter
 import com.adoptu.adapters.authkit.AuthKitJwtKeyProvider
+import com.adoptu.adapters.authkit.adoptuRoleByName
 import com.adoptu.adapters.db.DatabaseFactory
 import com.adoptu.config.AppConfig
 import com.adoptu.di.appModule
@@ -34,9 +36,9 @@ import com.adoptu.services.MedicalReminderScheduler
 import com.adoptu.services.crypto.CryptoService
 import com.adoptu.web.AccessLogFilter
 import com.adoptu.web.JsonSupport
-import com.adoptu.web.SecurityHeadersFilter
 import com.universaliun.auth.backend.infrastructure.authKoinModule
 import com.universaliun.auth.backend.infrastructure.installJwtAuth
+import com.universaliun.auth.backend.infrastructure.installSecurityHeaders
 import com.universaliun.auth.backend.domain.port.out.RefreshTokenRepositoryPort
 import com.universaliun.auth.backend.domain.port.out.TokenBlocklistPort
 import com.universaliun.auth.backend.domain.port.out.TokenServicePort
@@ -90,11 +92,14 @@ fun main() {
             authKoinModule(
                 jwtPrivateKey = jwtPrivateKey,
                 jwtPublicKey = jwtPublicKey,
-                // Adopt-u has no AuthKit-native RBAC (roles/permissions are handled entirely by
-                // its own UserRepository/UserService, unrelated to AuthKit's JWT claims) - no
-                // resources to enumerate, no role lookup to perform.
-                resourceCount = 0,
-                roleByName = { null },
+                resourceCount = ADOPTU_RESOURCE_COUNT,
+                roleByName = adoptuRoleByName,
+                // Adopt-u's own registration flow (AuthRoutes.kt's applyRoleSelection) grants
+                // roles itself, through its own UserRepository - not through AuthKit's
+                // RegisterService/FinishPasskeySignupService, which never touch
+                // user_active_roles (see AdoptuUserRepositoryAdapter's save() doc comment). This
+                // stays at empty/no-op; a freshly AuthKit-registered row simply starts with no
+                // roles until Adopt-u's own post-registration step grants some.
                 defaultPermissions = PermissionSet.empty(0),
                 // Preserves the native MagicLinkService's real 5-minute expiry (see
                 // magicLinkEmailContent's "This link will expire in 5 minutes" text) - AuthKit's
@@ -125,16 +130,40 @@ fun main() {
     MedicalReminderScheduler.start(CoroutineScope(Dispatchers.IO), GlobalContext.get().get())
 }
 
+/**
+ * Content-Security-Policy for [installSecurityHeaders] below -- kept exactly as it was under the
+ * local `SecurityHeadersFilter` this migrated from (see git history for that file's own doc
+ * comment, which explained each directive in more depth than fits here):
+ *  - script-src 'none' -- the backend is JSON-API-only (page rendering moved to the static site);
+ *    its one remaining HTML response (the magic-link-login cookie bounce) has no `<script>` tag.
+ *  - style-src 'self' -- every inline style="..." in the (now-removed) page templates was already
+ *    moved to a CSS class before this policy was first written.
+ *  - img-src allows blob: (client-side photo compression via canvas) and this app's own two CDN
+ *    hosts (static.adopt-u.org, dynamic.adopt-u.org -- the pet-photo bucket's public URL is a
+ *    custom CNAME, not covered by the *.amazonaws.com wildcard) plus *.amazonaws.com generally.
+ */
+private val ADOPTU_CONTENT_SECURITY_POLICY = listOf(
+    "default-src 'none'",
+    "script-src 'none'",
+    "style-src 'self'",
+    "img-src 'self' data: blob: https://static.adopt-u.org https://dynamic.adopt-u.org https://*.amazonaws.com",
+    "connect-src 'self'",
+    "object-src 'none'",
+    "base-uri 'none'",
+    "form-action 'none'",
+    "frame-ancestors 'none'",
+).joinToString("; ")
+
 internal fun configureRouting(routing: HttpRouting.Builder) {
     routing.addFilter(AccessLogFilter())
-    routing.addFilter(SecurityHeadersFilter())
+    routing.installSecurityHeaders(contentSecurityPolicy = ADOPTU_CONTENT_SECURITY_POLICY)
 
     val koin = GlobalContext.get()
     routing.installJwtAuth(
         tokenService = koin.get<TokenServicePort>(),
         tokenBlocklist = koin.get<TokenBlocklistPort>(),
-        resourceCount = 0,
-        roleByName = { null },
+        resourceCount = ADOPTU_RESOURCE_COUNT,
+        roleByName = adoptuRoleByName,
         cookieName = "adoptu_access_token",
     )
 

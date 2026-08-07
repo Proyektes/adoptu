@@ -11,7 +11,6 @@ import com.adoptu.services.ServiceResult
 import com.adoptu.services.UserService
 import com.adoptu.services.validation.PhotographersValidationService
 import com.adoptu.web.Deps
-import com.adoptu.web.getSession
 import com.adoptu.web.pathParam
 import com.adoptu.web.queryParam
 import com.adoptu.web.receiveJson
@@ -20,6 +19,7 @@ import com.adoptu.web.respondError
 import com.adoptu.web.respondForbidden
 import com.adoptu.web.respondNotFound
 import com.adoptu.web.respondUnauthorized
+import com.universaliun.auth.backend.infrastructure.currentPrincipal
 import io.helidon.http.HeaderNames
 import io.helidon.webserver.http.Handler
 import io.helidon.webserver.http.HttpRules
@@ -33,12 +33,8 @@ fun HttpRules.photographerRoutes() {
     val userService by Deps.inject<UserService>()
 
     fun validateUser(req: ServerRequest): ServiceResult<UserDto> = runBlocking {
-        val sessionResult = validationService.validateSession(req.getSession())
-        if (sessionResult is ServiceResult.Forbidden) {
-            return@runBlocking ServiceResult.Forbidden
-        }
-        val session = (sessionResult as ServiceResult.Success).data
-        validationService.validateUserById(session.userId)
+        val principal = req.currentPrincipal() ?: return@runBlocking ServiceResult.Forbidden
+        validationService.validateUserById(principal.userId.value.toInt())
     }
 
     get("/api/photographers", Handler { req, res ->
@@ -58,37 +54,29 @@ fun HttpRules.photographerRoutes() {
     // Own photographer settings - a second call rather than denormalizing these fields onto
     // AuthMeResponse/UserDto, so /api/auth/me stays a plain identity/session payload.
     get("/api/photographers/me", Handler { req, res ->
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val sessionResult = validationService.validateSession(req.getSession())
-            if (sessionResult is ServiceResult.Forbidden) {
-                return@runBlocking res.respondUnauthorized()
-            }
-            val session = (sessionResult as ServiceResult.Success).data
-            val photographer = photographerService.getPhotographerById(session.userId)
+            val photographer = photographerService.getPhotographerById(principal.userId.value.toInt())
                 ?: return@runBlocking res.respondNotFound()
             res.send(photographer)
         }
     })
 
     post("/api/photographers/profile", Handler { req, res ->
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val sessionResult = validationService.validateSession(req.getSession())
-            if (sessionResult is ServiceResult.Forbidden) {
-                return@runBlocking res.respondUnauthorized()
-            }
-            val session = (sessionResult as ServiceResult.Success).data
-
+            val userId = principal.userId.value.toInt()
             val body = req.receiveJson<RoleActivationRequest>()
             if (body.activate) {
-                val existing = userService.getById(session.userId) ?: return@runBlocking res.respondNotFound()
+                val existing = userService.getById(userId) ?: return@runBlocking res.respondNotFound()
                 if (!existing.isEmailVerified) {
                     return@runBlocking res.respondError("Please verify your account email before publishing this profile", 403)
                 }
             }
             val user = if (body.activate) {
-                photographerService.activatePhotographerProfile(session.userId)
+                photographerService.activatePhotographerProfile(userId)
             } else {
-                photographerService.deactivatePhotographerProfile(session.userId)
+                photographerService.deactivatePhotographerProfile(userId)
             }
             val userResult = validationService.validateUser(user)
             if (userResult is ServiceResult.NotFound) {
@@ -108,7 +96,6 @@ fun HttpRules.photographerRoutes() {
                 else -> {}
             }
             val user = (userResult as ServiceResult.Success).data
-            val session = (validationService.validateSession(req.getSession()) as ServiceResult.Success).data
 
             val roleResult = validationService.validateRole(user, "PHOTOGRAPHER")
             if (roleResult is ServiceResult.Forbidden) {
@@ -122,7 +109,9 @@ fun HttpRules.photographerRoutes() {
             }
 
             try {
-                val photographer = photographerService.updatePhotographerSettings(session.userId, body)
+                // user.id is the same id validateUser(req) just resolved principal.userId to -
+                // no need to re-derive it from the request a second time.
+                val photographer = photographerService.updatePhotographerSettings(user.id, body)
                 if (photographer == null) {
                     return@runBlocking res.respondNotFound()
                 }
@@ -134,17 +123,12 @@ fun HttpRules.photographerRoutes() {
     })
 
     post("/api/photographers/requests", Handler { req, res ->
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val sessionResult = validationService.validateSession(req.getSession())
-            if (sessionResult is ServiceResult.Forbidden) {
-                return@runBlocking res.respondUnauthorized()
-            }
-            val session = (sessionResult as ServiceResult.Success).data
-
             val body = req.receiveJson<CreatePhotographyRequestRequest>()
 
             val result = photographerService.createPhotographyRequest(
-                requesterId = session.userId,
+                requesterId = principal.userId.value.toInt(),
                 photographerId = body.photographerId,
                 petId = body.petId,
                 message = body.message
@@ -155,17 +139,12 @@ fun HttpRules.photographerRoutes() {
     })
 
     post("/api/photographers/requests/multiple", Handler { req, res ->
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val sessionResult = validationService.validateSession(req.getSession())
-            if (sessionResult is ServiceResult.Forbidden) {
-                return@runBlocking res.respondUnauthorized()
-            }
-            val session = (sessionResult as ServiceResult.Success).data
-
             val body = req.receiveJson<CreateMultiPhotographerRequestRequest>()
 
             val result = photographerService.createPhotographyRequest(
-                requesterId = session.userId,
+                requesterId = principal.userId.value.toInt(),
                 photographerIds = body.photographerIds,
                 petId = body.petId,
                 message = body.message
@@ -198,13 +177,8 @@ fun HttpRules.photographerRoutes() {
     })
 
     put("/api/photographers/requests/{id}", Handler { req, res ->
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val sessionResult = validationService.validateSession(req.getSession())
-            if (sessionResult is ServiceResult.Forbidden) {
-                return@runBlocking res.respondUnauthorized()
-            }
-            val session = (sessionResult as ServiceResult.Success).data
-
             val idResult = validationService.validateId(req.pathParam("id"))
             if (idResult is ServiceResult.Error) {
                 return@runBlocking res.respondError(idResult.message, 400)
@@ -212,11 +186,12 @@ fun HttpRules.photographerRoutes() {
             val requestId = (idResult as ServiceResult.Success).data
 
             val body = req.receiveJson<UpdatePhotographyRequestRequest>()
-            val userResult = validationService.validateUserById(session.userId)
+            val userId = principal.userId.value.toInt()
+            val userResult = validationService.validateUserById(userId)
             val user = if (userResult is ServiceResult.Success) userResult.data else null
 
             try {
-                res.respondData(photographerService.updatePhotographyRequest(session.userId, user, requestId, body))
+                res.respondData(photographerService.updatePhotographyRequest(userId, user, requestId, body))
             } catch (e: IllegalArgumentException) {
                 res.respondError(e.message ?: "Invalid request", 400)
             }

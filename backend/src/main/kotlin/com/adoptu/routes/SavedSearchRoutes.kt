@@ -3,7 +3,7 @@ package com.adoptu.routes
 import com.adoptu.dto.input.CreateSavedSearchRequest
 import com.adoptu.services.SavedSearchService
 import com.adoptu.web.Deps
-import com.adoptu.web.getSession
+import com.universaliun.auth.backend.infrastructure.currentPrincipal
 import com.adoptu.web.pathParam
 import com.adoptu.web.receiveJson
 import com.adoptu.web.respondError
@@ -20,11 +20,11 @@ fun HttpRules.savedSearchRoutes() {
     val savedSearchService by Deps.inject<SavedSearchService>()
 
     post("/api/saved-searches", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
             val body = req.receiveJson<CreateSavedSearchRequest>()
             try {
-                res.send(savedSearchService.create(session.userId, body))
+                res.send(savedSearchService.create(principal.userId.value.toInt(), body))
             } catch (e: IllegalArgumentException) {
                 res.respondError(e.message ?: "Invalid saved search")
             }
@@ -32,13 +32,13 @@ fun HttpRules.savedSearchRoutes() {
     })
 
     get("/api/saved-searches", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
-        runBlocking { res.send(savedSearchService.list(session.userId)) }
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
+        runBlocking { res.send(savedSearchService.list(principal.userId.value.toInt())) }
     })
 
     delete("/api/saved-searches/{id}", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError("Invalid id")
-        runBlocking { res.respondSuccess(savedSearchService.delete(id, session.userId)) }
+        runBlocking { res.respondSuccess(savedSearchService.delete(id, principal.userId.value.toInt())) }
     })
 }

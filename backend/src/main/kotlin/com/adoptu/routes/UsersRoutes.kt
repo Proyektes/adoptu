@@ -1,5 +1,6 @@
 package com.adoptu.routes
 
+import com.adoptu.adapters.authkit.AdoptuRole
 import com.adoptu.dto.input.AcceptTermsRequest
 import com.adoptu.dto.input.BanUserRequest
 import com.adoptu.dto.input.PhotographerSettingsRequest
@@ -19,7 +20,7 @@ import com.adoptu.services.auth.WebAuthnService
 import com.adoptu.services.validation.ValidationConstants
 import com.adoptu.web.Deps
 import com.adoptu.web.SuccessResponse
-import com.adoptu.web.getSession
+import com.universaliun.auth.backend.infrastructure.currentPrincipal
 import com.adoptu.web.pathParam
 import com.adoptu.web.queryParam
 import com.adoptu.web.receiveJson
@@ -53,11 +54,11 @@ fun HttpRules.usersRoutes() {
     val rescuerDirectoryService by Deps.inject<RescuerDirectoryService>()
 
     post("/api/users/accept-terms", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
             val body = req.receiveJson<AcceptTermsRequest>()
-            val user = userService.acceptTerms(session.userId, body)
+            val user = userService.acceptTerms(principal.userId.value.toInt(), body)
                 ?: return@runBlocking res.respondNotFound()
 
             res.send(user)
@@ -65,13 +66,13 @@ fun HttpRules.usersRoutes() {
     })
 
     put("/api/users/profile", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
             val body = req.receiveJson<UpdateProfileRequest>()
             val language = req.queryParam("language")
             try {
-                val user = userService.updateProfile(session.userId, body.displayName, language, body.country)
+                val user = userService.updateProfile(principal.userId.value.toInt(), body.displayName, language, body.country)
                     ?: return@runBlocking res.respondNotFound(ValidationConstants.USER_NOT_FOUND)
                 res.send(user)
             } catch (e: IllegalArgumentException) {
@@ -81,12 +82,12 @@ fun HttpRules.usersRoutes() {
     })
 
     put("/api/users/language", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
             val body = req.receiveJson<UpdateLanguageRequest>()
             try {
-                val user = userService.updateLanguage(session.userId, body.language)
+                val user = userService.updateLanguage(principal.userId.value.toInt(), body.language)
                     ?: return@runBlocking res.respondNotFound(ValidationConstants.USER_NOT_FOUND)
                 res.send(user)
             } catch (e: IllegalArgumentException) {
@@ -113,20 +114,20 @@ fun HttpRules.usersRoutes() {
     })
 
     post("/api/users/rescuer-profile", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
             val body = req.receiveJson<RoleActivationRequest>()
             if (body.activate) {
-                val existing = userService.getById(session.userId) ?: return@runBlocking res.respondNotFound()
+                val existing = userService.getById(principal.userId.value.toInt()) ?: return@runBlocking res.respondNotFound()
                 if (!existing.isEmailVerified) {
                     return@runBlocking res.respondError("Please verify your account email before publishing this profile", 403)
                 }
             }
             val user = if (body.activate) {
-                userService.activateRescuerProfile(session.userId)
+                userService.activateRescuerProfile(principal.userId.value.toInt())
             } else {
-                userService.deactivateRescuerProfile(session.userId)
+                userService.deactivateRescuerProfile(principal.userId.value.toInt())
             } ?: return@runBlocking res.respondNotFound()
 
             res.send(user)
@@ -134,20 +135,20 @@ fun HttpRules.usersRoutes() {
     })
 
     post("/api/users/temporal-home-profile", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
             val body = req.receiveJson<RoleActivationRequest>()
             if (body.activate) {
-                val existing = userService.getById(session.userId) ?: return@runBlocking res.respondNotFound()
+                val existing = userService.getById(principal.userId.value.toInt()) ?: return@runBlocking res.respondNotFound()
                 if (!existing.isEmailVerified) {
                     return@runBlocking res.respondError("Please verify your account email before publishing this profile", 403)
                 }
             }
             val user = if (body.activate) {
-                userService.activateTemporalHomeProfile(session.userId)
+                userService.activateTemporalHomeProfile(principal.userId.value.toInt())
             } else {
-                userService.deactivateTemporalHomeProfile(session.userId)
+                userService.deactivateTemporalHomeProfile(principal.userId.value.toInt())
             } ?: return@runBlocking res.respondNotFound()
 
             res.send(user)
@@ -155,20 +156,20 @@ fun HttpRules.usersRoutes() {
     })
 
     post("/api/users/urgent-rescuer-profile", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
             val body = req.receiveJson<RoleActivationRequest>()
             if (body.activate) {
-                val existing = userService.getById(session.userId) ?: return@runBlocking res.respondNotFound()
+                val existing = userService.getById(principal.userId.value.toInt()) ?: return@runBlocking res.respondNotFound()
                 if (!existing.isEmailVerified) {
                     return@runBlocking res.respondError("Please verify your account email before publishing this profile", 403)
                 }
             }
             val user = if (body.activate) {
-                urgentRescueService.activateProfile(session.userId)
+                urgentRescueService.activateProfile(principal.userId.value.toInt())
             } else {
-                urgentRescueService.deactivateProfile(session.userId)
+                urgentRescueService.deactivateProfile(principal.userId.value.toInt())
             } ?: return@runBlocking res.respondNotFound()
 
             res.send(user)
@@ -176,11 +177,11 @@ fun HttpRules.usersRoutes() {
     })
 
     put("/api/users/photographer-settings", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
             val body = req.receiveJson<PhotographerSettingsRequest>()
-            val photographer = photographerService.updatePhotographerSettings(session.userId, body)
+            val photographer = photographerService.updatePhotographerSettings(principal.userId.value.toInt(), body)
                 ?: return@runBlocking res.respondNotFound()
 
             res.send(photographer)
@@ -188,20 +189,20 @@ fun HttpRules.usersRoutes() {
     })
 
     post("/api/users/photographer-profile", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
             val body = req.receiveJson<RoleActivationRequest>()
             if (body.activate) {
-                val existing = userService.getById(session.userId) ?: return@runBlocking res.respondNotFound()
+                val existing = userService.getById(principal.userId.value.toInt()) ?: return@runBlocking res.respondNotFound()
                 if (!existing.isEmailVerified) {
                     return@runBlocking res.respondError("Please verify your account email before publishing this profile", 403)
                 }
             }
             val user = if (body.activate) {
-                photographerService.activatePhotographerProfile(session.userId)
+                photographerService.activatePhotographerProfile(principal.userId.value.toInt())
             } else {
-                photographerService.deactivatePhotographerProfile(session.userId)
+                photographerService.deactivatePhotographerProfile(principal.userId.value.toInt())
             } ?: return@runBlocking res.respondNotFound()
 
             res.send(user)
@@ -209,23 +210,23 @@ fun HttpRules.usersRoutes() {
     })
 
     post("/api/users/shelter-profile", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
             val body = req.receiveJson<RoleActivationRequest>()
             if (body.activate) {
-                val existing = userService.getById(session.userId) ?: return@runBlocking res.respondNotFound()
+                val existing = userService.getById(principal.userId.value.toInt()) ?: return@runBlocking res.respondNotFound()
                 if (!existing.isEmailVerified) {
                     return@runBlocking res.respondError("Please verify your account email before publishing this profile", 403)
                 }
-                if (!profileEmailVerificationService.isProfileEmailVerified(VerifiableProfileType.SHELTER, session.userId)) {
+                if (!profileEmailVerificationService.isProfileEmailVerified(VerifiableProfileType.SHELTER, principal.userId.value.toInt())) {
                     return@runBlocking res.respondError("Please verify your shelter's contact email before publishing this profile", 403)
                 }
             }
             val user = if (body.activate) {
-                userService.activateShelterProfile(session.userId)
+                userService.activateShelterProfile(principal.userId.value.toInt())
             } else {
-                userService.deactivateShelterProfile(session.userId)
+                userService.deactivateShelterProfile(principal.userId.value.toInt())
             } ?: return@runBlocking res.respondNotFound()
 
             res.send(user)
@@ -233,23 +234,23 @@ fun HttpRules.usersRoutes() {
     })
 
     post("/api/users/sterilization-profile", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
             val body = req.receiveJson<RoleActivationRequest>()
             if (body.activate) {
-                val existing = userService.getById(session.userId) ?: return@runBlocking res.respondNotFound()
+                val existing = userService.getById(principal.userId.value.toInt()) ?: return@runBlocking res.respondNotFound()
                 if (!existing.isEmailVerified) {
                     return@runBlocking res.respondError("Please verify your account email before publishing this profile", 403)
                 }
-                if (!profileEmailVerificationService.isProfileEmailVerified(VerifiableProfileType.STERILIZATION, session.userId)) {
+                if (!profileEmailVerificationService.isProfileEmailVerified(VerifiableProfileType.STERILIZATION, principal.userId.value.toInt())) {
                     return@runBlocking res.respondError("Please verify your contact email before publishing this profile", 403)
                 }
             }
             val user = if (body.activate) {
-                userService.activateSterilizationProfile(session.userId)
+                userService.activateSterilizationProfile(principal.userId.value.toInt())
             } else {
-                userService.deactivateSterilizationProfile(session.userId)
+                userService.deactivateSterilizationProfile(principal.userId.value.toInt())
             } ?: return@runBlocking res.respondNotFound()
 
             res.send(user)
@@ -257,18 +258,18 @@ fun HttpRules.usersRoutes() {
     })
 
     get("/api/users/has-password", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
-        val hasPassword = runBlocking { passwordService.hasPassword(session.userId) }
+        val hasPassword = runBlocking { passwordService.hasPassword(principal.userId.value.toInt()) }
         res.send(mapOf("hasPassword" to hasPassword))
     })
 
     post("/api/users/password", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
             val body = req.receiveJson<SetPasswordRequest>()
-            val success = passwordService.setPassword(session.userId, body.encryptedPassword)
+            val success = passwordService.setPassword(principal.userId.value.toInt(), body.encryptedPassword)
             if (success) {
                 res.send(SuccessResponse(success = true))
             } else {
@@ -278,12 +279,12 @@ fun HttpRules.usersRoutes() {
     })
 
     put("/api/users/password", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
             val body = req.receiveJson<ChangePasswordRequest>()
             val success = passwordService.changePassword(
-                session.userId,
+                principal.userId.value.toInt(),
                 body.encryptedCurrentPassword,
                 body.encryptedNewPassword
             )
@@ -296,7 +297,7 @@ fun HttpRules.usersRoutes() {
     })
 
     post("/api/users/request-email-change", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
             val body = req.receiveJson<RequestEmailChangeRequest>()
@@ -305,10 +306,10 @@ fun HttpRules.usersRoutes() {
                 return@runBlocking res.respondError("Invalid email format", 400)
             }
 
-            val user = userService.getById(session.userId)
+            val user = userService.getById(principal.userId.value.toInt())
                 ?: return@runBlocking res.respondNotFound()
 
-            val result = emailChangeService.requestEmailChange(session.userId, body.newEmail, user.language)
+            val result = emailChangeService.requestEmailChange(principal.userId.value.toInt(), body.newEmail, user.language)
             if (result.isFailure) {
                 res.send(SuccessWithErrorResponse(success = false, error = result.exceptionOrNull()?.message ?: "Failed to request email change"))
             } else {
@@ -353,11 +354,10 @@ fun HttpRules.adminUsersRoutes() {
     val webAuthnService by Deps.inject<WebAuthnService>()
 
     get("/api/admin/users", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            val user = userService.getById(session.userId)
-            if (user == null || !user.activeRoles.contains(UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
 
@@ -376,11 +376,10 @@ fun HttpRules.adminUsersRoutes() {
     })
 
     get("/api/admin/users/{id}", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            val admin = userService.getById(session.userId)
-            if (admin == null || !admin.activeRoles.contains(UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
 
@@ -391,18 +390,17 @@ fun HttpRules.adminUsersRoutes() {
     })
 
     post("/api/admin/users/{id}/ban", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            val admin = userService.getById(session.userId)
-            if (admin == null || !admin.activeRoles.contains(UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
 
             val id = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondInvalidId(ValidationConstants.INVALID_ID)
             val body = req.receiveJson<BanUserRequest>()
 
-            if (id == session.userId) {
+            if (id == principal.userId.value.toInt()) {
                 return@runBlocking res.respondError("Cannot ban yourself", 400)
             }
 
@@ -424,11 +422,10 @@ fun HttpRules.adminUsersRoutes() {
     })
 
     post("/api/admin/users/{id}/unban", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            val admin = userService.getById(session.userId)
-            if (admin == null || !admin.activeRoles.contains(UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
 
@@ -447,17 +444,16 @@ fun HttpRules.adminUsersRoutes() {
     // active/inactive state (deactivatedAt/deactivatedBy on Users), separate axis with its own
     // "Show inactive" filter in the admin UI. Self-targeting is blocked, same as ban.
     post("/api/admin/users/{id}/deactivate", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            val admin = userService.getById(session.userId)
-            if (admin == null || !admin.activeRoles.contains(UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
 
             val id = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondInvalidId(ValidationConstants.INVALID_ID)
 
-            if (id == session.userId) {
+            if (id == principal.userId.value.toInt()) {
                 return@runBlocking res.respondError("Cannot deactivate yourself", 400)
             }
 
@@ -465,7 +461,7 @@ fun HttpRules.adminUsersRoutes() {
                 return@runBlocking res.respondNotFound()
             }
 
-            val deactivated = userService.deactivateUser(id, session.userId)
+            val deactivated = userService.deactivateUser(id, principal.userId.value.toInt())
             if (deactivated) {
                 res.send(SuccessResponse(success = true))
             } else {
@@ -475,11 +471,10 @@ fun HttpRules.adminUsersRoutes() {
     })
 
     post("/api/admin/users/{id}/reactivate", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            val admin = userService.getById(session.userId)
-            if (admin == null || !admin.activeRoles.contains(UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
 
@@ -499,17 +494,16 @@ fun HttpRules.adminUsersRoutes() {
     // account/profile/pet data is touched. Self-targeting is blocked so an admin can't
     // accidentally lock themselves out via this endpoint.
     post("/api/admin/users/{id}/reset-password", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            val admin = userService.getById(session.userId)
-            if (admin == null || !admin.activeRoles.contains(UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
 
             val id = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondInvalidId(ValidationConstants.INVALID_ID)
 
-            if (id == session.userId) {
+            if (id == principal.userId.value.toInt()) {
                 return@runBlocking res.respondError("Cannot reset your own password this way", 400)
             }
 

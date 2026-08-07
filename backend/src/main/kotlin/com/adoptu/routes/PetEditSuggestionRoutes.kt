@@ -6,7 +6,7 @@ import com.adoptu.services.PetEditSuggestionService
 import com.adoptu.services.ServiceResult
 import com.adoptu.services.validation.UsersValidationService
 import com.adoptu.web.Deps
-import com.adoptu.web.getSession
+import com.universaliun.auth.backend.infrastructure.currentPrincipal
 import com.adoptu.web.pathParam
 import com.adoptu.web.receiveJson
 import com.adoptu.web.respondData
@@ -24,18 +24,18 @@ fun HttpRules.petEditSuggestionRoutes() {
     val validationService by Deps.inject<UsersValidationService>()
 
     post("/api/pets/{id}/edit-suggestions", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
             val petId = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondError("Invalid id", 400)
             val body = req.receiveJson<CreatePetEditSuggestionRequest>()
-            res.respondData(suggestionService.createSuggestion(petId, session.userId, body))
+            res.respondData(suggestionService.createSuggestion(petId, principal.userId.value.toInt(), body))
         }
     })
 
     put("/api/pets/edit-suggestions/{id}/status", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -49,28 +49,28 @@ fun HttpRules.petEditSuggestionRoutes() {
             } catch (e: Exception) {
                 return@runBlocking res.respondError("Invalid status", 400)
             }
-            res.respondData(suggestionService.updateStatus(id, status, session.userId, activeRoles))
+            res.respondData(suggestionService.updateStatus(id, status, principal.userId.value.toInt(), activeRoles))
         }
     })
 
     get("/api/users/rescuer/edit-suggestions", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
             val user = (userResult as ServiceResult.Success).data
             val activeRoles = user.activeRoles.map { it.name }.toSet()
 
-            res.respondData(suggestionService.getPendingForRescuer(session.userId, session.userId, activeRoles))
+            res.respondData(suggestionService.getPendingForRescuer(principal.userId.value.toInt(), principal.userId.value.toInt(), activeRoles))
         }
     })
 
     get("/api/users/volunteer/edit-suggestions", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            res.send(suggestionService.getMySuggestions(session.userId))
+            res.send(suggestionService.getMySuggestions(principal.userId.value.toInt()))
         }
     })
 }

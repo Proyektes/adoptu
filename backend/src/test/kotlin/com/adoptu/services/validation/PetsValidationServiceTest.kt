@@ -11,7 +11,6 @@ import com.adoptu.mocks.TestClock
 import com.adoptu.mocks.TestDatabase
 import com.adoptu.services.ServiceResult
 import com.adoptu.services.UserService
-import com.adoptu.services.auth.SessionUser
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.junit.jupiter.api.AfterEach
@@ -82,27 +81,6 @@ class PetsValidationServiceTest {
         displayName = "Test User",
         activeRoles = roles
     )
-
-    // validateSession
-
-    @Test
-    fun `validateSession returns Forbidden when session is null`() = runBlocking {
-        val result = service.validateSession(null)
-
-        assertIs<ServiceResult.Forbidden>(result)
-        Unit
-    }
-
-    @Test
-    fun `validateSession returns Success when session is present`() = runBlocking {
-        val session = SessionUser(userId = 1, email = "a@test.com", displayName = "A")
-
-        val result = service.validateSession(session)
-
-        assertIs<ServiceResult.Success<SessionUser>>(result)
-        assertEquals(session, result.data)
-        Unit
-    }
 
     // validateUserById
 

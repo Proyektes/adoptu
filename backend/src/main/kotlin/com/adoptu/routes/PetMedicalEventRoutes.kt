@@ -6,7 +6,7 @@ import com.adoptu.services.ServiceResult
 import com.adoptu.services.validation.PetsValidationService
 import com.adoptu.services.validation.ValidationConstants
 import com.adoptu.web.Deps
-import com.adoptu.web.getSession
+import com.universaliun.auth.backend.infrastructure.currentPrincipal
 import com.adoptu.web.pathParam
 import com.adoptu.web.receiveJson
 import com.adoptu.web.respondData
@@ -32,9 +32,9 @@ fun HttpRules.petMedicalEventRoutes() {
     })
 
     post("/api/pets/{id}/medical-events", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -43,14 +43,14 @@ fun HttpRules.petMedicalEventRoutes() {
             val petId = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondError(ValidationConstants.INVALID_ID)
 
             val body = req.receiveJson<CreatePetMedicalEventRequest>()
-            res.respondData(medicalEventService.create(petId, session.userId, activeRoles, body))
+            res.respondData(medicalEventService.create(petId, principal.userId.value.toInt(), activeRoles, body))
         }
     })
 
     delete("/api/pets/medical-events/{eventId}", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -58,7 +58,7 @@ fun HttpRules.petMedicalEventRoutes() {
             val activeRoles = user.activeRoles.map { it.name }.toSet()
             val eventId = req.pathParam("eventId").toIntOrNull() ?: return@runBlocking res.respondError(ValidationConstants.INVALID_ID)
 
-            res.respondSuccess(medicalEventService.delete(eventId, session.userId, activeRoles))
+            res.respondSuccess(medicalEventService.delete(eventId, principal.userId.value.toInt(), activeRoles))
         }
     })
 }

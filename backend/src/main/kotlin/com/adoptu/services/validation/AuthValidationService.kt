@@ -3,7 +3,6 @@ package com.adoptu.services.validation
 import com.adoptu.dto.input.UserDto
 import com.adoptu.services.ServiceResult
 import com.adoptu.services.UserService
-import com.adoptu.services.auth.SessionUser
 import com.adoptu.services.crypto.CryptoService
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -33,11 +32,6 @@ class AuthValidationService : KoinComponent {
         val user = userService.getByEmail(email)
         return if (user != null) ServiceResult.Success(user)
                else ServiceResult.Error("Invalid credentials")
-    }
-
-    fun validateSession(session: SessionUser?): ServiceResult<SessionUser> {
-        return if (session != null) ServiceResult.Success(session)
-               else ServiceResult.Forbidden
     }
 
     suspend fun validateUserById(userId: Int): ServiceResult<UserDto> {

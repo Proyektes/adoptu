@@ -3,18 +3,12 @@ package com.adoptu.services.validation
 import com.adoptu.dto.input.UserDto
 import com.adoptu.services.ServiceResult
 import com.adoptu.services.UserService
-import com.adoptu.services.auth.SessionUser
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class PetsValidationService : KoinComponent {
 
     private val userService: UserService by inject()
-
-    fun validateSession(session: SessionUser?): ServiceResult<SessionUser> {
-        return if (session != null) ServiceResult.Success(session) 
-               else ServiceResult.Forbidden
-    }
 
     suspend fun validateUserById(userId: Int): ServiceResult<UserDto> {
         val user = userService.getById(userId)

@@ -1,18 +1,20 @@
 package com.adoptu.testsupport
 
+import com.adoptu.adapters.authkit.ADOPTU_RESOURCE_COUNT
 import com.adoptu.adapters.authkit.AdoptuPasskeyCeremonyStoreAdapter
 import com.adoptu.adapters.authkit.AdoptuPasskeyCredentialRepositoryAdapter
 import com.adoptu.adapters.authkit.AdoptuRefreshTokenRepositoryAdapter
 import com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter
 import com.adoptu.adapters.authkit.AuthKitJwtKeyProvider
+import com.adoptu.adapters.authkit.adoptuRoleByName
 import com.adoptu.adapters.db.DatabaseFactory
 import com.adoptu.config.AppConfig
 import com.adoptu.configureRouting
 import com.adoptu.di.appModule
-import com.adoptu.services.auth.SessionUser
 import com.adoptu.services.crypto.CryptoService
 import com.adoptu.web.JsonSupport
-import com.adoptu.web.setSession
+import com.universaliun.auth.backend.domain.model.user.AuthUser
+import com.universaliun.auth.backend.domain.model.user.Email
 import com.universaliun.auth.backend.domain.port.out.TokenServicePort
 import com.universaliun.auth.backend.domain.port.out.UserRepositoryPort
 import com.universaliun.auth.backend.infrastructure.authKoinModule
@@ -27,6 +29,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import java.time.Instant
 
 /**
  * Replaces Ktor's `testApplication { ... }` / `embeddedServer(Netty, ...)` test bootstrapping.
@@ -68,8 +71,8 @@ object TestServer {
      *   the HikariCP-pooled H2 connection and schema. Set false when the test manages its own
      *   connection via `TestDatabase.initH2()`/`clearAllData()` instead (Exposed's
      *   `TransactionManager.defaultDatabase` is process-global, so only one should run per test).
-     * @param withTestLogin also registers `POST /test/login/{userId}`, setting a real signed
-     *   session cookie for that user id without going through the production login flow -
+     * @param withTestLogin also registers `POST /test/login/{userId}`, setting a real AuthKit
+     *   access-token cookie for that user id without going through the production login flow -
      *   mirrors the old Ktor tests' `client.loginAs(userId)` helper.
      */
     fun start(
@@ -100,9 +103,8 @@ object TestServer {
         val authModule = authKoinModule(
             jwtPrivateKey = jwtPrivateKey,
             jwtPublicKey = jwtPublicKey,
-            // Adopt-u has no AuthKit-native RBAC - see Application.kt's main() for the same choice.
-            resourceCount = 0,
-            roleByName = { null },
+            resourceCount = ADOPTU_RESOURCE_COUNT,
+            roleByName = adoptuRoleByName,
             defaultPermissions = PermissionSet.empty(0),
             magicLinkExpiryMs = 5 * 60 * 1000L,
             requireEmailVerification = true,
@@ -149,31 +151,40 @@ object TestServer {
     }
 }
 
-// Mirrors the old Ktor tests' `client.loginAs(userId)` helper. Route groups other than
-// AuthRoutes.kt (Pets/Users/Photographer/... ) haven't been migrated onto AuthKit yet and still
-// authenticate via the native `req.getSession()` cookie -- that native SessionUser cookie MUST
-// keep being set here unconditionally, or every one of those still-native suites' test-logins
-// break (confirmed: an earlier version of this helper that set *only* the AuthKit cookie turned
-// 256 tests red across PetsRoutesE2ETest/UsersRoutesE2ETest/etc.). AuthRoutes.kt itself now
-// authenticates via `req.currentPrincipal()`, populated by AuthKit's JwtAuthFilter from a JWT in
-// the "adoptu_access_token" cookie (see ACCESS_COOKIE in AuthRoutes.kt) -- so also mint a real
+// Mirrors the old Ktor tests' `client.loginAs(userId)` helper. Every route now authenticates via
+// `req.currentPrincipal()`, populated by AuthKit's JwtAuthFilter from a JWT in the
+// "adoptu_access_token" cookie (see ACCESS_COOKIE in AuthRoutes.kt) -- so this mints a real
 // AuthKit access token via the same TokenServicePort/UserRepositoryPort AuthRoutes.kt resolves
-// from Koin (both bound by authKoinModule(...) above) and set it as a second cookie, best-effort:
-// some callers deliberately log in as a userId with no AuthKit-visible row (e.g. to exercise a
-// downstream 404), which must still reach the route rather than fail here, so this only adds the
-// AuthKit cookie when the user actually resolves.
+// from Koin (both bound by authKoinModule(...) above).
+//
+// Some callers deliberately log in as a userId with no AuthKit-visible row (e.g. to exercise a
+// downstream 404 in the route itself, past the auth check) - falls back to a synthetic AuthUser
+// in that case rather than skipping the cookie: skipping it would turn "authenticated as a userId
+// whose row was deleted" into "not authenticated at all" (401), which isn't what production does
+// -- JWT validity never re-checks the DB row exists, only signature/expiry/blocklist (see
+// resolveAuthPrincipal in AuthKit's JwtAuthPlugin.kt), so a still-valid token for a since-deleted
+// user reaches the route exactly like this fallback does, and correctly 404s downstream instead.
 private fun HttpRouting.Builder.registerTestLogin() {
     post("/test/login/{userId}", Handler { req, res ->
         val userId = req.path().pathParameters().get("userId").toInt()
-        res.setSession(SessionUser(userId, "user$userId@test.com", "Test User $userId"))
         val koin = GlobalContext.get()
-        val user = koin.get<UserRepositoryPort>().findById(AuthUserId(userId.toString()))
-        if (user != null) {
-            val accessToken = koin.get<TokenServicePort>().generateAccessToken(user)
-            res.headers().addCookie(
-                SetCookie.builder("adoptu_access_token", accessToken).path("/").build()
-            )
-        }
+        val authUserId = AuthUserId(userId.toString())
+        val user = koin.get<UserRepositoryPort>().findById(authUserId) ?: AuthUser(
+            id = authUserId,
+            email = Email("user$userId@test.com"),
+            displayName = "Test User $userId",
+            passwordHash = null,
+            roles = emptySet(),
+            permissions = PermissionSet.empty(0),
+            enabled = true,
+            emailVerified = true,
+            createdAt = Instant.now(),
+            lastModifiedAt = Instant.now(),
+        )
+        val accessToken = koin.get<TokenServicePort>().generateAccessToken(user)
+        res.headers().addCookie(
+            SetCookie.builder("adoptu_access_token", accessToken).path("/").build()
+        )
         res.send("OK")
     })
 }

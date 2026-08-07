@@ -12,7 +12,6 @@ import com.adoptu.dto.output.SuccessWithErrorResponse
 import com.adoptu.dto.output.VerificationResponse
 import com.adoptu.services.EmailVerificationService
 import com.adoptu.services.PasswordService
-import com.adoptu.services.auth.SessionUser
 import com.adoptu.services.ServiceResult
 import com.adoptu.services.UserService
 import com.adoptu.services.crypto.CryptoService
@@ -26,7 +25,6 @@ import com.adoptu.web.receiveText
 import com.adoptu.web.respondError
 import com.adoptu.web.respondHtml
 import com.adoptu.web.respondRedirect
-import com.adoptu.web.setSession
 import com.universaliun.auth.backend.adapter.`in`.web.clearAuthCookies
 import com.universaliun.auth.backend.adapter.`in`.web.cookie.CookieConfig
 import com.universaliun.auth.backend.adapter.`in`.web.setAuthCookies
@@ -45,6 +43,7 @@ import com.universaliun.auth.backend.domain.port.`in`.FinishPasskeySignupUseCase
 import com.universaliun.auth.backend.domain.port.`in`.ForgotPasswordUseCase
 import com.universaliun.auth.backend.domain.port.`in`.LoginUseCase
 import com.universaliun.auth.backend.domain.port.`in`.LogoutUseCase
+import com.universaliun.auth.backend.domain.port.`in`.RefreshTokenUseCase
 import com.universaliun.auth.backend.domain.port.`in`.ResetPasswordUseCase
 import com.universaliun.auth.backend.domain.port.`in`.StartPasskeyLoginUseCase
 import com.universaliun.auth.backend.domain.port.`in`.StartPasskeyRegistrationUseCase
@@ -79,8 +78,7 @@ import java.util.UUID
 
 private val logger = LoggerFactory.getLogger("AdoptU-Auth")
 
-// Cookie names for the tokens AuthKit issues -- distinct from the retired native "user_session"
-// cookie (still cleared on logout below, as hygiene for anyone with a pre-cutover session).
+// Cookie names for the tokens AuthKit issues.
 private const val ACCESS_COOKIE = "adoptu_access_token"
 private const val REFRESH_COOKIE = "adoptu_refresh_token"
 
@@ -133,6 +131,7 @@ fun HttpRules.authRoutes() {
     val finishPasskeyLogin by Deps.inject<FinishPasskeyLoginUseCase>()
     val loginUseCase by Deps.inject<LoginUseCase>()
     val logoutUseCase by Deps.inject<LogoutUseCase>()
+    val refreshTokenUseCase by Deps.inject<RefreshTokenUseCase>()
     val forgotPasswordUseCase by Deps.inject<ForgotPasswordUseCase>()
     val resetPasswordUseCase by Deps.inject<ResetPasswordUseCase>()
     val rateLimiter by Deps.inject<RateLimiter>()
@@ -152,30 +151,12 @@ fun HttpRules.authRoutes() {
     val accessTokenExpiryMs = Duration.ofMinutes(15).toMillis()
     val refreshTokenExpiryMs = Duration.ofDays(30).toMillis()
 
-    // sessionUser also (re)issues the legacy `user_session` HMAC cookie: server-rendered pages
-    // (UIRoutes' getNavParams/isAdmin gates) and the pre-AuthKit routes (Photographer/Shelter/
-    // SterilizationLocation) still authenticate via getSession() — after the AuthKit cutover
-    // nothing set that cookie anymore, so every login looked anonymous to them. That cookie is a
-    // genuinely separate mechanism from AuthKit's JWT pair (an HMAC-signed session payload, not a
-    // token -- see Sessions.kt), so it isn't part of CookieConfig and stays set separately here.
-    fun ServerResponse.setAuthCookies(tokens: TokenPair, sessionUser: SessionUser?) {
+    fun ServerResponse.setAuthCookies(tokens: TokenPair) {
         setAuthCookies(tokens, cookieConfig, accessTokenExpiryMs, refreshTokenExpiryMs)
-        sessionUser?.let { setSession(it) }
     }
 
-    // AuthKit's clearAuthCookies() only clears the access/refresh (and, if configured, CSRF)
-    // cookies -- the legacy `user_session` cookie is adoptu-specific and still cleared here
-    // explicitly, using the same Path=/ + epoch-Expires approach (NOT Max-Age=0: Helidon's
-    // SetCookie silently omits Max-Age when given Duration.ZERO, which would leave `user_session`
-    // as a value-overwritten session cookie instead of actually deleting it -- see AuthKit's
-    // CookieAuthRoutes.kt clearAuthCookies() doc comment for the same gotcha on the token cookies).
     fun ServerResponse.clearAuthCookies() {
         clearAuthCookies(cookieConfig)
-        headers().addCookie(
-            SetCookie.builder("user_session", "").path("/")
-                .expires(ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC))
-                .secure(cookieSecure).httpOnly(true).sameSite(SetCookie.SameSite.STRICT).build()
-        )
     }
 
     fun ServerRequest.cookieValue(name: String): String? {
@@ -379,22 +360,18 @@ fun HttpRules.authRoutes() {
         // shared slot directly via the bridge repository rather than EmailVerificationService's
         // own verifyToken(), which only ever looks in the old table. Absorbed from UIRoutes.kt's
         // old /verify handler (deleted - the static verify.html/verify-email.html pages drive this
-        // endpoint via fetch instead, see EmailVerificationPageModule in frontend): auto-login
-        // (the legacy `user_session` cookie, still what PhotographerRoutes/ShelterRoutes/
-        // SterilizationLocationRoutes/UsersRoutes' session-gated routes check via getSession())
-        // and the pre-AuthKit-cutover legacy-token fallback both moved here too, so a single
-        // endpoint now does everything the two old page routes (/verify, /verify-email) used to
-        // split between them.
+        // endpoint via fetch instead, see EmailVerificationPageModule in frontend): the
+        // pre-AuthKit-cutover legacy-token fallback moved here too, so a single endpoint now does
+        // everything the two old page routes (/verify, /verify-email) used to split between them.
+        // Doesn't auto-login (no AuthKit token pair to issue from a plain activation token) -
+        // the frontend sends the user to /login after a successful verification.
         val kitUser = kitUserRepository.findByResetTokenHash(sha256Hex(token))
         if (kitUser != null) {
             val activated = kitUserRepository.save(kitUser.copy(enabled = true, emailVerified = true))
             kitUserRepository.updateResetToken(kitUser.id, null, null)
             val kitUserId = kitUser.id.value.toInt()
             if (activated.emailVerified) {
-                runBlocking {
-                    userService.activatePendingRoles(kitUserId)
-                    userRepository.getById(kitUserId)?.let { res.setSession(SessionUser(it.id, it.username, it.displayName)) }
-                }
+                runBlocking { userService.activatePendingRoles(kitUserId) }
             }
             res.send(VerificationResponse(success = activated.emailVerified, message = "Email verified successfully. You can now login."))
             return@Handler
@@ -402,12 +379,7 @@ fun HttpRules.authRoutes() {
 
         // Legacy fallback: tokens minted before the AuthKit cutover live in the old table.
         val result = runBlocking {
-            val legacyUserId = userRepository.getUserIdByToken(token)
-            val verifyResult = webAuthnService.verifyTokenAndGetLanguage(token)
-            if (verifyResult.first && legacyUserId != null) {
-                userRepository.getById(legacyUserId)?.let { res.setSession(SessionUser(it.id, it.username, it.displayName)) }
-            }
-            verifyResult
+            webAuthnService.verifyTokenAndGetLanguage(token)
         }
         if (result.first) {
             res.send(VerificationResponse(success = true, message = "Email verified successfully. You can now login."))
@@ -496,10 +468,7 @@ fun HttpRules.authRoutes() {
                 return@Handler
             }
             logger.info("Passkey auth success: userId=$userId")
-            res.setAuthCookies(
-                result.tokens,
-                user?.let { SessionUser(it.id, it.username, it.displayName) },
-            )
+            res.setAuthCookies(result.tokens)
             res.send(SuccessResponse(success = true))
         } catch (e: InvalidPasskeyCeremonyException) {
             res.send(SuccessWithErrorResponse(success = false, error = "Authentication failed"))
@@ -518,6 +487,30 @@ fun HttpRules.authRoutes() {
         }
         res.clearAuthCookies()
         res.send(SuccessResponse(success = true))
+    })
+
+    // Renews the short-lived (15 min, see accessTokenExpiryMs above) access-token cookie from the
+    // refresh-token cookie, without requiring the user to log in again. Mirrors AuthKit's own
+    // cookieAuthRoutes()' /api/auth/web/refresh (not mounted here directly - this app hand-wires
+    // individual endpoints rather than that whole bundle, same as every other route in this file).
+    // Any failure (missing/expired/revoked/reused refresh token, or the user's account no longer
+    // existing/enabled) clears both cookies and requires a fresh login rather than leaving a stale,
+    // now-unusable pair sitting in the browser.
+    post("/api/auth/refresh", Handler { req, res ->
+        val refreshToken = req.cookieValue(REFRESH_COOKIE)
+        if (refreshToken.isNullOrBlank()) {
+            res.clearAuthCookies()
+            res.respondError("Not authenticated", 401)
+            return@Handler
+        }
+        try {
+            val tokens = refreshTokenUseCase.refresh(RefreshTokenUseCase.Command(refreshToken))
+            res.setAuthCookies(tokens)
+            res.send(SuccessResponse(success = true))
+        } catch (e: RuntimeException) {
+            res.clearAuthCookies()
+            res.respondError("Session expired, please log in again", 401)
+        }
     })
 
     get("/api/auth/me", Handler { req, res ->
@@ -636,9 +629,7 @@ fun HttpRules.authRoutes() {
             val result = Deps.get<com.universaliun.auth.backend.domain.port.`in`.ConsumeMagicLinkUseCase>()
                 .consume(com.universaliun.auth.backend.domain.port.`in`.ConsumeMagicLinkUseCase.Command(token))
             logger.info("Magic link login success: userId=$tokenUserId")
-            val sessionUser = runBlocking { userService.getById(tokenUserId) }
-                ?.let { SessionUser(it.id, it.username, it.displayName) }
-            res.setAuthCookies(result.tokens, sessionUser)
+            res.setAuthCookies(result.tokens)
             // Same-origin bounce instead of a 302: the click from the mail client is a cross-site
             // navigation, and SameSite=Strict cookies are withheld for the whole redirect chain it
             // initiates — a direct redirect would render /profile logged-out. The meta refresh
@@ -687,9 +678,7 @@ fun HttpRules.authRoutes() {
             runBlocking { passwordService.recordLoginAttempt(body.email, successful = true) }
             val userId = extractUserId(result.tokens.accessToken)
             logger.info("Password login success: userId=$userId username=${body.email}")
-            val sessionUser = userId.toIntOrNull()?.let { id -> runBlocking { userService.getById(id) } }
-                ?.let { SessionUser(it.id, it.username, it.displayName) }
-            res.setAuthCookies(result.tokens, sessionUser)
+            res.setAuthCookies(result.tokens)
             res.send(SuccessResponse(success = true))
         } catch (e: InvalidCredentialsException) {
             runBlocking { passwordService.recordLoginAttempt(body.email, successful = false) }

@@ -47,14 +47,12 @@ object TestHttp {
         )
 
     /** Logs in as [userId] against the test-only `/test/login/{userId}` route, returning a
-     *  `"name1=value1; name2=value2"` Cookie header covering every cookie the route set (it sets
-     *  both the native session cookie and, best-effort, an AuthKit access-token cookie -- a
-     *  response can carry multiple Set-Cookie headers, and `firstValue` silently drops all but the
-     *  first, which previously meant only the session cookie made it back to the caller). */
+     *  `"name1=value1; name2=value2"` Cookie header with the AuthKit access-token cookie the
+     *  route set. */
     fun loginAs(baseUrl: String, userId: Int): String {
         val response = send(requestBuilder("$baseUrl/test/login/$userId", null).POST(BodyPublishers.noBody()))
         val setCookies = response.headers().allValues("Set-Cookie")
-        if (setCookies.isEmpty()) throw IllegalStateException("No session cookie returned from test login")
+        if (setCookies.isEmpty()) throw IllegalStateException("No access-token cookie returned from test login")
         return setCookies.joinToString("; ") { it.substringBefore(";") }
     }
 

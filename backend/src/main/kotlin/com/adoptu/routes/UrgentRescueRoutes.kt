@@ -6,7 +6,7 @@ import com.adoptu.dto.input.UpdateUrgentRescuerProfileRequest
 import com.adoptu.services.UrgentRescueService
 import com.adoptu.services.UserService
 import com.adoptu.web.Deps
-import com.adoptu.web.getSession
+import com.universaliun.auth.backend.infrastructure.currentPrincipal
 import com.adoptu.web.pathParam
 import com.adoptu.web.queryParam
 import com.adoptu.web.receiveJson
@@ -36,18 +36,18 @@ fun HttpRules.urgentRescueRoutes() {
     // --- Rescuer profile (coverage area, phone) -------------------------------------------
 
     get("/api/urgent-rescuers/me", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val profile = urgentRescueService.getProfile(session.userId) ?: return@runBlocking res.respondNotFound("No urgent-rescuer profile yet")
+            val profile = urgentRescueService.getProfile(principal.userId.value.toInt()) ?: return@runBlocking res.respondNotFound("No urgent-rescuer profile yet")
             res.send(profile)
         }
     })
 
     post("/api/urgent-rescuers/me", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
             val body = req.receiveJson<CreateUrgentRescuerProfileRequest>()
-            urgentRescueService.createProfile(session.userId, body).fold(
+            urgentRescueService.createProfile(principal.userId.value.toInt(), body).fold(
                 onSuccess = { res.send(it) },
                 onFailure = { res.respondError(it.message ?: "Could not create profile") }
             )
@@ -55,10 +55,10 @@ fun HttpRules.urgentRescueRoutes() {
     })
 
     put("/api/urgent-rescuers/me", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
             val body = req.receiveJson<UpdateUrgentRescuerProfileRequest>()
-            urgentRescueService.updateProfile(session.userId, body).fold(
+            urgentRescueService.updateProfile(principal.userId.value.toInt(), body).fold(
                 onSuccess = { res.send(it) },
                 onFailure = { res.respondError(it.message ?: "Could not update profile") }
             )
@@ -69,8 +69,8 @@ fun HttpRules.urgentRescueRoutes() {
 
     post("/api/urgent-reports/submit", Handler { req, res ->
         runBlocking {
-            val session = req.getSession()
-            val sessionUser = session?.let { userService.getById(it.userId) }
+            val principal = req.currentPrincipal()
+            val sessionUser = principal?.let { userService.getById(it.userId.value.toInt()) }
             val body = req.receiveJson<SubmitUrgentReportRequest>()
 
             urgentRescueService.submitReport(body, sessionUser, clientIp(req)).fold(
@@ -98,10 +98,10 @@ fun HttpRules.urgentRescueRoutes() {
     // In-app dashboard accept button - same race, resolved the same way, just authenticated
     // instead of token-based.
     post("/api/urgent-rescuers/reports/{id}/accept", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         val reportId = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError("Invalid report id")
         runBlocking {
-            urgentRescueService.acceptAsRescuer(reportId, session.userId).fold(
+            urgentRescueService.acceptAsRescuer(reportId, principal.userId.value.toInt()).fold(
                 onSuccess = { res.send(it) },
                 onFailure = { res.respondError(it.message ?: "Could not accept report", 409) }
             )
@@ -109,9 +109,9 @@ fun HttpRules.urgentRescueRoutes() {
     })
 
     get("/api/urgent-rescuers/my-pages", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            res.send(urgentRescueService.getMyPendingPages(session.userId))
+            res.send(urgentRescueService.getMyPendingPages(principal.userId.value.toInt()))
         }
     })
 

@@ -1,5 +1,6 @@
 package com.adoptu.routes
 
+import com.adoptu.adapters.authkit.AdoptuRole
 import com.adoptu.config.AppConfig
 import com.adoptu.dto.input.CreateAdoptionRequestRequest
 import com.adoptu.dto.input.CreatePetRequest
@@ -8,12 +9,11 @@ import com.adoptu.dto.input.UserRole
 import com.adoptu.services.PetFavoriteService
 import com.adoptu.services.PetService
 import com.adoptu.services.ServiceResult
-import com.adoptu.services.UserService
 import com.adoptu.services.validation.PetsValidationService
 import com.adoptu.services.validation.ValidationConstants
 import com.adoptu.web.Deps
 import com.adoptu.web.SuccessResponse
-import com.adoptu.web.getSession
+import com.universaliun.auth.backend.infrastructure.currentPrincipal
 import com.adoptu.web.pathParam
 import com.adoptu.web.queryParam
 import com.adoptu.web.receiveFormParameters
@@ -104,10 +104,10 @@ fun HttpRules.petsRoutes() {
     // given method in registration order, so literal-segment routes must precede templated ones
     // at the same path depth or they'd be shadowed (unlike Ktor's specificity-first routing tree).
     get("/api/pets/mine", Handler { req, res ->
-        val session = req.getSession()
+        val principal = req.currentPrincipal()
             ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -120,22 +120,22 @@ fun HttpRules.petsRoutes() {
     })
 
     get("/api/pets/my-adoption-requests", Handler { req, res ->
-        val session = req.getSession()
+        val principal = req.currentPrincipal()
             ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val requests = petService.getMyAdoptionRequests(session.userId)
+            val requests = petService.getMyAdoptionRequests(principal.userId.value.toInt())
             res.send(requests)
         }
     })
 
     get("/api/pets/favorites", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
-        runBlocking { res.send(petFavoriteService.getFavoritePets(session.userId)) }
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
+        runBlocking { res.send(petFavoriteService.getFavoritePets(principal.userId.value.toInt())) }
     })
 
     get("/api/pets/favorite-ids", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
-        runBlocking { res.send(petFavoriteService.getFavoritePetIds(session.userId)) }
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
+        runBlocking { res.send(petFavoriteService.getFavoritePetIds(principal.userId.value.toInt())) }
     })
 
     get("/api/pets/{id}", Handler { req, res ->
@@ -152,9 +152,9 @@ fun HttpRules.petsRoutes() {
     })
 
     get("/api/pets/{id}/analytics", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -162,15 +162,15 @@ fun HttpRules.petsRoutes() {
             val activeRoles = user.activeRoles.map { it.name }.toSet()
             val petId = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondError(ValidationConstants.INVALID_ID)
 
-            res.respondData(petService.getAnalytics(petId, session.userId, activeRoles))
+            res.respondData(petService.getAnalytics(petId, principal.userId.value.toInt(), activeRoles))
         }
     })
 
     post("/api/pets", Handler { req, res ->
-        val session = req.getSession()
+        val principal = req.currentPrincipal()
             ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -183,7 +183,7 @@ fun HttpRules.petsRoutes() {
 
             val request = req.receiveJson<CreatePetRequest>()
             try {
-                val pet = petService.create(session.userId, request)
+                val pet = petService.create(principal.userId.value.toInt(), request)
                 res.send(pet)
             } catch (e: IllegalArgumentException) {
                 res.respondError(e.message ?: "Invalid request", 400)
@@ -192,10 +192,10 @@ fun HttpRules.petsRoutes() {
     })
 
     put("/api/pets/{id}", Handler { req, res ->
-        val session = req.getSession()
+        val principal = req.currentPrincipal()
             ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -205,7 +205,7 @@ fun HttpRules.petsRoutes() {
 
             val body = req.receiveJson<UpdatePetRequest>()
             try {
-                res.respondData(petService.update(id, session.userId, activeRoles, body))
+                res.respondData(petService.update(id, principal.userId.value.toInt(), activeRoles, body))
             } catch (e: IllegalArgumentException) {
                 res.respondError(e.message ?: "Invalid request", 400)
             }
@@ -213,10 +213,10 @@ fun HttpRules.petsRoutes() {
     })
 
     delete("/api/pets/{id}", Handler { req, res ->
-        val session = req.getSession()
+        val principal = req.currentPrincipal()
             ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -224,15 +224,15 @@ fun HttpRules.petsRoutes() {
             val activeRoles = user.activeRoles.map { it.name }.toSet()
             val id = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondError(ValidationConstants.INVALID_ID)
 
-            res.respondSuccess(petService.delete(id, session.userId, activeRoles))
+            res.respondSuccess(petService.delete(id, principal.userId.value.toInt(), activeRoles))
         }
     })
 
     post("/api/pets/{id}/images", Handler { req, res ->
-        val session = req.getSession()
+        val principal = req.currentPrincipal()
             ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -244,7 +244,7 @@ fun HttpRules.petsRoutes() {
             if (imageIdsParam != null) {
                 try {
                     val imageIds = imageIdsParam.split(",").mapNotNull { it.toIntOrNull() }
-                    val result = petService.updatePetImages(petId, session.userId, activeRoles, imageIds)
+                    val result = petService.updatePetImages(petId, principal.userId.value.toInt(), activeRoles, imageIds)
                     when (result) {
                         is ServiceResult.Success -> res.send(mapOf("images" to result.data))
                         is ServiceResult.NotFound -> res.respondError(ValidationConstants.NOT_FOUND, 404)
@@ -268,7 +268,7 @@ fun HttpRules.petsRoutes() {
                 res.respondData(
                     petService.uploadAndAddImage(
                         petId = petId,
-                        userId = session.userId,
+                        userId = principal.userId.value.toInt(),
                         userRoles = activeRoles,
                         imageName = filePart.fileName,
                         contentType = filePart.contentType,
@@ -283,9 +283,9 @@ fun HttpRules.petsRoutes() {
     })
 
     post("/api/pets/{id}/video", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) return@runBlocking res.respondNotFound()
             val user = (userResult as ServiceResult.Success).data
             val activeRoles = user.activeRoles.map { it.name }.toSet()
@@ -294,7 +294,7 @@ fun HttpRules.petsRoutes() {
             val (filePart, _) = req.receiveMultipart()
             if (filePart == null) return@runBlocking res.respondError("No video provided")
 
-            when (val result = petService.uploadAndSetVideo(petId, session.userId, activeRoles, filePart.fileName, filePart.contentType, filePart.bytes)) {
+            when (val result = petService.uploadAndSetVideo(petId, principal.userId.value.toInt(), activeRoles, filePart.fileName, filePart.contentType, filePart.bytes)) {
                 is ServiceResult.Success -> res.send(result.data)
                 is ServiceResult.NotFound -> res.respondError(ValidationConstants.NOT_FOUND, 404)
                 is ServiceResult.Forbidden -> res.respondError("Forbidden", 403)
@@ -304,15 +304,15 @@ fun HttpRules.petsRoutes() {
     })
 
     delete("/api/pets/{id}/video", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) return@runBlocking res.respondNotFound()
             val user = (userResult as ServiceResult.Success).data
             val activeRoles = user.activeRoles.map { it.name }.toSet()
             val petId = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondError(ValidationConstants.INVALID_ID)
 
-            when (val result = petService.removeVideo(petId, session.userId, activeRoles)) {
+            when (val result = petService.removeVideo(petId, principal.userId.value.toInt(), activeRoles)) {
                 is ServiceResult.Success -> res.send(result.data)
                 is ServiceResult.NotFound -> res.respondError(ValidationConstants.NOT_FOUND, 404)
                 is ServiceResult.Forbidden -> res.respondError("Forbidden", 403)
@@ -322,22 +322,22 @@ fun HttpRules.petsRoutes() {
     })
 
     post("/api/pets/{id}/favorite", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         val petId = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
-        runBlocking { res.respondSuccess(petFavoriteService.add(session.userId, petId)) }
+        runBlocking { res.respondSuccess(petFavoriteService.add(principal.userId.value.toInt(), petId)) }
     })
 
     delete("/api/pets/{id}/favorite", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         val petId = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
-        runBlocking { res.respondSuccess(petFavoriteService.remove(session.userId, petId)) }
+        runBlocking { res.respondSuccess(petFavoriteService.remove(principal.userId.value.toInt(), petId)) }
     })
 
     delete("/api/pets/{petId}/images/{imageId}", Handler { req, res ->
-        val session = req.getSession()
+        val principal = req.currentPrincipal()
             ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -348,7 +348,7 @@ fun HttpRules.petsRoutes() {
 
             try {
                 res.respondSuccess(
-                    petService.removeImage(petId, imageId, session.userId, activeRoles)
+                    petService.removeImage(petId, imageId, principal.userId.value.toInt(), activeRoles)
                 )
             } catch (e: Exception) {
                 res.respondError("Failed to delete storage. Please try again later.", 500)
@@ -357,10 +357,10 @@ fun HttpRules.petsRoutes() {
     })
 
     put("/api/pets/{petId}/images/{imageId}/primary", Handler { req, res ->
-        val session = req.getSession()
+        val principal = req.currentPrincipal()
             ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -371,7 +371,7 @@ fun HttpRules.petsRoutes() {
 
             try {
                 res.respondSuccess(
-                    petService.setPrimaryImage(petId, imageId, session.userId, activeRoles)
+                    petService.setPrimaryImage(petId, imageId, principal.userId.value.toInt(), activeRoles)
                 )
             } catch (e: Exception) {
                 res.respondError("Failed to set primary storage. Please try again later.", 500)
@@ -380,10 +380,10 @@ fun HttpRules.petsRoutes() {
     })
 
     post("/api/pets/{id}/adopt", Handler { req, res ->
-        val session = req.getSession()
+        val principal = req.currentPrincipal()
             ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -395,7 +395,7 @@ fun HttpRules.petsRoutes() {
             val body = req.receiveJson<CreateAdoptionRequestRequest>()
 
             val request = petService.createAdoptionRequest(
-                id, session.userId, body.message,
+                id, principal.userId.value.toInt(), body.message,
                 body.housingType, body.hasYard, body.hasOtherPets, body.experienceLevel
             )
             res.send(request)
@@ -403,10 +403,10 @@ fun HttpRules.petsRoutes() {
     })
 
     get("/api/pets/{id}/adoption-requests", Handler { req, res ->
-        val session = req.getSession()
+        val principal = req.currentPrincipal()
             ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondError("User not found", 404)
             }
@@ -414,15 +414,15 @@ fun HttpRules.petsRoutes() {
             val activeRoles = user.activeRoles.map { it.name }.toSet()
             val id = req.pathParam("id").toIntOrNull() ?: return@runBlocking res.respondError(ValidationConstants.INVALID_ID)
 
-            res.respondData(petService.getAdoptionRequestsForPet(id, session.userId, activeRoles))
+            res.respondData(petService.getAdoptionRequestsForPet(id, principal.userId.value.toInt(), activeRoles))
         }
     })
 
     put("/api/pets/adoption-requests/{requestId}", Handler { req, res ->
-        val session = req.getSession()
+        val principal = req.currentPrincipal()
             ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val userResult = validationService.validateUserById(session.userId)
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
             if (userResult is ServiceResult.NotFound) {
                 return@runBlocking res.respondNotFound()
             }
@@ -433,7 +433,7 @@ fun HttpRules.petsRoutes() {
             val status = params["status"] ?: return@runBlocking res.respondError("status required")
             val reviewNote = params["reviewNote"]?.takeIf { it.isNotBlank() }
 
-            res.respondData(petService.updateAdoptionRequest(requestId, status, session.userId, activeRoles, reviewNote))
+            res.respondData(petService.updateAdoptionRequest(requestId, status, principal.userId.value.toInt(), activeRoles, reviewNote))
         }
     })
 }
@@ -443,14 +443,12 @@ fun HttpRules.petsRoutes() {
 // admins for full add/edit) - that page has no pagination and this doesn't touch it.
 fun HttpRules.adminPetsRoutes() {
     val petService by Deps.inject<PetService>()
-    val userService by Deps.inject<UserService>()
 
     get("/api/admin/pets", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            val admin = userService.getById(session.userId)
-            if (admin == null || !admin.activeRoles.contains(UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
 
@@ -465,11 +463,10 @@ fun HttpRules.adminPetsRoutes() {
     })
 
     post("/api/admin/pets/{id}/deactivate", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            val admin = userService.getById(session.userId)
-            if (admin == null || !admin.activeRoles.contains(UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
 
@@ -478,7 +475,7 @@ fun HttpRules.adminPetsRoutes() {
                 return@runBlocking res.respondNotFound()
             }
 
-            val deactivated = petService.deactivatePet(id, session.userId)
+            val deactivated = petService.deactivatePet(id, principal.userId.value.toInt())
             if (deactivated) {
                 res.send(SuccessResponse(success = true))
             } else {
@@ -488,11 +485,10 @@ fun HttpRules.adminPetsRoutes() {
     })
 
     post("/api/admin/pets/{id}/reactivate", Handler { req, res ->
-        val session = req.getSession() ?: return@Handler res.respondUnauthorized()
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            val admin = userService.getById(session.userId)
-            if (admin == null || !admin.activeRoles.contains(UserRole.ADMIN)) {
+            if (!principal.hasRole(AdoptuRole.ADMIN)) {
                 return@runBlocking res.respondForbidden()
             }
 
