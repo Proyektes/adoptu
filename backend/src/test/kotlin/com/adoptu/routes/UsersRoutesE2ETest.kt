@@ -137,7 +137,7 @@ class UsersRoutesE2ETest {
             single<UserRepositoryPort> { UserRepository(get()) }
             single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
             single { PhotographerService(get(), get(), get(), get()) }
-            single { UserService(get(), get()) }
+            single { UserService(get(), get(), get()) }
             single { com.adoptu.services.RescuerDirectoryService(get(), get()) }
             single { com.universaliun.ratelimit.common.RateLimiter(com.universaliun.ratelimit.common.InMemoryRateLimitStateAdapter()) }
             single { ProfileEmailVerificationService(get(), get(), get(), "http://localhost:80") }

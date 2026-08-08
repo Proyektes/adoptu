@@ -1,4 +1,5 @@
 package com.adoptu.services
+import com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter
 
 import com.adoptu.adapters.db.EmailVerificationTokens
 import com.adoptu.adapters.db.UserActiveRoles
@@ -39,7 +40,7 @@ class UserServiceTest {
         TestDatabase.initH2()
         userRepository = UserRepository(clock)
         val photographerRepository = PhotographerRepositoryImpl(PetRepositoryImpl(clock), userRepository, clock)
-        userService = UserService(userRepository, photographerRepository)
+        userService = UserService(userRepository, photographerRepository, AdoptuUserRepositoryAdapter())
     }
 
     @Test

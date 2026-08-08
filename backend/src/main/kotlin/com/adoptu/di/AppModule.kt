@@ -82,7 +82,7 @@ fun appModule(config: AppConfig) = module {
     single<CaptchaPort> { TurnstileCaptchaAdapter(config.propertyOrNull("turnstile.secretKey")?.getString() ?: "") }
     single { RateLimiter(ExposedRateLimitStateAdapter()) }
     single<PhotographerService> { PhotographerService(get(), get(), get(), get()) }
-    single<UserService> { UserService(get(), get()) }
+    single<UserService> { UserService(get(), get(), get()) }
     single<PetService> { PetService(get(), get(), get(), get(), get(), config.propertyOrNull("baseUrl")?.getString() ?: "http://localhost:80") }
     single<SavedSearchService> { SavedSearchService(get()) }
     single<PetMedicalEventService> { PetMedicalEventService(get(), get()) }

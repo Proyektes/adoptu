@@ -50,7 +50,7 @@ class PetFosterPlacementRoutesE2ETest {
             single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
             single<TemporalHomeRepositoryPort> { TemporalHomeRepositoryImpl(get(), get(), get()) }
             single<PetFosterPlacementRepositoryPort> { PetFosterPlacementRepositoryImpl(get(), get(), get()) }
-            single { UserService(get(), get()) }
+            single { UserService(get(), get(), get()) }
             single { PetFosterPlacementService(get(), get(), get(), get()) }
             single { PetsValidationService() }
         }

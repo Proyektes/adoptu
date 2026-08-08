@@ -6,10 +6,20 @@ import com.adoptu.dto.input.UserRole
 import com.adoptu.dto.output.PagedResult
 import com.adoptu.ports.PhotographerRepositoryPort
 import com.adoptu.ports.UserRepositoryPort
+import com.universaliun.auth.backend.domain.port.out.UserRepositoryPort as KitUserRepositoryPort
+import com.universaliun.auth.common.identity.AuthUserId
 
 class UserService(
     private val userRepository: UserRepositoryPort,
-    private val photographerRepository: PhotographerRepositoryPort
+    private val photographerRepository: PhotographerRepositoryPort,
+    // Account activation state (deactivatedAt/deactivatedBy on the shared Users table) is owned
+    // by AuthKit's own UserRepositoryPort now -- see AdoptuUserRepositoryAdapter.deactivate/
+    // reactivate. Adoptu's native UserRepositoryPort used to have its own competing
+    // deactivateUser/reactivateUser methods writing the same columns through a separate code
+    // path; that duplication was removed so there is exactly one writer of this state.
+    // isBanned/banReason stay on the native port below -- AuthKit's AuthUser model has no concept
+    // of banning, so there is nothing to consolidate there.
+    private val kitUserRepository: KitUserRepositoryPort,
 ) {
     suspend fun getById(userId: Int): UserDto? = userRepository.getById(userId)
 
@@ -30,9 +40,21 @@ class UserService(
     
     suspend fun unbanUser(userId: Int): Boolean = userRepository.unbanUser(userId)
 
-    suspend fun deactivateUser(userId: Int, deactivatedBy: Int): Boolean = userRepository.deactivateUser(userId, deactivatedBy)
+    // Existence is checked against the native port first (cheap read, no behavior change for
+    // callers) since AuthKit's deactivate/reactivate are fire-and-forget updates that don't
+    // report whether a row actually matched - callers (UsersRoutes.kt) rely on a false return
+    // here to surface a 404/500 for a non-existent target.
+    suspend fun deactivateUser(userId: Int, deactivatedBy: Int): Boolean {
+        if (userRepository.getById(userId) == null) return false
+        kitUserRepository.deactivate(AuthUserId(userId.toString()), AuthUserId(deactivatedBy.toString()))
+        return true
+    }
 
-    suspend fun reactivateUser(userId: Int): Boolean = userRepository.reactivateUser(userId)
+    suspend fun reactivateUser(userId: Int): Boolean {
+        if (userRepository.getById(userId) == null) return false
+        kitUserRepository.reactivate(AuthUserId(userId.toString()))
+        return true
+    }
     
     suspend fun isBanned(userId: Int): Boolean = userRepository.isBanned(userId)
     

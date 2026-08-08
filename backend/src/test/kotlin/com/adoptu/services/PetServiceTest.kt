@@ -1,4 +1,5 @@
 package com.adoptu.services
+import com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter
 
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
@@ -103,7 +104,7 @@ class PetServiceTest {
         petRepository = PetRepositoryImpl(clock)
         val photographerRepository = PhotographerRepositoryImpl(petRepository, userRepository, clock)
         val photographerService = PhotographerService(photographerRepository, null, userRepository, clock)
-        val userService = UserService(userRepository, photographerRepository)
+        val userService = UserService(userRepository, photographerRepository, AdoptuUserRepositoryAdapter())
         val savedSearchRepository = com.adoptu.adapters.db.repositories.SavedSearchRepositoryImpl(clock)
         petService = PetService(petRepository, mockImageStorage, mockNotificationAdapter, userService, savedSearchRepository)
     }

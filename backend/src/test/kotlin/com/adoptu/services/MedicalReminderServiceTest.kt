@@ -1,4 +1,5 @@
 package com.adoptu.services
+import com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter
 
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
@@ -56,7 +57,7 @@ class MedicalReminderServiceTest {
         mockNotificationAdapter = MockNotificationAdapter()
         val userRepository = UserRepository(clock)
         val photographerRepository = PhotographerRepositoryImpl(petRepository, userRepository, clock)
-        val userService = UserService(userRepository, photographerRepository)
+        val userService = UserService(userRepository, photographerRepository, AdoptuUserRepositoryAdapter())
         reminderService = MedicalReminderService(
             medicalEventRepository, petRepository, userService, mockNotificationAdapter, clock, "http://localhost:4000"
         )

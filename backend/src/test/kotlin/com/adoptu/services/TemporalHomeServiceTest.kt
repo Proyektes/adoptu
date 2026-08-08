@@ -1,4 +1,5 @@
 package com.adoptu.services
+import com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter
 
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
@@ -44,7 +45,7 @@ class TemporalHomeServiceTest {
         val userRepository = UserRepository(clock)
         val petRepository = PetRepositoryImpl(clock)
         val photographerRepository = PhotographerRepositoryImpl(petRepository, userRepository, clock)
-        userService = UserService(userRepository, photographerRepository)
+        userService = UserService(userRepository, photographerRepository, AdoptuUserRepositoryAdapter())
         temporalHomeRepository = TemporalHomeRepositoryImpl(petRepository, userRepository, clock)
         mockNotificationAdapter = MockNotificationAdapter()
         service = TemporalHomeService(

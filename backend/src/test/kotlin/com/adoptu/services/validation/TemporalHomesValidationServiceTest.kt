@@ -1,4 +1,5 @@
 package com.adoptu.services.validation
+import com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter
 
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
@@ -41,7 +42,7 @@ class TemporalHomesValidationServiceTest {
         TestDatabase.initH2()
         val userRepository = UserRepository(clock)
         val photographerRepository = PhotographerRepositoryImpl(PetRepositoryImpl(clock), userRepository, clock)
-        userService = UserService(userRepository, photographerRepository)
+        userService = UserService(userRepository, photographerRepository, AdoptuUserRepositoryAdapter())
         val petRepository = PetRepositoryImpl(clock)
         val temporalHomeRepository = TemporalHomeRepositoryImpl(petRepository, userRepository, clock)
         val notificationAdapter = MockNotificationAdapter()

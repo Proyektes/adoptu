@@ -259,30 +259,6 @@ class UserRepository(private val clock: Clock) : UserRepositoryPort {
         }
     }
 
-    override suspend fun deactivateUser(userId: Int, deactivatedBy: Int): Boolean {
-        return withContext(dbDispatcher) {
-            transaction {
-                val rowsUpdated = Users.update({ Users.id eq userId }) {
-                    it[Users.deactivatedAt] = clock.now().toEpochMilliseconds()
-                    it[Users.deactivatedBy] = deactivatedBy
-                }
-                rowsUpdated > 0
-            }
-        }
-    }
-
-    override suspend fun reactivateUser(userId: Int): Boolean {
-        return withContext(dbDispatcher) {
-            transaction {
-                val rowsUpdated = Users.update({ Users.id eq userId }) {
-                    it[Users.deactivatedAt] = null
-                    it[Users.deactivatedBy] = null
-                }
-                rowsUpdated > 0
-            }
-        }
-    }
-
     override suspend fun isBanned(userId: Int): Boolean {
         return withContext(dbDispatcher) {
             transaction {

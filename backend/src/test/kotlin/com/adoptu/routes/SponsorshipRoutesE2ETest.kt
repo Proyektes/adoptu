@@ -51,7 +51,7 @@ class SponsorshipRoutesE2ETest {
             single<UserRepositoryPort> { UserRepository(get()) }
             single<PetRepositoryPort> { PetRepositoryImpl(get()) }
             single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
-            single { UserService(get(), get()) }
+            single { UserService(get(), get(), get()) }
             single<SponsorshipOfferRepositoryPort> { SponsorshipOfferRepositoryImpl(get(), get(), get()) }
             single { SponsorshipService(get(), get(), get(), get()) }
             single { UsersValidationService() }

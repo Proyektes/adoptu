@@ -100,7 +100,7 @@ class AuthRoutesE2ETest {
             single<AppConfig> { config }
             single<Clock> { Clock.System }
             single<com.adoptu.ports.UserRepositoryPort> { UserRepository(get()) }
-            single { com.adoptu.services.UserService(get(), get()) }
+            single { com.adoptu.services.UserService(get(), get(), get()) }
             // DB-backed, not in-memory: this file seeds already-exhausted rate-limit state
             // directly into RateLimitStateTable (see seedExhaustedRateLimit) to test the
             // exhausted-limit response path, which only the running server can observe if both

@@ -1,4 +1,5 @@
 package com.adoptu.services.validation
+import com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter
 
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
@@ -37,7 +38,7 @@ class PhotographersValidationServiceTest {
         TestDatabase.initH2()
         val userRepository = UserRepository(clock)
         val photographerRepository = PhotographerRepositoryImpl(PetRepositoryImpl(clock), userRepository, clock)
-        userService = UserService(userRepository, photographerRepository)
+        userService = UserService(userRepository, photographerRepository, AdoptuUserRepositoryAdapter())
 
         stopKoin() // defensive: clear any Koin app leaked from a concurrently-run test in this JVM
         startKoin {

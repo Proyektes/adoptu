@@ -1,4 +1,5 @@
 package com.adoptu.services
+import com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter
 
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
@@ -66,7 +67,7 @@ class PetFosterPlacementServiceTest {
         temporalHomeRepository = TemporalHomeRepositoryImpl(petRepository, userRepository, clock)
         val placementRepository = PetFosterPlacementRepositoryImpl(petRepository, temporalHomeRepository, clock)
         val photographerRepository = com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl(petRepository, userRepository, clock)
-        val userService = UserService(userRepository, photographerRepository)
+        val userService = UserService(userRepository, photographerRepository, AdoptuUserRepositoryAdapter())
         service = PetFosterPlacementService(placementRepository, petRepository, temporalHomeRepository, userService)
 
         runBlocking {

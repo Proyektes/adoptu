@@ -157,7 +157,7 @@ class PhotographerRoutesE2ETest {
         single<UserRepositoryPort> { UserRepository(get()) }
         single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
         single { PhotographerService(get(), get(), get(), get()) }
-        single { UserService(get(), get()) }
+        single { UserService(get(), get(), get()) }
         single { PhotographersValidationService() }
     }
 

@@ -81,7 +81,7 @@ class UrgentRescueRoutesE2ETest {
             single { UrgentRescueService(get(), get(), get(), get(), get(), get(), get(), "http://localhost:80") }
             single<PetRepositoryPort> { PetRepositoryImpl(get()) }
             single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
-            single { UserService(get(), get()) }
+            single { UserService(get(), get(), get()) }
         }
     )
 

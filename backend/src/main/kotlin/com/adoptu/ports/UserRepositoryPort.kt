@@ -25,8 +25,6 @@ interface UserRepositoryPort {
     suspend fun getRescuers(): List<UserDto>
     suspend fun banUser(userId: Int, reason: String?): Boolean
     suspend fun unbanUser(userId: Int): Boolean
-    suspend fun deactivateUser(userId: Int, deactivatedBy: Int): Boolean
-    suspend fun reactivateUser(userId: Int): Boolean
     suspend fun isBanned(userId: Int): Boolean
     suspend fun isRoleActive(userId: Int, role: UserRole): Boolean
     suspend fun activateRescuerProfile(userId: Int): UserDto?

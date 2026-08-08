@@ -162,7 +162,7 @@ class ApplicationIntegrationTest {
             }
             single<EmailSenderPort> { emailSenderPortFromConfig(config) }
             single<NotificationPort> { NotificationEmailAdapter(get()) }
-            single<UserService> { UserService(get(), get()) }
+            single<UserService> { UserService(get(), get(), get()) }
             single<PetService> { PetService(get(), get(), get(), get(), get()) }
             single<PhotographerService> { PhotographerService(get(), get(), get(), get()) }
             single<TemporalHomeService> { TemporalHomeService(get(), get(), get(), get()) }

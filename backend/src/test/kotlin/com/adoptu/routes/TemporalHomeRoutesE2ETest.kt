@@ -62,7 +62,7 @@ class TemporalHomeRoutesE2ETest {
             single<UserRepositoryPort> { UserRepository(get()) }
             single<TemporalHomeRepositoryPort> { TemporalHomeRepositoryImpl(get(), get(), get()) }
             single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
-            single { UserService(get(), get()) }
+            single { UserService(get(), get(), get()) }
             single { TemporalHomeService(get(), get(), get(), get()) }
             single { TemporalHomesValidationService() }
         }

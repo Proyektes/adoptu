@@ -57,7 +57,7 @@ class LostFoundRoutesE2ETest {
             single<UserRepositoryPort> { UserRepository(get()) }
             single<PetRepositoryPort> { PetRepositoryImpl(get()) }
             single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
-            single { UserService(get(), get()) }
+            single { UserService(get(), get(), get()) }
             single<LostFoundRepositoryPort> { LostFoundRepositoryImpl(get()) }
             single<GeocodingPort> { FakeGeocodingPort }
             single<CaptchaPort> { AlwaysPassCaptchaPort }

@@ -120,7 +120,7 @@ class PetsRoutesE2ETest {
                 single<com.adoptu.ports.PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
                 single<com.adoptu.ports.SavedSearchRepositoryPort> { mockk(relaxed = true) }
                 single { com.adoptu.services.PhotographerService(get(), get(), get(), get()) }
-                single { com.adoptu.services.UserService(get(), get()) }
+                single { com.adoptu.services.UserService(get(), get(), get()) }
                 single { PetService(get(), get(), get(), get(), get()) }
                 single { com.adoptu.services.validation.PetsValidationService() }
             }

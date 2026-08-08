@@ -1,4 +1,5 @@
 package com.adoptu.services
+import com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter
 
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
@@ -57,7 +58,7 @@ class VolunteerServiceTest {
         val photographerRepository = PhotographerRepositoryImpl(
             com.adoptu.adapters.db.repositories.PetRepositoryImpl(clock), userRepository, clock
         )
-        val userService = UserService(userRepository, photographerRepository)
+        val userService = UserService(userRepository, photographerRepository, AdoptuUserRepositoryAdapter())
         val volunteerRepository = VolunteerRepositoryImpl(userRepository, clock)
         service = VolunteerService(volunteerRepository, userService)
     }

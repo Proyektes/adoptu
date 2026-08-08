@@ -42,7 +42,7 @@ class VolunteerRoutesE2ETest {
             single<PetRepositoryPort> { PetRepositoryImpl(get()) }
             single<UserRepositoryPort> { UserRepository(get()) }
             single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
-            single { UserService(get(), get()) }
+            single { UserService(get(), get(), get()) }
             single<VolunteerRepositoryPort> { VolunteerRepositoryImpl(get(), get()) }
             single { VolunteerService(get(), get()) }
             single { UsersValidationService() }

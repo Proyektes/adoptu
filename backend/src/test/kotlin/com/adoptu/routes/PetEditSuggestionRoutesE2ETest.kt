@@ -47,7 +47,7 @@ class PetEditSuggestionRoutesE2ETest {
             single<Clock> { Clock.System }
             single<UserRepositoryPort> { UserRepository(get()) }
             single<PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
-            single { UserService(get(), get()) }
+            single { UserService(get(), get(), get()) }
             single { UsersValidationService() }
             single<PetRepositoryPort> { PetRepositoryImpl(get()) }
             single<VolunteerRepositoryPort> { VolunteerRepositoryImpl(get(), get()) }
