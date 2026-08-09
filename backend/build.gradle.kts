@@ -159,7 +159,7 @@ dependencies {
     // StorageKit's own createS3Client() doesn't know about; see that file's comment) and passes
     // it into StorageKit's S3ObjectStorageAdapter directly, so software.amazon.awssdk:s3 above
     // stays a direct dependency regardless.
-    implementation("com.universaliun.storagekit:storagekit-backend:1.0-SNAPSHOT")
+    implementation("com.universaliun.storagekit:storagekit-backend:1.0.0")
     implementation("software.amazon.awssdk:ses") {
         exclude(group = "net.bytebuddy")
     }
@@ -177,15 +177,15 @@ dependencies {
     // Artifact renamed from bare "backend" to "emailkit-backend" -- EmailKit, RateLimitKit and
     // AuthKit's backend modules all used to publish the same generic "backend" artifactId, which
     // collided as lib/backend-1.0-SNAPSHOT.jar in distTar/distZip once 2+ were combined here.
-    implementation("com.universaliun.email:emailkit-backend:1.0-SNAPSHOT")
+    implementation("com.universaliun.email:emailkit-backend:1.0.0")
 
     // Daily-resend throttles (password reset, magic link, email verification) -- see
     // services/PasswordService.kt, MagicLinkService.kt, EmailVerificationService.kt.
-    implementation("com.universaliun.ratelimit:ratelimitkit-backend:1.0-SNAPSHOT")
+    implementation("com.universaliun.ratelimit:ratelimitkit-backend:1.0.0")
 
     // Login/register/refresh/passkey/magic-link/OAuth/password-reset auth engine -- replaces
     // AuthRoutes.kt's own hand-rolled session/token logic. See adapters/authkit/.
-    implementation("com.universaliun.auth:authkit-backend:1.0-SNAPSHOT")
+    implementation("com.universaliun.auth:authkit-backend:1.0.0")
 
     // test
     testImplementation(kotlin("test"))
