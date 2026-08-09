@@ -1,5 +1,6 @@
 package com.adoptu.adapters.db
 
+import com.adoptu.adapters.authkit.PasswordHistoryTable
 import com.adoptu.config.AppConfig
 import com.adoptu.dto.input.UserRole
 import com.universaliun.ratelimit.backend.adapter.out.persistence.tables.RateLimitStateTable
@@ -64,7 +65,8 @@ object DatabaseFactory {
         PetFavorites,
         Volunteers,
         PetEditSuggestions,
-        SponsorshipOffers)
+        SponsorshipOffers,
+        PasswordHistoryTable)
     fun init(config: AppConfig) {
         val env = config.propertyOrNull("env")?.getString() ?: "prod"
         val prefix = "db.$env"

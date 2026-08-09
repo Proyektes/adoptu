@@ -763,6 +763,8 @@ fun HttpRules.authRoutes() {
             res.send(SuccessWithErrorResponse(success = false, error = "Failed to reset password. Token may be invalid/expired or password doesn't meet requirements (min 8 chars with uppercase, lowercase, number, symbol)."))
         } catch (e: WeakPasswordException) {
             res.send(SuccessWithErrorResponse(success = false, error = e.message ?: "Password does not meet requirements"))
+        } catch (e: com.adoptu.adapters.authkit.PasswordReuseException) {
+            res.send(SuccessWithErrorResponse(success = false, error = e.message ?: "You cannot reuse a recent password"))
         }
     })
 

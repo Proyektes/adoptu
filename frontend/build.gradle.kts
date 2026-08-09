@@ -6,8 +6,23 @@ plugins {
 group = "com.adoptu"
 version = "1.0.0"
 
+// Env var first (terminal builds), falling back to a Gradle property of the same name -- matches
+// backend/build.gradle.kts's own credential(...) helper for the AuthKitGitHubPackages repo below.
+fun Project.credential(name: String): String? = System.getenv(name) ?: findProperty(name) as String?
+
 repositories {
     mavenCentral()
+    // AuthKit's web module (WebAuthn browser bridge) -- see backend/build.gradle.kts's identical
+    // AuthKitGitHubPackages block for the credentials this needs (GITHUB_ACTOR / AUTH_KIT_TOKEN).
+    maven {
+        name = "AuthKitGitHubPackages"
+        url = uri("https://maven.pkg.github.com/ULibraries/AuthKit")
+        credentials {
+            username = credential("GITHUB_ACTOR")
+            password = credential("AUTH_KIT_TOKEN")
+        }
+        content { includeGroup("com.universaliun.auth") }
+    }
 }
 
 kotlin {
@@ -31,6 +46,15 @@ kotlin {
         val jsMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-js"))
+                // AuthKit's WebAuthn browser bridge (createPasskeyCredential/getPasskeyAssertion)
+                // -- replaces this module's own WebAuthn.kt, which hand-rolled the same
+                // navigator.credentials/base64url logic with a wrong assumption about the
+                // backend's optionsJson wire shape (flat, when it's actually wrapped in
+                // {"publicKey": ...} -- see WebAuthn.kt's replacement for detail). Needs
+                // kotlinx-coroutines-core for its suspend functions and for bridging back to the
+                // Promise-based call sites here via kotlinx.coroutines.promise.
+                implementation("com.universaliun.auth:authkit-web:1.0-SNAPSHOT")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
             }
         }
         val jvmMain by getting {

@@ -53,6 +53,17 @@ repositories {
         content { includeGroup("com.universaliun.ratelimit") }
     }
 
+    // TEMPORARY: resolves AuthKit's unpublished-to-GitHub-Packages changes (verifyPassword,
+    // ResetPasswordService's reuse-policy hook) from the local ~/.m2 cache until they're actually
+    // pushed. Declared BEFORE AuthKitGitHubPackages below so it's tried first -- Gradle checks
+    // repositories in declaration order, and a real (older) SNAPSHOT sitting in GitHub Packages
+    // would otherwise resolve first. content{}-scoped to just the authkit group. Remove once
+    // published for real.
+    maven {
+        name = "AuthKitMavenLocal"
+        url = uri("${System.getProperty("user.home")}/.m2/repository")
+        content { includeGroup("com.universaliun.auth") }
+    }
     // AuthKit (login/JWT/OAuth/WebAuthn passkey/magic-link auth engine, generic RBAC
     // Role/Resource/PermissionSet) -- see Libraries/AuthKit/README.md. Uses AUTH_KIT_TOKEN
     // (AuthKit's own publish credential, distinct from PAYMENT_KIT_TOKEN above) with the same
@@ -163,15 +174,18 @@ dependencies {
 
     // Transactional email (SMTP in dev via Mailpit, SES in prod) -- replaces the previous
     // hand-rolled SesEmailAdapter/commons-email combo. See di/EmailSenderConfig.kt.
-    implementation("com.universaliun.email:backend:1.0-SNAPSHOT")
+    // Artifact renamed from bare "backend" to "emailkit-backend" -- EmailKit, RateLimitKit and
+    // AuthKit's backend modules all used to publish the same generic "backend" artifactId, which
+    // collided as lib/backend-1.0-SNAPSHOT.jar in distTar/distZip once 2+ were combined here.
+    implementation("com.universaliun.email:emailkit-backend:1.0-SNAPSHOT")
 
     // Daily-resend throttles (password reset, magic link, email verification) -- see
     // services/PasswordService.kt, MagicLinkService.kt, EmailVerificationService.kt.
-    implementation("com.universaliun.ratelimit:backend:1.0-SNAPSHOT")
+    implementation("com.universaliun.ratelimit:ratelimitkit-backend:1.0-SNAPSHOT")
 
     // Login/register/refresh/passkey/magic-link/OAuth/password-reset auth engine -- replaces
     // AuthRoutes.kt's own hand-rolled session/token logic. See adapters/authkit/.
-    implementation("com.universaliun.auth:backend:1.0-SNAPSHOT")
+    implementation("com.universaliun.auth:authkit-backend:1.0-SNAPSHOT")
 
     // test
     testImplementation(kotlin("test"))
@@ -186,6 +200,10 @@ dependencies {
     testImplementation("io.helidon.webserver.testing.junit5:helidon-webserver-testing-junit5:$helidonVersion")
     testImplementation("io.helidon.webclient:helidon-webclient:$helidonVersion")
     testImplementation("com.h2database:h2:2.4.240")
+    // Builds a real BCrypt-format hash as a test fixture for AdoptuPasswordReusePolicyAdapterTest
+    // -- AuthKit's own PasswordHasher (Argon2id) is `internal` to that module, but verifyPassword()
+    // accepts BCrypt hashes too (its documented legacy-format support).
+    testImplementation("at.favre.lib:bcrypt:0.10.2")
     testImplementation(platform("org.testcontainers:testcontainers-bom:1.21.4"))
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:junit-jupiter:1.21.4")

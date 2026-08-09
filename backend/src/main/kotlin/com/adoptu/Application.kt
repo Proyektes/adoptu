@@ -113,6 +113,7 @@ fun main() {
                 passkeyCredentialRepository = kitPasskeyCredentialRepository,
                 refreshTokenRepository = kitRefreshTokenRepository,
                 passkeyCeremonyStore = kitPasskeyCeremonyStore,
+                passwordReusePolicy = com.adoptu.adapters.authkit.AdoptuPasswordReusePolicyAdapter(),
             ),
         )
     }
