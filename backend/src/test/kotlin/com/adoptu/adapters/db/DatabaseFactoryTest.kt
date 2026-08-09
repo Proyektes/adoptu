@@ -1,5 +1,6 @@
 package com.adoptu.adapters.db
 
+import com.adoptu.adapters.authkit.PasswordHistoryTable
 import com.universaliun.ratelimit.backend.adapter.out.persistence.tables.RateLimitStateTable
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
@@ -29,8 +30,8 @@ class DatabaseFactoryTest {
     }
 
     @Test
-    fun `DatabaseFactory has 42 tables`() {
-        assertEquals(42, DatabaseFactory.listOfTables.size)
+    fun `DatabaseFactory has 43 tables`() {
+        assertEquals(43, DatabaseFactory.listOfTables.size)
     }
 
     @Test
@@ -182,7 +183,8 @@ class DatabaseFactoryTest {
             PetFavorites,
             Volunteers,
             PetEditSuggestions,
-            SponsorshipOffers
+            SponsorshipOffers,
+            PasswordHistoryTable
         )
         
         assertEquals(expectedTables.size, DatabaseFactory.listOfTables.size)
