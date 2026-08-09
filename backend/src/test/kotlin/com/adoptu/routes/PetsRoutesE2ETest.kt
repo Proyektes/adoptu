@@ -122,6 +122,8 @@ class PetsRoutesE2ETest {
                 single { com.adoptu.services.PhotographerService(get(), get(), get(), get()) }
                 single { com.adoptu.services.UserService(get(), get(), get()) }
                 single { PetService(get(), get(), get(), get(), get()) }
+                single<com.adoptu.ports.PetFavoriteRepositoryPort> { com.adoptu.adapters.db.repositories.PetFavoriteRepositoryImpl(get()) }
+                single { com.adoptu.services.PetFavoriteService(get(), get()) }
                 single { com.adoptu.services.validation.PetsValidationService() }
             }
         ),
@@ -2108,6 +2110,252 @@ class PetsRoutesE2ETest {
             val response = TestHttp.get("${handle.baseUrl}/api/pets/my-adoption-requests", cookie)
             assertEquals(200, response.statusCode())
             assertTrue(response.body().contains("Please let me adopt"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    // ==================== GET /api/share/pet/{id} ====================
+
+    @Test
+    fun `GET share pet returns 404 for a non-existent pet`() {
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/share/pet/999")
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET share pet returns an html shell with og tags`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/share/pet/$petId")
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("og:title"))
+            assertTrue(response.body().contains("Buddy"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET share pet includes an og image when the pet has one`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        createImageInDb(petId, isPrimary = true)
+
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/share/pet/$petId")
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("og:image"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    // ==================== GET /api/pets/favorites and /favorite-ids ====================
+
+    @Test
+    fun `GET pets favorites returns 401 when no session`() {
+        val handle = startTestServer()
+        try {
+            assertEquals(401, TestHttp.get("${handle.baseUrl}/api/pets/favorites").statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET pets favorite-ids returns 401 when no session`() {
+        val handle = startTestServer()
+        try {
+            assertEquals(401, TestHttp.get("${handle.baseUrl}/api/pets/favorite-ids").statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST and GET pet favorites round-trip for the session user`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2) // adopter
+
+            val added = TestHttp.post("${handle.baseUrl}/api/pets/$petId/favorite", cookie)
+            assertEquals(200, added.statusCode())
+
+            val ids = TestHttp.get("${handle.baseUrl}/api/pets/favorite-ids", cookie)
+            assertEquals(200, ids.statusCode())
+            assertTrue(ids.body().contains(petId.toString()))
+
+            val favorites = TestHttp.get("${handle.baseUrl}/api/pets/favorites", cookie)
+            assertEquals(200, favorites.statusCode())
+            assertTrue(favorites.body().contains("Buddy"))
+
+            val removed = TestHttp.delete("${handle.baseUrl}/api/pets/$petId/favorite", cookie)
+            assertEquals(200, removed.statusCode())
+
+            val idsAfterRemove = TestHttp.get("${handle.baseUrl}/api/pets/favorite-ids", cookie)
+            assertFalse(idsAfterRemove.body().contains(petId.toString()))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST pet favorite returns 401 when no session`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val handle = startTestServer()
+        try {
+            assertEquals(401, TestHttp.post("${handle.baseUrl}/api/pets/$petId/favorite").statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `DELETE pet favorite returns 401 when no session`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val handle = startTestServer()
+        try {
+            assertEquals(401, TestHttp.delete("${handle.baseUrl}/api/pets/$petId/favorite").statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    // ==================== GET /api/pets/{id}/analytics ====================
+
+    @Test
+    fun `GET pet analytics returns 401 when no session`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val handle = startTestServer()
+        try {
+            assertEquals(401, TestHttp.get("${handle.baseUrl}/api/pets/$petId/analytics").statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET pet analytics returns 403 for a non-owner`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/$petId/analytics", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET pet analytics succeeds for the owner`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/$petId/analytics", cookie)
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    // ==================== POST/DELETE /api/pets/{id}/video ====================
+
+    @Test
+    fun `POST pet video returns 401 when no session`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val handle = startTestServer()
+        try {
+            assertEquals(401, TestHttp.post("${handle.baseUrl}/api/pets/$petId/video").statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST pet video returns 400 when no file provided`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val boundary = "----TestBoundary${System.nanoTime()}"
+            val body = buildMultipartBody(boundary, fields = mapOf("noop" to "1"))
+
+            val response = TestHttp.multipart("${handle.baseUrl}/api/pets/$petId/video", boundary, body, cookie)
+            assertEquals(400, response.statusCode())
+            assertTrue(response.body().contains("No video provided"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST pet video returns 403 for a non-owner`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
+            val boundary = "----TestBoundary${System.nanoTime()}"
+            val body = buildMultipartBody(boundary, files = mapOf("file" to Triple("clip.mp4", "video/mp4", ByteArray(10))))
+
+            val response = TestHttp.multipart("${handle.baseUrl}/api/pets/$petId/video", boundary, body, cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST pet video succeeds for the owner`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val boundary = "----TestBoundary${System.nanoTime()}"
+            val body = buildMultipartBody(boundary, files = mapOf("file" to Triple("clip.mp4", "video/mp4", ByteArray(10))))
+
+            val response = TestHttp.multipart("${handle.baseUrl}/api/pets/$petId/video", boundary, body, cookie)
+            assertEquals(200, response.statusCode())
+            assertTrue(response.body().contains("mock-storage"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `DELETE pet video returns 401 when no session`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val handle = startTestServer()
+        try {
+            assertEquals(401, TestHttp.delete("${handle.baseUrl}/api/pets/$petId/video").statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `DELETE pet video succeeds for the owner`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val boundary = "----TestBoundary${System.nanoTime()}"
+            val uploadBody = buildMultipartBody(boundary, files = mapOf("file" to Triple("clip.mp4", "video/mp4", ByteArray(10))))
+            TestHttp.multipart("${handle.baseUrl}/api/pets/$petId/video", boundary, uploadBody, cookie)
+
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/$petId/video", cookie)
+            assertEquals(200, response.statusCode())
         } finally {
             handle.stop()
         }

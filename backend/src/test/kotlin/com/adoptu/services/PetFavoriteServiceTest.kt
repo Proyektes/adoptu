@@ -22,6 +22,7 @@ class PetFavoriteServiceTest {
 
     private lateinit var service: PetFavoriteService
     private lateinit var petRepository: PetRepositoryImpl
+    private lateinit var favoriteRepository: PetFavoriteRepositoryImpl
     private val clock = TestClock(Instant.parse("2024-01-15T10:00:00Z"))
 
     @BeforeEach
@@ -44,7 +45,8 @@ class PetFavoriteServiceTest {
             exec("DELETE FROM pets")
         }
         petRepository = PetRepositoryImpl(clock)
-        service = PetFavoriteService(PetFavoriteRepositoryImpl(clock), petRepository)
+        favoriteRepository = PetFavoriteRepositoryImpl(clock)
+        service = PetFavoriteService(favoriteRepository, petRepository)
     }
 
     private suspend fun createPet(): Int = petRepository.create(
@@ -91,5 +93,16 @@ class PetFavoriteServiceTest {
         assertEquals(1, favorites.size)
         assertEquals(petId, favorites.first().id)
         assertEquals("Buddy", favorites.first().name)
+    }
+
+    @Test
+    fun `isFavorited reflects whether the pet is favorited by that user`() = runBlocking {
+        val petId = createPet()
+
+        kotlin.test.assertFalse(favoriteRepository.isFavorited(userId = 1, petId = petId))
+
+        service.add(userId = 1, petId = petId)
+
+        assertTrue(favoriteRepository.isFavorited(userId = 1, petId = petId))
     }
 }
