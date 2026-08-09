@@ -4,7 +4,31 @@ import kotlinx.browser.window
 import kotlin.js.Promise
 import kotlin.js.json
 
-fun apiFetch(path: String, init: dynamic = null): Promise<dynamic> {
+private const val REFRESH_PATH = "/api/auth/refresh"
+
+private fun rejectWithApiError(r: dynamic): Promise<dynamic> =
+    r.text().then { text ->
+        val message = try {
+            JSON.parse<dynamic>(text.unsafeCast<String>()).error?.unsafeCast<String>()
+                ?: "Request failed: $text"
+        } catch (e: dynamic) {
+            "Request failed: $text"
+        }
+        throw js("new Error(message)")
+    }.unsafeCast<Promise<dynamic>>()
+
+fun apiFetch(path: String, init: dynamic = null): Promise<dynamic> = apiFetchInternal(path, init, alreadyRetried = false)
+
+/**
+ * Silent-refresh-on-401: the AuthKit access-token cookie expires after 15 minutes (see
+ * accessTokenExpiryMs in AuthRoutes.kt) - without this, a still-active user gets logged out of
+ * whatever they're doing mid-session, well before the 7-day session they think they have. On a
+ * 401, POSTs /api/auth/refresh (which rotates the refresh-token cookie into a fresh access-token
+ * cookie) and retries the original request exactly once (`alreadyRetried` guards against looping
+ * if the retried call somehow 401s again). Never retries the refresh call itself, or a 401 there
+ * would recurse forever - that 401 is the real "you're logged out" signal, left alone.
+ */
+private fun apiFetchInternal(path: String, init: dynamic, alreadyRetried: Boolean): Promise<dynamic> {
     val opts = init ?: js("({})")
     val method = opts.method?.unsafeCast<String>()
     if (method == null) {
@@ -19,16 +43,16 @@ fun apiFetch(path: String, init: dynamic = null): Promise<dynamic> {
     return window.asDynamic().fetch(path, opts).then { res ->
         try {
             val r = res.unsafeCast<dynamic>()
-            if (!r.ok) {
-                r.text().then { text ->
-                    val message = try {
-                        JSON.parse<dynamic>(text.unsafeCast<String>()).error?.unsafeCast<String>()
-                            ?: "Request failed: $text"
-                    } catch (e: dynamic) {
-                        "Request failed: $text"
+            if (r.status == 401 && path != REFRESH_PATH && !alreadyRetried) {
+                window.asDynamic().fetch(REFRESH_PATH, js("({method: 'POST', credentials: 'include'})")).then { refreshRes ->
+                    if (refreshRes.unsafeCast<dynamic>().ok == true) {
+                        apiFetchInternal(path, init, alreadyRetried = true)
+                    } else {
+                        rejectWithApiError(r)
                     }
-                    throw js("new Error(message)")
                 }
+            } else if (!r.ok) {
+                rejectWithApiError(r)
             } else {
                 r.json().then<dynamic> { json -> json }
             }
@@ -41,7 +65,23 @@ fun apiFetch(path: String, init: dynamic = null): Promise<dynamic> {
 @JsExport
 @JsName("ApiClient")
 object ApiClientModule {
-    fun me(): Promise<dynamic> = apiFetch("/api/auth/me")
+    // /api/auth/me is a soft-fail check (200 + {authenticated: false}), never a 401 - the retry
+    // in apiFetch/apiFetchInternal only ever triggers on a real 401, so it does nothing here. Every
+    // page's own auth guard reads this response directly (see e.g. ProfilePage.kt's
+    // `if (user.authenticated == false) window.location.href = "/login"`), so without this, a page
+    // load/reload after the 15-minute access token expires bounces straight to /login even though
+    // the refresh token is still good. One refresh-and-recheck, scoped to just this accessor -
+    // deliberately not changing /api/auth/me's own status-code contract, which every other page
+    // already assumes is always 200.
+    fun me(): Promise<dynamic> = apiFetch("/api/auth/me").then<dynamic> { user ->
+        if (user?.authenticated == false) {
+            window.asDynamic().fetch("/api/auth/refresh", js("({method: 'POST', credentials: 'include'})")).then { refreshRes ->
+                if (refreshRes.unsafeCast<dynamic>().ok == true) apiFetch("/api/auth/me") else user
+            }
+        } else {
+            user
+        }
+    }
 
     fun logout(): Promise<dynamic> = apiFetch("/api/auth/logout", js("({method: 'POST'})"))
 
