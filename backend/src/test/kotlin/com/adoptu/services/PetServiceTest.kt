@@ -964,6 +964,175 @@ class PetServiceTest {
         assertEquals(ServiceResult.NotFound, result)
     }
 
+    // --- getAllForAdmin / deactivatePet / reactivatePet -------------------------------------
+
+    @Test
+    fun `getAllForAdmin paginates and searches across all pets`() = runBlocking {
+        createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+        createTestPet(rescuerId = 1, name = "Whiskers", type = "CAT")
+
+        val page = petService.getAllForAdmin(page = 1, pageSize = 20, search = "Buddy")
+
+        assertEquals(1, page.items.size)
+        assertEquals("Buddy", page.items.first().name)
+    }
+
+    @Test
+    fun `deactivatePet and reactivatePet toggle a pet's active status`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+
+        assertTrue(petService.deactivatePet(pet.id, deactivatedBy = 1))
+        assertTrue(petService.reactivatePet(pet.id))
+    }
+
+    // --- uploadAndAddImage -------------------------------------------------------------------
+
+    private fun jpegBytes(width: Int = 100, height: Int = 100): ByteArray {
+        val image = java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_RGB)
+        val out = java.io.ByteArrayOutputStream()
+        javax.imageio.ImageIO.write(image, "jpg", out)
+        return out.toByteArray()
+    }
+
+    @Test
+    fun `uploadAndAddImage returns NotFound for a non-existent pet`() = runBlocking {
+        val result = petService.uploadAndAddImage(999, 1, setOf("RESCUER"), "photo.jpg", "image/jpeg", jpegBytes(), false)
+
+        assertEquals(ServiceResult.NotFound, result)
+    }
+
+    @Test
+    fun `uploadAndAddImage returns Forbidden when user is not owner`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+
+        val result = petService.uploadAndAddImage(pet.id, 3, setOf("ADOPTER"), "photo.jpg", "image/jpeg", jpegBytes(), false)
+
+        assertEquals(ServiceResult.Forbidden, result)
+    }
+
+    @Test
+    fun `uploadAndAddImage rejects an unsupported content type`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+
+        val result = petService.uploadAndAddImage(pet.id, 1, setOf("RESCUER"), "photo.gif", "image/gif", jpegBytes(), false)
+
+        assertTrue(result is ServiceResult.Error)
+    }
+
+    @Test
+    fun `uploadAndAddImage rejects an oversized image`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+
+        val result = petService.uploadAndAddImage(pet.id, 1, setOf("RESCUER"), "photo.jpg", "image/jpeg", ByteArray(6 * 1024 * 1024), false)
+
+        assertTrue(result is ServiceResult.Error)
+    }
+
+    @Test
+    fun `uploadAndAddImage rejects data that fails to decode as an image`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+
+        val result = petService.uploadAndAddImage(pet.id, 1, setOf("RESCUER"), "photo.jpg", "image/jpeg", byteArrayOf(1, 2, 3), false)
+
+        assertTrue(result is ServiceResult.Error)
+    }
+
+    @Test
+    fun `uploadAndAddImage compresses and stores a valid JPEG`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+
+        val result = petService.uploadAndAddImage(pet.id, 1, setOf("RESCUER"), "photo.jpg", "image/jpeg", jpegBytes(), isPrimary = true)
+
+        assertTrue(result is ServiceResult.Success)
+        assertEquals(1, mockImageStorage.getStoredImages().size)
+    }
+
+    @Test
+    fun `uploadAndAddImage compresses and stores a valid PNG`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+        val image = java.awt.image.BufferedImage(50, 50, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+        val out = java.io.ByteArrayOutputStream()
+        javax.imageio.ImageIO.write(image, "png", out)
+
+        val result = petService.uploadAndAddImage(pet.id, 1, setOf("RESCUER"), "photo.png", "image/png", out.toByteArray(), false)
+
+        assertTrue(result is ServiceResult.Success)
+    }
+
+    // --- uploadAndSetVideo / removeVideo ------------------------------------------------------
+
+    @Test
+    fun `uploadAndSetVideo returns NotFound for a non-existent pet`() = runBlocking {
+        val result = petService.uploadAndSetVideo(999, 1, setOf("RESCUER"), "clip.mp4", "video/mp4", ByteArray(10))
+
+        assertEquals(ServiceResult.NotFound, result)
+    }
+
+    @Test
+    fun `uploadAndSetVideo returns Forbidden when user is not owner`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+
+        val result = petService.uploadAndSetVideo(pet.id, 3, setOf("ADOPTER"), "clip.mp4", "video/mp4", ByteArray(10))
+
+        assertEquals(ServiceResult.Forbidden, result)
+    }
+
+    @Test
+    fun `uploadAndSetVideo rejects an unsupported content type`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+
+        val result = petService.uploadAndSetVideo(pet.id, 1, setOf("RESCUER"), "clip.mov", "video/quicktime", ByteArray(10))
+
+        assertTrue(result is ServiceResult.Error)
+    }
+
+    @Test
+    fun `uploadAndSetVideo rejects an oversized video`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+
+        val result = petService.uploadAndSetVideo(pet.id, 1, setOf("RESCUER"), "clip.mp4", "video/mp4", ByteArray(51 * 1024 * 1024))
+
+        assertTrue(result is ServiceResult.Error)
+    }
+
+    @Test
+    fun `uploadAndSetVideo replaces an existing video and deletes the old one from storage`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+        petService.uploadAndSetVideo(pet.id, 1, setOf("RESCUER"), "first.mp4", "video/mp4", ByteArray(10))
+
+        val result = petService.uploadAndSetVideo(pet.id, 1, setOf("RESCUER"), "second.mp4", "video/mp4", ByteArray(10))
+
+        assertTrue(result is ServiceResult.Success)
+        assertNotNull((result as ServiceResult.Success).data.videoUrl)
+    }
+
+    @Test
+    fun `removeVideo returns NotFound for a non-existent pet`() = runBlocking {
+        val result = petService.removeVideo(999, 1, setOf("RESCUER"))
+
+        assertEquals(ServiceResult.NotFound, result)
+    }
+
+    @Test
+    fun `removeVideo returns Forbidden when user is not owner`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+
+        val result = petService.removeVideo(pet.id, 3, setOf("ADOPTER"))
+
+        assertEquals(ServiceResult.Forbidden, result)
+    }
+
+    @Test
+    fun `removeVideo clears a set video and deletes it from storage`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
+        petService.uploadAndSetVideo(pet.id, 1, setOf("RESCUER"), "clip.mp4", "video/mp4", ByteArray(10))
+
+        val result = petService.removeVideo(pet.id, 1, setOf("RESCUER"))
+
+        assertTrue(result is ServiceResult.Success)
+        assertNull((result as ServiceResult.Success).data.videoUrl)
+    }
+
     private suspend fun createTestPet(
         rescuerId: Int,
         name: String,
