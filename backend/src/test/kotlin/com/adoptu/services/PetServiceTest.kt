@@ -1104,6 +1104,7 @@ class PetServiceTest {
 
         assertTrue(result is ServiceResult.Success)
         assertNotNull((result as ServiceResult.Success).data.videoUrl)
+        Unit
     }
 
     @Test

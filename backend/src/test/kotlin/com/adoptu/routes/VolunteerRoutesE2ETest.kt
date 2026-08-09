@@ -257,6 +257,25 @@ class VolunteerRoutesE2ETest {
     }
 
     @Test
+    fun `PUT volunteers status returns 404 for session user that does not exist`() {
+        val handle = startServer()
+        try {
+            val id = createApplicationInDb(rescuerId = 1, volunteerId = 2)
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/volunteers/$id/status",
+                JsonSupport.objectMapper.writeValueAsString(UpdateVolunteerStatusRequest(status = VolunteerStatus.ACTIVE)),
+                cookie
+            )
+
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `PUT volunteers status returns 400 for an invalid id`() {
         val handle = startServer()
         try {
@@ -349,6 +368,20 @@ class VolunteerRoutesE2ETest {
             val body = response.body()
             assertTrue(body.contains("\"rescuerId\": 1"))
             assertTrue(body.contains("\"volunteerId\": 2"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET users rescuer volunteers returns 404 for session user that does not exist`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.get("${handle.baseUrl}/api/users/rescuer/volunteers", cookie)
+
+            assertEquals(404, response.statusCode())
         } finally {
             handle.stop()
         }

@@ -400,6 +400,23 @@ class PetMedicalEventRoutesE2ETest {
     }
 
     @Test
+    fun `DELETE pet medical-events returns 404 when the session user no longer exists`() {
+        val petId = createPetInDb(rescuerId = 1)
+
+        val handle = startServer()
+        try {
+            val eventId = createEvent(handle, petId, ownerUserId = 1)
+            val ghostCookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/medical-events/$eventId", ghostCookie)
+
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `DELETE pet medical-events returns 400 for an invalid event id`() {
         val handle = startServer()
         try {

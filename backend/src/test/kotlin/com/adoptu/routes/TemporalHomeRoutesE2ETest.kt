@@ -7,6 +7,7 @@ import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.repositories.PetRepositoryImpl
 import com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl
+import com.adoptu.adapters.db.repositories.PetFosterPlacementRepositoryImpl
 import com.adoptu.adapters.db.repositories.TemporalHomeRepositoryImpl
 import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.dto.input.BlockRescuerRequest
@@ -16,10 +17,12 @@ import com.adoptu.dto.input.UpdateTemporalHomeRequest
 import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestDatabase
 import com.adoptu.ports.NotificationPort
+import com.adoptu.ports.PetFosterPlacementRepositoryPort
 import com.adoptu.ports.PetRepositoryPort
 import com.adoptu.ports.PhotographerRepositoryPort
 import com.adoptu.ports.TemporalHomeRepositoryPort
 import com.adoptu.ports.UserRepositoryPort
+import com.adoptu.services.PetFosterPlacementService
 import com.adoptu.services.TemporalHomeService
 import com.adoptu.services.UserService
 import com.adoptu.services.validation.TemporalHomesValidationService
@@ -65,6 +68,8 @@ class TemporalHomeRoutesE2ETest {
             single { UserService(get(), get(), get()) }
             single { TemporalHomeService(get(), get(), get(), get()) }
             single { TemporalHomesValidationService() }
+            single<PetFosterPlacementRepositoryPort> { PetFosterPlacementRepositoryImpl(get(), get(), get()) }
+            single { PetFosterPlacementService(get(), get(), get(), get()) }
         }
     )
 
@@ -240,6 +245,23 @@ class TemporalHomeRoutesE2ETest {
         }
     }
 
+    @Test
+    fun `POST temporal-home returns 500 for an invalid country`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/temporal-home",
+                JsonSupport.objectMapper.writeValueAsString(CreateTemporalHomeRequest("Sunny Home", "Nowhereland", city = "Dallas")),
+                cookie
+            )
+            assertEquals(500, response.statusCode())
+            assertTrue(response.body().contains("Invalid country"))
+        } finally {
+            handle.stop()
+        }
+    }
+
     // ==================== GET /api/users/temporal-home ====================
 
     @Test
@@ -401,6 +423,67 @@ class TemporalHomeRoutesE2ETest {
         try {
             val cookie = TestHttp.loginAs(handle.baseUrl, 3)
             val response = TestHttp.get("${handle.baseUrl}/api/users/temporal-home/requests", cookie)
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    // ==================== GET /api/users/temporal-home/foster-placements ====================
+
+    @Test
+    fun `GET temporal-home foster-placements returns 401 when no session`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/users/temporal-home/foster-placements")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET temporal-home foster-placements returns 404 when session user does not exist`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+            val response = TestHttp.get("${handle.baseUrl}/api/users/temporal-home/foster-placements", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET temporal-home foster-placements returns 403 when user lacks the role`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer only
+            val response = TestHttp.get("${handle.baseUrl}/api/users/temporal-home/foster-placements", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET temporal-home foster-placements succeeds for a temporal home user`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
+            val response = TestHttp.get("${handle.baseUrl}/api/users/temporal-home/foster-placements", cookie)
+            assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET temporal-home foster-placements succeeds for an admin`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3)
+            val response = TestHttp.get("${handle.baseUrl}/api/users/temporal-home/foster-placements", cookie)
             assertEquals(200, response.statusCode())
         } finally {
             handle.stop()

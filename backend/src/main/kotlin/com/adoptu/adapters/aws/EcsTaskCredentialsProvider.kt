@@ -30,8 +30,11 @@ data class EcsCredentialsPayload(
  * parses them with the app's existing Jackson setup - both already proven to work in the native
  * binary - instead of relying on the SDK's own reflective credential-loading machinery.
  */
-class EcsTaskCredentialsProvider : AwsCredentialsProvider {
-    private val relativeUri = System.getenv("AWS_CONTAINER_CREDENTIALS_RELATIVE_URI")
+class EcsTaskCredentialsProvider(
+    private val credentialsHost: String = "http://169.254.170.2",
+    private val relativeUriOverride: String? = null,
+) : AwsCredentialsProvider {
+    private val relativeUri = relativeUriOverride ?: System.getenv("AWS_CONTAINER_CREDENTIALS_RELATIVE_URI")
     private val httpClient: HttpClient = HttpClient.newBuilder()
         .version(HttpClient.Version.HTTP_1_1)
         .connectTimeout(Duration.ofSeconds(5))
@@ -51,7 +54,7 @@ class EcsTaskCredentialsProvider : AwsCredentialsProvider {
             val uri = requireNotNull(relativeUri) {
                 "AWS_CONTAINER_CREDENTIALS_RELATIVE_URI is not set - not running under an ECS task role"
             }
-            val request = HttpRequest.newBuilder(URI.create("http://169.254.170.2$uri"))
+            val request = HttpRequest.newBuilder(URI.create("$credentialsHost$uri"))
                 .timeout(Duration.ofSeconds(5))
                 .GET()
                 .build()

@@ -238,6 +238,30 @@ class UrgentRescueRoutesE2ETest {
     }
 
     @Test
+    fun `POST urgent-rescuers me returns 400 when location cannot be determined`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+
+            // ZONE mode with no zoneCountry/zoneCity - resolveCoordinates has nothing to geocode.
+            val request = CreateUrgentRescuerProfileRequest(
+                phone = "+15551234567",
+                inputMode = LocationInputMode.ZONE
+            )
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/urgent-rescuers/me",
+                JsonSupport.objectMapper.writeValueAsString(request),
+                cookie
+            )
+
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `GET urgent-rescuers me returns the created profile`() {
         val handle = startServer()
         try {
@@ -293,6 +317,25 @@ class UrgentRescueRoutesE2ETest {
 
             assertEquals(200, response.statusCode())
             assertTrue(response.body().contains("+15559999999"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `PUT urgent-rescuers me returns 400 when no profile exists`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+
+            // No profile was ever created for this user, so the repository update finds no row.
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/urgent-rescuers/me",
+                JsonSupport.objectMapper.writeValueAsString(UpdateUrgentRescuerProfileRequest(phone = "+15559999999")),
+                cookie
+            )
+
+            assertEquals(400, response.statusCode())
         } finally {
             handle.stop()
         }

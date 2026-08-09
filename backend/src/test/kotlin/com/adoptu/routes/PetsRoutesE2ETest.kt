@@ -1631,6 +1631,44 @@ class PetsRoutesE2ETest {
     }
 
     @Test
+    fun `POST admin pets deactivate returns 400 for invalid id`() {
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/pets/abc/deactivate", cookie)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST admin pets reactivate returns 401 when no session`() {
+        val petId = createPetInDb("Buddy", "DOG")
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/pets/$petId/reactivate")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST admin pets reactivate returns 400 for invalid id`() {
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/pets/abc/reactivate", cookie)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `POST admin pets reactivate returns 403 for non-admin user`() {
         val petId = createPetInDb("Buddy", "DOG")
         val handle = startTestServer()
@@ -1652,6 +1690,80 @@ class PetsRoutesE2ETest {
 
             val response = TestHttp.post("${handle.baseUrl}/api/admin/pets/9999/reactivate", cookie)
             assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    // Route registers the target pet's existence via petService.getById(id) != null, then calls
+    // deactivatePet/reactivatePet - through the real repository these can never legitimately
+    // disagree (both key off Pets.id, single-threaded test), so the route's own `else -> 500`
+    // branch is only reachable by mocking PetService itself to make them disagree, same "mocked
+    // PetService swapped into the real Koin container via TestServer's later-binding-wins rule"
+    // pattern as startTestServer()'s sibling helper below.
+    private fun startTestServerWithPetService(petService: PetService) = TestServer.start(
+        modules = listOf(
+            module {
+                single { com.adoptu.config.AppConfig.fromMap(mapOf("admin.email" to "admin@adopt-u.com")) }
+                single<Clock> { Clock.System }
+                single { WebAuthnService(get(), get()) }
+                single<ImageStoragePort> { MockImageStorage() }
+                single { MockNotificationAdapter() }
+                single<com.adoptu.ports.NotificationPort> { get<MockNotificationAdapter>() }
+                single<PetRepositoryPort> { PetRepositoryImpl(get()) }
+                single<com.adoptu.ports.UserRepositoryPort> { UserRepository(get()) }
+                single<com.adoptu.ports.PhotographerRepositoryPort> { PhotographerRepositoryImpl(get(), get(), get()) }
+                single<com.adoptu.ports.SavedSearchRepositoryPort> { mockk(relaxed = true) }
+                single { com.adoptu.services.PhotographerService(get(), get(), get(), get()) }
+                single { com.adoptu.services.UserService(get(), get(), get()) }
+                single<com.adoptu.ports.PetFavoriteRepositoryPort> { com.adoptu.adapters.db.repositories.PetFavoriteRepositoryImpl(get()) }
+                single { com.adoptu.services.PetFavoriteService(get(), get()) }
+                single { com.adoptu.services.validation.PetsValidationService() }
+                // Registered last so it wins over any earlier PetService binding.
+                single { petService }
+            }
+        ),
+        initDatabase = false,
+        withTestLogin = true
+    )
+
+    @Test
+    fun `POST admin pets deactivate returns 500 when the repository reports no row updated`() {
+        val petId = createPetInDb("Buddy", "DOG")
+        val mockRepository = mockk<PetRepositoryPort>(relaxed = true)
+        val realRepository = PetRepositoryImpl(clock = kotlin.time.Clock.System)
+        val petService = PetService(mockRepository, mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true))
+        coEvery { mockRepository.getById(petId) } coAnswers { realRepository.getById(petId) }
+        coEvery { mockRepository.deactivatePet(petId, any()) } returns false
+
+        val handle = startTestServerWithPetService(petService)
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/pets/$petId/deactivate", cookie)
+            assertEquals(500, response.statusCode())
+            assertTrue(response.body().contains("Failed to deactivate pet"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST admin pets reactivate returns 500 when the repository reports no row updated`() {
+        val petId = createPetInDb("Buddy", "DOG")
+        val mockRepository = mockk<PetRepositoryPort>(relaxed = true)
+        val realRepository = PetRepositoryImpl(clock = kotlin.time.Clock.System)
+        val petService = PetService(mockRepository, mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true))
+        coEvery { mockRepository.getById(petId) } coAnswers { realRepository.getById(petId) }
+        coEvery { mockRepository.reactivatePet(petId) } returns false
+
+        val handle = startTestServerWithPetService(petService)
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 3) // admin
+
+            val response = TestHttp.post("${handle.baseUrl}/api/admin/pets/$petId/reactivate", cookie)
+            assertEquals(500, response.statusCode())
+            assertTrue(response.body().contains("Failed to reactivate pet"))
         } finally {
             handle.stop()
         }
@@ -2258,6 +2370,31 @@ class PetsRoutesE2ETest {
     }
 
     @Test
+    fun `GET pet analytics returns 404 when session user does not exist`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/$petId/analytics", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET pet analytics returns 400 for invalid id`() {
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/abc/analytics", cookie)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `GET pet analytics succeeds for the owner`() {
         val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
         val handle = startTestServer()
@@ -2356,6 +2493,56 @@ class PetsRoutesE2ETest {
 
             val response = TestHttp.delete("${handle.baseUrl}/api/pets/$petId/video", cookie)
             assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `DELETE pet video returns 404 when session user does not exist`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/$petId/video", cookie)
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `DELETE pet video returns 400 for invalid id`() {
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/abc/video", cookie)
+            assertEquals(400, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `DELETE pet video returns 403 for a non-owner`() {
+        val petId = createPetInDb("Buddy", "DOG", rescuerId = 1)
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/$petId/video", cookie)
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `DELETE pet video returns 404 when pet does not exist`() {
+        val handle = startTestServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.delete("${handle.baseUrl}/api/pets/9999/video", cookie)
+            assertEquals(404, response.statusCode())
         } finally {
             handle.stop()
         }

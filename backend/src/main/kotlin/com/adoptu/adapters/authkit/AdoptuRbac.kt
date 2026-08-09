@@ -51,5 +51,3 @@ enum class AdoptuRole(override val resources: Set<Resource>) : Role {
 /** [com.universaliun.auth.backend.infrastructure.authKoinModule]'s / `installJwtAuth`'s
  *  `roleByName` - resolves a JWT role-name claim back to our own [AdoptuRole] constant. */
 val adoptuRoleByName: (String) -> Role? = { name -> runCatching { AdoptuRole.valueOf(name) }.getOrNull() }
-
-fun UserRole.toAdoptuRole(): AdoptuRole = AdoptuRole.valueOf(name)

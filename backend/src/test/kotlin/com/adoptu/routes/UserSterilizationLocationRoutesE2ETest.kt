@@ -7,6 +7,7 @@ import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.adapters.db.repositories.UserSterilizationLocationRepository
 import com.adoptu.dto.input.CreateUserSterilizationLocationRequest
 import com.adoptu.dto.input.UpdateUserSterilizationLocationRequest
+import com.adoptu.dto.input.UserSterilizationLocationDto
 import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestDatabase
 import com.adoptu.ports.NotificationPort
@@ -31,6 +32,23 @@ import kotlin.time.ExperimentalTime
 class UserSterilizationLocationRoutesE2ETest {
 
     private val clock = Clock.System
+
+    // Fault-injection wrapper used by a single test below to force the route's generic
+    // `catch (e: Exception)` (500) branch - every legitimate business-rule failure reachable
+    // through UserSterilizationLocationService.create() surfaces as IllegalArgumentException
+    // (caught -> 400), so the only way to genuinely exercise the 500 path is an unexpected
+    // repository failure.
+    private class ThrowingUserSterilizationLocationRepository(
+        private val delegate: UserSterilizationLocationRepositoryPort
+    ) : UserSterilizationLocationRepositoryPort by delegate {
+        override suspend fun create(
+            userId: Int,
+            request: CreateUserSterilizationLocationRequest,
+            emailVerified: Boolean
+        ): UserSterilizationLocationDto {
+            throw RuntimeException("Unexpected database failure")
+        }
+    }
 
     private val testModules = listOf(
         module {
@@ -264,6 +282,48 @@ class UserSterilizationLocationRoutesE2ETest {
         }
     }
 
+    @Test
+    fun `POST users sterilization-location returns 500 for an unexpected repository failure`() {
+        val handle = TestServer.start(
+            modules = listOf(
+                module {
+                    single<Clock> { Clock.System }
+                    single { MockNotificationAdapter() }
+                    single<NotificationPort> { get<MockNotificationAdapter>() }
+                    single<UserRepositoryPort> { UserRepository(get()) }
+                    single { ProfileEmailVerificationService(get(), get(), get()) }
+                    single<UserSterilizationLocationRepositoryPort> {
+                        ThrowingUserSterilizationLocationRepository(UserSterilizationLocationRepository(get()))
+                    }
+                    single { UserSterilizationLocationService(get(), get()) }
+                }
+            ),
+            initDatabase = false,
+            withTestLogin = true
+        )
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+
+            val request = CreateUserSterilizationLocationRequest(
+                name = "My Location",
+                country = "United States",
+                city = "LA",
+                address = "123 Main St"
+            )
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/sterilization-location",
+                JsonSupport.objectMapper.writeValueAsString(request),
+                cookie
+            )
+
+            assertEquals(500, response.statusCode())
+            assertTrue(response.body().contains("Unexpected database failure"))
+        } finally {
+            handle.stop()
+        }
+    }
+
     // ==================== GET /api/users/sterilization-location ====================
 
     @Test
@@ -318,6 +378,28 @@ class UserSterilizationLocationRoutesE2ETest {
             val response = TestHttp.putJson(
                 "${handle.baseUrl}/api/users/sterilization-location",
                 JsonSupport.objectMapper.writeValueAsString(UpdateUserSterilizationLocationRequest(name = "New"))
+            )
+
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    // Mirrors `POST users sterilization-location returns 401 for session user that does not
+    // exist` above - the displayName lookup that guards this null-branch is duplicated
+    // per-handler in UserSterilizationLocationRoutes.kt (POST and PUT each resolve it
+    // independently), so each needs its own test.
+    @Test
+    fun `PUT users sterilization-location returns 401 for session user that does not exist`() {
+        val handle = TestServer.start(modules = testModules, initDatabase = false, withTestLogin = true)
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.putJson(
+                "${handle.baseUrl}/api/users/sterilization-location",
+                JsonSupport.objectMapper.writeValueAsString(UpdateUserSterilizationLocationRequest(name = "New")),
+                cookie
             )
 
             assertEquals(401, response.statusCode())

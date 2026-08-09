@@ -196,6 +196,13 @@ class LostFoundServiceTest {
     fun `a nearby opposite-kind report within the match window triggers a match email`() = runBlocking {
         val now = clock.now().toEpochMilliseconds()
         service.submitReport(anonymousRequest(kind = LostFoundKind.FOUND, lastSeenAt = now), sessionUser = null, clientIp = "1.3.1.1")
+        // notifyMatches() fires on a fire-and-forget scope.launch (see LostFoundService.kt) - this
+        // delay lets the first report's own (zero-match, since the second report doesn't exist
+        // yet) async check finish before the second report is submitted. Without it, under load
+        // the first report's async check can run late enough to see the second report already
+        // inserted, so BOTH reports' checks independently fire a match email (one per reporter)
+        // instead of just the second - flaky "expected 1 but was 2" under a full-suite run.
+        delay(300)
 
         service.submitReport(anonymousRequest(kind = LostFoundKind.LOST, lastSeenAt = now), sessionUser = null, clientIp = "1.3.1.2")
         delay(300)

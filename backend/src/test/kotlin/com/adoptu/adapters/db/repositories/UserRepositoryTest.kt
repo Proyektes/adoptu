@@ -6,7 +6,10 @@ import com.adoptu.dto.input.PhotographerSettingsRequest
 import com.adoptu.dto.input.UserRole
 import com.adoptu.mocks.TestClock
 import com.adoptu.mocks.TestDatabase
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -19,11 +22,14 @@ import kotlin.time.Instant
 import kotlinx.coroutines.runBlocking
 
 /**
- * Direct repository-level tests for two UserRepository methods that exist to satisfy the
- * UserRepositoryPort interface but are not currently reached by any HTTP route -- the live
- * photographer-settings route goes through PhotographerService -> PhotographerRepositoryImpl
- * instead. They still need to behave correctly (the interface contract is real), so they're
- * tested directly here rather than through a route.
+ * Direct repository-level tests for UserRepository methods that exist to satisfy the
+ * UserRepositoryPort interface but are not currently reached (or not fully reached) by any HTTP
+ * route or service call path -- e.g. the live photographer-settings route goes through
+ * PhotographerService -> PhotographerRepositoryImpl instead of this class's
+ * updatePhotographerSettings, and getUserIdByToken/getVerificationAttemptsToday/
+ * recordVerificationAttempt have no caller at all (EmailVerificationService uses a separate
+ * RateLimiter-backed counter). They still need to behave correctly (the interface contract is
+ * real), so they're tested directly here rather than through a route.
  */
 @OptIn(ExperimentalTime::class)
 class UserRepositoryTest {
@@ -182,5 +188,88 @@ class UserRepositoryTest {
 
         assertEquals(setOf(UserRole.RESCUER), repository.consumePendingRoleActivations(userId1))
         assertEquals(setOf(UserRole.PHOTOGRAPHER), repository.consumePendingRoleActivations(userId2))
+    }
+
+    // activateUrgentRescuerProfile's transaction body has two paths: the role doesn't exist yet
+    // (insert it) and the role is already active (no-op, existingRole != null short-circuits the
+    // insert). Only the first path is reached via UserServiceTest/other callers, so the no-op
+    // branch is covered directly here.
+    @Test
+    fun `activateUrgentRescuerProfile inserts the role on first activation`() = runBlocking {
+        val userId = createTestUser()
+
+        val result = repository.activateUrgentRescuerProfile(userId)
+
+        assertTrue(result?.activeRoles?.contains(UserRole.URGENT_RESCUER) == true)
+    }
+
+    @Test
+    fun `activateUrgentRescuerProfile is a no-op when the role is already active`() = runBlocking {
+        val userId = createTestUser()
+        repository.activateUrgentRescuerProfile(userId)
+
+        val result = repository.activateUrgentRescuerProfile(userId)
+
+        assertTrue(result?.activeRoles?.contains(UserRole.URGENT_RESCUER) == true)
+        // Still exactly one row for this user+role - the second call didn't insert a duplicate.
+        val rowCount = transaction {
+            UserActiveRoles.selectAll()
+                .where { (UserActiveRoles.userId eq userId) and (UserActiveRoles.role eq UserRole.URGENT_RESCUER.name) }
+                .count()
+        }
+        assertEquals(1L, rowCount)
+    }
+
+    // getUserIdByToken/getVerificationAttemptsToday/recordVerificationAttempt are declared on
+    // UserRepositoryPort and implemented here, but nothing in the current codebase calls them --
+    // EmailVerificationService and UserService both use the separate RateLimiter-backed
+    // resendPolicy / verifyToken() methods instead (see EmailVerificationService.kt). They're
+    // still a real part of the interface contract, so they're exercised directly rather than left
+    // permanently dark.
+    @Test
+    fun `getUserIdByToken returns the owning user id for a valid token`() = runBlocking {
+        val userId = createTestUser()
+        repository.createEmailVerificationToken(userId, "tok-abc", clock.now().toEpochMilliseconds() + 60_000)
+
+        val result = repository.getUserIdByToken("tok-abc")
+
+        assertEquals(userId, result)
+    }
+
+    @Test
+    fun `getUserIdByToken returns null for an unknown token`() = runBlocking {
+        val result = repository.getUserIdByToken("does-not-exist")
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `getVerificationAttemptsToday returns zero when nothing was recorded`() = runBlocking {
+        val userId = createTestUser()
+
+        val count = repository.getVerificationAttemptsToday(userId)
+
+        assertEquals(0, count)
+    }
+
+    @Test
+    fun `recordVerificationAttempt then getVerificationAttemptsToday reflects the new attempt`() = runBlocking {
+        val userId = createTestUser()
+
+        repository.recordVerificationAttempt(userId)
+        repository.recordVerificationAttempt(userId)
+
+        assertEquals(2, repository.getVerificationAttemptsToday(userId))
+    }
+
+    @Test
+    fun `getVerificationAttemptsToday only counts attempts for the given user`() = runBlocking {
+        val userId1 = createTestUser(1)
+        val userId2 = createTestUser(2)
+
+        repository.recordVerificationAttempt(userId1)
+
+        assertEquals(1, repository.getVerificationAttemptsToday(userId1))
+        assertEquals(0, repository.getVerificationAttemptsToday(userId2))
     }
 }

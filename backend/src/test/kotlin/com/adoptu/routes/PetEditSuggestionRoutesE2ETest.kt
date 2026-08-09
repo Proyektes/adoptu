@@ -425,6 +425,19 @@ class PetEditSuggestionRoutesE2ETest {
     }
 
     @Test
+    fun `GET rescuer edit-suggestions returns 404 for a session user that does not exist`() {
+        val handle = startServer()
+        try {
+            val ghostCookie = TestHttp.loginAs(handle.baseUrl, 9999)
+            val response = TestHttp.get("${handle.baseUrl}/api/users/rescuer/edit-suggestions", ghostCookie)
+
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `GET rescuer edit-suggestions excludes suggestions already reviewed`() {
         val handle = startServer()
         try {

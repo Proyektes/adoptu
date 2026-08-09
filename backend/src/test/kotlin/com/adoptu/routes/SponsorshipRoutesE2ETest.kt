@@ -207,6 +207,34 @@ class SponsorshipRoutesE2ETest {
     }
 
     @Test
+    fun `PUT sponsorships read returns 404 when session user does not exist`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.putJson("${handle.baseUrl}/api/sponsorships/1/read", "", cookie)
+
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `PUT sponsorships read returns 404 for a non-numeric id`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+
+            val response = TestHttp.putJson("${handle.baseUrl}/api/sponsorships/abc/read", "", cookie)
+
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `PUT sponsorships read returns 403 for an unrelated user`() {
         val handle = startServer()
         try {
@@ -280,6 +308,18 @@ class SponsorshipRoutesE2ETest {
         try {
             val response = TestHttp.get("${handle.baseUrl}/api/users/rescuer/sponsorships")
             assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET users rescuer sponsorships returns 404 when session user does not exist`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+            val response = TestHttp.get("${handle.baseUrl}/api/users/rescuer/sponsorships", cookie)
+            assertEquals(404, response.statusCode())
         } finally {
             handle.stop()
         }

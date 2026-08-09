@@ -13,6 +13,7 @@ import com.adoptu.dto.input.MedicalEventCategory
 import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestClock
 import com.adoptu.mocks.TestDatabase
+import com.adoptu.ports.NotificationPort
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.junit.jupiter.api.BeforeEach
@@ -22,6 +23,70 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+
+/**
+ * Fails on the first [sendEmail] call and succeeds on every subsequent one, so tests can verify
+ * that [MedicalReminderService.sendDueReminders] keeps processing the remaining medical events
+ * (and logs, rather than propagates) after one event's reminder throws.
+ */
+private class ThrowOnceNotificationAdapter : NotificationPort {
+    private var callCount = 0
+    val sentEmails = mutableListOf<String>()
+
+    override suspend fun sendEmail(to: String, subject: String, body: String, userId: Int?): Boolean {
+        callCount++
+        if (callCount == 1) throw RuntimeException("boom")
+        sentEmails.add(to)
+        return true
+    }
+
+    override suspend fun sendPhotographerRequest(
+        photographerEmail: String,
+        photographerName: String,
+        requesterName: String,
+        petName: String?,
+        message: String,
+        fee: Double?,
+        currency: String?
+    ): Boolean = true
+
+    override suspend fun sendAdoptionRequestNotification(
+        rescuerEmail: String,
+        petName: String,
+        adopterName: String,
+        message: String?
+    ): Boolean = true
+
+    override suspend fun sendTemporalHomeRequest(
+        temporalHomeEmail: String,
+        temporalHomeAlias: String,
+        rescuerName: String,
+        petName: String?,
+        message: String,
+        spamReportLink: String
+    ): Boolean = true
+
+    override suspend fun sendSponsorshipOffer(
+        rescuerEmail: String,
+        rescuerName: String,
+        sponsorName: String,
+        petName: String?,
+        offerType: String,
+        amount: Double?,
+        currency: String?,
+        inKindDescription: String?,
+        message: String
+    ): Boolean = true
+
+    override suspend fun sendUrgentRescueAlert(
+        rescuerEmail: String,
+        rescuerName: String,
+        description: String,
+        dangerType: String,
+        locationLabel: String,
+        acceptLink: String
+    ): Boolean = true
+}
 
 @OptIn(ExperimentalTime::class)
 class MedicalReminderServiceTest {
@@ -145,5 +210,24 @@ class MedicalReminderServiceTest {
         val event = medicalEventRepository.getById(eventId)!!
         assertTrue(event.reminder7dSent)
         assertTrue(event.reminderDueSent)
+    }
+
+    @Test
+    fun `keeps processing remaining events when one event's reminder throws`() = runBlocking {
+        createEventDueIn(5)
+        createEventDueIn(5)
+
+        val userRepository = UserRepository(clock)
+        val photographerRepository = PhotographerRepositoryImpl(petRepository, userRepository, clock)
+        val userService = UserService(userRepository, photographerRepository, AdoptuUserRepositoryAdapter())
+
+        val throwingAdapter = ThrowOnceNotificationAdapter()
+        val serviceWithThrowingAdapter = MedicalReminderService(
+            medicalEventRepository, petRepository, userService, throwingAdapter, clock, "http://localhost:4000"
+        )
+
+        serviceWithThrowingAdapter.sendDueReminders()
+
+        assertEquals(1, throwingAdapter.sentEmails.size)
     }
 }

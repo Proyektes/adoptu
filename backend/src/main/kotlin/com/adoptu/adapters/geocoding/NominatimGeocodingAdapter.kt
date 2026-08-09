@@ -27,7 +27,9 @@ private val logger = LoggerFactory.getLogger("AdoptU-Geocoding")
  * corner, so the circle always fully contains the box (may over-cover non-square zones, which is
  * the safe direction to err for an urgency-matching feature).
  */
-class NominatimGeocodingAdapter : GeocodingPort {
+class NominatimGeocodingAdapter(
+    private val baseUrl: String = "https://nominatim.openstreetmap.org/search",
+) : GeocodingPort {
     private val httpClient: HttpClient = HttpClient.newBuilder()
         .version(HttpClient.Version.HTTP_1_1)
         .connectTimeout(Duration.ofSeconds(5))
@@ -36,7 +38,7 @@ class NominatimGeocodingAdapter : GeocodingPort {
     override suspend fun geocode(country: String, state: String?, city: String): GeocodeResult? {
         val query = listOfNotNull(city, state, country).joinToString(", ")
         val encoded = URLEncoder.encode(query, StandardCharsets.UTF_8)
-        val uri = URI.create("https://nominatim.openstreetmap.org/search?q=$encoded&format=json&limit=1")
+        val uri = URI.create("$baseUrl?q=$encoded&format=json&limit=1")
 
         val request = HttpRequest.newBuilder(uri)
             .header("User-Agent", "Adopt-U (adopt-u.org, urgent-rescuer geocoding)")

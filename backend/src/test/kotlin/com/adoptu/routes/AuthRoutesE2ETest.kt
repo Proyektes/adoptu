@@ -1356,6 +1356,58 @@ class AuthRoutesE2ETest {
         }
     }
 
+    // ==================== POST /api/auth/refresh ====================
+
+    @Test
+    fun `POST refresh returns 401 when no refresh-token cookie`() {
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.post("${handle.baseUrl}/api/auth/refresh")
+            assertEquals(401, response.statusCode())
+            assertTrue(response.body().contains("Not authenticated"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST refresh issues a new access-token cookie for a valid refresh token`() {
+        val email = "refresh-user@example.com"
+        val handle = startTestServer()
+        try {
+            handle.registerVerifiedUser(email, displayName = "Refresh User", roles = "ADOPTER")
+            val cookie = handle.loginAndGetCookie(email, "SecurePass123!")
+
+            val response = TestHttp.post("${handle.baseUrl}/api/auth/refresh", cookie)
+            assertEquals(200, response.statusCode())
+            val body = JsonSupport.objectMapper.readValue(response.body(), SuccessResponse::class.java)
+            assertTrue(body.success)
+
+            val setCookies = response.headers().allValues("Set-Cookie")
+            assertTrue(setCookies.any { it.startsWith("adoptu_access_token=") })
+            assertTrue(setCookies.any { it.startsWith("adoptu_refresh_token=") })
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST refresh returns 401 and clears cookies for an invalid refresh token`() {
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.post("${handle.baseUrl}/api/auth/refresh", "adoptu_refresh_token=not-a-real-token")
+            assertEquals(401, response.statusCode())
+            assertTrue(response.body().contains("Session expired"))
+
+            val setCookies = response.headers().allValues("Set-Cookie")
+            // clearAuthCookies() deletes both by re-issuing them with an epoch Expires.
+            assertTrue(setCookies.any { it.startsWith("adoptu_access_token=") })
+            assertTrue(setCookies.any { it.startsWith("adoptu_refresh_token=") })
+        } finally {
+            handle.stop()
+        }
+    }
+
     // ==================== GET /api/auth/me ====================
 
     @Test
@@ -1502,6 +1554,26 @@ class AuthRoutesE2ETest {
             val body = JsonSupport.objectMapper.readValue(response.body(), SuccessWithErrorResponse::class.java)
             assertFalse(body.success)
             assertEquals(email, body.email)
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST request-magic-link succeeds for a verified user and sends the email`() {
+        val email = "magicverified@example.com"
+        val handle = startTestServer()
+        try {
+            handle.registerVerifiedUser(email)
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/auth/request-magic-link",
+                JsonSupport.objectMapper.writeValueAsString(EncryptedLoginRequest(encryptValue(email)))
+            )
+            assertEquals(200, response.statusCode())
+            val body = JsonSupport.objectMapper.readValue(response.body(), SuccessResponse::class.java)
+            assertTrue(body.success)
+            assertTrue(mockNotificationAdapter.getSentEmails().any { it.to == email })
         } finally {
             handle.stop()
         }
@@ -1655,6 +1727,27 @@ class AuthRoutesE2ETest {
             val response = TestHttp.postJson(
                 "${handle.baseUrl}/api/auth/login-with-password",
                 JsonSupport.objectMapper.writeValueAsString(PasswordLoginRequest("unknown@example.com", encryptValue("whatever")))
+            )
+            assertEquals(200, response.statusCode())
+            val body = JsonSupport.objectMapper.readValue(response.body(), SuccessWithErrorResponse::class.java)
+            assertFalse(body.success)
+            assertEquals("Invalid credentials", body.error)
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST login-with-password returns invalid credentials when password decryption fails`() {
+        val handle = startTestServer()
+        try {
+            // "not-encrypted-data" is not valid CryptoService-encrypted ciphertext, so
+            // CryptoService.decrypt(...) returns null and plainPassword short-circuits to null
+            // before any AuthKit login attempt is made -- a distinct branch from "correctly
+            // decrypted but wrong password" below.
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/auth/login-with-password",
+                JsonSupport.objectMapper.writeValueAsString(PasswordLoginRequest("someone@example.com", "not-encrypted-data"))
             )
             assertEquals(200, response.statusCode())
             val body = JsonSupport.objectMapper.readValue(response.body(), SuccessWithErrorResponse::class.java)
@@ -1875,6 +1968,26 @@ class AuthRoutesE2ETest {
             assertEquals(200, response.statusCode())
             val body = JsonSupport.objectMapper.readValue(response.body(), SuccessResponse::class.java)
             assertTrue(body.success)
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST forgot-password succeeds for a known user and sends the reset email`() {
+        val email = "forgotknown@example.com"
+        val handle = startTestServer()
+        try {
+            handle.registerVerifiedUser(email)
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/auth/forgot-password",
+                JsonSupport.objectMapper.writeValueAsString(EncryptedLoginRequest(encryptValue(email)))
+            )
+            assertEquals(200, response.statusCode())
+            val body = JsonSupport.objectMapper.readValue(response.body(), SuccessResponse::class.java)
+            assertTrue(body.success)
+            assertTrue(mockNotificationAdapter.getSentEmails().any { it.to == email })
         } finally {
             handle.stop()
         }

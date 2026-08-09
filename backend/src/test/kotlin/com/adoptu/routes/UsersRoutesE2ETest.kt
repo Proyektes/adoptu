@@ -6,6 +6,7 @@ import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.WebAuthnCredentials
 import com.adoptu.adapters.db.repositories.PetRepositoryImpl
 import com.adoptu.adapters.db.repositories.PhotographerRepositoryImpl
+import com.adoptu.adapters.db.repositories.UrgentRescueRepositoryImpl
 import com.adoptu.adapters.db.repositories.UserRepository
 import com.adoptu.config.AppConfig
 import com.adoptu.dto.input.AcceptTermsRequest
@@ -14,16 +15,22 @@ import com.adoptu.dto.input.RoleActivationRequest
 import com.adoptu.mocks.MockImageStorage
 import com.adoptu.mocks.MockNotificationAdapter
 import com.adoptu.mocks.TestDatabase
+import com.adoptu.ports.CaptchaPort
+import com.adoptu.ports.GeocodeResult
+import com.adoptu.ports.GeocodingPort
 import com.adoptu.ports.ImageStoragePort
 import com.adoptu.ports.NotificationPort
 import com.adoptu.ports.PetRepositoryPort
 import com.adoptu.ports.PhotographerRepositoryPort
+import com.adoptu.ports.SmsNotificationPort
+import com.adoptu.ports.UrgentRescueRepositoryPort
 import com.adoptu.ports.UserRepositoryPort
 import com.adoptu.services.EmailChangeService
 import com.adoptu.services.PasswordService
 import com.adoptu.services.PetService
 import com.adoptu.services.PhotographerService
 import com.adoptu.services.ProfileEmailVerificationService
+import com.adoptu.services.UrgentRescueService
 import com.adoptu.services.UserService
 import com.adoptu.services.auth.WebAuthnService
 import com.adoptu.testsupport.TestHttp
@@ -50,6 +57,28 @@ import kotlin.time.ExperimentalTime
 class UsersRoutesE2ETest {
 
     private val clock = Clock.System
+
+    // Minimal fakes so UrgentRescueService's constructor can be satisfied - only
+    // activateProfile/deactivateProfile (delegating straight to userRepository) are exercised by
+    // the /api/users/urgent-rescuer-profile tests below, so these never actually get called.
+    private object FakeSmsPort : SmsNotificationPort {
+        override suspend fun sendUrgentRescueAlert(
+            phone: String,
+            description: String,
+            dangerType: String,
+            locationLabel: String,
+            acceptLink: String
+        ): Boolean = true
+    }
+
+    private object FakeGeocodingPort : GeocodingPort {
+        override suspend fun geocode(country: String, state: String?, city: String): GeocodeResult? =
+            GeocodeResult(latitude = 0.0, longitude = 0.0, radiusKm = 50.0)
+    }
+
+    private object AlwaysPassCaptchaPort : CaptchaPort {
+        override suspend fun verify(token: String, remoteIp: String?): Boolean = true
+    }
 
     @BeforeEach
     fun setup() {
@@ -140,6 +169,11 @@ class UsersRoutesE2ETest {
             single { UserService(get(), get(), get()) }
             single { com.adoptu.services.RescuerDirectoryService(get(), get()) }
             single { com.universaliun.ratelimit.common.RateLimiter(com.universaliun.ratelimit.common.InMemoryRateLimitStateAdapter()) }
+            single<UrgentRescueRepositoryPort> { UrgentRescueRepositoryImpl(get()) }
+            single<SmsNotificationPort> { FakeSmsPort }
+            single<GeocodingPort> { FakeGeocodingPort }
+            single<CaptchaPort> { AlwaysPassCaptchaPort }
+            single { UrgentRescueService(get(), get(), get(), get(), get(), get(), get(), "http://localhost:80") }
             single { ProfileEmailVerificationService(get(), get(), get(), "http://localhost:80") }
             single { PetService(get(), get(), get(), get(), get()) }
             single { PasswordService(get(), get(), get(), "http://localhost:80", get()) }
@@ -1199,6 +1233,97 @@ class UsersRoutesE2ETest {
 
             val response = TestHttp.postJson(
                 "${handle.baseUrl}/api/users/temporal-home-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(false)),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    // ==================== POST /api/users/urgent-rescuer-profile ====================
+
+    @Test
+    fun `POST urgent-rescuer-profile returns 401 when no session`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/urgent-rescuer-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true))
+            )
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST urgent-rescuer-profile activates and deactivates when authenticated`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 2)
+
+            val activate = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/urgent-rescuer-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(200, activate.statusCode())
+
+            val deactivate = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/urgent-rescuer-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(false)),
+                cookie
+            )
+            assertEquals(200, deactivate.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST urgent-rescuer-profile returns 404 for session user that does not exist`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/urgent-rescuer-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST urgent-rescuer-profile returns 403 when activating for unverified user`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1) // rescuer, not verified
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/urgent-rescuer-profile",
+                JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(true)),
+                cookie
+            )
+            assertEquals(403, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST urgent-rescuer-profile deactivate returns 404 for session user that does not exist`() {
+        val handle = startServer()
+        try {
+            val cookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/users/urgent-rescuer-profile",
                 JsonSupport.objectMapper.writeValueAsString(RoleActivationRequest(false)),
                 cookie
             )

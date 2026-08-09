@@ -20,7 +20,10 @@ private val logger = LoggerFactory.getLogger("TurnstileCaptchaAdapter")
  * CAPTCHA, embedded client-side via a plain <script> tag (no npm package, matching this project's
  * "no Node.js" convention - see frontend page templates' report-urgent widget).
  */
-class TurnstileCaptchaAdapter(private val secretKey: String) : CaptchaPort {
+class TurnstileCaptchaAdapter(
+    private val secretKey: String,
+    private val verifyUrl: String = "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+) : CaptchaPort {
     private val httpClient: HttpClient = HttpClient.newBuilder()
         .version(HttpClient.Version.HTTP_1_1)
         .connectTimeout(Duration.ofSeconds(5))
@@ -35,7 +38,7 @@ class TurnstileCaptchaAdapter(private val secretKey: String) : CaptchaPort {
             if (remoteIp != null) append("&remoteip=${encode(remoteIp)}")
         }
 
-        val request = HttpRequest.newBuilder(URI.create("https://challenges.cloudflare.com/turnstile/v0/siteverify"))
+        val request = HttpRequest.newBuilder(URI.create(verifyUrl))
             .header("Content-Type", "application/x-www-form-urlencoded")
             .timeout(Duration.ofSeconds(10))
             .POST(HttpRequest.BodyPublishers.ofString(params))

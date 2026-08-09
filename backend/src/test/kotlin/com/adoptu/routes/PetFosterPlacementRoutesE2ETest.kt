@@ -351,6 +351,25 @@ class PetFosterPlacementRoutesE2ETest {
         }
     }
 
+    @Test
+    fun `POST foster-placements returns 404 for a session user that does not exist`() {
+        val handle = startServer()
+        try {
+            val petId = createPetInDb(rescuerId = 1)
+            val ghostCookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/pets/$petId/foster-placements",
+                createRequestJson(),
+                ghostCookie
+            )
+
+            assertEquals(404, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
     // ==================== GET /api/pets/{id}/foster-placements ====================
 
     @Test
@@ -364,6 +383,21 @@ class PetFosterPlacementRoutesE2ETest {
 
             assertEquals(403, response.statusCode())
             assertTrue(response.body().contains("Forbidden"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET foster-placements returns 404 for a session user that does not exist`() {
+        val handle = startServer()
+        try {
+            val petId = createPetInDb(rescuerId = 1)
+            val ghostCookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.get("${handle.baseUrl}/api/pets/$petId/foster-placements", ghostCookie)
+
+            assertEquals(404, response.statusCode())
         } finally {
             handle.stop()
         }
@@ -415,6 +449,20 @@ class PetFosterPlacementRoutesE2ETest {
 
             assertEquals(403, response.statusCode())
             assertTrue(response.body().contains("Forbidden"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `PUT foster-placements end returns 404 for a session user that does not exist`() {
+        val handle = startServer()
+        try {
+            val ghostCookie = TestHttp.loginAs(handle.baseUrl, 9999)
+
+            val response = TestHttp.put("${handle.baseUrl}/api/pets/foster-placements/1/end", ghostCookie)
+
+            assertEquals(404, response.statusCode())
         } finally {
             handle.stop()
         }
