@@ -53,17 +53,6 @@ repositories {
         content { includeGroup("com.universaliun.ratelimit") }
     }
 
-    // TEMPORARY: resolves AuthKit's unpublished-to-GitHub-Packages changes (verifyPassword,
-    // ResetPasswordService's reuse-policy hook) from the local ~/.m2 cache until they're actually
-    // pushed. Declared BEFORE AuthKitGitHubPackages below so it's tried first -- Gradle checks
-    // repositories in declaration order, and a real (older) SNAPSHOT sitting in GitHub Packages
-    // would otherwise resolve first. content{}-scoped to just the authkit group. Remove once
-    // published for real.
-    maven {
-        name = "AuthKitMavenLocal"
-        url = uri("${System.getProperty("user.home")}/.m2/repository")
-        content { includeGroup("com.universaliun.auth") }
-    }
     // AuthKit (login/JWT/OAuth/WebAuthn passkey/magic-link auth engine, generic RBAC
     // Role/Resource/PermissionSet) -- see Libraries/AuthKit/README.md. Uses AUTH_KIT_TOKEN
     // (AuthKit's own publish credential, distinct from PAYMENT_KIT_TOKEN above) with the same
@@ -185,7 +174,7 @@ dependencies {
 
     // Login/register/refresh/passkey/magic-link/OAuth/password-reset auth engine -- replaces
     // AuthRoutes.kt's own hand-rolled session/token logic. See adapters/authkit/.
-    implementation("com.universaliun.auth:authkit-backend:1.0.1")
+    implementation("com.universaliun.auth:authkit-backend:1.1.0")
 
     // test
     testImplementation(kotlin("test"))
