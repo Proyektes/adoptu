@@ -175,6 +175,10 @@ object WebAuthnCredentials : Table("webauthn_credentials") {
     val signCount = long("sign_count")
     val transports = varchar("transports", 255).nullable()
     val createdAt = long("created_at")
+    // Nullable for rows written before this column existed -- see
+    // com.universaliun.auth.backend.domain.model.passkey.PasskeyCredential.userHandle's doc
+    // comment for what this is and why it can't be derived from userId alone.
+    val userHandle = varchar("user_handle", 255).nullable()
 
     override val primaryKey = PrimaryKey(id)
 }

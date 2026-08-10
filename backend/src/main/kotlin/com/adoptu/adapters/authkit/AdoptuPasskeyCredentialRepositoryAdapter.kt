@@ -60,6 +60,7 @@ class AdoptuPasskeyCredentialRepositoryAdapter : PasskeyCredentialRepositoryPort
         val attestedCredentialData = AttestedCredentialData(AAGUID.ZERO, credential.credentialId, coseKey)
         val encodedBlob = Base64.getEncoder().encodeToString(attestedCredentialDataConverter.convert(attestedCredentialData))
         val encodedCredentialId = credential.credentialId.toB64Url()
+        val encodedUserHandle = credential.userHandle.toB64Url()
         val userId = credential.userId.value.toInt()
 
         val exists = WebAuthnCredentials.selectAll().where { WebAuthnCredentials.credentialId eq encodedCredentialId }.any()
@@ -68,6 +69,7 @@ class AdoptuPasskeyCredentialRepositoryAdapter : PasskeyCredentialRepositoryPort
                 row[attestedCredentialDataBase64] = encodedBlob
                 row[signCount] = credential.signatureCount
                 row[transports] = credential.transports.takeIf { it.isNotEmpty() }?.joinToString(",")
+                row[userHandle] = encodedUserHandle
             }
         } else {
             WebAuthnCredentials.insert { row ->
@@ -77,6 +79,7 @@ class AdoptuPasskeyCredentialRepositoryAdapter : PasskeyCredentialRepositoryPort
                 row[signCount] = credential.signatureCount
                 row[transports] = credential.transports.takeIf { it.isNotEmpty() }?.joinToString(",")
                 row[createdAt] = credential.createdAt.toEpochMilli()
+                row[userHandle] = encodedUserHandle
             }
         }
         credential
@@ -96,6 +99,13 @@ class AdoptuPasskeyCredentialRepositoryAdapter : PasskeyCredentialRepositoryPort
             .map { it.toPasskeyCredential() }
     }
 
+    override fun findByUserHandle(userHandle: ByteArray): PasskeyCredential? = transaction {
+        WebAuthnCredentials.selectAll()
+            .where { WebAuthnCredentials.userHandle eq userHandle.toB64Url() }
+            .singleOrNull()
+            ?.toPasskeyCredential()
+    }
+
     override fun updateSignatureCount(credentialId: ByteArray, signatureCount: Long) {
         transaction {
             WebAuthnCredentials.update({ WebAuthnCredentials.credentialId eq credentialId.toB64Url() }) {
@@ -109,13 +119,18 @@ class AdoptuPasskeyCredentialRepositoryAdapter : PasskeyCredentialRepositoryPort
         val attestedCredentialData = attestedCredentialDataConverter.convert(acdBytes)
         val publicKeyCoseBytes = objectConverter.cborConverter.writeValueAsBytes(attestedCredentialData.coseKey)
 
+        val userId = this[WebAuthnCredentials.userId]
         return PasskeyCredential(
             credentialId = this[WebAuthnCredentials.credentialId].fromB64Url(),
-            userId = AuthUserId(this[WebAuthnCredentials.userId].toString()),
+            userId = AuthUserId(userId.toString()),
             publicKeyCose = publicKeyCoseBytes,
             signatureCount = this[WebAuthnCredentials.signCount],
             transports = this[WebAuthnCredentials.transports]?.split(",")?.filter { it.isNotBlank() }?.toSet() ?: emptySet(),
             createdAt = Instant.ofEpochMilli(this[WebAuthnCredentials.createdAt]),
+            // Rows written before this column existed (including ones bridged from the retired
+            // native webauthn4j flow) have no stored handle -- fall back to the deterministic
+            // derivation AuthKit used everywhere before this fix.
+            userHandle = this[WebAuthnCredentials.userHandle]?.fromB64Url() ?: userId.toString().toByteArray(Charsets.UTF_8),
         )
     }
 }

@@ -36,6 +36,8 @@ private class FakePasskeyCredentialRepository : PasskeyCredentialRepositoryPort 
     }
     override fun findByCredentialId(credentialId: ByteArray): PasskeyCredential? = store[credentialId.joinToString(",")]
     override fun findByUserId(userId: AuthUserId): List<PasskeyCredential> = store.values.filter { it.userId == userId }
+    override fun findByUserHandle(userHandle: ByteArray): PasskeyCredential? =
+        store.values.firstOrNull { it.userHandle.contentEquals(userHandle) }
     override fun updateSignatureCount(credentialId: ByteArray, signatureCount: Long) {}
 }
 

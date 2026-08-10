@@ -82,6 +82,7 @@ class AdoptuPasskeyCredentialRepositoryAdapterTest {
                 signatureCount = 0,
                 transports = setOf("internal", "hybrid"),
                 createdAt = Instant.now(),
+                userHandle = "test-user-handle".toByteArray(),
             )
         )
 
@@ -124,6 +125,9 @@ class AdoptuPasskeyCredentialRepositoryAdapterTest {
         assertNotNull(bridged)
         assertEquals(5L, bridged.signatureCount)
         assertEquals(testUserId, bridged.userId)
+        // No userHandle column value was written above -- falls back to the deterministic
+        // pre-fix derivation, same as what discoverable login would have used for this row before.
+        assertTrue(testUserIdInt.toString().toByteArray().contentEquals(bridged.userHandle))
 
         val bridgedKey = objectConverter.cborConverter.readValue(bridged.publicKeyCose, EC2COSEKey::class.java)!!
         assertTrue(coseKey.x.contentEquals(bridgedKey.x))
@@ -154,6 +158,29 @@ class AdoptuPasskeyCredentialRepositoryAdapterTest {
         assertEquals(42L, adapter.findByCredentialId(credentialId)?.signatureCount)
     }
 
+    @Test fun `findByUserHandle finds a passkey-first signup's random handle, not just the deterministic one`() {
+        val randomHandle = "random-signup-handle".toByteArray()
+        adapter.save(
+            PasskeyCredential(
+                credentialId = "handle-lookup-cred".toByteArray(),
+                userId = testUserId,
+                publicKeyCose = objectConverter.cborConverter.writeValueAsBytes(EC2COSEKey.create(freshEcPublicKey(), COSEAlgorithmIdentifier.ES256)),
+                signatureCount = 0,
+                transports = emptySet(),
+                createdAt = Instant.now(),
+                userHandle = randomHandle,
+            )
+        )
+
+        val found = adapter.findByUserHandle(randomHandle)
+        assertNotNull(found)
+        assertEquals(testUserId, found.userId)
+    }
+
+    @Test fun `findByUserHandle returns null for an unknown handle`() {
+        assertNull(adapter.findByUserHandle("no-such-handle".toByteArray()))
+    }
+
     private fun passkeyCredential(credentialId: ByteArray, publicKey: ECPublicKey) = PasskeyCredential(
         credentialId = credentialId,
         userId = AuthUserId("1"),
@@ -161,5 +188,6 @@ class AdoptuPasskeyCredentialRepositoryAdapterTest {
         signatureCount = 0,
         transports = emptySet(),
         createdAt = Instant.now(),
+        userHandle = "1".toByteArray(),
     )
 }
