@@ -163,6 +163,12 @@ class AuthRoutesE2ETest {
         // WebAuthnCredentialRepositoryAdapter's doc comment) -- Adopt-u's AuthUserId is just the
         // int user id as a string.
         val userId: Int? = null,
+        // Set instead of userId for a passkey-FIRST signup ceremony (POST /api/auth/register):
+        // no account/int id exists yet when StartPasskeySignupService picks the handle, so it's a
+        // throwaway random value (captured here straight off the registration-options response,
+        // see ParsedPasskeyOptions.userHandleBytes) rather than derivable from an id at all. Takes
+        // precedence over userId in buildAssertionResponseJson when both would otherwise apply.
+        val userHandleBytes: ByteArray? = null,
     )
 
     private fun generateSimulatedAuthenticator(userId: Int? = null): SimulatedAuthenticator {
@@ -189,14 +195,18 @@ class AuthRoutesE2ETest {
      * `PublicKeyCredentialCreationOptions`/`PublicKeyCredentialRequestOptions` JSON, always nested
      * under a top-level "publicKey" key (`options.toCredentialsCreateJson()` /
      * `request.toCredentialsGetJson()` in AuthKit's Start*Service classes). */
-    private data class ParsedPasskeyOptions(val requestId: String, val challengeBytes: ByteArray)
+    /** [userHandleBytes] is only present on registration-options -- assertion-options has no
+     * `user` object to carry one (Adopt-u's login is always usernameless/discoverable). */
+    private data class ParsedPasskeyOptions(val requestId: String, val challengeBytes: ByteArray, val userHandleBytes: ByteArray? = null)
 
     private fun parsePasskeyOptions(optionsResponseBody: String): ParsedPasskeyOptions {
         val outer = JsonSupport.objectMapper.readTree(optionsResponseBody)
         val requestId = outer.get("requestId").asText()
         val inner = JsonSupport.objectMapper.readTree(outer.get("optionsJson").asText())
-        val challengeNode = inner.get("publicKey")?.get("challenge") ?: inner.get("challenge")
-        return ParsedPasskeyOptions(requestId, b64urlDecode(challengeNode.asText()))
+        val publicKey = inner.get("publicKey")
+        val challengeNode = publicKey?.get("challenge") ?: inner.get("challenge")
+        val userIdNode = publicKey?.get("user")?.get("id")
+        return ParsedPasskeyOptions(requestId, b64urlDecode(challengeNode.asText()), userIdNode?.let { b64urlDecode(it.asText()) })
     }
 
     // webAuthnOrigins configured for the test server (see TestServer.kt's authKoinModule(...)
@@ -260,8 +270,9 @@ class AuthRoutesE2ETest {
             update(authenticatorDataBytes + clientDataHash)
         }.sign()
 
-        val userId = requireNotNull(authenticator.userId) { "buildAssertionResponseJson needs a SimulatedAuthenticator with a userId (see registerPasskeyCeremony)" }
-        val userHandle = userId.toString().toByteArray(Charsets.UTF_8)
+        val userHandle = authenticator.userHandleBytes
+            ?: requireNotNull(authenticator.userId) { "buildAssertionResponseJson needs a SimulatedAuthenticator with a userId or userHandleBytes (see registerPasskeyCeremony)" }
+                .toString().toByteArray(Charsets.UTF_8)
 
         return JsonSupport.objectMapper.writeValueAsString(
             mapOf(
@@ -1283,6 +1294,61 @@ class AuthRoutesE2ETest {
             val body = JsonSupport.objectMapper.readValue(response.body(), SuccessResponse::class.java)
             assertTrue(body.success)
             assertNotNull(response.header("Set-Cookie"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    /** The passkey-first-signup counterpart to the test above: no account exists yet when the
+     * registration ceremony starts, so the WebAuthn user handle baked into the credential is a
+     * throwaway random value (StartPasskeySignupService), not the account's own id. A discoverable
+     * login (no username, no allowCredentials -- see GET /api/auth/assertion-options) must still
+     * resolve that random handle back to the freshly created account. Regression coverage for the
+     * AuthKit bug fixed alongside this test: PasskeyCredential now stores the handle it was
+     * actually created with instead of re-deriving it from AuthUserId at lookup time. */
+    @Test
+    fun `POST authenticate succeeds via discoverable login for a passkey-first signup`() {
+        val email = "passkeyfirst-login@example.com"
+        val handle = startTestServer()
+        try {
+            val optionsResponse = TestHttp.postForm(
+                "${handle.baseUrl}/api/auth/registration-options",
+                formUrlEncode(listOf("email" to email, "displayName" to "Passkey First User"))
+            )
+            assertEquals(200, optionsResponse.statusCode())
+            val registrationOptions = parsePasskeyOptions(optionsResponse.body())
+            val userHandleBytes = requireNotNull(registrationOptions.userHandleBytes) {
+                "registration-options response had no user.id -- can't build a faithful ceremony"
+            }
+
+            val authenticator = generateSimulatedAuthenticator().copy(userHandleBytes = userHandleBytes)
+            val registrationResponseJson = buildRegistrationResponseJson(authenticator, registrationOptions.challengeBytes)
+
+            val registerResponse = TestHttp.postJson(
+                "${handle.baseUrl}/api/auth/register",
+                JsonSupport.objectMapper.writeValueAsString(
+                    mapOf("requestId" to registrationOptions.requestId, "credentialJson" to registrationResponseJson)
+                )
+            )
+            assertEquals(200, registerResponse.statusCode())
+            val registerBody = JsonSupport.objectMapper.readValue(registerResponse.body(), RegistrationResponse::class.java)
+            assertTrue(registerBody.success)
+
+            // Same shortcut registerVerifiedUser uses -- bypass the real activation-token/email
+            // flow, only email-verified status matters for what this test is proving.
+            transaction { Users.update({ Users.username eq email }) { it[isEmailVerified] = true } }
+
+            val assertionOptions = handle.fetchAssertionChallenge()
+            val credentialJson = buildAssertionResponseJson(authenticator, assertionOptions.challengeBytes)
+
+            val authenticateResponse = TestHttp.postJson(
+                "${handle.baseUrl}/api/auth/authenticate",
+                JsonSupport.objectMapper.writeValueAsString(mapOf("requestId" to assertionOptions.requestId, "credentialJson" to credentialJson))
+            )
+            assertEquals(200, authenticateResponse.statusCode())
+            val authenticateBody = JsonSupport.objectMapper.readValue(authenticateResponse.body(), SuccessResponse::class.java)
+            assertTrue(authenticateBody.success)
+            assertNotNull(authenticateResponse.header("Set-Cookie"))
         } finally {
             handle.stop()
         }
