@@ -53,7 +53,7 @@ kotlin {
                 // {"publicKey": ...} -- see WebAuthn.kt's replacement for detail). Needs
                 // kotlinx-coroutines-core for its suspend functions and for bridging back to the
                 // Promise-based call sites here via kotlinx.coroutines.promise.
-                implementation("com.universaliun.auth:authkit-web:1.1.2")
+                implementation("com.universaliun.auth:authkit-web:1.2.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
             }
         }
