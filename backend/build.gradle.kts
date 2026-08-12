@@ -174,7 +174,7 @@ dependencies {
 
     // Login/register/refresh/passkey/magic-link/OAuth/password-reset auth engine -- replaces
     // AuthRoutes.kt's own hand-rolled session/token logic. See adapters/authkit/.
-    implementation("com.universaliun.auth:authkit-backend:1.2.1")
+    implementation("com.universaliun.auth:authkit-backend:1.2.2")
 
     // test
     testImplementation(kotlin("test"))
