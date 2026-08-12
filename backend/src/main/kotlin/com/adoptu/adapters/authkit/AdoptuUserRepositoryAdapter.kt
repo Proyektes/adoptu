@@ -201,7 +201,7 @@ class AdoptuUserRepositoryAdapter : UserRepositoryPort {
             displayName = this[Users.displayName],
             passwordHash = passwordHash,
             roles = activeRoles,
-            permissions = PermissionSet.fromResources(activeRoles.flatMap { it.resources }.toSet(), ADOPTU_RESOURCE_COUNT),
+            permissions = PermissionSet.fromRoles(activeRoles, ADOPTU_RESOURCE_COUNT),
             enabled = isEmailVerified && !isBanned && deactivatedAt == null,
             emailVerified = isEmailVerified,
             createdAt = Instant.ofEpochMilli(this[Users.createdAt]),

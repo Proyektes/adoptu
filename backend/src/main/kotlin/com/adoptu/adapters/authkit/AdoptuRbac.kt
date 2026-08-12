@@ -1,6 +1,7 @@
 package com.adoptu.adapters.authkit
 
 import com.adoptu.dto.input.UserRole
+import com.universaliun.auth.common.rbac.Crud
 import com.universaliun.auth.common.rbac.Resource
 import com.universaliun.auth.common.rbac.Role
 
@@ -26,21 +27,21 @@ val ADOPTU_RESOURCE_COUNT = AdoptuResource.entries.size
  * Mirrors [UserRole] 1:1 by entry name - [AdoptuRole.valueOf] round-trips cleanly against both a
  * decoded JWT role-name claim and the user_active_roles.role DB column (see
  * [AdoptuUserRepositoryAdapter]), which already stores `UserRole.name`. Each role grants full CRUD
- * (see [com.universaliun.auth.common.rbac.PermissionSet.fromResources]) on the one resource its
- * own profile type owns - ADOPTER/URGENT_RESCUER own none, since their authorization is entirely
- * role-membership (or row-level ownership, decided in the service layer) at every current call
- * site, never resource-CRUD. [ADMIN.grantsAll] bypasses every hasResource/hasPermission/hasRole
- * check via [com.universaliun.auth.common.rbac.AuthPrincipal.isSuperAdmin] - see its doc comment.
+ * (see [Crud.entries]) on the one resource its own profile type owns - ADOPTER/URGENT_RESCUER own
+ * none, since their authorization is entirely role-membership (or row-level ownership, decided in
+ * the service layer) at every current call site, never resource-CRUD, so no partial-CRUD subset is
+ * meaningful here today. [ADMIN.grantsAll] bypasses every hasResource/hasPermission/hasRole check
+ * via [com.universaliun.auth.common.rbac.AuthPrincipal.isSuperAdmin] - see its doc comment.
  */
-enum class AdoptuRole(override val resources: Set<Resource>) : Role {
-    ADOPTER(emptySet()),
-    RESCUER(setOf(AdoptuResource.PET)),
-    PHOTOGRAPHER(setOf(AdoptuResource.PHOTOGRAPHER)),
-    TEMPORAL_HOME(setOf(AdoptuResource.TEMPORAL_HOME)),
-    SHELTER(setOf(AdoptuResource.SHELTER)),
-    STERILIZATION_SERVICE(setOf(AdoptuResource.STERILIZATION_LOCATION)),
-    URGENT_RESCUER(emptySet()),
-    ADMIN(emptySet()) {
+enum class AdoptuRole(override val resources: Map<Resource, Set<Crud>>) : Role {
+    ADOPTER(emptyMap()),
+    RESCUER(mapOf(AdoptuResource.PET to Crud.entries.toSet())),
+    PHOTOGRAPHER(mapOf(AdoptuResource.PHOTOGRAPHER to Crud.entries.toSet())),
+    TEMPORAL_HOME(mapOf(AdoptuResource.TEMPORAL_HOME to Crud.entries.toSet())),
+    SHELTER(mapOf(AdoptuResource.SHELTER to Crud.entries.toSet())),
+    STERILIZATION_SERVICE(mapOf(AdoptuResource.STERILIZATION_LOCATION to Crud.entries.toSet())),
+    URGENT_RESCUER(emptyMap()),
+    ADMIN(emptyMap()) {
         override fun grantsAll() = true
     },
     ;
