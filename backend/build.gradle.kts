@@ -208,6 +208,15 @@ application {
 graalvmNative {
     metadataRepository {
         enabled.set(true)
+        // Pinned rather than left on default/"latest" resolution - unpinned, a container
+        // build with no prior Gradle cache re-resolves and re-downloads this repository
+        // fresh, and an in-flight network hiccup or the two-invocation :backend:jar then
+        // :backend:nativeCompile split (see Dockerfile's comment on why they're separate)
+        // can leave a partially-extracted, "missing schema files" cache behind that a
+        // later invocation trusts as complete. Version verified directly against the
+        // release archive (schemas/library-and-framework-list-schema-v1.0.0.json and
+        // schemas/metadata-library-index-schema-v2.3.0.json both present).
+        version.set("1.0.11")
     }
     binaries {
         named("main") {
