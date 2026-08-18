@@ -43,6 +43,24 @@ def handler(event, context):
         print(result)
         return result
 
+    # ECS marks a task's desiredStatus STOPPED the instant it decides to drain
+    # it (e.g. replacing it, or a task-replacement that isn't a full new
+    # deployment and so shares the outgoing task's startedBy/PRIMARY
+    # deployment id - the check below can't tell them apart in that case),
+    # but lastStatus lags behind until the container actually exits - often
+    # several seconds, comfortably past this function's stability wait. A
+    # task in that window still reads lastStatus=RUNNING and would otherwise
+    # sail through the check above and overwrite DNS with the IP of a task
+    # that's already on its way out.
+    if tasks[0].get("desiredStatus") != "RUNNING":
+        result = {
+            "skipped": "task's desiredStatus is no longer RUNNING (being drained)",
+            "task_arn": task_arn,
+            "desired_status": tasks[0].get("desiredStatus"),
+        }
+        print(result)
+        return result
+
     # During a normal rolling deployment, the old task and the new task are
     # BOTH briefly RUNNING at once (that's how a zero-downtime deploy works)
     # - EventBridge fires for both, and nothing guarantees the new task's
