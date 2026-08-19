@@ -28,6 +28,7 @@ import com.adoptu.web.respondRedirect
 import com.universaliun.auth.backend.adapter.`in`.web.clearAuthCookies
 import com.universaliun.auth.backend.adapter.`in`.web.cookie.CookieConfig
 import com.universaliun.auth.backend.adapter.`in`.web.setAuthCookies
+import com.universaliun.auth.backend.domain.exception.AccountSetupPendingException
 import com.universaliun.auth.backend.domain.exception.EmailAlreadyRegisteredException
 import com.universaliun.auth.backend.domain.exception.InvalidCredentialsException
 import com.universaliun.auth.backend.domain.exception.InvalidMagicLinkTokenException
@@ -701,6 +702,23 @@ fun HttpRules.authRoutes() {
                     res.send(SuccessWithErrorResponse(success = false, error = "Your account has been suspended. Reason: ${user.banReason ?: "Contact administrator"}", email = body.email))
                     return@Handler
                 }
+            }
+            res.send(SuccessWithErrorResponse(success = false, error = "Invalid credentials"))
+        } catch (e: AccountSetupPendingException) {
+            // Thrown for an account that's neither enabled, email-verified, nor has a password set
+            // yet (see AuthKit's LoginAuthenticator.isPendingSetup) - i.e. a passkey-first/OAuth/
+            // magic-link signup that never finished email verification, attempting to log in with a
+            // password it was never given. Same "resend the verification email" UX as the
+            // unverified branch below, just reached via a different, more specific exception type.
+            runBlocking { passwordService.recordLoginAttempt(body.email, successful = false) }
+            val user = runBlocking { validationService.getUserByEmail(body.email) }
+            if (user != null) {
+                val resent = resendActivationEmail(user.id, body.email, user.displayName, user.language)
+                val message = if (resent.isSuccess && resent.getOrDefault(false))
+                    "Verification email was expired. A new verification email has been sent."
+                else "Please verify your email before logging in"
+                res.send(SuccessWithErrorResponse(success = false, error = message, email = body.email))
+                return@Handler
             }
             res.send(SuccessWithErrorResponse(success = false, error = "Invalid credentials"))
         }

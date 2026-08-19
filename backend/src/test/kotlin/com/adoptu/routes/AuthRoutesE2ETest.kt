@@ -1902,6 +1902,38 @@ class AuthRoutesE2ETest {
     }
 
     @Test
+    fun `POST login-with-password returns a handled response, not a 500, for a passkey-first account with no password`() {
+        // AuthKit's LoginAuthenticator throws AccountSetupPendingException (not
+        // InvalidCredentialsException) for an account that is neither enabled, email-verified, nor
+        // has a password set - e.g. a passkey-first signup that never finished email verification,
+        // attempting to log in with a password it was never given. Regression test for that
+        // exception type going uncaught and surfacing as a raw 500 (see AuthRoutes.kt's
+        // login-with-password AccountSetupPendingException catch clause).
+        val email = "passkeyonly-nopassword@example.com"
+        val handle = startTestServer()
+        try {
+            transaction {
+                Users.insert {
+                    it[username] = email
+                    it[displayName] = "Passkey Only User"
+                    it[createdAt] = clock.now().toEpochMilliseconds()
+                }
+            }
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/auth/login-with-password",
+                JsonSupport.objectMapper.writeValueAsString(PasswordLoginRequest(email, encryptValue("SomePassword123!")))
+            )
+
+            assertEquals(200, response.statusCode())
+            val body = JsonSupport.objectMapper.readValue(response.body(), SuccessWithErrorResponse::class.java)
+            assertFalse(body.success)
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `POST login-with-password resends verification when token missing or expired`() {
         val email = "loginresend@example.com"
         val handle = startTestServer()
