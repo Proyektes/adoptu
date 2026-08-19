@@ -208,7 +208,8 @@ object RegisterPageModule {
                     "email" to email,
                     "displayName" to displayName,
                     "roles" to getRoles(),
-                    "encryptedPassword" to encryptedPassword.unsafeCast<String>()
+                    "encryptedPassword" to encryptedPassword.unsafeCast<String>(),
+                    "language" to (localStorage.getItem("preferredLanguage") ?: "en")
                 )
                 apiFetch("/api/auth/register-password", js("({method: 'POST', body: JSON.stringify(body)})"))
             }

@@ -165,6 +165,23 @@ class EmailVerificationServiceTest {
     }
 
     @Test
+    fun `generateAndSendVerificationEmail works for Chinese language`() = kotlinx.coroutines.runBlocking {
+        val userId = createTestUser("test@example.com", "Test User")
+
+        val result = emailVerificationService.generateAndSendVerificationEmail(
+            userId = userId,
+            email = "test@example.com",
+            displayName = "Test User",
+            language = "zh"
+        )
+
+        assertTrue(result.isSuccess)
+
+        val sentEmails = mockNotificationAdapter.getSentEmails()
+        assertTrue(sentEmails.first().subject.contains("验证您的邮箱"))
+    }
+
+    @Test
     fun `verifyToken returns true and marks email as verified`() = runBlocking {
         val userId = createTestUser("test@example.com", "Test User")
         val token = createVerificationToken(userId)

@@ -243,10 +243,13 @@ fun HttpRules.authRoutes() {
         try {
             val result = finishPasskeySignup.finish(FinishPasskeySignupUseCase.Command(body.requestId, body.credentialJson))
             if (result.requiresEmailVerification) {
-                val created = runBlocking { validationService.getUserByEmail(result.email!!) }
+                var created = runBlocking { validationService.getUserByEmail(result.email!!) }
                 if (created != null) {
                     val effectiveRoles = if (result.email.equals(adminEmail, ignoreCase = true)) roles + UserRole.ADMIN else roles
                     applyRoleSelection(created.id, effectiveRoles)
+                    if (!body.language.isNullOrBlank()) {
+                        created = runBlocking { userService.updateLanguage(created.id, body.language) } ?: created
+                    }
                 }
                 val sent = sendActivationEmail(result.activationToken, result.email, created)
                 if (sent) {
@@ -275,6 +278,7 @@ fun HttpRules.authRoutes() {
         val displayName = json.get("displayName")?.asText() ?: return@Handler res.respondError("displayName required")
         val encryptedPassword = json.get("encryptedPassword")?.asText() ?: return@Handler res.respondError("password required")
         val rolesStr = json.get("roles")?.asText()
+        val language = json.get("language")?.asText()
 
         val emailRegex = Regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")
         if (!emailRegex.matches(email)) return@Handler res.respondError("invalid email format")
@@ -294,8 +298,13 @@ fun HttpRules.authRoutes() {
             val result = com.universaliun.auth.backend.domain.port.`in`.RegisterUseCase.Command(email, plainPassword, displayName)
                 .let { Deps.get<com.universaliun.auth.backend.domain.port.`in`.RegisterUseCase>().register(it) }
             if (result.requiresEmailVerification) {
-                val created = runBlocking { validationService.getUserByEmail(email) }
-                if (created != null) applyRoleSelection(created.id, effectiveRoles)
+                var created = runBlocking { validationService.getUserByEmail(email) }
+                if (created != null) {
+                    applyRoleSelection(created.id, effectiveRoles)
+                    if (!language.isNullOrBlank()) {
+                        created = runBlocking { userService.updateLanguage(created.id, language) } ?: created
+                    }
+                }
                 val sent = sendActivationEmail(result.activationToken, email, created)
                 if (sent) {
                     res.send(RegistrationResponse(success = true, message = "Registration successful. Please check your email to verify your account.", emailVerificationSent = true))
@@ -804,7 +813,7 @@ private fun extractUserId(accessToken: String): String {
     }
 }
 
-private data class PasskeyFinishRequestWithProfile(val requestId: String, val credentialJson: String, val email: String? = null, val displayName: String? = null)
+private data class PasskeyFinishRequestWithProfile(val requestId: String, val credentialJson: String, val email: String? = null, val displayName: String? = null, val language: String? = null)
 
 private fun userAuthenticationSuccess(
     userResult: ServiceResult.Success<UserDto>,

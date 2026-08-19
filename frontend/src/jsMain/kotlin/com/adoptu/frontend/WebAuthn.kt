@@ -32,7 +32,8 @@ object WebAuthnModule {
         val start = getRegistrationOptions(email, displayName).await()
         val requestId = start.requestId as String
         val credentialJson = createPasskeyCredential(start.optionsJson as String)
-        val jsonStr = """{"requestId":"$requestId","email":"${email.replace("\"", "\\\"")}","displayName":"${displayName.replace("\"", "\\\"")}","credentialJson":${window.asDynamic().JSON.stringify(credentialJson)}}"""
+        val language = window.localStorage.getItem("preferredLanguage") ?: "en"
+        val jsonStr = """{"requestId":"$requestId","email":"${email.replace("\"", "\\\"")}","displayName":"${displayName.replace("\"", "\\\"")}","language":"$language","credentialJson":${window.asDynamic().JSON.stringify(credentialJson)}}"""
         console.log("Encoded json: " + jsonStr)
         val fetchResult = window.asDynamic().fetch(
             "/api/auth/register",

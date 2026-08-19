@@ -823,6 +823,37 @@ class AuthRoutesE2ETest {
         }
     }
 
+    @Test
+    fun `POST register sends the activation email in the language selected at registration`() {
+        val email = "realregister-lang@example.com"
+        val handle = startTestServer()
+        try {
+            val optionsResponse = TestHttp.postForm(
+                "${handle.baseUrl}/api/auth/registration-options",
+                formUrlEncode(listOf("email" to email, "displayName" to "Real User"))
+            )
+            assertEquals(200, optionsResponse.statusCode())
+            val options = parsePasskeyOptions(optionsResponse.body())
+            val authenticator = generateSimulatedAuthenticator()
+            val registrationResponseJson = buildRegistrationResponseJson(authenticator, options.challengeBytes)
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/auth/register",
+                JsonSupport.objectMapper.writeValueAsString(
+                    mapOf("requestId" to options.requestId, "credentialJson" to registrationResponseJson, "language" to "es")
+                )
+            )
+            assertEquals(200, response.statusCode())
+
+            val storedLanguage = transaction { Users.selectAll().where { Users.username eq email }.first()[Users.language] }
+            assertEquals("es", storedLanguage)
+            val sentEmails = mockNotificationAdapter.getSentEmails()
+            assertTrue(sentEmails.any { it.to == email && it.subject.contains("Verifica tu correo") })
+        } finally {
+            handle.stop()
+        }
+    }
+
     // BUG (found while porting, not fixed -- see final report): the migrated /api/auth/register
     // handler never actually dispatches a verification email at all. FinishPasskeySignupService.finish
     // (AuthKit) returns `activationToken`/`email` in its Result specifically so the HOST can build
@@ -882,6 +913,59 @@ class AuthRoutesE2ETest {
                 )
             )
             assertEquals(200, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST register-password sends the activation email in the language selected at registration`() {
+        val email = "registerpassword-lang@example.com"
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/auth/register-password",
+                JsonSupport.objectMapper.writeValueAsString(
+                    mapOf(
+                        "email" to email,
+                        "displayName" to "Lang User",
+                        "encryptedPassword" to encryptValue("SecurePass123!"),
+                        "language" to "fr"
+                    )
+                )
+            )
+            assertEquals(200, response.statusCode())
+
+            val storedLanguage = transaction { Users.selectAll().where { Users.username eq email }.first()[Users.language] }
+            assertEquals("fr", storedLanguage)
+            val sentEmails = mockNotificationAdapter.getSentEmails()
+            assertTrue(sentEmails.any { it.to == email && it.subject.contains("Vérifiez votre email") })
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST register-password defaults to English when no language is provided`() {
+        val email = "registerpassword-nolang@example.com"
+        val handle = startTestServer()
+        try {
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/auth/register-password",
+                JsonSupport.objectMapper.writeValueAsString(
+                    mapOf(
+                        "email" to email,
+                        "displayName" to "No Lang User",
+                        "encryptedPassword" to encryptValue("SecurePass123!")
+                    )
+                )
+            )
+            assertEquals(200, response.statusCode())
+
+            val storedLanguage = transaction { Users.selectAll().where { Users.username eq email }.first()[Users.language] }
+            assertEquals("en", storedLanguage)
+            val sentEmails = mockNotificationAdapter.getSentEmails()
+            assertTrue(sentEmails.any { it.to == email && it.subject.contains("Verify your email") })
         } finally {
             handle.stop()
         }

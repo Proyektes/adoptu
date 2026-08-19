@@ -95,17 +95,30 @@ class EmailVerificationService(
             
             "pt" -> "Verifique seu email - Adopt-U" to """
                 Olá,
-                
+
                 Obrigado por se registrar no Adopt-U!
-                
+
                 Por favor, verifique seu endereço de email clicando no link abaixo:
                 $verificationUrl
-                
+
                 Este link expirará em 24 horas.
-                
+
                 Se você não criou uma conta, por favor ignore este email.
             """.trimIndent()
-            
+
+            "zh" -> "验证您的邮箱 - Adopt-U" to """
+                您好，
+
+                感谢您注册 Adopt-U！
+
+                请点击下面的链接验证您的邮箱地址：
+                $verificationUrl
+
+                此链接将在24小时后失效。
+
+                如果您没有创建账户，请忽略此邮件。
+            """.trimIndent()
+
             else -> "Verify your email - Adopt-U" to """
                 Hello $displayName,
                 
