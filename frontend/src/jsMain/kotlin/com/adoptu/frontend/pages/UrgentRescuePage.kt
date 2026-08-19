@@ -49,12 +49,35 @@ object ReportUrgentPageModule {
         }
         geolocation.getCurrentPosition(
             { position: dynamic ->
-                latitude = position.coords.latitude as? Double
-                longitude = position.coords.longitude as? Double
+                val lat = position.coords.latitude as? Double
+                val lon = position.coords.longitude as? Double
+                latitude = lat
+                longitude = lon
                 status?.textContent = I18n.t("locationCaptured")
+                if (lat != null && lon != null) reverseGeocodeAndFillFields(lat, lon, status)
             },
             { _: dynamic -> status?.textContent = I18n.t("locationDenied") }
         )
+    }
+
+    // Fills country/state/city/street from a best-effort reverse geocode - exterior number and
+    // reference notes are left for the reporter to type, since GPS accuracy can't tell them apart
+    // from the neighbor's house. Silently leaves the fields blank on failure (no address found,
+    // network error) rather than blocking submission - coordinates alone are still enough to page
+    // nearby rescuers, see UrgentRescueService.resolveReportLocation.
+    private fun reverseGeocodeAndFillFields(lat: Double, lon: Double, status: org.w3c.dom.Element?) {
+        apiFetch("/api/urgent-reports/reverse-geocode?lat=$lat&lon=$lon")
+            .then<Unit> { address: dynamic ->
+                (document.getElementById("report-country") as? HTMLSelectElement)?.let {
+                    val country = address.country?.toString()
+                    if (!country.isNullOrBlank()) it.value = country
+                }
+                (address.state?.toString())?.let { (document.getElementById("report-state") as? HTMLInputElement)?.value = it }
+                (address.city?.toString())?.let { (document.getElementById("report-city") as? HTMLInputElement)?.value = it }
+                (address.street?.toString())?.let { (document.getElementById("report-street") as? HTMLInputElement)?.value = it }
+                (address.houseNumber?.toString())?.let { (document.getElementById("report-exterior-number") as? HTMLInputElement)?.value = it }
+            }
+            .catch<Unit> { /* reverse geocode is best-effort - coordinates were already captured above */ }
     }
 
     private fun submit() {
@@ -64,6 +87,9 @@ object ReportUrgentPageModule {
         val country = (document.getElementById("report-country") as? HTMLSelectElement)?.value
         val state = (document.getElementById("report-state") as? HTMLInputElement)?.value
         val city = (document.getElementById("report-city") as? HTMLInputElement)?.value
+        val street = (document.getElementById("report-street") as? HTMLInputElement)?.value
+        val exteriorNumber = (document.getElementById("report-exterior-number") as? HTMLInputElement)?.value
+        val referenceNotes = (document.getElementById("report-reference-notes") as? HTMLInputElement)?.value
         val reporterEmail = (document.getElementById("reporter-email") as? HTMLInputElement)?.value
         val reporterPhone = (document.getElementById("reporter-phone") as? HTMLInputElement)?.value
         val captchaToken = window.asDynamic().turnstile?.getResponse()?.unsafeCast<String?>()
@@ -92,7 +118,10 @@ object ReportUrgentPageModule {
             "longitude" to longitude,
             "country" to country,
             "state" to state,
-            "city" to city
+            "city" to city,
+            "street" to street,
+            "exteriorNumber" to exteriorNumber,
+            "referenceNotes" to referenceNotes
         )
 
         apiFetch("/api/urgent-reports/submit", json("method" to "POST", "body" to JSON.stringify(body)))
@@ -240,9 +269,14 @@ object UrgentRescuerDashboardPageModule {
     private fun buildCard(page: dynamic): HTMLElement {
         val card = document.createElement("div").unsafeCast<HTMLElement>()
         card.className = "card-bg profile-section"
+        val referenceNotes = page.referenceNotes?.toString()
+        val referenceNotesHtml = if (!referenceNotes.isNullOrBlank()) {
+            "<p><em>${I18n.t("referenceNotes")}: ${CommonModule.escapeHtml(referenceNotes)}</em></p>"
+        } else ""
         card.innerHTML = """
             <h2>${CommonModule.escapeHtml(page.dangerType?.toString())}</h2>
             <p>${CommonModule.escapeHtml(page.locationLabel?.toString())}</p>
+            $referenceNotesHtml
             <p>${CommonModule.escapeHtml(page.description?.toString())}</p>
         """.trimIndent()
 

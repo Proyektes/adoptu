@@ -61,6 +61,21 @@ fun HTML.reportUrgentPage(navParams: NavParams = NavParams()) {
                     label { htmlFor = "report-state"; attributes["data-i18n"] = "state"; +"State (optional)" }
                     input(InputType.text) { id = "report-state" }
                 }
+                p(classes = "field-hint") { attributes["data-i18n"] = "concreteAddressHint"; +"Add a street and number if you can - this is what lets a rescuer take a taxi or open a maps app straight to the spot." }
+                div(classes = "form-row-two-col") {
+                    div {
+                        label { htmlFor = "report-street"; attributes["data-i18n"] = "street"; +"Street" }
+                        input(InputType.text) { id = "report-street" }
+                    }
+                    div {
+                        label { htmlFor = "report-exterior-number"; attributes["data-i18n"] = "exteriorNumber"; +"Exterior number" }
+                        input(InputType.text) { id = "report-exterior-number" }
+                    }
+                }
+                div(classes = "form-row") {
+                    label { htmlFor = "report-reference-notes"; attributes["data-i18n"] = "referenceNotes"; +"Reference notes (e.g. house color, nearby landmark)" }
+                    input(InputType.text) { id = "report-reference-notes" }
+                }
 
                 div(classes = "form-row") {
                     id = "reporter-contact-row"

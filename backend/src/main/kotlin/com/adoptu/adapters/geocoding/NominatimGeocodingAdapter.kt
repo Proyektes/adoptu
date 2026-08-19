@@ -2,6 +2,7 @@ package com.adoptu.adapters.geocoding
 
 import com.adoptu.ports.GeocodeResult
 import com.adoptu.ports.GeocodingPort
+import com.adoptu.ports.ReverseGeocodeResult
 import com.adoptu.services.haversineDistanceKm
 import com.adoptu.web.JsonSupport
 import org.slf4j.LoggerFactory
@@ -29,6 +30,7 @@ private val logger = LoggerFactory.getLogger("AdoptU-Geocoding")
  */
 class NominatimGeocodingAdapter(
     private val baseUrl: String = "https://nominatim.openstreetmap.org/search",
+    private val reverseBaseUrl: String = "https://nominatim.openstreetmap.org/reverse",
 ) : GeocodingPort {
     private val httpClient: HttpClient = HttpClient.newBuilder()
         .version(HttpClient.Version.HTTP_1_1)
@@ -78,6 +80,42 @@ class NominatimGeocodingAdapter(
             GeocodeResult(latitude = lat, longitude = lon, radiusKm = radiusKm)
         } catch (e: Exception) {
             logger.error("Nominatim geocode error for '$query'", e)
+            null
+        }
+    }
+
+    override suspend fun reverseGeocode(latitude: Double, longitude: Double): ReverseGeocodeResult? {
+        // accept-language=en pins Nominatim's address fields to English regardless of the
+        // location's local language - the report form's country <select> is keyed by English
+        // country names (see I18n.kt's countryKeyByEnglishName), so a localized name like
+        // "México" wouldn't match any <option> and the field would silently stay unselected.
+        val uri = URI.create("$reverseBaseUrl?lat=$latitude&lon=$longitude&format=json&zoom=18&addressdetails=1&accept-language=en")
+
+        val request = HttpRequest.newBuilder(uri)
+            .header("User-Agent", "Adopt-U (adopt-u.org, urgent-rescuer geocoding)")
+            .timeout(Duration.ofSeconds(10))
+            .GET()
+            .build()
+
+        return try {
+            val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+            if (response.statusCode() != 200) {
+                logger.warn("Nominatim reverseGeocode failed for ($latitude, $longitude): HTTP ${response.statusCode()}")
+                return null
+            }
+
+            val address = JsonSupport.objectMapper.readTree(response.body())["address"] ?: return null
+            ReverseGeocodeResult(
+                street = address["road"]?.asText(),
+                houseNumber = address["house_number"]?.asText(),
+                // Nominatim uses whichever of these applies to the locality's size - no single
+                // field is populated for every place, so this is the standard fallback chain.
+                city = address["city"]?.asText() ?: address["town"]?.asText() ?: address["village"]?.asText(),
+                state = address["state"]?.asText(),
+                country = address["country"]?.asText()
+            )
+        } catch (e: Exception) {
+            logger.error("Nominatim reverseGeocode error for ($latitude, $longitude)", e)
             null
         }
     }

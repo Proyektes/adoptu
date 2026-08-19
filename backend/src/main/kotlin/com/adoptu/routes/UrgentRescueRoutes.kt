@@ -65,6 +65,19 @@ fun HttpRules.urgentRescueRoutes() {
         }
     })
 
+    // --- Reverse geocoding (pre-fills the report form's address fields) -------------------
+
+    // Public - same reasoning as report submission below, anonymous visitors need this too.
+    get("/api/urgent-reports/reverse-geocode", Handler { req, res ->
+        val lat = req.queryParam("lat")?.toDoubleOrNull()
+        val lon = req.queryParam("lon")?.toDoubleOrNull()
+        if (lat == null || lon == null) return@Handler res.respondError("lat and lon are required")
+        runBlocking {
+            val result = urgentRescueService.reverseGeocode(lat, lon)
+            if (result == null) res.respondNotFound("No address found for that location") else res.send(result)
+        }
+    })
+
     // --- Report submission (works with or without a session) -----------------------------
 
     post("/api/urgent-reports/submit", Handler { req, res ->

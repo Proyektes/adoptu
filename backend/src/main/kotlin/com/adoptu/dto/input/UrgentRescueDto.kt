@@ -62,6 +62,12 @@ data class UrgentReportDto(
     val latitude: Double,
     val longitude: Double,
     val locationLabel: String,
+    // Street/exteriorNumber/referenceNotes are what make locationLabel concrete enough to hand a
+    // taxi driver or a maps app, rather than just a city/country. All optional - not every report
+    // will have a formally addressed location.
+    val street: String? = null,
+    val exteriorNumber: String? = null,
+    val referenceNotes: String? = null,
     val status: UrgentReportStatus,
     val acceptedByUserId: Int? = null,
     val acceptedByName: String? = null,
@@ -83,7 +89,14 @@ data class SubmitUrgentReportRequest(
     val longitude: Double? = null,
     val country: String? = null,
     val state: String? = null,
-    val city: String? = null
+    val city: String? = null,
+    // User-entered, not derived from geolocation/reverse-geocoding alone - a reverse-geocoded
+    // street is offered as a starting point (see GET /api/urgent-reports/reverse-geocode) but the
+    // exterior number and any reference notes ("blue house, black gate") can only come from the
+    // reporter. This is what actually makes the report's location usable for a taxi or maps app.
+    val street: String? = null,
+    val exteriorNumber: String? = null,
+    val referenceNotes: String? = null
 )
 
 data class UrgentReportPageDto(

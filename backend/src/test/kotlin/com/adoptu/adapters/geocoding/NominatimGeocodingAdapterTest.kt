@@ -35,6 +35,18 @@ class NominatimGeocodingAdapterTest {
         return "http://localhost:${httpServer.address.port}/search"
     }
 
+    private fun startReverseServer(status: Int, response: String): String {
+        val httpServer = HttpServer.create(InetSocketAddress("localhost", 0), 0)
+        httpServer.createContext("/reverse") { exchange ->
+            val bytes = response.toByteArray(StandardCharsets.UTF_8)
+            exchange.sendResponseHeaders(status, bytes.size.toLong())
+            exchange.responseBody.use { it.write(bytes) }
+        }
+        httpServer.start()
+        server = httpServer
+        return "http://localhost:${httpServer.address.port}/reverse"
+    }
+
     @Test
     fun `geocode returns lat lon and a radius derived from the boundingbox`() {
         val url = startServer(
@@ -104,6 +116,65 @@ class NominatimGeocodingAdapterTest {
         val adapter: GeocodingPort = NominatimGeocodingAdapter(baseUrl = "http://localhost:1/search")
 
         val result = runBlocking { adapter.geocode("Somewhere", null, "Some City") }
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `reverseGeocode returns the address fields Nominatim provides`() {
+        val url = startReverseServer(
+            200,
+            """{"address": {"road": "Av. Insurgentes Sur", "house_number": "123", "city": "Mexico City", "state": "CDMX", "country": "Mexico"}}""",
+        )
+        val adapter: GeocodingPort = NominatimGeocodingAdapter(reverseBaseUrl = url)
+
+        val result = runBlocking { adapter.reverseGeocode(19.4326, -99.1332) }
+
+        requireNotNull(result)
+        assertEquals("Av. Insurgentes Sur", result.street)
+        assertEquals("123", result.houseNumber)
+        assertEquals("Mexico City", result.city)
+        assertEquals("CDMX", result.state)
+        assertEquals("Mexico", result.country)
+    }
+
+    @Test
+    fun `reverseGeocode falls back through town then village when city is absent`() {
+        val url = startReverseServer(200, """{"address": {"village": "Small Village", "country": "Nowhereland"}}""")
+        val adapter: GeocodingPort = NominatimGeocodingAdapter(reverseBaseUrl = url)
+
+        val result = runBlocking { adapter.reverseGeocode(0.0, 0.0) }
+
+        requireNotNull(result)
+        assertEquals("Small Village", result.city)
+        assertNull(result.street)
+    }
+
+    @Test
+    fun `reverseGeocode returns null when the response has no address object`() {
+        val url = startReverseServer(200, """{"error": "Unable to geocode"}""")
+        val adapter: GeocodingPort = NominatimGeocodingAdapter(reverseBaseUrl = url)
+
+        val result = runBlocking { adapter.reverseGeocode(0.0, 0.0) }
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `reverseGeocode returns null on a non-200 HTTP status`() {
+        val url = startReverseServer(503, "service unavailable")
+        val adapter: GeocodingPort = NominatimGeocodingAdapter(reverseBaseUrl = url)
+
+        val result = runBlocking { adapter.reverseGeocode(0.0, 0.0) }
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `reverseGeocode returns null when the endpoint is unreachable`() {
+        val adapter: GeocodingPort = NominatimGeocodingAdapter(reverseBaseUrl = "http://localhost:1/reverse")
+
+        val result = runBlocking { adapter.reverseGeocode(0.0, 0.0) }
 
         assertNull(result)
     }

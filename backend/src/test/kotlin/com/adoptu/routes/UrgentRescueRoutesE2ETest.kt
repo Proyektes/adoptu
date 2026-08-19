@@ -20,6 +20,7 @@ import com.adoptu.mocks.TestDatabase
 import com.adoptu.ports.CaptchaPort
 import com.adoptu.ports.GeocodeResult
 import com.adoptu.ports.GeocodingPort
+import com.adoptu.ports.ReverseGeocodeResult
 import com.adoptu.ports.NotificationPort
 import com.adoptu.ports.PetRepositoryPort
 import com.adoptu.ports.PhotographerRepositoryPort
@@ -61,6 +62,8 @@ class UrgentRescueRoutesE2ETest {
     private object FakeGeocodingPort : GeocodingPort {
         override suspend fun geocode(country: String, state: String?, city: String): GeocodeResult? =
             GeocodeResult(latitude = 0.0, longitude = 0.0, radiusKm = 50.0)
+        override suspend fun reverseGeocode(latitude: Double, longitude: Double): ReverseGeocodeResult? =
+            ReverseGeocodeResult(street = "Main St", houseNumber = "42", city = "Testville", state = "Test State", country = "Testland")
     }
 
     private object AlwaysPassCaptchaPort : CaptchaPort {
@@ -365,6 +368,65 @@ class UrgentRescueRoutesE2ETest {
             val body = response.body()
             assertTrue(body.contains("anon@test.com"))
             assertTrue(body.contains("Injured cat by the road"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `POST urgent-reports submit persists street, exteriorNumber, and referenceNotes into a concrete locationLabel`() {
+        val handle = startServer()
+        try {
+            val request = SubmitUrgentReportRequest(
+                description = "Injured cat by the road",
+                dangerType = UrgentDangerType.INJURED,
+                reporterEmail = "anon@test.com",
+                captchaToken = "valid-token",
+                latitude = 40.0,
+                longitude = -74.0,
+                city = "Testville",
+                country = "Testland",
+                street = "Main St",
+                exteriorNumber = "42",
+                referenceNotes = "Red door, next to the bakery"
+            )
+
+            val response = TestHttp.postJson(
+                "${handle.baseUrl}/api/urgent-reports/submit",
+                JsonSupport.objectMapper.writeValueAsString(request)
+            )
+
+            assertEquals(200, response.statusCode())
+            val body = response.body()
+            assertTrue(body.contains("\"locationLabel\": \"Main St 42, Testville, Testland\""))
+            assertTrue(body.contains("\"referenceNotes\": \"Red door, next to the bakery\""))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET urgent-reports reverse-geocode returns the address for a coordinate pair`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/urgent-reports/reverse-geocode?lat=19.4326&lon=-99.1332")
+
+            assertEquals(200, response.statusCode())
+            val body = response.body()
+            assertTrue(body.contains("Main St"))
+            assertTrue(body.contains("Testville"))
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
+    fun `GET urgent-reports reverse-geocode returns 400 when lat or lon is missing`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/urgent-reports/reverse-geocode?lat=19.4326")
+
+            assertEquals(400, response.statusCode())
         } finally {
             handle.stop()
         }

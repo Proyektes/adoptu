@@ -210,6 +210,69 @@ class UrgentRescueServiceTest {
     }
 
     @Test
+    fun `submitReport builds a concrete street-level locationLabel when a street is provided`() = runBlocking {
+        val sessionUser = userRepository.getById(1)!!
+        val request = SubmitUrgentReportRequest(
+            description = "Injured cat", dangerType = UrgentDangerType.INJURED,
+            latitude = 19.4, longitude = -99.1,
+            city = "Mexico City", country = "Mexico",
+            street = "Av. Reforma", exteriorNumber = "222", referenceNotes = "Blue gate, next to the pharmacy"
+        )
+
+        val result = service.submitReport(request, sessionUser = sessionUser, clientIp = "8.8.8.9")
+
+        assertTrue(result.isSuccess)
+        val report = result.getOrThrow()
+        assertEquals("Av. Reforma 222, Mexico City, Mexico", report.locationLabel)
+        assertEquals("Av. Reforma", report.street)
+        assertEquals("222", report.exteriorNumber)
+        assertEquals("Blue gate, next to the pharmacy", report.referenceNotes)
+    }
+
+    @Test
+    fun `submitReport falls back to city-country locationLabel when no street is provided`() = runBlocking {
+        val sessionUser = userRepository.getById(1)!!
+        val request = SubmitUrgentReportRequest(
+            description = "Injured cat", dangerType = UrgentDangerType.INJURED,
+            latitude = 19.4, longitude = -99.1, city = "Mexico City", country = "Mexico"
+        )
+
+        val result = service.submitReport(request, sessionUser = sessionUser, clientIp = "8.8.8.10")
+
+        assertEquals("Mexico City, Mexico", result.getOrThrow().locationLabel)
+    }
+
+    // --- Reverse geocoding -------------------------------------------------------------------
+
+    @Test
+    fun `reverseGeocode delegates to GeocodingPort`() = runBlocking {
+        val geocoder = FakeGeocodingPort(
+            reverseResults = mapOf(
+                Pair(19.4326, -99.1332) to com.adoptu.ports.ReverseGeocodeResult(
+                    street = "Av. Insurgentes", houseNumber = "10", city = "Mexico City", state = "CDMX", country = "Mexico"
+                )
+            )
+        )
+        val serviceWithReverseGeocoder = UrgentRescueService(
+            UrgentRescueRepositoryImpl(clock), userRepository, notificationAdapter, smsAdapter,
+            geocoder, captchaPort, newRateLimiter(), "http://localhost:4000"
+        )
+
+        val result = serviceWithReverseGeocoder.reverseGeocode(19.4326, -99.1332)
+
+        requireNotNull(result)
+        assertEquals("Av. Insurgentes", result.street)
+        assertEquals("Mexico City", result.city)
+    }
+
+    @Test
+    fun `reverseGeocode returns null when GeocodingPort has nothing for that location`() = runBlocking {
+        val result = service.reverseGeocode(0.0, 0.0)
+
+        assertNull(result)
+    }
+
+    @Test
     fun `a matching active rescuer profile gets paged and alerted after submission`() = runBlocking {
         service.createProfile(1, CreateUrgentRescuerProfileRequest(
             phone = "+15551234567", inputMode = LocationInputMode.COORDINATES, latitude = 19.4, longitude = -99.1, radiusKm = 10.0

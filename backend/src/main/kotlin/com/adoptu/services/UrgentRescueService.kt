@@ -12,6 +12,7 @@ import com.adoptu.dto.input.UserDto
 import com.adoptu.ports.CaptchaPort
 import com.adoptu.ports.GeocodingPort
 import com.adoptu.ports.NotificationPort
+import com.adoptu.ports.ReverseGeocodeResult
 import com.adoptu.ports.SmsNotificationPort
 import com.adoptu.ports.UrgentRescueRepositoryPort
 import com.adoptu.ports.UserRepositoryPort
@@ -132,18 +133,32 @@ class UrgentRescueService(
         return Result.success(report)
     }
 
+    private fun buildLocationLabel(request: SubmitUrgentReportRequest): String {
+        // Street + exteriorNumber together form a real, taxi/maps-app-usable address line - kept
+        // separate from city/state/country rather than replacing them, since either half may be
+        // missing (a reporter might know the street but not confirm the city, or vice versa).
+        val streetLine = if (request.street != null) {
+            listOfNotNull(request.street, request.exteriorNumber).joinToString(" ")
+        } else null
+        val cityLine = listOfNotNull(request.city, request.state, request.country).joinToString(", ").ifBlank { null }
+        return listOfNotNull(streetLine, cityLine).joinToString(", ").ifBlank { "reported location" }
+    }
+
     private suspend fun resolveReportLocation(request: SubmitUrgentReportRequest): Triple<Double, Double, String>? {
         if (request.latitude != null && request.longitude != null) {
-            val label = listOfNotNull(request.city, request.country).joinToString(", ").ifBlank { "reported location" }
-            return Triple(request.latitude, request.longitude, label)
+            return Triple(request.latitude, request.longitude, buildLocationLabel(request))
         }
         if (request.country != null && request.city != null) {
             val geocoded = geocodingPort.geocode(request.country, request.state, request.city) ?: return null
-            val label = listOfNotNull(request.city, request.country).joinToString(", ")
-            return Triple(geocoded.latitude, geocoded.longitude, label)
+            return Triple(geocoded.latitude, geocoded.longitude, buildLocationLabel(request))
         }
         return null
     }
+
+    // --- Reverse geocoding (pre-fills the report form's address fields) --------------------
+
+    suspend fun reverseGeocode(latitude: Double, longitude: Double): ReverseGeocodeResult? =
+        geocodingPort.reverseGeocode(latitude, longitude)
 
     // --- Matching + paging -----------------------------------------------------------------
 
@@ -219,6 +234,7 @@ class UrgentRescueService(
                 "description" to report.description,
                 "dangerType" to report.dangerType,
                 "locationLabel" to report.locationLabel,
+                "referenceNotes" to report.referenceNotes,
                 "photoUrl" to report.photoUrl
             )
         }

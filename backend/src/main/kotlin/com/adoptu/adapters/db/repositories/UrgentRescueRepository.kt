@@ -71,6 +71,9 @@ class UrgentRescueRepositoryImpl(
         latitude = row[UrgentReports.latitude],
         longitude = row[UrgentReports.longitude],
         locationLabel = row[UrgentReports.locationLabel],
+        street = row[UrgentReports.street],
+        exteriorNumber = row[UrgentReports.exteriorNumber],
+        referenceNotes = row[UrgentReports.referenceNotes],
         status = UrgentReportStatus.valueOf(row[UrgentReports.status]),
         acceptedByUserId = row[UrgentReports.acceptedByUserId],
         acceptedAt = row[UrgentReports.acceptedAt],
@@ -199,6 +202,9 @@ class UrgentRescueRepositoryImpl(
                 it[UrgentReports.latitude] = latitude
                 it[UrgentReports.longitude] = longitude
                 it[UrgentReports.locationLabel] = locationLabel
+                it[UrgentReports.street] = request.street
+                it[UrgentReports.exteriorNumber] = request.exteriorNumber
+                it[UrgentReports.referenceNotes] = request.referenceNotes
                 it[UrgentReports.status] = UrgentReportStatus.PENDING.name
                 it[UrgentReports.createdAt] = createdAt
             } get UrgentReports.id
@@ -214,6 +220,9 @@ class UrgentRescueRepositoryImpl(
                 latitude = latitude,
                 longitude = longitude,
                 locationLabel = locationLabel,
+                street = request.street,
+                exteriorNumber = request.exteriorNumber,
+                referenceNotes = request.referenceNotes,
                 status = UrgentReportStatus.PENDING,
                 createdAt = createdAt
             )
