@@ -1977,9 +1977,198 @@
       "allDeclaredConstructors": true,
       "allDeclaredMethods": true,
       "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.AssertionRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.ToPublicKeyCredentialDescriptor",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.AssertionExtensionInputs",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.AttestationConveyancePreference",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.AuthenticatorAttachment",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.AuthenticatorSelectionCriteria",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.AuthenticatorTransport",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.ByteArray",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.COSEAlgorithmIdentifier",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.ExtensionInputs",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.Extensions$CredentialProtection$CredentialProtectionPolicy",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.Extensions$LargeBlob$LargeBlobAuthenticationInput",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.Extensions$LargeBlob$LargeBlobRegistrationInput",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.Extensions$LargeBlob$LargeBlobRegistrationInput$LargeBlobSupport",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.Extensions$Prf$PrfAuthenticationInput",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.Extensions$Prf$PrfRegistrationInput",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.Extensions$Prf$PrfValues",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.PublicKeyCredentialCreationOptions",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.PublicKeyCredentialDescriptor",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.PublicKeyCredentialEntity",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.PublicKeyCredentialParameters",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.PublicKeyCredentialRequestOptions",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.PublicKeyCredentialType",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.RegistrationExtensionInputs",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.RelyingPartyIdentity",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.ResidentKeyRequirement",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.UserIdentity",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.data.UserVerificationRequirement",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.extension.appid.AppId",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.yubico.webauthn.extension.appid.AppId$JsonSerializer",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
     }
   ],
   "resources": [
+    {
+      "glob": "com/yubico/webauthn/AssertionRequest.class"
+    },
+    {
+      "glob": "com/yubico/webauthn/data/PublicKeyCredentialCreationOptions.class"
+    },
+    {
+      "glob": "com/yubico/webauthn/data/UserIdentity.class"
+    },
     {
       "glob": "/psw4j.properties"
     },
