@@ -2,11 +2,9 @@ package com.adoptu.site.pages
 
 import kotlinx.html.*
 
-// Cloudflare's published always-pass test site key (public - site keys, unlike secret keys, are
-// meant to be embedded in HTML). Swap for the real Turnstile site key before relying on this as
-// actual spam protection - see infra/variables.tf's turnstile_secret_key for the matching
-// server-side secret and https://developers.cloudflare.com/turnstile/troubleshooting/testing/.
-private const val TURNSTILE_TEST_SITE_KEY = "1x00000000000000000000AA"
+// Public - site keys, unlike secret keys, are meant to be embedded in HTML. Matching server-side
+// secret lives in infra/terraform.tfvars's turnstile_secret_key (gitignored).
+private const val TURNSTILE_SITE_KEY = "0x4AAAAAAEqpqMlvXIJr_ApK"
 
 // Public - works for both anonymous visitors and logged-in users (ReportUrgentPageModule decides
 // which fields to show based on GET /api/auth/me, same pattern as CommonModule.initAuthNav()).
@@ -93,7 +91,7 @@ fun HTML.reportUrgentPage(navParams: NavParams = NavParams()) {
                     div {
                         id = "turnstile-widget"
                         classes = setOf("cf-turnstile")
-                        attributes["data-sitekey"] = TURNSTILE_TEST_SITE_KEY
+                        attributes["data-sitekey"] = TURNSTILE_SITE_KEY
                     }
                 }
 

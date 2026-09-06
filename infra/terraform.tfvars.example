@@ -10,3 +10,7 @@ domain_name = "adopt-u.org"
 container_image_tag = "latest"
 
 desired_count = 1
+
+# Real Cloudflare Turnstile secret key (dash.cloudflare.com > Turnstile > your widget).
+# Omit to fall back to Cloudflare's always-pass test key (see infra/variables.tf).
+# turnstile_secret_key = "0x4..."

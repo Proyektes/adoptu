@@ -110,6 +110,8 @@
   },
   "permissions": {
     "allow": [
+      "Bash(aws:*)",
+      "Bash(tofu:*)",
       "mcp__tokensave__tokensave_affected",
       "mcp__tokensave__tokensave_annotations",
       "mcp__tokensave__tokensave_blame",
