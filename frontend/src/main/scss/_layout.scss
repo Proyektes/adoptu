@@ -62,6 +62,7 @@ header {
     }
 
     #nav-donate {
+        right: 0.75rem;
         padding: 0.4rem 0.6rem;
         font-size: 0.85rem;
     }
@@ -73,14 +74,23 @@ header {
     }
 }
 
+// Floating action button, not an inline nav link: fixed under the language dropdown (top-right
+// of the header) so it stays reachable while scrolling instead of competing for space in the
+// nav row.
 #nav-donate {
+    position: fixed;
+    top: 82px;
+    right: 1.5rem;
+    z-index: 900;
+    margin: 0;
     background-color: #ff6b6b;
     color: white;
     padding: 0.5rem 1rem;
-    border-radius: 4px;
+    border-radius: 999px;
     font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     transition: background-color 0.2s;
-    
+
     &:hover {
         background-color: #ee5a5a;
     }
