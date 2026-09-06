@@ -1,6 +1,5 @@
 package com.adoptu.routes
 
-import com.adoptu.adapters.authkit.AdoptuRole
 import com.adoptu.config.AppConfig
 import com.adoptu.dto.input.CreateAdoptionRequestRequest
 import com.adoptu.dto.input.CreatePetRequest
@@ -448,7 +447,7 @@ fun HttpRules.adminPetsRoutes() {
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
 
@@ -466,7 +465,7 @@ fun HttpRules.adminPetsRoutes() {
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
 
@@ -488,7 +487,7 @@ fun HttpRules.adminPetsRoutes() {
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
 

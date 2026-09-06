@@ -8,6 +8,7 @@ import com.universaliun.auth.backend.domain.model.user.Email
 import com.universaliun.auth.backend.domain.port.out.UserRepositoryPort
 import com.universaliun.auth.backend.domain.port.out.UserSearchResult
 import com.universaliun.auth.common.identity.AuthUserId
+import com.universaliun.auth.common.rbac.AuthPrincipal
 import com.universaliun.auth.common.rbac.PermissionSet
 import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.ResultRow
@@ -44,7 +45,12 @@ import java.time.Instant
  * when a password hash is present). `user_active_roles` is likewise Adopt-u's own table (managed
  * entirely through `UserRepository`'s native `addActiveRoles`/`addPendingRoleActivations`, never
  * through this bridge's [save]) — [toAuthUser] only *reads* it, to populate [AuthUser.roles]/
- * [AuthUser.permissions] for the JWT AuthKit issues (see [AdoptuRole]/[AdoptuResource]).
+ * [AuthUser.permissions] for the JWT AuthKit issues (see [AdoptuRole]/[AdoptuResource]). Since
+ * AuthKit 1.3.0, authorization decisions never key off role identity — [toAuthUser] also derives
+ * [AuthUser.allowedActions] from [activeRolesFor] here, granting
+ * [AuthPrincipal.SUPER_ADMIN_ACTION] whenever any active role's [AdoptuRole.grantsAll] is `true`
+ * (currently only [AdoptuRole.ADMIN]), so [AuthPrincipal.isSuperAdmin] keeps working for every user
+ * who already holds the ADMIN role, with no separate persisted grant or data migration needed.
  *
  * ## `enabled` is derived, not stored
  * This app has no single `enabled` column — the real login gate is
@@ -202,6 +208,7 @@ class AdoptuUserRepositoryAdapter : UserRepositoryPort {
             passwordHash = passwordHash,
             roles = activeRoles,
             permissions = PermissionSet.fromRoles(activeRoles, ADOPTU_RESOURCE_COUNT),
+            allowedActions = if (activeRoles.any { it.grantsAll() }) setOf(AuthPrincipal.SUPER_ADMIN_ACTION) else emptySet(),
             enabled = isEmailVerified && !isBanned && deactivatedAt == null,
             emailVerified = isEmailVerified,
             createdAt = Instant.ofEpochMilli(this[Users.createdAt]),

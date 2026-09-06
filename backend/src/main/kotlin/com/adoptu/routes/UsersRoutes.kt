@@ -1,6 +1,5 @@
 package com.adoptu.routes
 
-import com.adoptu.adapters.authkit.AdoptuRole
 import com.adoptu.dto.input.AcceptTermsRequest
 import com.adoptu.dto.input.BanUserRequest
 import com.adoptu.dto.input.PhotographerSettingsRequest
@@ -357,7 +356,7 @@ fun HttpRules.adminUsersRoutes() {
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
 
@@ -379,7 +378,7 @@ fun HttpRules.adminUsersRoutes() {
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
 
@@ -393,7 +392,7 @@ fun HttpRules.adminUsersRoutes() {
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
 
@@ -425,7 +424,7 @@ fun HttpRules.adminUsersRoutes() {
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
 
@@ -447,7 +446,7 @@ fun HttpRules.adminUsersRoutes() {
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
 
@@ -474,7 +473,7 @@ fun HttpRules.adminUsersRoutes() {
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
 
@@ -497,7 +496,7 @@ fun HttpRules.adminUsersRoutes() {
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
 
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
 

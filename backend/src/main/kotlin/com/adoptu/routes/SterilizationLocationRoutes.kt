@@ -1,6 +1,5 @@
 package com.adoptu.routes
 
-import com.adoptu.adapters.authkit.AdoptuRole
 import com.adoptu.dto.input.CreateSterilizationLocationRequest
 import com.adoptu.dto.input.UpdateSterilizationLocationRequest
 import com.adoptu.services.SterilizationLocationService
@@ -80,7 +79,7 @@ fun HttpRules.adminSterilizationLocationRoutes() {
     get("/api/admin/sterilization-locations", Handler { req, res ->
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
             val country = req.queryParam("country")
@@ -96,7 +95,7 @@ fun HttpRules.adminSterilizationLocationRoutes() {
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
             val location = service.getById(id)
@@ -111,7 +110,7 @@ fun HttpRules.adminSterilizationLocationRoutes() {
     post("/api/admin/sterilization-locations", Handler { req, res ->
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
             val request = req.receiveJson<CreateSterilizationLocationRequest>()
@@ -128,7 +127,7 @@ fun HttpRules.adminSterilizationLocationRoutes() {
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
             val request = req.receiveJson<UpdateSterilizationLocationRequest>()
@@ -140,7 +139,7 @@ fun HttpRules.adminSterilizationLocationRoutes() {
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
             res.respondSuccess(service.delete(id))

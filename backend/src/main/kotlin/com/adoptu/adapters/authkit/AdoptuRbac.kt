@@ -30,8 +30,12 @@ val ADOPTU_RESOURCE_COUNT = AdoptuResource.entries.size
  * (see [Crud.entries]) on the one resource its own profile type owns - ADOPTER/URGENT_RESCUER own
  * none, since their authorization is entirely role-membership (or row-level ownership, decided in
  * the service layer) at every current call site, never resource-CRUD, so no partial-CRUD subset is
- * meaningful here today. [ADMIN.grantsAll] bypasses every hasResource/hasPermission/hasRole check
- * via [com.universaliun.auth.common.rbac.AuthPrincipal.isSuperAdmin] - see its doc comment.
+ * meaningful here today. [ADMIN.grantsAll] is a host-side signal, not itself checked at
+ * authorization time (AuthKit 1.3.0+): [AdoptuUserRepositoryAdapter.toAuthUser] reads it to grant
+ * [com.universaliun.auth.common.rbac.AuthPrincipal.SUPER_ADMIN_ACTION] as an allowed action, and
+ * every hasResource/hasPermission/hasRole/isSuperAdmin check bypasses via that allowed action, not
+ * via role identity - see [com.universaliun.auth.common.rbac.AuthPrincipal.isSuperAdmin]'s doc
+ * comment.
  */
 enum class AdoptuRole(override val resources: Map<Resource, Set<Crud>>) : Role {
     ADOPTER(emptyMap()),

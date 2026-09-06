@@ -1,12 +1,15 @@
 package com.adoptu.adapters.authkit
 
+import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
 import com.adoptu.mocks.TestDatabase
 import com.universaliun.auth.backend.domain.model.user.AuthUser
 import com.universaliun.auth.backend.domain.model.user.Email
 import com.universaliun.auth.common.identity.AuthUserId
+import com.universaliun.auth.common.rbac.AuthPrincipal
 import com.universaliun.auth.common.rbac.PermissionSet
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
@@ -154,5 +157,33 @@ class AdoptuUserRepositoryAdapterTest {
 
         assertEquals(1, result.totalCount)
         assertEquals("findme@test.com", result.items.single().email.value)
+    }
+
+    @Test fun `toAuthUser grants SUPER_ADMIN_ACTION when the user has the ADMIN active role`() {
+        val saved = adapter.save(newAuthUser("admin@test.com"))
+        transaction {
+            UserActiveRoles.insert {
+                it[UserActiveRoles.userId] = saved.id.value.toInt()
+                it[UserActiveRoles.role] = AdoptuRole.ADMIN.name
+            }
+        }
+
+        val found = adapter.findById(saved.id)!!
+
+        assertEquals(setOf(AuthPrincipal.SUPER_ADMIN_ACTION), found.allowedActions)
+    }
+
+    @Test fun `toAuthUser grants no allowed actions for a non-admin active role`() {
+        val saved = adapter.save(newAuthUser("rescuer@test.com"))
+        transaction {
+            UserActiveRoles.insert {
+                it[UserActiveRoles.userId] = saved.id.value.toInt()
+                it[UserActiveRoles.role] = AdoptuRole.RESCUER.name
+            }
+        }
+
+        val found = adapter.findById(saved.id)!!
+
+        assertEquals(emptySet(), found.allowedActions)
     }
 }

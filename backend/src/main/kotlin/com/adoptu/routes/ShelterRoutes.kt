@@ -1,6 +1,5 @@
 package com.adoptu.routes
 
-import com.adoptu.adapters.authkit.AdoptuRole
 import com.adoptu.dto.input.CreateShelterRequest
 import com.adoptu.dto.input.UpdateShelterRequest
 import com.adoptu.services.ShelterService
@@ -71,7 +70,7 @@ fun HttpRules.adminShelterRoutes() {
     get("/api/admin/shelters", Handler { req, res ->
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
             val country = req.queryParam("country")
@@ -92,7 +91,7 @@ fun HttpRules.adminShelterRoutes() {
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
             val shelter = shelterService.getById(id)
@@ -107,7 +106,7 @@ fun HttpRules.adminShelterRoutes() {
     post("/api/admin/shelters", Handler { req, res ->
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
             val request = req.receiveJson<CreateShelterRequest>()
@@ -124,7 +123,7 @@ fun HttpRules.adminShelterRoutes() {
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
             val request = req.receiveJson<UpdateShelterRequest>()
@@ -136,7 +135,7 @@ fun HttpRules.adminShelterRoutes() {
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         val id = req.pathParam("id").toIntOrNull() ?: return@Handler res.respondError(ValidationConstants.INVALID_ID)
         runBlocking {
-            if (!principal.hasRole(AdoptuRole.ADMIN)) {
+            if (!principal.isSuperAdmin()) {
                 return@runBlocking res.respondForbidden()
             }
             res.respondSuccess(shelterService.delete(id))

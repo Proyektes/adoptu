@@ -174,7 +174,7 @@ dependencies {
 
     // Login/register/refresh/passkey/magic-link/OAuth/password-reset auth engine -- replaces
     // AuthRoutes.kt's own hand-rolled session/token logic. See adapters/authkit/.
-    implementation("com.universaliun.auth:authkit-backend:1.2.2")
+    implementation("com.universaliun.auth:authkit-backend:1.3.0")
 
     // test
     testImplementation(kotlin("test"))
@@ -232,6 +232,10 @@ graalvmNative {
             )
             buildArgs.add("--no-fallback")
             buildArgs.add("-H:+ReportExceptionStackTraces")
+            // Native-image defaults to Serial GC (single-threaded, optimized for footprint/startup,
+            // not throughput). G1 is available in Community Edition on Linux/amd64 and trades a
+            // larger footprint for concurrent collection - the right call for a server under load.
+            buildArgs.add("--gc=G1")
             // ImageCompressor uses javax.imageio, which touches java.awt.Toolkit at class
             // init. Without this, Toolkit tries the X11-backed libawt_xawt.so - the
             // oraclelinux:10-slim runtime image has no X11 libraries installed at all, so
