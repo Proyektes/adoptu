@@ -78,7 +78,11 @@ fun NAV.commonNav(isLoggedIn: Boolean = false, isAdmin: Boolean = false, isRescu
         // requirement (see UrgentRescueService/SubmitUrgentReportRequest), so this must be
         // visible to guests too.
         a("/report-urgent") { id = "nav-report-urgent"; attributes["data-i18n"] = "reportUrgent"; +"Report Urgent" }
-        a("/urgent-rescuer-leaderboard") { id = "nav-urgent-leaderboard"; attributes["data-i18n"] = "topRescuers"; +"Top Rescuers" }
+        a("/urgent-rescuer-leaderboard") {
+            id = "nav-urgent-leaderboard"
+            span(classes = "material-symbols-outlined") { +Icons.TROPHY }
+            span { attributes["data-i18n"] = "topRescuers"; +"Top Rescuers" }
+        }
         // Same reasoning as the urgent-report link above - anonymous lost/found reporting must
         // stay visible to guests.
         a("/report-lost-found") { id = "nav-report-lost-found"; attributes["data-i18n"] = "reportLostFound"; +"Lost & Found" }

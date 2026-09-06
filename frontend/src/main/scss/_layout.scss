@@ -97,6 +97,16 @@ header {
     }
 }
 
+#nav-urgent-leaderboard {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    .material-symbols-outlined {
+        font-size: 18px;
+    }
+}
+
 .user-menu {
     position: relative;
     margin-left: 0.5rem;
