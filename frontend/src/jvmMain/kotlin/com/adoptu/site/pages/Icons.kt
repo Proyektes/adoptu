@@ -16,4 +16,5 @@ object Icons {
     const val URGENT = "emergency"
     const val GROUP = "group"
     const val TROPHY = "emoji_events"
+    const val WARNING = "warning"
 }

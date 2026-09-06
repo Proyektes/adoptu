@@ -72,20 +72,39 @@ fun NAV.languageDropdown() {
 // isLoggedIn/isAdmin/... params are kept only so every existing call site (indexPage etc.)
 // doesn't need to change - they're no longer read here.
 fun NAV.commonNav(isLoggedIn: Boolean = false, isAdmin: Boolean = false, isRescuerOrAdmin: Boolean = false, isTemporalHomeOrAdmin: Boolean = false) {
+    // Not data-auth gated - anonymous bystanders reporting a pet in danger, or a lost/found pet,
+    // are core requirements (see UrgentRescueService/SubmitUrgentReportRequest and LostFoundPage),
+    // so both must be visible to guests too. margin-right: auto on .nav-left (in CSS) pins this
+    // group to the left edge of the nav row, right after the logo, while every other nav item
+    // keeps its existing right-aligned flow.
+    div(classes = "nav-left") {
+        a("/report-urgent") {
+            id = "nav-report-urgent"
+            classes = setOf("nav-urgent-pill")
+            span(classes = "material-symbols-outlined") { +Icons.WARNING }
+            span { attributes["data-i18n"] = "reportUrgent"; +"Report Urgent" }
+        }
+        a("/report-lost-found") {
+            id = "nav-report-lost-found"
+            classes = setOf("nav-urgent-pill")
+            unsafe {
+                // Paw-in-lens: the real Material Symbols "pets" glyph path (same source as
+                // Icons.PAW) remapped from its native 0,-960,960,960 viewBox into a 26x26 box
+                // centered inside an 18px-radius lens ring - see icon exploration in chat.
+                raw(
+                    """<svg width="18" height="18" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><circle cx="26" cy="26" r="18" fill="none" stroke="currentColor" stroke-width="3"/><path transform="translate(13,39) scale(0.0270833)" fill="currentColor" d="M180-475q-42 0-71-29t-29-71q0-42 29-71t71-29q42 0 71 29t29 71q0 42-29 71t-71 29Zm180-160q-42 0-71-29t-29-71q0-42 29-71t71-29q42 0 71 29t29 71q0 42-29 71t-71 29Zm240 0q-42 0-71-29t-29-71q0-42 29-71t71-29q42 0 71 29t29 71q0 42-29 71t-71 29Zm180 160q-42 0-71-29t-29-71q0-42 29-71t71-29q42 0 71 29t29 71q0 42-29 71t-71 29ZM266-75q-45 0-75.5-34.5T160-191q0-52 35.5-91t70.5-77q29-31 50-67.5t50-68.5q22-26 51-43t63-17q34 0 63 16t51 42q28 32 49.5 69t50.5 69q35 38 70.5 77t35.5 91q0 47-30.5 81.5T694-75q-54 0-107-9t-107-9q-54 0-107 9t-107 9Z"/><line x1="38.7" y1="38.7" x2="58" y2="58" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>"""
+                )
+            }
+            span { attributes["data-i18n"] = "reportLostFound"; +"Lost & Found" }
+        }
+    }
     div(classes = "nav-right") {
         div(classes = "hidden") { attributes["data-auth"] = "user"; commonResourcesDropdown() }
-        // Not data-auth gated - anonymous bystanders reporting a pet in danger is a core
-        // requirement (see UrgentRescueService/SubmitUrgentReportRequest), so this must be
-        // visible to guests too.
-        a("/report-urgent") { id = "nav-report-urgent"; attributes["data-i18n"] = "reportUrgent"; +"Report Urgent" }
         a("/urgent-rescuer-leaderboard") {
             id = "nav-urgent-leaderboard"
             span(classes = "material-symbols-outlined") { +Icons.TROPHY }
             span { attributes["data-i18n"] = "topRescuers"; +"Top Rescuers" }
         }
-        // Same reasoning as the urgent-report link above - anonymous lost/found reporting must
-        // stay visible to guests.
-        a("/report-lost-found") { id = "nav-report-lost-found"; attributes["data-i18n"] = "reportLostFound"; +"Lost & Found" }
         a("https://paypal.me/adoptu") { target = "_blank"; id = "nav-donate"; attributes["data-i18n"] = "donate"; +"Donate" }
 
         a("/login", classes = "btn hidden") { attributes["data-auth"] = "guest"; id = "nav-login"; attributes["data-i18n"] = "login"; +"Login" }

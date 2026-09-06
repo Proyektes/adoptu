@@ -31,10 +31,17 @@ header {
     }
 }
 
+// Floating action group, not inline nav links: fixed under the logo (top-left of the header,
+// mirroring #nav-donate's fixed placement under the language dropdown on the right) so both stay
+// reachable while scrolling instead of competing for space in the nav row.
 .nav-left {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    position: fixed;
+    top: 74px;
+    left: 1.5rem;
+    z-index: 900;
 }
 
 .nav-right {
@@ -42,6 +49,34 @@ header {
     align-items: center;
     gap: 1rem;
     margin-left: auto;
+}
+
+// Anonymous urgent-danger reporting and anonymous lost/found reporting are safety-critical CTAs
+// that deserve their own prominence, not competing for attention with Login/Donate/etc. Shared by
+// both #nav-report-urgent and #nav-report-lost-found so they read as one matched pair of pills.
+.nav-urgent-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #fbbf24;
+    border: 2px solid #ea580c;
+    color: #7c2d12;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: background-color 0.2s;
+
+    .material-symbols-outlined,
+    svg {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+    }
+
+    &:hover {
+        background-color: #f59e0b;
+    }
 }
 
 @media (max-width: 640px) {
@@ -63,6 +98,20 @@ header {
 
     #nav-donate {
         right: 0.75rem;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    // Stack the two pills instead of growing rightward - side by side at this width they'd run
+    // under the fixed Donate button on the opposite corner.
+    .nav-left {
+        left: 0.75rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+    }
+
+    .nav-urgent-pill {
         padding: 0.4rem 0.6rem;
         font-size: 0.85rem;
     }
