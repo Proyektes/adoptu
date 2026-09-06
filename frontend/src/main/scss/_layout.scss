@@ -31,16 +31,20 @@ header {
     }
 }
 
-// Floating action group, not inline nav links: fixed under the logo (top-left of the header,
-// mirroring #nav-donate's fixed placement under the language dropdown on the right) so both stay
+// Floating action buttons, not inline nav links: fixed to opposite bottom corners of the
+// viewport (mirroring #nav-donate's fixed placement under the language dropdown) so both stay
 // reachable while scrolling instead of competing for space in the nav row.
-.nav-left {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+.nav-bottom-left {
     position: fixed;
-    top: 74px;
+    bottom: 5rem;
     left: 1.5rem;
+    z-index: 900;
+}
+
+.nav-bottom-right {
+    position: fixed;
+    bottom: 5rem;
+    right: 1.5rem;
     z-index: 900;
 }
 
@@ -102,13 +106,12 @@ header {
         font-size: 0.85rem;
     }
 
-    // Stack the two pills instead of growing rightward - side by side at this width they'd run
-    // under the fixed Donate button on the opposite corner.
-    .nav-left {
+    .nav-bottom-left {
         left: 0.75rem;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.4rem;
+    }
+
+    .nav-bottom-right {
+        right: 0.75rem;
     }
 
     .nav-urgent-pill {
@@ -146,14 +149,39 @@ header {
     }
 }
 
-#nav-urgent-leaderboard {
+// Icon-only nav button (Top Rescuers): a hover circle standing in for the missing text label
+// gives it the same affordance as a labeled link without crowding the nav row with a cup + words.
+.nav-icon-only {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    transition: background-color 0.2s;
 
     .material-symbols-outlined {
-        font-size: 18px;
+        font-size: 24px;
     }
+
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+// Keeps translated label text available to screen readers/i18n without showing it - pairs with
+// icon-only nav buttons like .nav-icon-only.
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .user-menu {
