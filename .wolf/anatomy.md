@@ -1,7 +1,11 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-06T13:21:56.720Z
-> Files: 632 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T23:33:36.914Z
+> Files: 635 tracked | Anatomy hits: 0 | Misses: 0
+
+## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/0c143af8-4bf8-435f-b390-a50882523c6c/scratchpad/
+
+- `bitakore-imagekit-prompt.md` — Prompt: evaluate consolidating onto ImageKit (Bitakore is the source, not a bug-fix consumer) (~1307 tok)
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/37d425e0-d2ad-499f-bde7-97b1baf5c00b/scratchpad/
 
@@ -444,7 +448,7 @@
 
 ## backend/
 
-- `build.gradle.kts` — credential (~3843 tok)
+- `build.gradle.kts` — credential (~4943 tok)
 
 ## backend/src/main/kotlin/com/adoptu/
 
@@ -659,7 +663,7 @@
 ## backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/
 
 - `native-image.properties` (~368 tok)
-- `reachability-metadata.json` (~15502 tok)
+- `reachability-metadata.json` (~15758 tok)
 
 ## backend/src/test/kotlin/com/adoptu/
 
@@ -777,7 +781,7 @@
 
 - `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~4131 tok)
 - `Common.kt` — rule: NodeList, showDonationPrompt, onCountryChange, initI18n (~3910 tok)
-- `I18n.kt` (~75198 tok)
+- `I18n.kt` (~75652 tok)
 - `ImageCompression.kt` — compress, attempt (~724 tok)
 - `Main.kt` — main (~1838 tok)
 - `WebAuthn.kt` — encodeURIComponent, register, authenticate, parseAssertionOptions, getRegistrationOptions (~2384 tok)
@@ -787,7 +791,7 @@
 - `AdminPage.kt` — init, switchTab, formatDate, buildQuery, renderPagination (~4624 tok)
 - `AuthFlowPages.kt` — init, showSuccess, showError, init, submit (~2649 tok)
 - `IndexPage.kt` — init, refreshFavoriteButtons, toggleFavorite, saveCurrentSearch, loadPets (~3234 tok)
-- `LostFoundPage.kt` — init, captureLocation, submit, init, search (~2842 tok)
+- `LostFoundPage.kt` — init, captureLocation, submit, init, search (~2966 tok)
 - `MyPetsPage.kt` — init, togglePromotedReasonRow, loadFosterPlacementStatus, endCurrentPlacement, loadMedicalEvents (~11818 tok)
 - `PetDetailPage.kt` — init, render (~6566 tok)
 - `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~12176 tok)
@@ -807,21 +811,21 @@
 - `Icons.kt` — Declares val (~139 tok)
 - `IndexPage.kt` — HTML (~951 tok)
 - `LocationSearchFilters.kt` — DIV (~642 tok)
-- `LostFoundPage.kt` — HTML, HTML, HTML, HTML (~2376 tok)
+- `LostFoundPage.kt` — HTML, HTML, HTML, HTML (~2588 tok)
 - `MyPetsPage.kt` — HTML (~3845 tok)
 - `NavParams.kt` — Data class: NavParams (~58 tok)
 - `PetsPage.kt` — HTML (~900 tok)
 - `ProfilePage.kt` — HTML (~5233 tok)
 - `RescuersPage.kt` — HTML, HTML (~356 tok)
-- `Shared.kt` — HTML, A, BODY, DIV, NAV (~2783 tok)
+- `Shared.kt` — HTML, A, BODY, DIV, NAV (~3335 tok)
 - `SterilizationLocationsPage.kt` — HTML, HTML (~1539 tok)
 - `TemporalHomePage.kt` — HTML, HTML, HTML, HTML (~1033 tok)
-- `UrgentRescuePage.kt` — HTML, HTML, HTML, HTML, HTML (~3440 tok)
+- `UrgentRescuePage.kt` — HTML, HTML, HTML, HTML, HTML (~3670 tok)
 
 ## frontend/src/main/scss/
 
 - `rescuers.scss` — Styles: 10 rules (~529 tok)
-- `style.scss` — Styles: 55 rules (~4555 tok)
+- `style.scss` — Styles: 54 rules (~4758 tok)
 
 ## frontend/src/tests/
 
@@ -835,7 +839,8 @@
 - `outputs.tf` (~328 tok)
 - `s3.tf` (~860 tok)
 - `secrets.tf` — RDS master ("postgres" superuser) password - generated, never typed in by (~591 tok)
-- `terraform.tfvars` (~102 tok)
+- `terraform.tfvars` (~146 tok)
+- `terraform.tfvars.example` — Copy to terraform.tfvars and adjust. Values shown match the current live (~174 tok)
 - `variables.tf` — Declares can (~1930 tok)
 
 ## infra/cloudfront-functions/

@@ -4,6 +4,7 @@ import com.adoptu.frontend.ApiClientModule
 import com.adoptu.frontend.CommonModule
 import com.adoptu.frontend.I18n
 import com.adoptu.frontend.apiFetch
+import com.adoptu.frontend.forEachElement
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.HTMLElement
@@ -34,6 +35,14 @@ object ReportLostFoundPageModule {
 
         document.getElementById("use-my-location-btn")?.addEventListener("click", { captureLocation() })
         document.getElementById("submit-btn")?.addEventListener("click", { submit() })
+
+        document.querySelectorAll(".kind-btn").forEachElement { node ->
+            val btn = node.unsafeCast<HTMLElement>()
+            btn.addEventListener("click", {
+                document.querySelectorAll(".kind-btn").forEachElement { b -> b.unsafeCast<HTMLElement>().classList.remove("active") }
+                btn.classList.add("active")
+            })
+        }
     }
 
     private fun captureLocation() {
@@ -56,8 +65,8 @@ object ReportLostFoundPageModule {
 
     private fun submit() {
         val msg = document.getElementById("message")
-        val kind = (document.querySelector("input[name=kind]:checked") as? HTMLInputElement)?.value ?: "LOST"
-        val petType = (document.getElementById("pet-type") as? HTMLInputElement)?.value
+        val kind = (document.querySelector(".kind-btn.active") as? HTMLElement)?.asDynamic()?.dataset?.kind?.toString() ?: "LOST"
+        val petType = (document.getElementById("pet-type") as? HTMLSelectElement)?.value?.takeIf { it.isNotBlank() }
         val description = (document.getElementById("description") as? HTMLTextAreaElement)?.value ?: ""
         val country = (document.getElementById("report-country") as? HTMLSelectElement)?.value
         val state = (document.getElementById("report-state") as? HTMLInputElement)?.value

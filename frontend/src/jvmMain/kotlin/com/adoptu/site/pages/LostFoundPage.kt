@@ -2,8 +2,9 @@ package com.adoptu.site.pages
 
 import kotlinx.html.*
 
-// Same test site key reasoning as UrgentRescuePage.kt's report-urgent form.
-private const val TURNSTILE_TEST_SITE_KEY = "1x00000000000000000000AA"
+// Public - site keys, unlike secret keys, are meant to be embedded in HTML. Matching server-side
+// secret lives in infra/terraform.tfvars's turnstile_secret_key (gitignored).
+private const val TURNSTILE_SITE_KEY = "0x4AAAAAAEqpqMlvXIJr_ApK"
 
 fun HTML.reportLostFoundPage(navParams: NavParams = NavParams()) {
     commonHead("Report a Lost or Found Pet - Adopt-U")
@@ -19,19 +20,28 @@ fun HTML.reportLostFoundPage(navParams: NavParams = NavParams()) {
                 p { a("/lost-found") { attributes["data-i18n"] = "browseLostFound"; +"Browse existing lost & found reports" } }
 
                 div(classes = "form-row") {
-                    div(classes = "checkbox-row") {
-                        input(InputType.radio) { id = "kind-lost"; name = "kind"; value = "LOST"; checked = true }
-                        span { attributes["data-i18n"] = "kindLost"; +"I lost my pet" }
-                    }
-                    div(classes = "checkbox-row") {
-                        input(InputType.radio) { id = "kind-found"; name = "kind"; value = "FOUND" }
-                        span { attributes["data-i18n"] = "kindFound"; +"I found a pet" }
+                    div(classes = "kind-toggle") {
+                        button(classes = "kind-btn active", type = ButtonType.button) {
+                            id = "kind-lost"; attributes["data-kind"] = "LOST"
+                            span { attributes["data-i18n"] = "kindLost"; +"I lost my pet" }
+                        }
+                        button(classes = "kind-btn", type = ButtonType.button) {
+                            id = "kind-found"; attributes["data-kind"] = "FOUND"
+                            span { attributes["data-i18n"] = "kindFound"; +"I found a pet" }
+                        }
                     }
                 }
 
                 div(classes = "form-row") {
                     label { htmlFor = "pet-type"; attributes["data-i18n"] = "petType"; +"Type of pet" }
-                    input(InputType.text) { id = "pet-type"; placeholder = "Dog, cat, ..." }
+                    select {
+                        id = "pet-type"
+                        option { value = ""; attributes["data-i18n"] = "petTypeUnknown"; +"Not sure" }
+                        option { value = "DOG"; attributes["data-i18n"] = "dog"; +"Dog" }
+                        option { value = "CAT"; attributes["data-i18n"] = "cat"; +"Cat" }
+                        option { value = "BIRD"; attributes["data-i18n"] = "bird"; +"Bird" }
+                        option { value = "FISH"; attributes["data-i18n"] = "fish"; +"Fish" }
+                    }
                 }
                 div(classes = "form-row") {
                     label { htmlFor = "description"; attributes["data-i18n"] = "description"; +"Description" }
@@ -78,7 +88,7 @@ fun HTML.reportLostFoundPage(navParams: NavParams = NavParams()) {
                     div {
                         id = "turnstile-widget"
                         classes = setOf("cf-turnstile")
-                        attributes["data-sitekey"] = TURNSTILE_TEST_SITE_KEY
+                        attributes["data-sitekey"] = TURNSTILE_SITE_KEY
                     }
                 }
 
@@ -101,6 +111,7 @@ fun HTML.lostFoundBrowsePage(navParams: NavParams = NavParams()) {
         }
         main {
             h1 { attributes["data-i18n"] = "lostFoundBrowseTitle"; +"Lost & Found Pets" }
+            a("/report-lost-found", classes = "btn") { attributes["data-i18n"] = "reportLostFoundTitle"; +"Report a Lost or Found Pet" }
             div(classes = "form-row") {
                 label { htmlFor = "browse-kind"; attributes["data-i18n"] = "showing"; +"Showing" }
                 select {

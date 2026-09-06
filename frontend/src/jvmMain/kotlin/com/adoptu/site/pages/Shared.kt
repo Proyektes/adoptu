@@ -82,7 +82,7 @@ fun NAV.commonNav(isLoggedIn: Boolean = false, isAdmin: Boolean = false, isRescu
         span(classes = "material-symbols-outlined") { +Icons.WARNING }
         span { attributes["data-i18n"] = "reportUrgent"; +"Report Urgent" }
     }
-    a("/report-lost-found") {
+    a("/lost-found") {
         id = "nav-report-lost-found"
         classes = setOf("nav-urgent-pill", "nav-bottom-right")
         unsafe {
