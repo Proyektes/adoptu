@@ -63,6 +63,15 @@ form {
         font-weight: 500;
     }
 
+    a {
+        color: var(--primary-light);
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
     input,
     select,
     textarea {
