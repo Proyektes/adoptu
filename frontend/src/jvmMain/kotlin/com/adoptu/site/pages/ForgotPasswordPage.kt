@@ -20,9 +20,9 @@ fun HTML.forgotPasswordPage(navParams: NavParams = NavParams()) {
                     input(InputType.email) { id = "email"; required = true }
                 }
                 p { id = "message"; +"" }
-                button(classes = "btn", type = ButtonType.button) { id = "submit-btn"; attributes["data-i18n"] = "sendResetLink"; +"Send Reset Link" }
+                button(classes = "btn full-width-btn", type = ButtonType.button) { id = "submit-btn"; attributes["data-i18n"] = "sendResetLink"; +"Send Reset Link" }
                 p { }
-                a(href = "/login") { button(classes = "btn btn-secondary", type = ButtonType.button) { attributes["data-i18n"] = "backToLogin"; +"Back to Login" } }
+                a(href = "/login") { button(classes = "btn btn-secondary full-width-btn", type = ButtonType.button) { attributes["data-i18n"] = "backToLogin"; +"Back to Login" } }
             }
         }
         footer()
@@ -52,9 +52,9 @@ fun HTML.resetPasswordPage(navParams: NavParams = NavParams()) {
                     input(InputType.password) { id = "confirm-password"; required = true; minLength = "8" }
                 }
                 p { id = "message"; +"" }
-                button(classes = "btn", type = ButtonType.button) { id = "submit-btn"; attributes["data-i18n"] = "resetPasswordTitle"; +"Reset Password" }
+                button(classes = "btn full-width-btn", type = ButtonType.button) { id = "submit-btn"; attributes["data-i18n"] = "resetPasswordTitle"; +"Reset Password" }
                 p { }
-                a(href = "/login") { button(classes = "btn btn-secondary", type = ButtonType.button) { attributes["data-i18n"] = "backToLogin"; +"Back to Login" } }
+                a(href = "/login") { button(classes = "btn btn-secondary full-width-btn", type = ButtonType.button) { attributes["data-i18n"] = "backToLogin"; +"Back to Login" } }
             }
         }
         footer()
