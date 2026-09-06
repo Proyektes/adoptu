@@ -101,7 +101,8 @@ header {
     }
 
     #nav-donate {
-        right: 0.75rem;
+        top: 110px;
+        right: 0.5rem;
         padding: 0.4rem 0.6rem;
         font-size: 0.85rem;
     }
@@ -131,8 +132,8 @@ header {
 // nav row.
 #nav-donate {
     position: fixed;
-    top: 74px;
-    right: 1.5rem;
+    top: 130px;
+    right: 0.75rem;
     z-index: 900;
     margin: 0;
     background-color: #ff6b6b;
