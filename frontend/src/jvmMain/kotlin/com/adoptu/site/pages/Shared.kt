@@ -212,5 +212,8 @@ fun BODY.footer() {
         a("/terms") { attributes["data-i18n"] = "termsConditions"; +"Terms and Conditions" }
         span { +" | " }
         span { +"© 2025 Adopt-U" }
+        // Populated from GET /health's deploySequence field by CommonModule.initDeploySequence()
+        // (frontend/Common.kt) - blank until that call resolves, so it never shows a stale "0".
+        span(classes = "deploy-sequence") { id = "deploy-sequence" }
     }
 }

@@ -86,6 +86,7 @@ resource "aws_ecs_task_definition" "app" {
         # validation likely never worked for real users on the old image.
         { name = "ADOPTU_WEB_AUTHN_ORIGINS", value = var.webauthn_origins },
         { name = "ADOPTU_WEB_AUTHN_RP_ID", value = var.webauthn_rp_id },
+        { name = "ADOPTU_DEPLOY_SEQUENCE", value = var.deploy_sequence },
       ]
 
       # Was a plaintext environment variable in the live task definition.

@@ -185,6 +185,16 @@ internal fun configureRouting(routing: HttpRouting.Builder) {
 
     routing.get("/health", Handler { _, res -> res.send(mapOf("status" to "ok")) })
 
+    // deploySequence mirrors the ADOPTU_DEPLOY_SEQUENCE env var deploy.sh bakes into the ECS task
+    // definition from the repo-root DEPLOY_SEQUENCE file (see infra/ecs.tf) - "dev" locally, where
+    // that env var is never set. Lives under /api/ (unlike /health) specifically so the browser can
+    // reach it: CloudFront's app distribution only proxies /api/* to the backend origin (see
+    // infra/cloudfront.tf) - everything else, including a bare /health, falls through to the
+    // static site's S3 origin instead. Same reasoning for scripts/serve_site.py's local dev proxy.
+    routing.get("/api/version", Handler { _, res ->
+        res.send(mapOf("deploySequence" to (System.getenv("ADOPTU_DEPLOY_SEQUENCE") ?: "dev")))
+    })
+
     routing.authRoutes()
     routing.countryRoutes()
     routing.petsRoutes()

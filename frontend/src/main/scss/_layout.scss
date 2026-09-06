@@ -333,6 +333,13 @@ footer {
     span {
         color: var(--text);
     }
+
+    .deploy-sequence {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.7rem;
+        color: var(--border);
+    }
 }
 
 .lang-dropdown {

@@ -243,6 +243,23 @@ object CommonModule {
         }
     }
 
+    // Populates the footer's #deploy-sequence span from GET /api/version - unauthenticated, so a
+    // plain fetch (not apiFetch's 401-retry wrapper, which exists for authenticated endpoints
+    // only). Must stay under /api/ - CloudFront's app distribution only proxies /api/* paths to
+    // the backend (see infra/cloudfront.tf); a bare /health would 404 against the static site's
+    // own S3 origin instead. Silently leaves the span blank on failure rather than showing a
+    // stale/placeholder value.
+    fun initDeploySequence() {
+        window.asDynamic().fetch("/api/version").then { res: dynamic ->
+            res.json()
+        }.then { body: dynamic ->
+            val sequence = body.deploySequence?.toString()
+            if (!sequence.isNullOrBlank()) {
+                document.getElementById("deploy-sequence")?.textContent = "#$sequence"
+            }
+        }.catch { }
+    }
+
     private const val COUNTRY_STORAGE_KEY = "adoptu.selectedCountry"
 
     // Defaults a country <select>, in priority order: the last country picked anywhere on

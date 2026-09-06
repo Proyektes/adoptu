@@ -42,6 +42,16 @@ variable "container_image_tag" {
   default     = "latest"
 }
 
+# Numbered deploy counter (mirrors Mazmobi's DEPLOY_SEQUENCE file) - deploy.sh reads the
+# repo-root DEPLOY_SEQUENCE file, increments it, and writes it here before `tofu apply`. Only
+# committed back to DEPLOY_SEQUENCE once the post-deploy health check passes, so a failed deploy
+# never burns a sequence number. Exposed via GET /health and shown subtly in the site footer.
+variable "deploy_sequence" {
+  description = "Monotonically increasing deploy counter, set by deploy.sh on each release."
+  type        = string
+  default     = "0"
+}
+
 variable "container_port" {
   description = "Port the Ktor app listens on inside the container (matches Dockerfile EXPOSE / application.conf ktor.deployment.port)."
   type        = number
