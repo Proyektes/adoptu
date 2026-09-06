@@ -205,6 +205,12 @@
       ]
     },
     {
+      "type": "com.adoptu.routes.PasskeyStartRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
       "type": "com.adoptu.routes.PasskeyFinishRequest",
       "methods": [
         {

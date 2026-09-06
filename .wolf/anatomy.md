@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T23:33:36.914Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T23:40:05.796Z
 > Files: 635 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/0c143af8-4bf8-435f-b390-a50882523c6c/scratchpad/
@@ -663,7 +663,7 @@
 ## backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/
 
 - `native-image.properties` (~368 tok)
-- `reachability-metadata.json` (~15758 tok)
+- `reachability-metadata.json` (~15807 tok)
 
 ## backend/src/test/kotlin/com/adoptu/
 
