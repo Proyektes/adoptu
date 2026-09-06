@@ -16,11 +16,20 @@ class ImageCompressorTest {
     @TempDir
     lateinit var tempDir: File
 
+    // Per-channel variation at three different periodicities, not just a single smooth low-frequency
+    // ramp - a near-solid-color gradient is already close to maximally compressed by the initial
+    // JPEG encode, so recompressing it at an unchanged-or-higher quality can legitimately fail to
+    // shrink it further. Real photos have far more local high-frequency detail than a flat gradient,
+    // so this fixture needs some too for "compress actually shrinks the file" to be a meaningful,
+    // realistic assertion rather than an artifact of degenerate test content.
     private fun createTestImage(width: Int, height: Int): ByteArray {
         val image = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
         for (x in 0 until width) {
             for (y in 0 until height) {
-                image.setRGB(x, y, (x + y) % 256)
+                val r = (x * 37 + y * 17) % 256
+                val g = (x * 53 + y * 29) % 256
+                val b = (x * 11 + y * 41) % 256
+                image.setRGB(x, y, (r shl 16) or (g shl 8) or b)
             }
         }
         val outputStream = ByteArrayOutputStream()
@@ -64,7 +73,11 @@ class ImageCompressorTest {
 
     @Test
     fun `compress handles png format`() {
-        val image = createTestImage(1000, 800)
+        // Must actually be PNG-encoded - format is now content-sniffed rather than trusted from
+        // the caller's label, unlike the old ImageIO.read() path which silently auto-detected any
+        // format regardless of what was requested.
+        val pngImage = BufferedImage(1000, 800, BufferedImage.TYPE_INT_RGB)
+        val image = ByteArrayOutputStream().also { ImageIO.write(pngImage, "png", it) }.toByteArray()
         val inputStream = ByteArrayInputStream(image)
 
         val result = ImageCompressor.compress(inputStream, "png")

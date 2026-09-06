@@ -80,6 +80,20 @@ repositories {
         }
         content { includeGroup("com.universaliun.storagekit") }
     }
+
+    // ImageKit (pure-JVM JPEG/PNG codecs, zero java.awt/javax.imageio) -- see
+    // Libraries/ImageKit/README.md. Extracted after javax.imageio's PNG path crashed GraalVM
+    // native-image at runtime (NoClassDefFoundError: java/awt/GraphicsEnvironment) the first time
+    // a PNG was uploaded -- see ImageCompressor.kt's own comment for the full incident writeup.
+    maven {
+        name = "ImageKitGitHubPackages"
+        url = uri("https://maven.pkg.github.com/ULibraries/ImageKit")
+        credentials {
+            username = credential("GITHUB_ACTOR")
+            password = credential("IMAGE_KIT_TOKEN")
+        }
+        content { includeGroup("com.universaliun.imagekit") }
+    }
 }
 
 // EmailKit is consumed as a `1.0-SNAPSHOT` ("changing") dependency -- same reasoning as the other
@@ -149,6 +163,10 @@ dependencies {
     // it into StorageKit's S3ObjectStorageAdapter directly, so software.amazon.awssdk:s3 above
     // stays a direct dependency regardless.
     implementation("com.universaliun.storagekit:storagekit-backend:1.0.0")
+    // Pure-JVM JPEG/PNG encode/decode/resize for ImageCompressor.kt -- see that file's comment
+    // and Libraries/ImageKit/README.md for why (GraalVM native-image + javax.imageio/java.awt
+    // don't mix safely).
+    implementation("com.universaliun.imagekit:imagekit-common:1.0.1")
     implementation("software.amazon.awssdk:ses") {
         exclude(group = "net.bytebuddy")
     }
@@ -232,10 +250,12 @@ graalvmNative {
             )
             buildArgs.add("--no-fallback")
             buildArgs.add("-H:+ReportExceptionStackTraces")
-            // Native-image defaults to Serial GC (single-threaded, optimized for footprint/startup,
-            // not throughput). G1 is available in Community Edition on Linux/amd64 and trades a
-            // larger footprint for concurrent collection - the right call for a server under load.
-            buildArgs.add("--gc=G1")
+            // G1 requires Oracle GraalVM (Enterprise) as of this native-image-community:25 build -
+            // "Invalid option '--gc'. 'G1' is not an accepted value. Accepted values are 'epsilon',
+            // 'serial'." Community Edition only ships Serial and Epsilon GC, so explicitly pin
+            // Serial (single-threaded, optimized for footprint/startup - native-image's own
+            // default) rather than relying on the implicit default.
+            buildArgs.add("--gc=serial")
             // ImageCompressor uses javax.imageio, which touches java.awt.Toolkit at class
             // init. Without this, Toolkit tries the X11-backed libawt_xawt.so - the
             // oraclelinux:10-slim runtime image has no X11 libraries installed at all, so

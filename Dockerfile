@@ -36,33 +36,37 @@ COPY common/src common/src
 # constrained-memory CI container. Running them separately lets the first
 # JVM fully exit before native-image starts.
 #
-# GITHUB_ACTOR/PAYMENT_KIT_TOKEN/AUTH_KIT_TOKEN/STORAGE_KIT_TOKEN (same names
+# GITHUB_ACTOR/PAYMENT_KIT_TOKEN/AUTH_KIT_TOKEN/STORAGE_KIT_TOKEN/IMAGE_KIT_TOKEN (same names
 # backend/build.gradle.kts's credential() reads, same names exported in ~/.profile for
-# host-side builds) authenticate the four private GitHub Packages repos (EmailKit/RateLimitKit,
-# AuthKit, StorageKit). Passed as build secrets mounted as files (not --build-arg) so the token
-# values never land in image layer history - only this RUN's shell reads them, via a subshell
-# `export` from the mounted path. Podman's --mount=type=secret has no env= shorthand (unlike
-# Docker buildx), so this file+export form is what works on both. Caller must pass matching
+# host-side builds) authenticate the five private GitHub Packages repos (EmailKit/RateLimitKit,
+# AuthKit, StorageKit, ImageKit). Passed as build secrets mounted as files (not --build-arg) so the
+# token values never land in image layer history - only this RUN's shell reads them, via a
+# subshell `export` from the mounted path. Podman's --mount=type=secret has no env= shorthand
+# (unlike Docker buildx), so this file+export form is what works on both. Caller must pass matching
 # `podman build --secret id=...,src=...` (or `env=...`, docker) flags (see scripts/deploy.sh).
 RUN --mount=type=cache,target=/root/.gradle \
     --mount=type=secret,id=github_actor \
     --mount=type=secret,id=payment_kit_token \
     --mount=type=secret,id=auth_kit_token \
     --mount=type=secret,id=storage_kit_token \
+    --mount=type=secret,id=image_kit_token \
     export GITHUB_ACTOR="$(cat /run/secrets/github_actor)" \
       PAYMENT_KIT_TOKEN="$(cat /run/secrets/payment_kit_token)" \
       AUTH_KIT_TOKEN="$(cat /run/secrets/auth_kit_token)" \
-      STORAGE_KIT_TOKEN="$(cat /run/secrets/storage_kit_token)" && \
+      STORAGE_KIT_TOKEN="$(cat /run/secrets/storage_kit_token)" \
+      IMAGE_KIT_TOKEN="$(cat /run/secrets/image_kit_token)" && \
     ./gradlew :backend:jar --no-daemon
 RUN --mount=type=cache,target=/root/.gradle \
     --mount=type=secret,id=github_actor \
     --mount=type=secret,id=payment_kit_token \
     --mount=type=secret,id=auth_kit_token \
     --mount=type=secret,id=storage_kit_token \
+    --mount=type=secret,id=image_kit_token \
     export GITHUB_ACTOR="$(cat /run/secrets/github_actor)" \
       PAYMENT_KIT_TOKEN="$(cat /run/secrets/payment_kit_token)" \
       AUTH_KIT_TOKEN="$(cat /run/secrets/auth_kit_token)" \
-      STORAGE_KIT_TOKEN="$(cat /run/secrets/storage_kit_token)" && \
+      STORAGE_KIT_TOKEN="$(cat /run/secrets/storage_kit_token)" \
+      IMAGE_KIT_TOKEN="$(cat /run/secrets/image_kit_token)" && \
     ./gradlew :backend:nativeCompile --no-daemon
 
 # Runtime stage - same OS family/glibc as the builder (Oracle Linux 10.1,
@@ -77,12 +81,11 @@ RUN microdnf install -y ca-certificates shadow-utils \
 
 WORKDIR /app
 
-# javax.imageio's AWT/Toolkit init (used by ImageCompressor for the PNG
-# upload path only as of the JPEG codec vendoring - JPEG no longer touches
-# AWT at all) dlopen's these at runtime relative to the executable's own
-# directory - copying just the binary left them missing entirely
-# (UnsatisfiedLinkError: Can't load library: awt), silently breaking every
-# photo upload since the native-image migration.
+# ImageCompressor.kt now uses ImageKit (pure-JVM JPEG/PNG codecs, no java.awt/javax.imageio at
+# all - see that file's comment for the incident this replaced: javax.imageio's AWT/Toolkit init
+# used to crash native-image on the first PNG upload). native-image can still emit a handful of
+# other .so shims (e.g. libjava.so/libjvm.so) unrelated to AWT, so this glob copy stays - it's
+# just no longer carrying AWT's shared libraries.
 COPY --from=builder /app/backend/build/native/nativeCompile/adoptu-backend .
 COPY --from=builder /app/backend/build/native/nativeCompile/*.so .
 COPY backend/src/main/resources/application.conf .

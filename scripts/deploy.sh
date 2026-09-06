@@ -70,20 +70,22 @@ aws ecr get-login-password --profile "$AWS_PROFILE" --region "$AWS_REGION" \
   | podman login --username AWS --password-stdin "${ECR_REPO%%/*}"
 
 echo "==> Building $ECR_REPO:$IMAGE_TAG"
-# GITHUB_ACTOR/PAYMENT_KIT_TOKEN/AUTH_KIT_TOKEN/STORAGE_KIT_TOKEN authenticate the private
-# GitHub Packages repos (EmailKit/RateLimitKit, AuthKit, StorageKit) the backend depends on -
-# same names ~/.profile exports for host-side Gradle builds. Passed as build secrets (never
-# --build-arg) so they never land in the image's layer history. Dockerfile's builder-stage RUN
-# steps consume these ids.
+# GITHUB_ACTOR/PAYMENT_KIT_TOKEN/AUTH_KIT_TOKEN/STORAGE_KIT_TOKEN/IMAGE_KIT_TOKEN authenticate
+# the private GitHub Packages repos (EmailKit/RateLimitKit, AuthKit, StorageKit, ImageKit) the
+# backend depends on - same names ~/.profile exports for host-side Gradle builds. Passed as build
+# secrets (never --build-arg) so they never land in the image's layer history. Dockerfile's
+# builder-stage RUN steps consume these ids.
 : "${GITHUB_ACTOR:?GITHUB_ACTOR must be set (see ~/.profile)}"
 : "${PAYMENT_KIT_TOKEN:?PAYMENT_KIT_TOKEN must be set (see ~/.profile)}"
 : "${AUTH_KIT_TOKEN:?AUTH_KIT_TOKEN must be set (see ~/.profile)}"
 : "${STORAGE_KIT_TOKEN:?STORAGE_KIT_TOKEN must be set (see ~/.profile)}"
+: "${IMAGE_KIT_TOKEN:?IMAGE_KIT_TOKEN must be set (see ~/.profile)}"
 podman build \
   --secret id=github_actor,env=GITHUB_ACTOR \
   --secret id=payment_kit_token,env=PAYMENT_KIT_TOKEN \
   --secret id=auth_kit_token,env=AUTH_KIT_TOKEN \
   --secret id=storage_kit_token,env=STORAGE_KIT_TOKEN \
+  --secret id=image_kit_token,env=IMAGE_KIT_TOKEN \
   -t "$ECR_REPO:$IMAGE_TAG" -t "$ECR_REPO:latest" .
 
 echo "==> Pushing $ECR_REPO:$IMAGE_TAG and :latest"
