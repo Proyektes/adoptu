@@ -100,8 +100,7 @@ fun NAV.commonNav(isLoggedIn: Boolean = false, isAdmin: Boolean = false, isRescu
     // are core requirements (see UrgentRescueService/SubmitUrgentReportRequest and LostFoundPage),
     // so both must be visible to guests too. Stacked together in .nav-pill-stack (fixed to the
     // bottom-left, left curve bled off the viewport edge) so they stay reachable while scrolling
-    // without crowding the nav row - Donate mirrors the same pill treatment on the bottom-right
-    // (.nav-bottom-right) so the floating-CTA layout stays visually balanced on both sides.
+    // without crowding the nav row.
     div(classes = "nav-pill-stack") {
         a("/report-urgent") {
             id = "nav-report-urgent"
@@ -198,7 +197,6 @@ fun NAV.commonNav(isLoggedIn: Boolean = false, isAdmin: Boolean = false, isRescu
     a("https://paypal.me/adoptu") {
         target = "_blank"
         id = "nav-donate"
-        classes = setOf("nav-urgent-pill", "nav-bottom-right")
         span(classes = "material-symbols-outlined") { +Icons.DONATE }
         span { attributes["data-i18n"] = "donate"; +"Donate" }
     }

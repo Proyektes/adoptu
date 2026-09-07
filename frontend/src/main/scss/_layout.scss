@@ -32,11 +32,10 @@ header {
 }
 
 // Floating action pills, not inline nav links: the urgent-report pair stacks on the bottom-left
-// (.nav-pill-stack), Donate mirrors the same treatment alone on the bottom-right
-// (.nav-bottom-right), so all three stay reachable while scrolling instead of competing for
-// space in the nav row. Each pill's leading curve is bled off its own side of the viewport
-// (negative left/right) - position:fixed is clipped by the viewport edge with no wrapper needed -
-// and the pill's own asymmetric padding re-centers the icon/text past the clipped curve.
+// (.nav-pill-stack) so both stay reachable while scrolling instead of competing for space in the
+// nav row. Each pill's leading curve is bled off the left edge of the viewport (negative left -
+// position:fixed is clipped by the viewport edge with no wrapper needed), and the pill's own
+// asymmetric padding re-centers the icon/text past the clipped curve.
 .nav-pill-stack {
     position: fixed;
     bottom: 7rem;
@@ -47,13 +46,6 @@ header {
     gap: 0.75rem;
 }
 
-.nav-bottom-right {
-    position: fixed;
-    bottom: 7rem;
-    right: -1.25rem;
-    z-index: 900;
-}
-
 .nav-right {
     display: flex;
     align-items: center;
@@ -62,9 +54,9 @@ header {
 }
 
 // Anonymous urgent-danger reporting and anonymous lost/found reporting are safety-critical CTAs
-// that deserve their own prominence, not competing for attention with Login/etc. Donate reuses
-// the same pill so the three floating CTAs read as one family. Fixed width keeps the stacked pair
-// aligned; the bled-off curve's side gets extra padding so the icon/text still reads as inset.
+// that deserve their own prominence, not competing for attention with Login/Donate/etc. Shared by
+// both #nav-report-urgent and #nav-report-lost-found so they read as one matched pair of pills.
+// Fixed width keeps the stacked pair aligned.
 .nav-urgent-pill {
     display: inline-flex;
     align-items: center;
@@ -93,12 +85,6 @@ header {
     }
 }
 
-// Only .nav-bottom-right's pill (Donate) bleeds its curve off the *right* edge, so its extra
-// padding needs to sit on the right instead of the left.
-.nav-bottom-right.nav-urgent-pill {
-    padding: 0.5rem 1.75rem 0.5rem 1rem;
-}
-
 @media (max-width: 640px) {
     header {
         padding: 0.5rem 0.75rem;
@@ -120,18 +106,53 @@ header {
         bottom: 6rem;
     }
 
-    .nav-bottom-right {
-        bottom: 6rem;
-    }
-
     .nav-urgent-pill {
         width: 128px;
         padding: 0.4rem 0.6rem 0.4rem 1.35rem;
         font-size: 0.85rem;
     }
 
-    .nav-bottom-right.nav-urgent-pill {
-        padding: 0.4rem 1.35rem 0.4rem 0.6rem;
+    #nav-donate {
+        top: 92px;
+        right: -1rem;
+        padding: 0.4rem 1.15rem 0.4rem 0.6rem;
+        font-size: 0.85rem;
+
+        .material-symbols-outlined {
+            font-size: 20px;
+        }
+    }
+}
+
+// Floating action button, not an inline nav link: fixed under the language dropdown (top-right
+// of the header) so it stays reachable while scrolling instead of competing for space in the nav
+// row. Own color scheme (unrelated to the urgent-report pills) - its curve bleeds off the right
+// edge of the viewport the same way the left-stack pills bleed off the left, with padding shifted
+// to the right side to re-center the icon/text past the clipped curve.
+#nav-donate {
+    position: fixed;
+    top: 102px;
+    right: -1.25rem;
+    z-index: 900;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #ff6b6b;
+    border: 2px solid #ffb3ab;
+    color: white;
+    padding: 0.5rem 1.75rem 0.5rem 1rem;
+    border-radius: 999px;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: background-color 0.2s;
+
+    .material-symbols-outlined {
+        font-size: 24px;
+    }
+
+    &:hover {
+        background-color: #ee5a5a;
     }
 }
 
