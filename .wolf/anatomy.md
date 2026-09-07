@@ -1,11 +1,13 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-07T16:07:54.679Z
-> Files: 658 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-07T18:57:58.837Z
+> Files: 660 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/0c143af8-4bf8-435f-b390-a50882523c6c/scratchpad/
 
+- `adoptu-e2e-live-test-prompt.md` — Prompt: full live end-to-end test of adopt-u.org production (~2406 tok)
 - `bitakore-imagekit-prompt.md` — Prompt: evaluate consolidating onto ImageKit (Bitakore is the source, not a bug-fix consumer) (~1307 tok)
+- `nav-pills-preview.html` — Report Urgent / Lost & Found pill layout (~1747 tok)
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/22992a4f-64b0-4f0f-b8cb-2e8984934a2a/scratchpad/i18n/
 
@@ -686,7 +688,7 @@
 ## backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/
 
 - `native-image.properties` (~368 tok)
-- `reachability-metadata.json` (~15807 tok)
+- `reachability-metadata.json` (~17856 tok)
 
 ## backend/src/test/kotlin/com/adoptu/
 

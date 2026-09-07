@@ -7673,6 +7673,55 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-09-07T15:10:00.000Z"
+    },
+    {
+      "id": "bug-467",
+      "timestamp": "2026-09-07T18:50:00.000Z",
+      "error_message": "Systemic: dozens of com.adoptu.dto.input.* request/response DTOs missing from the GraalVM native-image reachability-metadata.json, causing every write endpoint that uses one of them to return a blank 500 (Jackson InvalidDefinitionException: 'Cannot construct instance of ... this appears to be a native image, in which case you may need to configure reflection') and every read endpoint using one to silently serialize as empty {} objects. Confirmed live and reproducible in production on: POST /api/lost-found/reports, POST /api/saved-searches, POST /api/sponsorships, POST /api/volunteers, POST /api/urgent-reports/submit (all 500, request body never even deserializes - service layer never runs, confirmed via CloudWatch stack traces, so NO database writes or notification sends occurred from any of these test calls), and GET /api/users/rescuers / GET /api/users/rescuers/{id} (200 OK but every object serializes as literal {} - confirmed via direct fetch, and reproduced in the UI as blank rescuer-directory cards with a broken href=\"/rescuer/undefined\" link). This breaks essentially every 'still needs testing' flow from the E2E task: Lost & Found submission, Saved Searches, Sponsorship Offers, Volunteer Applications, Urgent Rescue report submission (and by extension its leaderboard/accept flow, since no report can ever be created), Rescuer Directory browsing, Pet Edit Suggestions, Pet Foster Placements, Pet Medical Events. Root cause is the same class of bug as the same-day 'Add PasskeyStartRequest to native-image reachability metadata' fix (commit 207c6939) - reachability-metadata.json is maintained by hand/agent and was never updated as these features were built, so it silently drifted out of sync with the actual DTO surface. Confirmed NOT broken (already covered in metadata, worked live): pet CRUD incl. real JPEG+PNG image upload, adoption request submit/approve round-trip, shelter/sterilization-location/temporal-home/photographer profile activation DTOs (CreateShelterRequest, CreateSterilizationLocationRequest, CreateTemporalHomeRequest, PhotographerSettingsRequest were all already present).",
+      "file": "backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/reachability-metadata.json",
+      "root_cause": "GraalVM native-image builds a closed-world reflection config; Jackson (via jackson-module-kotlin) needs every Kotlin data class it reflectively constructs (request deserialization) or introspects (response serialization) registered in reachability-metadata.json with allDeclaredConstructors/allDeclaredMethods/allDeclaredFields. 39 classes in com.adoptu.dto.input.* (RescuerDirectoryDto, RescuerDetailDto, LostFoundReportDto, SubmitLostFoundReportRequest, ContactLostFoundReporterRequest, LostFoundKind, LostFoundStatus, SavedSearchDto, CreateSavedSearchRequest, SponsorshipOfferDto, CreateSponsorshipOfferRequest, SponsorshipOfferType, VolunteerDto, CreateVolunteerApplicationRequest, UpdateVolunteerStatusRequest, VolunteerStatus, UrgentReportDto, SubmitUrgentReportRequest, UrgentDangerType, UrgentReportStatus, UrgentReportPageDto, UrgentReportPageStatus, UrgentRescuerProfileDto, CreateUrgentRescuerProfileRequest, UpdateUrgentRescuerProfileRequest, UrgentRescuerLeaderboardEntryDto, PetEditSuggestionDto, CreatePetEditSuggestionRequest, PetEditSuggestionStatus, PetFosterPlacementDto, CreateFosterPlacementRequest, PetMedicalEventDto, CreatePetMedicalEventRequest, MedicalEventCategory, PetAnalyticsDto, PromotedReason, HousingType, LocationInputMode, AdoptionExperience) plus com.adoptu.routes.SetPasswordRequest were never added to the metadata file even though their features were fully built and shipped, so the JVM test suite (which has no reflection restrictions) always passed while the native-image production binary silently or loudly failed on every one of them.",
+      "fix": "Added all 39 missing com.adoptu.dto.input.* types (with allDeclaredConstructors/allDeclaredMethods/allDeclaredFields: true, matching the existing entry style) plus com.adoptu.routes.SetPasswordRequest (constructor-reflection style matching its siblings ChangePasswordRequest/RequestEmailChangeRequest) to backend/src/main/resources/META-INF/native-image/com.adoptu/adoptu-backend/reachability-metadata.json. Purely additive (245 insertions, 0 deletions) - verified via a defined-vs-registered diff script that zero com.adoptu.dto.input.* classes remain unregistered. NOT YET DEPLOYED - requires a native-image rebuild (./gradlew :backend:jar :backend:nativeCompile, per the two-invocation OOM workaround already documented in cerebrum.md) and redeploy via ./scripts/deploy.sh, which this session was explicitly forbidden from running unattended. Committed to develop but not pushed.",
+      "tags": [
+        "native-image",
+        "graalvm",
+        "reflection",
+        "jackson",
+        "reachability-metadata",
+        "500-error",
+        "lost-found",
+        "saved-search",
+        "sponsorship",
+        "volunteer",
+        "urgent-rescue",
+        "rescuer-directory",
+        "production",
+        "systemic"
+      ],
+      "related_bugs": [
+        "bug-466"
+      ],
+      "occurrences": 6,
+      "last_seen": "2026-09-07T18:50:00.000Z"
+    },
+    {
+      "id": "bug-468",
+      "timestamp": "2026-09-07T19:05:00.000Z",
+      "error_message": "My Temporal Home page (/temporal-home) renders the literal untranslated key 'requestsFromRescuers' as the section heading instead of 'Requests from Rescuers', in every language including English.",
+      "file": "frontend/src/jvmMain/kotlin/com/adoptu/site/pages/TemporalHomePage.kt",
+      "root_cause": "TemporalHomePage.kt line 15 sets data-i18n=\"requestsFromRescuers\" with English fallback text \"Requests from Rescuers\", but this key was never added to frontend/src/jsMain/kotlin/com/adoptu/frontend/I18n.kt's translation map (confirmed via literal search - zero occurrences of 'requestsFromRescuers' in I18n.kt). window.t() has no entry for this key so it renders the raw key string instead of leaving the server-rendered English fallback alone - same recurring i18n-key-drift pattern as bug-461/bug-464 (two parallel places to update, only one is live).",
+      "fix": "NOT YET FIXED (identified only, live production reproduction confirmed by navigating to /temporal-home as an authenticated Temporal Home provider). Needs: add \"requestsFromRescuers\" to I18n.kt for all 17 supported languages (mirroring how sibling keys on the same page are structured), then ./gradlew :frontend:jsBrowserProductionWebpack to regenerate common.js, then redeploy. Left unfixed this session due to time constraints after the larger bug-467 native-image investigation/fix; low severity (cosmetic, one heading) compared to bug-467.",
+      "tags": [
+        "i18n",
+        "missing-translation-key",
+        "temporal-home",
+        "cosmetic"
+      ],
+      "related_bugs": [
+        "bug-461",
+        "bug-464"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-07T19:05:00.000Z"
     }
   ]
 }
