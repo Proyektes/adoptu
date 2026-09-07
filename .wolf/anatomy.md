@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-07T16:03:28.132Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-07T16:07:54.679Z
 > Files: 658 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/0c143af8-4bf8-435f-b390-a50882523c6c/scratchpad/
@@ -807,7 +807,7 @@
 - `I18n.kt` (~254033 tok)
 - `ImageCompression.kt` — compress, attempt (~724 tok)
 - `Main.kt` — main (~1838 tok)
-- `WebAuthn.kt` — encodeURIComponent, register, authenticate, parseAssertionOptions, getRegistrationOptions (~2384 tok)
+- `WebAuthn.kt` — Registration/login orchestration for this app's own `/api/auth/registration-options` + (~1472 tok)
 
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
 
@@ -820,7 +820,7 @@
 - `MyPetsPage.kt` — init, togglePromotedReasonRow, loadFosterPlacementStatus, endCurrentPlacement, loadMedicalEvents (~11935 tok)
 - `PetDetailPage.kt` — init, render (~6566 tok)
 - `PhotographersPage.kt` — init, search, load, render, createRequestModal (~1716 tok)
-- `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~12418 tok)
+- `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~12355 tok)
 - `RescuersPage.kt` — init, render, init, render, sponsorFormHtml (~2728 tok)
 - `SheltersPage.kt` — init, search, renderShelters (~1482 tok)
 - `SterilizationLocationsPage.kt` — init, search, render, locationCard, init (~2869 tok)

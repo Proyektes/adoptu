@@ -124,10 +124,10 @@ object LoginPageModule {
                     .then { data: dynamic ->
                         isProcessing = false
                         if (data.success == true) {
-                            msgEl?.textContent = "Login link sent! Check your email."
+                            msgEl?.textContent = I18n.t("magicLinkSent")
                             emailInput?.value = ""
                         } else {
-                            msgEl?.textContent = data.error ?: "Failed to send"
+                            msgEl?.textContent = data.error ?: I18n.t("magicLinkSendFailed")
                         }
                     }
                     .catch { e: dynamic ->

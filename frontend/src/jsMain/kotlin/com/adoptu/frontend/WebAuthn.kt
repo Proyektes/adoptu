@@ -43,6 +43,20 @@ object WebAuthnModule {
         fetchResult.json().unsafeCast<Promise<dynamic>>().await()
     }
 
+    // For an already-authenticated user adding an additional passkey from Profile settings -
+    // distinct from register() above, which is the brand-new-signup flow and calls
+    // /api/auth/registration-options (rejects already-registered emails, so it can never work for
+    // a logged-in user adding a second passkey). Uses /api/auth/registration-options-for-user +
+    // /api/auth/register-passkey instead, which derive the user from the session cookie rather
+    // than a submitted email.
+    fun registerAdditional(): Promise<dynamic> = webAuthnScope.promise {
+        val start = apiFetch("/api/auth/registration-options-for-user", js("({method: 'POST'})")).await()
+        val requestId = start.requestId as String
+        val credentialJson = createPasskeyCredential(start.optionsJson as String)
+        val jsonStr = """{"requestId":"$requestId","credentialJson":${window.asDynamic().JSON.stringify(credentialJson)}}"""
+        apiFetch("/api/auth/register-passkey", js("({method: 'POST', body: jsonStr})")).await()
+    }
+
     fun authenticate(): Promise<dynamic> = webAuthnScope.promise {
         val start = getAuthenticationOptions().await()
         val requestId = start.requestId as String

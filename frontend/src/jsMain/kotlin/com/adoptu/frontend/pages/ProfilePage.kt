@@ -671,18 +671,13 @@ object ProfilePageModule {
         }
         showMessage(msg, "", I18n.t("registeringPasskey"))
 
-        ApiClientModule.me().then<Unit> { user ->
-            if (user != null && user.email != null) {
-                WebAuthnModule.register(user.email.toString(), passkeyName).then<Unit> {
-                    showMessage(msg, "success", I18n.t("passkeyRegisteredSuccess"))
-                    (document.getElementById("passkey-name") as? HTMLInputElement)?.value = ""
-                    loadPasskeyStatus()
-                    undefined
-                }.catch { error: dynamic ->
-                    showMessage(msg, "error", error.message ?: I18n.t("passkeyRegistrationFailed"))
-                }
-            }
+        WebAuthnModule.registerAdditional().then<Unit> {
+            showMessage(msg, "success", I18n.t("passkeyRegisteredSuccess"))
+            (document.getElementById("passkey-name") as? HTMLInputElement)?.value = ""
+            loadPasskeyStatus()
             undefined
+        }.catch { error: dynamic ->
+            showMessage(msg, "error", error.message ?: I18n.t("passkeyRegistrationFailed"))
         }
     }
 

@@ -7637,6 +7637,42 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-09-07T15:02:00.000Z"
+    },
+    {
+      "id": "bug-465",
+      "timestamp": "2026-09-07T16:06:42.631Z",
+      "error_message": "Significant refactor of ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/ProfilePage.kt",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 16\u219211 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-07T16:06:42.631Z"
+    },
+    {
+      "id": "bug-466",
+      "timestamp": "2026-09-07T15:10:00.000Z",
+      "error_message": "Add Passkey (Profile settings) always fails with \"email already registered\"",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/WebAuthn.kt, frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/ProfilePage.kt",
+      "root_cause": "ProfilePage.kt registerPasskey() called WebAuthnModule.register(), the new-account-signup flow that POSTs /api/auth/registration-options (which explicitly rejects already-registered emails). Any logged-in user adding a second passkey has, by definition, an already-registered email, so this always failed. The backend already had the correct authenticated pair implemented and tested (POST /api/auth/registration-options-for-user + POST /api/auth/register-passkey, both deriving the user from the session) but nothing on the frontend called them.",
+      "fix": "Added WebAuthnModule.registerAdditional() using apiFetch against the authenticated endpoint pair; ProfilePage.kt now calls it instead of register(). Also added missing magicLinkSent/magicLinkSendFailed i18n keys (all 17 languages, mirrored from the existing resetLinkSent structure) and wired LoginPage.kt to use them instead of hardcoded English (bug-463/464 follow-up).",
+      "tags": [
+        "auth",
+        "webauthn",
+        "passkey",
+        "production-sweep",
+        "kt"
+      ],
+      "related_bugs": [
+        "bug-463"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-07T15:10:00.000Z"
     }
   ]
 }
