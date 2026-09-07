@@ -66,7 +66,7 @@ header {
     background-color: #fbbf24;
     border: 2px solid #ea580c;
     color: #7c2d12;
-    padding: 0.5rem 1rem 0.5rem 1.75rem;
+    padding: 0.5rem 1rem 0.5rem 1.1rem;
     border-radius: 999px;
     font-weight: bold;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
@@ -108,7 +108,7 @@ header {
 
     .nav-urgent-pill {
         width: 128px;
-        padding: 0.4rem 0.6rem 0.4rem 1.35rem;
+        padding: 0.4rem 0.6rem 0.4rem 0.8rem;
         font-size: 0.85rem;
     }
 
@@ -138,8 +138,8 @@ header {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background-color: #ff6b6b;
-    border: 2px solid #ffb3ab;
+    background-color: #b91c1c;
+    border: 2px solid #ff6b6b;
     color: white;
     padding: 0.5rem 1.75rem 0.5rem 1rem;
     border-radius: 999px;
@@ -152,7 +152,7 @@ header {
     }
 
     &:hover {
-        background-color: #ee5a5a;
+        background-color: #a31818;
     }
 }
 

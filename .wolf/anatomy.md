@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-07T19:48:35.535Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-07T21:57:30.635Z
 > Files: 660 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/0c143af8-4bf8-435f-b390-a50882523c6c/scratchpad/
@@ -847,7 +847,7 @@
 - `PetsPage.kt` — HTML (~900 tok)
 - `ProfilePage.kt` — HTML (~5437 tok)
 - `RescuersPage.kt` — HTML, HTML (~356 tok)
-- `Shared.kt` — HTML, A, BODY, DIV, NAV (~4187 tok)
+- `Shared.kt` — HTML, A, BODY, DIV, NAV (~4200 tok)
 - `SterilizationLocationsPage.kt` — HTML, HTML (~1539 tok)
 - `TemporalHomePage.kt` — HTML, HTML, HTML, HTML (~1033 tok)
 - `UrgentRescuePage.kt` — HTML, HTML, HTML, HTML, HTML (~3670 tok)

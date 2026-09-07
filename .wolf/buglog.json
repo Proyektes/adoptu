@@ -7754,6 +7754,102 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-07T19:42:09.702Z"
+    },
+    {
+      "id": "bug-471",
+      "timestamp": "2026-09-07T20:08:39.052Z",
+      "error_message": "CSS fix: padding",
+      "file": "frontend/src/main/scss/_layout.scss",
+      "root_cause": "padding: 0.5rem 1rem 0.5rem 1.75rem → 0.5rem 1rem 0.5rem 1.4rem",
+      "fix": "Changed padding: 0.5rem 1rem 0.5rem 1.75rem → 0.5rem 1rem 0.5rem 1.4rem",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-09-07T20:08:50.829Z"
+    },
+    {
+      "id": "bug-472",
+      "timestamp": "2026-09-07T20:51:34.117Z",
+      "error_message": "Wrong reference: 4rem should be 1rem",
+      "file": "frontend/src/main/scss/_layout.scss",
+      "root_cause": "Used \"4rem\" instead of \"1rem\"",
+      "fix": "Changed 4rem → 1rem",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-07T20:51:34.117Z"
+    },
+    {
+      "id": "bug-473",
+      "timestamp": "2026-09-07T20:51:43.769Z",
+      "error_message": "CSS fix: padding",
+      "file": "frontend/src/main/scss/_layout.scss",
+      "root_cause": "padding: 0.4rem 0.6rem 0.4rem 1.05rem → 0.4rem 0.6rem 0.4rem 0.8rem",
+      "fix": "Changed padding: 0.4rem 0.6rem 0.4rem 1.05rem → 0.4rem 0.6rem 0.4rem 0.8rem",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-07T20:51:43.769Z"
+    },
+    {
+      "id": "bug-474",
+      "timestamp": "2026-09-07T21:40:43.516Z",
+      "error_message": "Wrong reference: ffb3ab should be b91c1c",
+      "file": "frontend/src/main/scss/_layout.scss",
+      "root_cause": "Used \"ffb3ab\" instead of \"b91c1c\"",
+      "fix": "Changed ffb3ab → b91c1c",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-07T21:40:43.516Z"
+    },
+    {
+      "id": "bug-475",
+      "timestamp": "2026-09-07T21:55:27.467Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/src/jvmMain/kotlin/com/adoptu/site/pages/Shared.kt",
+      "root_cause": "Had \"18\"",
+      "fix": "Changed to \"22\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-07T21:55:27.467Z"
+    },
+    {
+      "id": "bug-476",
+      "timestamp": "2026-09-07T21:57:30.658Z",
+      "error_message": "CSS fix: background-color, border",
+      "file": "frontend/src/main/scss/_layout.scss",
+      "root_cause": "background-color: #ee5a5a → #a31818; border: 2px solid #b91c1c → 2px solid #ff6b6b",
+      "fix": "Changed background-color: #ee5a5a → #a31818; border: 2px solid #b91c1c → 2px solid #ff6b6b",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-07T21:57:30.658Z"
     }
   ]
 }
