@@ -121,12 +121,6 @@ header {
     }
 }
 
-@media (max-width: 400px) {
-    .logo span {
-        display: none;
-    }
-}
-
 // Floating action button, not an inline nav link: fixed under the language dropdown (top-right
 // of the header) so it stays reachable while scrolling instead of competing for space in the
 // nav row.
@@ -183,6 +177,77 @@ header {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+}
+
+// Hidden until the max-width:600px breakpoint (above) flips it to inline-flex - mirrors
+// .resources-dropdown's click-to-toggle pattern for whatever collapses into it on narrow screens.
+.hamburger-menu {
+    display: none;
+    position: relative;
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        height: 4px;
+        z-index: 999;
+    }
+
+    &:hover .hamburger-dropdown-content,
+    &.open .hamburger-dropdown-content {
+        display: block;
+    }
+}
+
+.hamburger-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    .material-symbols-outlined {
+        font-size: 24px;
+    }
+
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+.hamburger-dropdown-content {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    background: var(--secondary);
+    min-width: 180px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    overflow: hidden;
+    z-index: 1000;
+
+    a {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        color: white;
+        text-decoration: none;
+
+        &:hover {
+            background: var(--primary);
+        }
+    }
 }
 
 .user-menu {
@@ -491,5 +556,40 @@ footer {
     
     &:hover .resources-dropdown-content {
         display: block;
+    }
+}
+
+// Below 600px, the icon-only "Top Rescuers" link moves into the hamburger menu instead of
+// sitting in the main nav row. Placed after .hamburger-menu's base rule (display: none) so this
+// override actually wins the cascade at equal specificity - source order matters here.
+@media (max-width: 600px) {
+    #nav-urgent-leaderboard {
+        display: none;
+    }
+
+    .hamburger-menu {
+        display: inline-flex;
+    }
+}
+
+// Below 525px, the wordmark stacks under the logo mark instead of squeezing inline next to it -
+// keeps it legible without the header running out of horizontal room for nav items. Placed after
+// .logo's base rule for the same cascade-ordering reason as the query above.
+@media (max-width: 525px) {
+    .logo {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.1rem;
+        height: auto;
+    }
+
+    .logo img {
+        margin-top: 0;
+        height: 28px;
+    }
+
+    .logo span {
+        font-size: 0.65rem;
     }
 }

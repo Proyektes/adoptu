@@ -17,4 +17,5 @@ object Icons {
     const val GROUP = "group"
     const val TROPHY = "emoji_events"
     const val WARNING = "warning"
+    const val MENU = "menu"
 }

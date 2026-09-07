@@ -104,6 +104,22 @@ fun NAV.commonNav(isLoggedIn: Boolean = false, isAdmin: Boolean = false, isRescu
             span(classes = "material-symbols-outlined") { +Icons.TROPHY }
             span(classes = "visually-hidden") { attributes["data-i18n"] = "topRescuers"; +"Top Rescuers" }
         }
+        // Below 600px (see _layout.scss), #nav-urgent-leaderboard hides and this hamburger takes
+        // over - same dropdown click pattern as .resources-dropdown, just gated by media query
+        // instead of always visible.
+        div(classes = "hamburger-menu") {
+            button(classes = "hamburger-btn", type = ButtonType.button) {
+                id = "hamburger-btn"
+                attributes["aria-label"] = "Menu"
+                span(classes = "material-symbols-outlined") { +Icons.MENU }
+            }
+            div(classes = "hamburger-dropdown-content") {
+                a("/urgent-rescuer-leaderboard") {
+                    span(classes = "material-symbols-outlined") { +Icons.TROPHY }
+                    span { attributes["data-i18n"] = "topRescuers"; +"Top Rescuers" }
+                }
+            }
+        }
         a("https://paypal.me/adoptu") { target = "_blank"; id = "nav-donate"; attributes["data-i18n"] = "donate"; +"Donate" }
 
         a("/login", classes = "btn hidden") { attributes["data-auth"] = "guest"; id = "nav-login"; attributes["data-i18n"] = "login"; +"Login" }

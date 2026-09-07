@@ -117,12 +117,29 @@ object CommonModule {
             })
         }
 
+        // Handle hamburger menu (mobile-only, see _layout.scss's max-width:600px breakpoint)
+        val hamburgerMenus = document.querySelectorAll(".hamburger-menu")
+        for (i in 0 until hamburgerMenus.length) {
+            val hamburgerMenu = hamburgerMenus.item(i)?.unsafeCast<HTMLElement>() ?: continue
+            val btn = hamburgerMenu.querySelector(".hamburger-btn") as? HTMLElement
+
+            btn?.addEventListener("click", { e ->
+                e.preventDefault()
+                e.stopPropagation()
+                hamburgerMenu.classList.toggle("open")
+            })
+        }
+
         // Close dropdowns when clicking outside
         document.addEventListener("click", { _ ->
             val dropdowns = document.querySelectorAll(".user-dropdown, .resources-dropdown-content")
             for (j in 0 until dropdowns.length) {
                 val dd = dropdowns.item(j)?.unsafeCast<HTMLElement>() ?: continue
                 dd.style.display = "none"
+            }
+            val hamburgerMenus2 = document.querySelectorAll(".hamburger-menu.open")
+            for (j in 0 until hamburgerMenus2.length) {
+                hamburgerMenus2.item(j)?.unsafeCast<HTMLElement>()?.classList?.remove("open")
             }
         })
     }
