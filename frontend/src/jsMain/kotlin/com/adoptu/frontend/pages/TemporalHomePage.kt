@@ -39,7 +39,7 @@ object TemporalHomeSearchPageModule {
         val container = document.getElementById("results-container").unsafeCast<HTMLElement?>()
         val list = homes as? Array<dynamic>
         if (list == null || list.isEmpty()) {
-            container?.innerHTML = "<p>${I18n.t("noTemporalHomes")}</p>"
+            container?.innerHTML = "<p data-i18n=\"noTemporalHomes\">${I18n.t("noTemporalHomes")}</p>"
             return
         }
         container?.innerHTML = list.joinToString("") { home ->
@@ -149,7 +149,7 @@ object TemporalHomeDetailPageModule {
             val pets = ((petsRaw as? Array<dynamic>) ?: arrayOf())
                 .filter { it.status == "AVAILABLE" && (isAdmin || it.rescuerId.toString() == user.id.toString()) }
             if (pets.isEmpty()) {
-                section.innerHTML = "<p>${I18n.t("noAvailablePetsToPlace")}</p>"
+                section.innerHTML = "<p data-i18n=\"noAvailablePetsToPlace\">${I18n.t("noAvailablePetsToPlace")}</p>"
                 return@then
             }
             val options = pets.joinToString("") { "<option value=\"${it.id}\">${CommonModule.escapeHtml(it.name?.toString())}</option>" }
@@ -165,7 +165,7 @@ object TemporalHomeDetailPageModule {
                 startPlacement()
             })
         }.catch {
-            section.innerHTML = "<p>${I18n.t("noAvailablePetsToPlace")}</p>"
+            section.innerHTML = "<p data-i18n=\"noAvailablePetsToPlace\">${I18n.t("noAvailablePetsToPlace")}</p>"
         }
     }
 
@@ -212,7 +212,7 @@ object TemporalHomeProfilePageModule {
         ApiClientModule.getMyActiveFosterPlacements().then<Unit> { placementsRaw: dynamic ->
             val list = (placementsRaw as? Array<dynamic>) ?: arrayOf()
             if (list.isEmpty()) {
-                container?.innerHTML = "<p>${I18n.t("noPetsCurrentlyFostered")}</p>"
+                container?.innerHTML = "<p data-i18n=\"noPetsCurrentlyFostered\">${I18n.t("noPetsCurrentlyFostered")}</p>"
                 return@then
             }
             container?.innerHTML = list.joinToString("") { p ->

@@ -55,7 +55,7 @@ object SterilizationLocationsPageModule {
     private fun render(data: dynamic, container: HTMLElement?) {
         val list = data as? Array<dynamic>
         if (list == null || list.isEmpty()) {
-            container?.innerHTML = "<p>${I18n.t("noLocationsFound")}</p>"
+            container?.innerHTML = "<p data-i18n=\"noLocationsFound\">${I18n.t("noLocationsFound")}</p>"
             return
         }
         val cards = list.joinToString("") { loc -> locationCard(loc, includeActions = false) }
@@ -118,7 +118,7 @@ object AdminSterilizationLocationsPageModule {
             res.json().then { data: dynamic ->
                 val list = data as? Array<dynamic>
                 if (list == null || list.isEmpty()) {
-                    container?.innerHTML = "<p>${I18n.t("noLocationsFound")}</p>"
+                    container?.innerHTML = "<p data-i18n=\"noLocationsFound\">${I18n.t("noLocationsFound")}</p>"
                     return@then
                 }
                 val cards = list.joinToString("") { loc -> locationCard(loc, includeActions = true) }

@@ -615,10 +615,12 @@ object ProfilePageModule {
             val passwordStatus = document.getElementById("password-status") as? HTMLElement
             val currentPasswordRow = document.getElementById("current-password-row") as? HTMLElement
             if (data.hasPassword == true) {
+                passwordStatus?.setAttribute("data-i18n", "passwordSet")
                 passwordStatus?.textContent = I18n.t("passwordSet")
                 currentPasswordRow?.classList?.remove("password-hidden")
                 (document.getElementById("current-password") as? HTMLInputElement)?.disabled = false
             } else {
+                passwordStatus?.setAttribute("data-i18n", "noPassword")
                 passwordStatus?.textContent = I18n.t("noPassword")
                 currentPasswordRow?.classList?.add("password-hidden")
                 (document.getElementById("current-password") as? HTMLInputElement)?.disabled = true
@@ -689,8 +691,10 @@ object ProfilePageModule {
             res.unsafeCast<dynamic>().json().then { data ->
                 val passkeyStatus = document.getElementById("passkey-status") as? HTMLElement
                 if (data.success == true) {
+                    passkeyStatus?.setAttribute("data-i18n", "passkeyRegistered")
                     passkeyStatus?.textContent = I18n.t("passkeyRegistered")
                 } else {
+                    passkeyStatus?.setAttribute("data-i18n", "noPasskey")
                     passkeyStatus?.textContent = I18n.t("noPasskey")
                 }
                 undefined
@@ -704,10 +708,12 @@ object ProfilePageModule {
             val container = document.getElementById("favorites-list")
             val empty = document.getElementById("favorites-empty")
             if (list.isEmpty()) {
+                empty?.setAttribute("data-i18n", "noFavoritesYet")
                 empty?.textContent = I18n.t("noFavoritesYet")
                 container?.innerHTML = ""
                 return@then
             }
+            empty?.removeAttribute("data-i18n")
             empty?.textContent = ""
             container?.innerHTML = list.joinToString("") { pet ->
                 "<div class=\"card-bg profile-section\"><h3>${pet.name}</h3>" +
@@ -727,10 +733,12 @@ object ProfilePageModule {
             val container = document.getElementById("my-adoption-requests-list")
             val empty = document.getElementById("my-adoption-requests-empty")
             if (requests.isEmpty()) {
+                empty?.setAttribute("data-i18n", "noAdoptionRequestsYet")
                 empty?.textContent = I18n.t("noAdoptionRequestsYet")
                 container?.innerHTML = ""
                 return@then
             }
+            empty?.removeAttribute("data-i18n")
             empty?.textContent = ""
             var remaining = requests.size
             val rows = arrayOfNulls<String>(requests.size)
@@ -767,10 +775,12 @@ object ProfilePageModule {
             val container = document.getElementById("my-volunteer-applications-list")
             val empty = document.getElementById("my-volunteer-applications-empty")
             if (applications.isEmpty()) {
+                empty?.setAttribute("data-i18n", "noVolunteerApplicationsYet")
                 empty?.textContent = I18n.t("noVolunteerApplicationsYet")
                 container?.innerHTML = ""
                 return@then
             }
+            empty?.removeAttribute("data-i18n")
             empty?.textContent = ""
             container?.innerHTML = applications.joinToString("") { renderVolunteerApplicationRow(it) }
         }
@@ -796,10 +806,12 @@ object ProfilePageModule {
             val container = document.getElementById("my-sponsorship-offers-list")
             val empty = document.getElementById("my-sponsorship-offers-empty")
             if (offers.isEmpty()) {
+                empty?.setAttribute("data-i18n", "noSponsorshipOffersYet")
                 empty?.textContent = I18n.t("noSponsorshipOffersYet")
                 container?.innerHTML = ""
                 return@then
             }
+            empty?.removeAttribute("data-i18n")
             empty?.textContent = ""
             container?.innerHTML = offers.joinToString("") { renderMySponsorshipOfferRow(it) }
         }
@@ -823,10 +835,12 @@ object ProfilePageModule {
             val container = document.getElementById("saved-searches-list")
             val empty = document.getElementById("saved-searches-empty")
             if (list.isEmpty()) {
+                empty?.setAttribute("data-i18n", "noSavedSearchesYet")
                 empty?.textContent = I18n.t("noSavedSearchesYet")
                 container?.innerHTML = ""
                 return@then
             }
+            empty?.removeAttribute("data-i18n")
             empty?.textContent = ""
             container?.innerHTML = list.joinToString("") { search ->
                 val type = search.type?.toString()?.takeIf { it.isNotEmpty() }?.let { I18n.t(it.lowercase()) } ?: I18n.t("all")

@@ -25,7 +25,7 @@ object RescuersPageModule {
         val container = document.getElementById("rescuers-container").unsafeCast<HTMLElement?>()
         val list = rescuers as? Array<dynamic>
         if (list == null || list.isEmpty()) {
-            container?.innerHTML = "<p>${I18n.t("noRescuersFound")}</p>"
+            container?.innerHTML = "<p data-i18n=\"noRescuersFound\">${I18n.t("noRescuersFound")}</p>"
             return
         }
         container?.innerHTML = list.joinToString("") { rescuer ->
@@ -96,7 +96,7 @@ object RescuerDetailPageModule {
         sb.append("<h2>${I18n.t("availablePets")}</h2>")
         val pets = (rescuer.pets as? Array<dynamic>) ?: arrayOf()
         if (pets.isEmpty()) {
-            sb.append("<p>${I18n.t("noAvailablePetsForRescuer")}</p>")
+            sb.append("<p data-i18n=\"noAvailablePetsForRescuer\">${I18n.t("noAvailablePetsForRescuer")}</p>")
         } else {
             sb.append("<div class=\"rescuer-pets-grid\">")
             sb.append(pets.joinToString("") { petCardHtml(it) })

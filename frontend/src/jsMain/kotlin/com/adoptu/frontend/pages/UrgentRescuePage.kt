@@ -257,12 +257,16 @@ object UrgentRescuerDashboardPageModule {
             val empty = document.getElementById("pages-empty")
             val list = pages.unsafeCast<Array<dynamic>>()
             if (list.isEmpty()) {
+                empty?.setAttribute("data-i18n", "noUrgentPages")
                 empty?.textContent = I18n.t("noUrgentPages")
                 return@then
             }
             list.forEach { page -> container?.appendChild(buildCard(page)) }
         }.catch<Unit> {
-            document.getElementById("pages-empty")?.textContent = I18n.t("noUrgentPages")
+            document.getElementById("pages-empty")?.apply {
+                setAttribute("data-i18n", "noUrgentPages")
+                textContent = I18n.t("noUrgentPages")
+            }
         }
     }
 

@@ -75,7 +75,7 @@ object AdminSheltersPageModule {
         val container = document.getElementById("shelters")
         val list = data as? Array<dynamic>
         if (list == null || list.isEmpty()) {
-            container?.innerHTML = "<p>${I18n.t("noSheltersFound")}</p>"
+            container?.innerHTML = "<p data-i18n=\"noSheltersFound\">${I18n.t("noSheltersFound")}</p>"
             return
         }
         val rows = list.joinToString("") { s ->

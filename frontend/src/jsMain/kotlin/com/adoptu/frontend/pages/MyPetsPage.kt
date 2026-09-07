@@ -73,14 +73,17 @@ object MyPetsPageModule {
                 activePlacementId = active.id?.toString()?.toIntOrNull()
                 val since = js("new Date(active.startDate)").toLocaleDateString()
                 val alias = active.temporalHomeAlias?.toString()?.takeIf { it.isNotEmpty() } ?: I18n.t("aTemporalHome")
+                statusEl?.removeAttribute("data-i18n")
                 statusEl?.textContent = "${I18n.t("currentlyWithLabel")} $alias ${I18n.t("sinceLabel")} $since"
                 endBtn?.classList?.remove("hidden")
             } else {
                 activePlacementId = null
+                statusEl?.setAttribute("data-i18n", "notCurrentlyFostered")
                 statusEl?.textContent = I18n.t("notCurrentlyFostered")
                 endBtn?.classList?.add("hidden")
             }
         }.catch {
+            statusEl?.setAttribute("data-i18n", "notCurrentlyFostered")
             statusEl?.textContent = I18n.t("notCurrentlyFostered")
             endBtn?.classList?.add("hidden")
         }
@@ -99,7 +102,7 @@ object MyPetsPageModule {
             val events = (eventsRaw as? Array<dynamic>) ?: arrayOf()
             val container = document.getElementById("medical-events-list")
             if (events.isEmpty()) {
-                container?.innerHTML = "<p>${I18n.t("noMedicalRecords")}</p>"
+                container?.innerHTML = "<p data-i18n=\"noMedicalRecords\">${I18n.t("noMedicalRecords")}</p>"
                 return@then
             }
             container?.innerHTML = events.joinToString("") { renderMedicalEventRow(it) }
@@ -206,7 +209,7 @@ object MyPetsPageModule {
         val container = document.getElementById("pets").unsafeCast<HTMLElement?>()
         container?.innerHTML = if (pets.isNotEmpty()) {
             pets.joinToString("") { p -> renderPetCard(p) }
-        } else "<p>${I18n.t("noPets")}</p>"
+        } else "<p data-i18n=\"noPets\">${I18n.t("noPets")}</p>"
 
         val editId = params.get("edit") as? String
         if (!editId.isNullOrEmpty()) {
@@ -229,7 +232,7 @@ object MyPetsPageModule {
         ApiClientModule.getSponsorshipOffersForRescuer().then<Unit> { offersRaw: dynamic ->
             val offers = (offersRaw as? Array<dynamic>) ?: arrayOf()
             if (offers.isEmpty()) {
-                container?.innerHTML = "<p>${I18n.t("noSponsorshipOffers")}</p>"
+                container?.innerHTML = "<p data-i18n=\"noSponsorshipOffers\">${I18n.t("noSponsorshipOffers")}</p>"
                 return@then
             }
             container?.innerHTML = offers.joinToString("") { renderSponsorshipOfferCard(it) }
@@ -269,7 +272,7 @@ object MyPetsPageModule {
         ApiClientModule.getPetEditSuggestionsForRescuer().then<Unit> { suggestionsRaw: dynamic ->
             val suggestions = (suggestionsRaw as? Array<dynamic>) ?: arrayOf()
             if (suggestions.isEmpty()) {
-                container?.innerHTML = "<p>${I18n.t("noPetEditSuggestions")}</p>"
+                container?.innerHTML = "<p data-i18n=\"noPetEditSuggestions\">${I18n.t("noPetEditSuggestions")}</p>"
                 return@then
             }
             container?.innerHTML = suggestions.joinToString("") { renderEditSuggestionCard(it) }
@@ -303,7 +306,7 @@ object MyPetsPageModule {
         ApiClientModule.getVolunteerApplicationsForRescuer().then<Unit> { applicationsRaw: dynamic ->
             val applications = (applicationsRaw as? Array<dynamic>) ?: arrayOf()
             if (applications.isEmpty()) {
-                container?.innerHTML = "<p>${I18n.t("noVolunteerApplications")}</p>"
+                container?.innerHTML = "<p data-i18n=\"noVolunteerApplications\">${I18n.t("noVolunteerApplications")}</p>"
                 return@then
             }
             container?.innerHTML = applications.joinToString("") { renderVolunteerApplicationCard(it) }
@@ -413,7 +416,7 @@ object MyPetsPageModule {
 
     private fun renderAdoptionRequests(allRequests: List<dynamic>, container: HTMLElement?) {
         if (allRequests.isEmpty()) {
-            container?.innerHTML = "<p>${I18n.t("noAdoptionRequests")}</p>"
+            container?.innerHTML = "<p data-i18n=\"noAdoptionRequests\">${I18n.t("noAdoptionRequests")}</p>"
             return
         }
         container?.innerHTML = allRequests.joinToString("") { r -> renderAdoptionRequestCard(r) }

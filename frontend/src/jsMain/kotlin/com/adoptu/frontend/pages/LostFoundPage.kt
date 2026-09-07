@@ -141,7 +141,7 @@ object LostFoundBrowsePageModule {
         apiFetch("/api/lost-found/reports?${params.toString()}").then<Unit> { results: dynamic ->
             val list = results.unsafeCast<Array<dynamic>>()
             if (list.isEmpty()) {
-                container?.innerHTML = "<p>${I18n.t("noLostFoundReportsFound")}</p>"
+                container?.innerHTML = "<p data-i18n=\"noLostFoundReportsFound\">${I18n.t("noLostFoundReportsFound")}</p>"
                 return@then
             }
             container?.innerHTML = list.joinToString("") { report -> renderCard(report) }

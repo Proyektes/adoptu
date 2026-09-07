@@ -49,7 +49,7 @@ object PhotographersPageModule {
     private fun render(data: dynamic, container: HTMLElement?) {
         val list = data as? Array<dynamic>
         if (list == null || list.isEmpty()) {
-            container?.innerHTML = "<p>${I18n.t("noPhotographersAvailable")}</p>"
+            container?.innerHTML = "<p data-i18n=\"noPhotographersAvailable\">${I18n.t("noPhotographersAvailable")}</p>"
             return
         }
         container?.innerHTML = list.joinToString("") { p ->

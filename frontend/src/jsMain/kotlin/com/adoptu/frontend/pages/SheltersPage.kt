@@ -64,7 +64,7 @@ object SheltersPageModule {
     private fun renderShelters(shelters: dynamic, container: HTMLElement?) {
         val list = shelters as? Array<dynamic>
         if (list == null || list.isEmpty()) {
-            container?.innerHTML = "<p>${I18n.t("noSheltersFound")}</p>"
+            container?.innerHTML = "<p data-i18n=\"noSheltersFound\">${I18n.t("noSheltersFound")}</p>"
             return
         }
         container?.innerHTML = list.joinToString("") { shelter ->
