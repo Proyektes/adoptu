@@ -37,6 +37,18 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
                         option { value = "fr"; +"Français 🇫🇷" }
                         option { value = "pt"; +"Português 🇧🇷" }
                         option { value = "zh"; +"中文 🇨🇳" }
+                        option { value = "ar"; +"العربية 🇸🇦" }
+                        option { value = "ru"; +"Русский 🇷🇺" }
+                        option { value = "ko"; +"한국어 🇰🇷" }
+                        option { value = "ja"; +"日本語 🇯🇵" }
+                        option { value = "sw"; +"Kiswahili 🇹🇿" }
+                        option { value = "ha"; +"Hausa 🇳🇬" }
+                        option { value = "tr"; +"Türkçe 🇹🇷" }
+                        option { value = "ro"; +"Română 🇷🇴" }
+                        option { value = "hi"; +"हिन्दी 🇮🇳" }
+                        option { value = "bn"; +"বাংলা 🇧🇩" }
+                        option { value = "mr"; +"मराठी 🇮🇳" }
+                        option { value = "te"; +"తెలుగు 🇮🇳" }
                     }
                 }
                 div(classes = "form-row") {

@@ -1,11 +1,28 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-07T00:22:15.347Z
-> Files: 636 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-07T13:12:12.335Z
+> Files: 655 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/0c143af8-4bf8-435f-b390-a50882523c6c/scratchpad/
 
 - `bitakore-imagekit-prompt.md` — Prompt: evaluate consolidating onto ImageKit (Bitakore is the source, not a bug-fix consumer) (~1307 tok)
+
+## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/22992a4f-64b0-4f0f-b8cb-2e8984934a2a/scratchpad/i18n/
+
+- `ar_block.kt` (~14259 tok)
+- `bn_block.kt` (~3664 tok)
+- `gen_tr.py` — -*- coding: utf-8 -*- (~15353 tok)
+- `ha_block.kt` (~15362 tok)
+- `hi_block.kt` (~15684 tok)
+- `ja_block.kt` (~11562 tok)
+- `ko_block.kt` (~11575 tok)
+- `mr_block.kt` (~15437 tok)
+- `ro_block.kt` (~15809 tok)
+- `ru_block.kt` (~15782 tok)
+- `sw_block.kt` (~15476 tok)
+- `te_block.kt` (~16209 tok)
+- `tr_block.kt` (~15802 tok)
+- `translations.py` — -*- coding: utf-8 -*- (~15334 tok)
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/37d425e0-d2ad-499f-bde7-97b1baf5c00b/scratchpad/
 
@@ -781,8 +798,8 @@
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/
 
 - `ApiClient.kt` — apiFetch, me, logout, detectCountry, getPets (~4131 tok)
-- `Common.kt` — rule: NodeList, showDonationPrompt, onCountryChange, initI18n (~3910 tok)
-- `I18n.kt` (~75652 tok)
+- `Common.kt` — rule: NodeList, showDonationPrompt, onCountryChange, initI18n (~4377 tok)
+- `I18n.kt` (~254033 tok)
 - `ImageCompression.kt` — compress, attempt (~724 tok)
 - `Main.kt` — main (~1838 tok)
 - `WebAuthn.kt` — encodeURIComponent, register, authenticate, parseAssertionOptions, getRegistrationOptions (~2384 tok)
@@ -790,15 +807,19 @@
 ## frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/
 
 - `AdminPage.kt` — init, switchTab, formatDate, buildQuery, renderPagination (~4624 tok)
+- `AdminSheltersPage.kt` — init, loadShelters, renderShelters, showMessage, getFormData (~3010 tok)
 - `AuthFlowPages.kt` — init, showSuccess, showError, init, submit (~2649 tok)
 - `IndexPage.kt` — init, refreshFavoriteButtons, toggleFavorite, saveCurrentSearch, loadPets (~3234 tok)
-- `LostFoundPage.kt` — init, captureLocation, submit, init, search (~2966 tok)
-- `MyPetsPage.kt` — init, togglePromotedReasonRow, loadFosterPlacementStatus, endCurrentPlacement, loadMedicalEvents (~11818 tok)
+- `LostFoundPage.kt` — init, captureLocation, submit, init, search (~2976 tok)
+- `MyPetsPage.kt` — init, togglePromotedReasonRow, loadFosterPlacementStatus, endCurrentPlacement, loadMedicalEvents (~11924 tok)
 - `PetDetailPage.kt` — init, render (~6566 tok)
-- `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~12176 tok)
-- `RescuersPage.kt` — init, render, init, render, sponsorFormHtml (~2710 tok)
-- `TemporalHomePage.kt` — init, search, displayResults, init, render (~3534 tok)
-- `UrgentRescuePage.kt` — init, captureLocation, reverseGeocodeAndFillFields, submit, init (~4457 tok)
+- `PhotographersPage.kt` — init, search, load, render, createRequestModal (~1716 tok)
+- `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~12418 tok)
+- `RescuersPage.kt` — init, render, init, render, sponsorFormHtml (~2728 tok)
+- `SheltersPage.kt` — init, search, renderShelters (~1482 tok)
+- `SterilizationLocationsPage.kt` — init, search, render, locationCard, init (~2869 tok)
+- `TemporalHomePage.kt` — init, search, displayResults, init, render (~3572 tok)
+- `UrgentRescuePage.kt` — init, captureLocation, reverseGeocodeAndFillFields, submit, init (~4501 tok)
 
 ## frontend/src/jvmMain/kotlin/com/adoptu/site/
 
@@ -809,22 +830,23 @@
 - `AdminPage.kt` — HTML (~1219 tok)
 - `AdminSheltersPage.kt` — HTML (~1716 tok)
 - `EmailVerificationPage.kt` — HTML (~1183 tok)
-- `Icons.kt` — Declares val (~139 tok)
+- `Icons.kt` — Declares val (~166 tok)
 - `IndexPage.kt` — HTML (~951 tok)
 - `LocationSearchFilters.kt` — DIV (~642 tok)
 - `LostFoundPage.kt` — HTML, HTML, HTML, HTML (~2588 tok)
 - `MyPetsPage.kt` — HTML (~3845 tok)
 - `NavParams.kt` — Data class: NavParams (~58 tok)
 - `PetsPage.kt` — HTML (~900 tok)
-- `ProfilePage.kt` — HTML (~5233 tok)
+- `ProfilePage.kt` — HTML (~5437 tok)
 - `RescuersPage.kt` — HTML, HTML (~356 tok)
-- `Shared.kt` — HTML, A, BODY, DIV, NAV (~3335 tok)
+- `Shared.kt` — HTML, A, BODY, DIV, NAV (~4134 tok)
 - `SterilizationLocationsPage.kt` — HTML, HTML (~1539 tok)
 - `TemporalHomePage.kt` — HTML, HTML, HTML, HTML (~1033 tok)
 - `UrgentRescuePage.kt` — HTML, HTML, HTML, HTML, HTML (~3670 tok)
 
 ## frontend/src/main/scss/
 
+- `_layout.scss` — Header/footer/nav styles incl. `.hamburger-menu`/`.hamburger-btn`/`.hamburger-dropdown-content` and the max-width:600px/525px responsive breakpoints (~3800 tok)
 - `rescuers.scss` — Styles: 10 rules (~529 tok)
 - `style.scss` — Styles: 54 rules (~4758 tok)
 
