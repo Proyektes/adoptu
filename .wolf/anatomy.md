@@ -1,13 +1,13 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-07T18:57:58.837Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-07T19:42:44.984Z
 > Files: 660 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/0c143af8-4bf8-435f-b390-a50882523c6c/scratchpad/
 
 - `adoptu-e2e-live-test-prompt.md` — Prompt: full live end-to-end test of adopt-u.org production (~2406 tok)
 - `bitakore-imagekit-prompt.md` — Prompt: evaluate consolidating onto ImageKit (Bitakore is the source, not a bug-fix consumer) (~1307 tok)
-- `nav-pills-preview.html` — Report Urgent / Lost & Found pill layout (~1747 tok)
+- `nav-pills-preview.html` — Report Urgent / Lost & Found pill layout (~1794 tok)
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/22992a4f-64b0-4f0f-b8cb-2e8984934a2a/scratchpad/i18n/
 
@@ -838,7 +838,7 @@
 - `AdminPage.kt` — HTML (~1219 tok)
 - `AdminSheltersPage.kt` — HTML (~1716 tok)
 - `EmailVerificationPage.kt` — HTML (~1183 tok)
-- `Icons.kt` — Declares val (~166 tok)
+- `Icons.kt` — Declares val (~178 tok)
 - `IndexPage.kt` — HTML (~951 tok)
 - `LocationSearchFilters.kt` — DIV (~642 tok)
 - `LostFoundPage.kt` — HTML, HTML, HTML, HTML (~2588 tok)
@@ -847,14 +847,14 @@
 - `PetsPage.kt` — HTML (~900 tok)
 - `ProfilePage.kt` — HTML (~5437 tok)
 - `RescuersPage.kt` — HTML, HTML (~356 tok)
-- `Shared.kt` — HTML, A, BODY, DIV, NAV (~4134 tok)
+- `Shared.kt` — HTML, A, BODY, DIV, NAV (~4245 tok)
 - `SterilizationLocationsPage.kt` — HTML, HTML (~1539 tok)
 - `TemporalHomePage.kt` — HTML, HTML, HTML, HTML (~1033 tok)
 - `UrgentRescuePage.kt` — HTML, HTML, HTML, HTML, HTML (~3670 tok)
 
 ## frontend/src/main/scss/
 
-- `_layout.scss` — Header/footer/nav styles incl. `.hamburger-menu`/`.hamburger-btn`/`.hamburger-dropdown-content` and the max-width:600px/525px responsive breakpoints (~3800 tok)
+- `_layout.scss` — Styles: 19 rules (~3471 tok)
 - `rescuers.scss` — Styles: 10 rules (~529 tok)
 - `style.scss` — Styles: 54 rules (~4758 tok)
 

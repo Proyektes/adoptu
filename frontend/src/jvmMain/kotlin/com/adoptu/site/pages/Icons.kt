@@ -18,4 +18,5 @@ object Icons {
     const val TROPHY = "emoji_events"
     const val WARNING = "warning"
     const val MENU = "menu"
+    const val DONATE = "volunteer_activism"
 }

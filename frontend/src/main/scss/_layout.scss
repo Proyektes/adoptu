@@ -31,20 +31,26 @@ header {
     }
 }
 
-// Floating action buttons, not inline nav links: fixed to opposite bottom corners of the
-// viewport (mirroring #nav-donate's fixed placement under the language dropdown) so both stay
-// reachable while scrolling instead of competing for space in the nav row.
-.nav-bottom-left {
+// Floating action pills, not inline nav links: the urgent-report pair stacks on the bottom-left
+// (.nav-pill-stack), Donate mirrors the same treatment alone on the bottom-right
+// (.nav-bottom-right), so all three stay reachable while scrolling instead of competing for
+// space in the nav row. Each pill's leading curve is bled off its own side of the viewport
+// (negative left/right) - position:fixed is clipped by the viewport edge with no wrapper needed -
+// and the pill's own asymmetric padding re-centers the icon/text past the clipped curve.
+.nav-pill-stack {
     position: fixed;
-    bottom: 5rem;
-    left: 1.5rem;
+    bottom: 7rem;
+    left: -1.25rem;
     z-index: 900;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
 .nav-bottom-right {
     position: fixed;
-    bottom: 5rem;
-    right: 1.5rem;
+    bottom: 7rem;
+    right: -1.25rem;
     z-index: 900;
 }
 
@@ -56,16 +62,19 @@ header {
 }
 
 // Anonymous urgent-danger reporting and anonymous lost/found reporting are safety-critical CTAs
-// that deserve their own prominence, not competing for attention with Login/Donate/etc. Shared by
-// both #nav-report-urgent and #nav-report-lost-found so they read as one matched pair of pills.
+// that deserve their own prominence, not competing for attention with Login/etc. Donate reuses
+// the same pill so the three floating CTAs read as one family. Fixed width keeps the stacked pair
+// aligned; the bled-off curve's side gets extra padding so the icon/text still reads as inset.
 .nav-urgent-pill {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    justify-content: flex-start;
+    gap: 6px;
+    width: 148px;
     background-color: #fbbf24;
     border: 2px solid #ea580c;
     color: #7c2d12;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 1rem 0.5rem 1.75rem;
     border-radius: 999px;
     font-weight: bold;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
@@ -73,14 +82,21 @@ header {
 
     .material-symbols-outlined,
     svg {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
     }
 
     &:hover {
         background-color: #f59e0b;
     }
+}
+
+// Only .nav-bottom-right's pill (Donate) bleeds its curve off the *right* edge, so its extra
+// padding needs to sit on the right instead of the left.
+.nav-bottom-right.nav-urgent-pill {
+    padding: 0.5rem 1.75rem 0.5rem 1rem;
 }
 
 @media (max-width: 640px) {
@@ -100,47 +116,22 @@ header {
         gap: 0.5rem;
     }
 
-    #nav-donate {
-        top: 92px;
-        right: 0.25rem;
-        padding: 0.4rem 0.6rem;
-        font-size: 0.85rem;
-    }
-
-    .nav-bottom-left {
-        left: 0.75rem;
+    .nav-pill-stack {
+        bottom: 6rem;
     }
 
     .nav-bottom-right {
-        right: 0.75rem;
+        bottom: 6rem;
     }
 
     .nav-urgent-pill {
-        padding: 0.4rem 0.6rem;
+        width: 128px;
+        padding: 0.4rem 0.6rem 0.4rem 1.35rem;
         font-size: 0.85rem;
     }
-}
 
-// Floating action button, not an inline nav link: fixed under the language dropdown (top-right
-// of the header) so it stays reachable while scrolling instead of competing for space in the
-// nav row.
-#nav-donate {
-    position: fixed;
-    top: 102px;
-    right: 0.4rem;
-    z-index: 900;
-    margin: 0;
-    background-color: #ff6b6b;
-    border: 2px solid #ffb3ab;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 999px;
-    font-weight: bold;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    transition: background-color 0.2s;
-
-    &:hover {
-        background-color: #ee5a5a;
+    .nav-bottom-right.nav-urgent-pill {
+        padding: 0.4rem 1.35rem 0.4rem 0.6rem;
     }
 }
 
