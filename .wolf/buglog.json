@@ -7601,6 +7601,42 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-07T14:41:00.000Z"
+    },
+    {
+      "id": "bug-463",
+      "timestamp": "2026-09-07T16:02:46.404Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/MyPetsPage.kt",
+      "root_cause": "Had \"<p>No adoption requests</p>\"",
+      "fix": "Changed to \"<p data-i18n=\\\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-07T16:02:46.404Z"
+    },
+    {
+      "id": "bug-464",
+      "timestamp": "2026-09-07T15:02:00.000Z",
+      "error_message": "Magic-link login success/failure messages and My Pets empty-adoption-requests message render in hardcoded English regardless of current UI language",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/LoginPage.kt, frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/MyPetsPage.kt",
+      "root_cause": "Several dynamically-set status messages were written as raw English string literals instead of I18n.t() calls: LoginPage.kt magic-link handler (\"Please enter your email\", \"Sending...\", \"Login link sent! Check your email.\", \"Failed to send\") and MyPetsPage.kt loadAdoptionRequests() (\"No adoption requests\", a duplicate of the already-localized noAdoptionRequests path used elsewhere in the same file). Found during a full authenticated production sweep.",
+      "fix": "Fixed the ones with existing matching i18n keys: LoginPage.kt now reuses emailRequired/sendingEllipsis; MyPetsPage.kt now reuses the existing noAdoptionRequests key (same key already used correctly at a sibling call site). Login link sent!/Failed to send have no existing translated key and were left as-is pending a decision on adding + translating new keys across all 17 languages.",
+      "tags": [
+        "i18n",
+        "ui-gap",
+        "production-sweep",
+        "kt"
+      ],
+      "related_bugs": [
+        "bug-449",
+        "bug-461"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-07T15:02:00.000Z"
     }
   ]
 }

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-07T15:42:39.441Z
-> Files: 657 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-07T16:03:28.132Z
+> Files: 658 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/0c143af8-4bf8-435f-b390-a50882523c6c/scratchpad/
 
@@ -815,8 +815,9 @@
 - `AdminSheltersPage.kt` — init, loadShelters, renderShelters, showMessage, getFormData (~3010 tok)
 - `AuthFlowPages.kt` — init, showSuccess, showError, init, submit (~2649 tok)
 - `IndexPage.kt` — init, refreshFavoriteButtons, toggleFavorite, saveCurrentSearch, loadPets (~3234 tok)
+- `LoginPage.kt` — init, setupEnterKeySubmit, showRegistrationNotification, showMagicLinkErrorNotification, getPublicKe (~2085 tok)
 - `LostFoundPage.kt` — init, captureLocation, submit, init, search (~2976 tok)
-- `MyPetsPage.kt` — init, togglePromotedReasonRow, loadFosterPlacementStatus, endCurrentPlacement, loadMedicalEvents (~11924 tok)
+- `MyPetsPage.kt` — init, togglePromotedReasonRow, loadFosterPlacementStatus, endCurrentPlacement, loadMedicalEvents (~11935 tok)
 - `PetDetailPage.kt` — init, render (~6566 tok)
 - `PhotographersPage.kt` — init, search, load, render, createRequestModal (~1716 tok)
 - `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~12418 tok)

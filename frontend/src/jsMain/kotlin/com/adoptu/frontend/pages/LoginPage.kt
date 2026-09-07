@@ -109,12 +109,12 @@ object LoginPageModule {
                 val email = emailInput?.value ?: ""
 
                 if (email.isEmpty()) {
-                    msgEl?.textContent = "Please enter your email"
+                    msgEl?.textContent = I18n.t("emailRequired")
                     isProcessing = false
                     return@addEventListener
                 }
 
-                msgEl?.textContent = "Sending..."
+                msgEl?.textContent = I18n.t("sendingEllipsis")
 
                 getPublicKey()
                     .then { publicKey -> RsaCryptoModule.encrypt(email, publicKey) }

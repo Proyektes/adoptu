@@ -396,7 +396,7 @@ object MyPetsPageModule {
         val allRequests = mutableListOf<dynamic>()
         var remaining = pets.size
         if (remaining == 0) {
-            container?.innerHTML = "<p>No adoption requests</p>"
+            container?.innerHTML = "<p data-i18n=\"noAdoptionRequests\">${I18n.t("noAdoptionRequests")}</p>"
             return
         }
         pets.forEach { pet ->
