@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-07T13:12:12.335Z
-> Files: 655 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-07T15:42:39.441Z
+> Files: 657 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/0c143af8-4bf8-435f-b390-a50882523c6c/scratchpad/
 
@@ -48,6 +48,11 @@
 
 - `concurrent-popping-cloud.md` — Add WebP support: frontend encode + backend pass-through with dimension validation (~1619 tok)
 - `vast-scribbling-goose.md` — Competitive feature gap analysis — Adopt-U vs. named competitors/similar platforms (~1411 tok)
+
+## ../../.claude/projects/-home-laf-Proyektes-adoptu/memory/
+
+- `MEMORY.md` (~167 tok)
+- `project_adoptu_e2e_test_account.md` (~277 tok)
 
 ## ./
 
@@ -864,7 +869,7 @@
 - `secrets.tf` — RDS master ("postgres" superuser) password - generated, never typed in by (~591 tok)
 - `terraform.tfvars` (~146 tok)
 - `terraform.tfvars.example` — Copy to terraform.tfvars and adjust. Values shown match the current live (~174 tok)
-- `variables.tf` — Declares can (~1930 tok)
+- `variables.tf` — Declares can (~2099 tok)
 
 ## infra/cloudfront-functions/
 

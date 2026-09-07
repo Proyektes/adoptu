@@ -7583,6 +7583,24 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-09-07T13:20:00.000Z"
+    },
+    {
+      "id": "bug-462",
+      "timestamp": "2026-09-07T14:41:00.000Z",
+      "error_message": "Users authenticated via any outbound-email login link (magic link, password reset, email verification) appear logged out as soon as they navigate to the canonical bare adopt-u.org domain",
+      "file": "infra/variables.tf",
+      "root_cause": "base_url terraform variable (used to build every outbound auth email link: password reset, magic-link login, email/profile-email verification, temporal-home spam-report - see AuthRoutes.kt:587, MagicLinkService.kt:114) defaulted to https://www.adopt-u.org instead of the canonical bare https://adopt-u.org. The session cookie set after consuming these email links is host-scoped (no shared Domain attribute), so authenticating via a www link leaves the user logged out the instant they land on bare adopt-u.org, which is the domain every other part of the site (nav links, deploy healthcheck, DOMAIN_NAME env) actually uses. Confirmed empirically: after magic-link login, GET /api/auth/me returned authenticated:true on www.adopt-u.org and authenticated:false on adopt-u.org in the same browser session.",
+      "fix": "Changed infra/variables.tf base_url default from https://www.adopt-u.org to https://adopt-u.org. Requires a tofu apply to take effect since terraform.tfvars does not override this variable.",
+      "tags": [
+        "auth",
+        "cookie-domain",
+        "infra",
+        "production-sweep",
+        "terraform"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-07T14:41:00.000Z"
     }
   ]
 }

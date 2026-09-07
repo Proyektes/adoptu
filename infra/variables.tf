@@ -165,9 +165,9 @@ variable "admin_username" {
 }
 
 variable "base_url" {
-  description = "Public base URL used to build links in outbound emails (password reset, magic-link login, email/profile-email verification, temporal-home spam-report). Never wired to ADOPTU_BASE_URL before this - every such link defaulted to application.conf's http://localhost:80 in production."
+  description = "Public base URL used to build links in outbound emails (password reset, magic-link login, email/profile-email verification, temporal-home spam-report). Must match the site's canonical browsing domain (bare adopt-u.org, not www) - the session cookie set by these email links is host-scoped, so a www link leaves the user logged out the moment they navigate to bare adopt-u.org."
   type        = string
-  default     = "https://www.adopt-u.org"
+  default     = "https://adopt-u.org"
 }
 
 variable "webauthn_origins" {
