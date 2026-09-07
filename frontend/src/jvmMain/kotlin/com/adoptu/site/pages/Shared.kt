@@ -48,6 +48,18 @@ fun DIV.languageDropdown() {
             a(classes = "lang-option") { attributes["data-lang"] = "fr"; +"🇫🇷 Français" }
             a(classes = "lang-option") { attributes["data-lang"] = "pt"; +"🇧🇷 Português" }
             a(classes = "lang-option") { attributes["data-lang"] = "zh"; +"🇨🇳 中文" }
+            a(classes = "lang-option") { attributes["data-lang"] = "ar"; +"🇸🇦 العربية" }
+            a(classes = "lang-option") { attributes["data-lang"] = "ru"; +"🇷🇺 Русский" }
+            a(classes = "lang-option") { attributes["data-lang"] = "ko"; +"🇰🇷 한국어" }
+            a(classes = "lang-option") { attributes["data-lang"] = "ja"; +"🇯🇵 日本語" }
+            a(classes = "lang-option") { attributes["data-lang"] = "sw"; +"🇹🇿 Kiswahili" }
+            a(classes = "lang-option") { attributes["data-lang"] = "ha"; +"🇳🇬 Hausa" }
+            a(classes = "lang-option") { attributes["data-lang"] = "tr"; +"🇹🇷 Türkçe" }
+            a(classes = "lang-option") { attributes["data-lang"] = "ro"; +"🇷🇴 Română" }
+            a(classes = "lang-option") { attributes["data-lang"] = "hi"; +"🇮🇳 हिन्दी" }
+            a(classes = "lang-option") { attributes["data-lang"] = "bn"; +"🇧🇩 বাংলা" }
+            a(classes = "lang-option") { attributes["data-lang"] = "mr"; +"🇮🇳 मराठी" }
+            a(classes = "lang-option") { attributes["data-lang"] = "te"; +"🇮🇳 తెలుగు" }
         }
     }
 }
@@ -61,6 +73,18 @@ fun NAV.languageDropdown() {
             a(classes = "lang-option") { attributes["data-lang"] = "fr"; +"🇫🇷 Français" }
             a(classes = "lang-option") { attributes["data-lang"] = "pt"; +"🇧🇷 Português" }
             a(classes = "lang-option") { attributes["data-lang"] = "zh"; +"🇨🇳 中文" }
+            a(classes = "lang-option") { attributes["data-lang"] = "ar"; +"🇸🇦 العربية" }
+            a(classes = "lang-option") { attributes["data-lang"] = "ru"; +"🇷🇺 Русский" }
+            a(classes = "lang-option") { attributes["data-lang"] = "ko"; +"🇰🇷 한국어" }
+            a(classes = "lang-option") { attributes["data-lang"] = "ja"; +"🇯🇵 日本語" }
+            a(classes = "lang-option") { attributes["data-lang"] = "sw"; +"🇹🇿 Kiswahili" }
+            a(classes = "lang-option") { attributes["data-lang"] = "ha"; +"🇳🇬 Hausa" }
+            a(classes = "lang-option") { attributes["data-lang"] = "tr"; +"🇹🇷 Türkçe" }
+            a(classes = "lang-option") { attributes["data-lang"] = "ro"; +"🇷🇴 Română" }
+            a(classes = "lang-option") { attributes["data-lang"] = "hi"; +"🇮🇳 हिन्दी" }
+            a(classes = "lang-option") { attributes["data-lang"] = "bn"; +"🇧🇩 বাংলা" }
+            a(classes = "lang-option") { attributes["data-lang"] = "mr"; +"🇮🇳 मराठी" }
+            a(classes = "lang-option") { attributes["data-lang"] = "te"; +"🇮🇳 తెలుగు" }
         }
     }
 }
