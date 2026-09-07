@@ -7367,6 +7367,24 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-06T23:33:09.034Z"
+    },
+    {
+      "id": "bug-449",
+      "timestamp": "2026-09-06T18:20:00.000Z",
+      "error_message": "Urgent Rescuer Leaderboard page shows mixed languages: title in one language, 'no rescues yet' empty-state text in another",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/UrgentRescuePage.kt",
+      "root_cause": "UrgentRescuerLeaderboardPageModule.init() set the empty-state text via `container.textContent = I18n.t(\"noLeaderboardData\")` without tagging the element with `data-i18n`. The page's <h1> does carry data-i18n=\"urgentRescuerLeaderboardTitle\", so when a user switches language via the dropdown, I18n.updatePage() re-translates every [data-i18n] element and updates the title, but the leaderboard empty-state text is invisible to that re-scan and stays frozen in whichever language was active at initial page load.",
+      "fix": "Set data-i18n=\"noLeaderboardData\" on the container alongside the textContent assignment (and remove it in the non-empty branch) so future I18n.updatePage() calls re-translate it correctly.",
+      "tags": [
+        "i18n",
+        "kotlin-js",
+        "language-switch",
+        "stale-text",
+        "urgent-rescue-leaderboard"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-06T18:20:00.000Z"
     }
   ]
 }

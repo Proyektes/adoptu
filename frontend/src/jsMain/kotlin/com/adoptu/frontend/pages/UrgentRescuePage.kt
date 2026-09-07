@@ -307,9 +307,11 @@ object UrgentRescuerLeaderboardPageModule {
             val container = document.getElementById("leaderboard-container") ?: return@then
             val list = entries.unsafeCast<Array<dynamic>>()
             if (list.isEmpty()) {
+                container.setAttribute("data-i18n", "noLeaderboardData")
                 container.textContent = I18n.t("noLeaderboardData")
                 return@then
             }
+            container.removeAttribute("data-i18n")
             val ol = document.createElement("ol")
             list.forEach { entry ->
                 val li = document.createElement("li")

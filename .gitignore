@@ -18,6 +18,10 @@ scripts/benchmark-results/
 .DS_Store
 Thumbs.db
 
+# Python (infra/lambda/*)
+__pycache__/
+*.pyc
+
 # Logs
 *.log
 logs/

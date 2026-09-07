@@ -139,6 +139,8 @@ tofu apply -auto-approve -no-color
 SITE_BUCKET="$(tofu output -raw site_bucket_name)"
 DISTRIBUTION_ID="$(tofu output -raw cloudfront_app_distribution_id)"
 
+cd "$REPO_ROOT"
+
 echo "==> Syncing $SITE_DIR to s3://$SITE_BUCKET"
 # --delete removes objects from the bucket that no longer exist in the build output (a page
 # renamed/removed since the last deploy would otherwise linger and stay reachable indefinitely).

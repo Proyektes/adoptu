@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T23:40:05.796Z
-> Files: 635 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-07T00:22:15.347Z
+> Files: 636 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/0c143af8-4bf8-435f-b390-a50882523c6c/scratchpad/
 
@@ -36,12 +36,13 @@
 
 - `.dockerignore` — Docker ignore rules (~22 tok)
 - `.gitattributes` — Git attributes (~70 tok)
-- `.gitignore` — Git ignore rules (~246 tok)
+- `.gitignore` — Git ignore rules (~353 tok)
 - `.mcp.json` (~41 tok)
 - `AGENTS.md` — Adopt-U - Agent Guidelines (~2149 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~154 tok)
 - `buildspec.yml` (~614 tok)
 - `CLAUDE.md` — OpenWolf (~624 tok)
+- `DEPLOY_SEQUENCE` (~1 tok)
 - `docker-compose.yml` — Docker Compose services (~118 tok)
 - `Dockerfile` — Docker container definition (~1182 tok)
 - `gradle.properties` (~159 tok)
@@ -797,7 +798,7 @@
 - `ProfilePage.kt` — init, loadProfile, updateProfileUI, checkProfileExists, setupRoleToggles (~12176 tok)
 - `RescuersPage.kt` — init, render, init, render, sponsorFormHtml (~2710 tok)
 - `TemporalHomePage.kt` — init, search, displayResults, init, render (~3534 tok)
-- `UrgentRescuePage.kt` — init, captureLocation, submit, init, toggleMode (~3769 tok)
+- `UrgentRescuePage.kt` — init, captureLocation, reverseGeocodeAndFillFields, submit, init (~4457 tok)
 
 ## frontend/src/jvmMain/kotlin/com/adoptu/site/
 
@@ -850,7 +851,7 @@
 ## scripts/
 
 - `benchmark.sh` — Load-tests the backend under the SAME resource ceiling as production (ECS Fargate), (~1580 tok)
-- `deploy.sh` — Builds the backend image from the current git HEAD, pushes it to ECR by (~1569 tok)
+- `deploy.sh` — Builds the backend image from the current git HEAD, pushes it to ECR by (~2548 tok)
 - `serve_site.py` — Local static file server for the generated site (frontend/build/site), mirroring how (~1936 tok)
 
 ## shared/
