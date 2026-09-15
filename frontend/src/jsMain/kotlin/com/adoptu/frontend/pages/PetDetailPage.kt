@@ -118,7 +118,20 @@ object PetDetailPageModule {
             sb.append("<div class=\"promoted-badge-detail\">🏠 ${I18n.t("needsNewHomeBadge")}: ${I18n.t(reasonKey)}${if (detail != null) " - ${CommonModule.escapeHtml(detail)}" else ""}</div>")
         }
 
-        sb.append("<button type=\"button\" class=\"btn btn-secondary\" id=\"share-pet-btn\">${I18n.t("share")}</button>")
+        // navigator.share opens the OS share sheet (Facebook/Instagram/Messages/etc. already
+        // included) on mobile/supporting browsers; desktop browsers generally don't implement
+        // it, so they get explicit per-platform icons instead of a single dead-end button.
+        if (window.navigator.asDynamic().share != null) {
+            sb.append("<button type=\"button\" class=\"btn btn-secondary\" id=\"share-pet-btn\">${I18n.t("share")}</button>")
+        } else {
+            sb.append("<div class=\"share-icons\">")
+            sb.append("<button type=\"button\" class=\"share-icon-btn share-facebook\" id=\"share-facebook-btn\" title=\"${I18n.t("shareViaFacebook")}\" aria-label=\"${I18n.t("shareViaFacebook")}\">f</button>")
+            sb.append("<button type=\"button\" class=\"share-icon-btn share-x\" id=\"share-x-btn\" title=\"${I18n.t("shareViaX")}\" aria-label=\"${I18n.t("shareViaX")}\">𝕏</button>")
+            sb.append("<button type=\"button\" class=\"share-icon-btn share-whatsapp\" id=\"share-whatsapp-btn\" title=\"${I18n.t("shareViaWhatsapp")}\" aria-label=\"${I18n.t("shareViaWhatsapp")}\"><span class=\"material-symbols-outlined\">chat</span></button>")
+            sb.append("<button type=\"button\" class=\"share-icon-btn share-email\" id=\"share-email-btn\" title=\"${I18n.t("shareViaEmail")}\" aria-label=\"${I18n.t("shareViaEmail")}\"><span class=\"material-symbols-outlined\">mail</span></button>")
+            sb.append("<button type=\"button\" class=\"share-icon-btn share-copy\" id=\"share-copy-btn\" title=\"${I18n.t("copyLink")}\" aria-label=\"${I18n.t("copyLink")}\"><span class=\"material-symbols-outlined\">content_copy</span></button>")
+            sb.append("</div>")
+        }
         val authenticated = user.authenticated == true || user.id != null
         if (authenticated) {
             sb.append("<button type=\"button\" class=\"btn btn-secondary\" id=\"favorite-pet-btn\">${I18n.t("addToFavorites")}</button>")
@@ -158,7 +171,15 @@ object PetDetailPageModule {
             initSponsorForm()
         }
 
-        document.getElementById("share-pet-btn")?.addEventListener("click", { shareCurrentPet() })
+        if (window.navigator.asDynamic().share != null) {
+            document.getElementById("share-pet-btn")?.addEventListener("click", { shareCurrentPet() })
+        } else {
+            document.getElementById("share-facebook-btn")?.addEventListener("click", { shareToFacebook() })
+            document.getElementById("share-x-btn")?.addEventListener("click", { shareToX() })
+            document.getElementById("share-whatsapp-btn")?.addEventListener("click", { shareToWhatsapp() })
+            document.getElementById("share-email-btn")?.addEventListener("click", { shareByEmail() })
+            document.getElementById("share-copy-btn")?.addEventListener("click", { copyShareLink() })
+        }
 
         if (authenticated) {
             val favBtn = document.getElementById("favorite-pet-btn")
@@ -363,12 +384,44 @@ object PetDetailPageModule {
         val pet = currentPet ?: return
         val url = window.location.href
         val text = "${pet.name} - ${I18n.t("adoptU")}"
-        val share = window.navigator.asDynamic().share
-        if (share != null) {
-            window.navigator.asDynamic().share(json("title" to text, "url" to url))
-        } else {
-            val encoded = window.asDynamic().encodeURIComponent("$text $url")
-            window.open("https://wa.me/?text=$encoded", "_blank")
+        window.navigator.asDynamic().share(json("title" to text, "url" to url))
+    }
+
+    private fun shareUrl(): String = window.location.href
+
+    private fun shareText(): String {
+        val pet = currentPet ?: return I18n.t("adoptU")
+        return "${pet.name} - ${I18n.t("adoptU")}"
+    }
+
+    private fun shareToFacebook() {
+        val encoded = window.asDynamic().encodeURIComponent(shareUrl())
+        window.open("https://www.facebook.com/sharer/sharer.php?u=$encoded", "_blank")
+    }
+
+    private fun shareToX() {
+        val encodedUrl = window.asDynamic().encodeURIComponent(shareUrl())
+        val encodedText = window.asDynamic().encodeURIComponent(shareText())
+        window.open("https://twitter.com/intent/tweet?text=$encodedText&url=$encodedUrl", "_blank")
+    }
+
+    private fun shareToWhatsapp() {
+        val encoded = window.asDynamic().encodeURIComponent("${shareText()} ${shareUrl()}")
+        window.open("https://wa.me/?text=$encoded", "_blank")
+    }
+
+    private fun shareByEmail() {
+        val encodedSubject = window.asDynamic().encodeURIComponent(shareText())
+        val encodedBody = window.asDynamic().encodeURIComponent(shareUrl())
+        window.location.href = "mailto:?subject=$encodedSubject&body=$encodedBody"
+    }
+
+    private fun copyShareLink() {
+        window.navigator.asDynamic().clipboard.writeText(shareUrl()).then<Unit> {
+            (document.getElementById("message") as? HTMLElement)?.let {
+                it.className = "message success"
+                it.textContent = I18n.t("linkCopied")
+            }
         }
     }
 

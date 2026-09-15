@@ -15,6 +15,43 @@
     margin-right: 0.5rem;
 }
 
+// Desktop fallback for browsers without navigator.share (see shareToFacebook etc.
+// in PetDetailPageModule.kt) - inline per-platform icons instead of a menu, so the
+// options are visible without an extra click.
+.share-icons {
+    display: inline-flex;
+    gap: 0.5rem;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+}
+
+.share-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1;
+
+    .material-symbols-outlined {
+        font-size: 1.2rem;
+    }
+
+    &.share-facebook { background: #1877f2; }
+    &.share-x { background: #000000; }
+    &.share-whatsapp { background: #25d366; }
+    &.share-email, &.share-copy {
+        background: var(--secondary);
+        border: 1px solid var(--primary-light);
+    }
+}
+
 // The body is one long flat flow of appended elements (description, detail grids,
 // fee, buttons, adopt form, sponsor form, suggest-edit) with nothing marking where
 // one section ends and the next begins - a divider above each section heading
