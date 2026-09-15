@@ -19,6 +19,12 @@ fun HTML.commonHead(title: String, extraCss: String? = null) {
         link(rel = "manifest", href = "/manifest.webmanifest")
         link(rel = "apple-touch-icon", href = "/apple-touch-icon.png")
         meta(name = "theme-color", content = "#0d9488")
+        // iOS ignores manifest.webmanifest's display/name for "Add to Home Screen" on older
+        // versions - these are its own equivalent (standalone mode, status bar style, home
+        // screen label instead of the per-page <title>).
+        meta { name = "apple-mobile-web-app-capable"; content = "yes" }
+        meta { name = "apple-mobile-web-app-status-bar-style"; content = "black-translucent" }
+        meta { name = "apple-mobile-web-app-title"; content = "Adopt-U" }
         // Generic site-wide share preview - every page except /pet/{id} gets this (that one route
         // has its own real per-pet og:image via the CloudFront-Function-routed
         // GET /api/share/pet/{id} bot path - see infra/cloudfront-functions/site-rewrite.js).
