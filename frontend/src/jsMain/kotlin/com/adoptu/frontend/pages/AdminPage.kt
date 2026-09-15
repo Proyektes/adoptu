@@ -44,6 +44,7 @@ object AdminPageModule {
 
         document.getElementById("tab-users")?.addEventListener("click", { switchTab("users") })
         document.getElementById("tab-pets")?.addEventListener("click", { switchTab("pets") })
+        document.getElementById("tab-shelters")?.addEventListener("click", { switchTab("shelters") })
 
         val onUserFilterChange = { userPage = 1; loadUsers() }
         document.getElementById("user-role-filter")?.addEventListener("change", {
@@ -79,23 +80,22 @@ object AdminPageModule {
     }
 
     private fun switchTab(tab: String) {
-        val usersTab = document.getElementById("users-tab").unsafeCast<HTMLElement?>()
-        val petsTab = document.getElementById("pets-tab").unsafeCast<HTMLElement?>()
-        val usersBtn = document.getElementById("tab-users").unsafeCast<HTMLElement?>()
-        val petsBtn = document.getElementById("tab-pets").unsafeCast<HTMLElement?>()
-
-        if (tab == "users") {
-            usersTab?.style?.display = "block"
-            petsTab?.style?.display = "none"
-            usersBtn?.classList?.add("active")
-            petsBtn?.classList?.remove("active")
-            loadUsers()
-        } else {
-            usersTab?.style?.display = "none"
-            petsTab?.style?.display = "block"
-            usersBtn?.classList?.remove("active")
-            petsBtn?.classList?.add("active")
-            loadPetsAdmin()
+        val tabs = mapOf(
+            "users" to ("users-tab" to "tab-users"),
+            "pets" to ("pets-tab" to "tab-pets"),
+            "shelters" to ("shelters-tab" to "tab-shelters")
+        )
+        tabs.forEach { (name, ids) ->
+            val (contentId, btnId) = ids
+            val content = document.getElementById(contentId).unsafeCast<HTMLElement?>()
+            val btn = document.getElementById(btnId).unsafeCast<HTMLElement?>()
+            val active = name == tab
+            content?.style?.display = if (active) "block" else "none"
+            if (active) btn?.classList?.add("active") else btn?.classList?.remove("active")
+        }
+        when (tab) {
+            "users" -> loadUsers()
+            "pets" -> loadPetsAdmin()
         }
     }
 

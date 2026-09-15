@@ -24,6 +24,11 @@ fun HTML.adminPage(navParams: NavParams = NavParams()) {
                     attributes["data-i18n"] = "managePets"
                     +"Manage Pets"
                 }
+                button(classes = "admin-tab-btn") {
+                    id = "tab-shelters"
+                    attributes["data-i18n"] = "manageShelters"
+                    +"Manage Shelters"
+                }
             }
             
             div(classes = "admin-tab-content") {
@@ -60,6 +65,14 @@ fun HTML.adminPage(navParams: NavParams = NavParams()) {
                 }
                 div { id = "pets-admin-container"; +"" }
                 div(classes = "admin-pagination") { id = "pets-pagination" }
+            }
+
+            // Full add/edit/filter UI lives on the dedicated page (AdminSheltersPage.kt) -
+            // same link-out pattern as the Manage Pets tab above.
+            div(classes = "admin-tab-content hidden") {
+                id = "shelters-tab"
+                p { attributes["data-i18n"] = "manageSheltersDescription"; +"Manage animal shelters. Add or remove shelters." }
+                a("/admin-shelters") { classes = setOf("btn"); attributes["data-i18n"] = "manageSheltersBtn"; +"Manage Shelters" }
             }
 
             div(classes = "form-modal hidden") {
