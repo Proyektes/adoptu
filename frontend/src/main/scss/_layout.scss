@@ -131,6 +131,28 @@ header {
     }
 }
 
+// At phone widths even the shrunk pill above (~130px wide, two stacked) is large enough to cover
+// real content scrolled underneath it (a form field, a share button) - collapse to icon-only
+// circles instead, small enough to stay out of the way while remaining reachable/recognizable.
+@media (max-width: 480px) {
+    .nav-pill-stack {
+        left: 0.5rem;
+    }
+
+    .nav-urgent-pill {
+        min-width: 0;
+        width: 48px;
+        height: 48px;
+        padding: 0;
+        justify-content: center;
+        border-radius: 50%;
+
+        span[data-i18n] {
+            display: none;
+        }
+    }
+}
+
 // Floating action button, not an inline nav link: fixed under the language dropdown (top-right
 // of the header) so it stays reachable while scrolling instead of competing for space in the nav
 // row. Own color scheme (unrelated to the urgent-report pills) - its curve bleeds off the right
