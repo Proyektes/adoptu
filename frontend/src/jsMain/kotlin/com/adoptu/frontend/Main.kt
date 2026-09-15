@@ -59,6 +59,7 @@ fun main() {
         CommonModule.initAuthNav()
         CommonModule.initDeploySequence()
         CommonModule.initServiceWorker()
+        CommonModule.initInstallPrompt()
 
         CommonModule.initI18n(null).then<Unit> {
             try {

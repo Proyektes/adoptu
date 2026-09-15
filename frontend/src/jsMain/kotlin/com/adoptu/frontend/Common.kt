@@ -44,6 +44,28 @@ object CommonModule {
         serviceWorker.register("/sw.js").catch<Unit> { /* best-effort - PWA install just won't be offered */ }
     }
 
+    // Shows the footer's "Install App" link only once the browser actually confirms the site is
+    // installable (manifest + service worker + criteria all satisfied) - most visits never fire
+    // this (already installed, criteria not met, or the browser has no concept of it at all, e.g.
+    // Firefox/iOS Safari, which only offers Share -> Add to Home Screen manually).
+    fun initInstallPrompt() {
+        var deferredPrompt: dynamic = null
+        window.asDynamic().addEventListener("beforeinstallprompt", { event: dynamic ->
+            event.preventDefault()
+            deferredPrompt = event
+            document.getElementById("install-app-link")?.classList?.remove("hidden")
+            document.getElementById("install-app-sep")?.classList?.remove("hidden")
+        })
+        document.getElementById("install-app-link")?.addEventListener("click", { event: Event ->
+            event.preventDefault()
+            val prompt = deferredPrompt ?: return@addEventListener
+            prompt.prompt()
+            deferredPrompt = null
+            document.getElementById("install-app-link")?.classList?.add("hidden")
+            document.getElementById("install-app-sep")?.classList?.add("hidden")
+        })
+    }
+
     fun onCountryChange() {
         val countrySelect = window.document.getElementById("profile-country")
         val stateContainer = window.document.getElementById("state-container")

@@ -267,6 +267,11 @@ fun BODY.footer() {
         span { +" | " }
         a("/terms") { attributes["data-i18n"] = "termsConditions"; +"Terms and Conditions" }
         span { +" | " }
+        // Hidden until the browser actually fires beforeinstallprompt (CommonModule.kt) - most
+        // browsers don't (already installed, criteria not met, or no support at all e.g. iOS
+        // Safari, which only offers Share -> Add to Home Screen with no programmatic prompt).
+        a(href = "#", classes = "hidden") { id = "install-app-link"; attributes["data-i18n"] = "installApp"; +"Install App" }
+        span(classes = "hidden") { id = "install-app-sep"; +" | " }
         span { +"© 2025 Adopt-U" }
         // Populated from GET /health's deploySequence field by CommonModule.initDeploySequence()
         // (frontend/Common.kt) - blank until that call resolves, so it never shows a stale "0".
