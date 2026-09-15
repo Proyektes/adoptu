@@ -168,9 +168,11 @@ object UrgentRescuerProfilePageModule {
 
         document.getElementById("capture-location-btn")?.addEventListener("click", { captureLocation() })
         document.getElementById("radius-km")?.addEventListener("change", {
-            if (circle != null) {
+            val lat = latitude
+            val lon = longitude
+            if (circle != null && lat != null && lon != null) {
                 circle.setRadius(radiusMeters())
-                map.fitBounds(circle.getBounds(), json("maxZoom" to 15))
+                fitToCoverage(lat, lon, radiusMeters())
             }
         })
         document.getElementById("urgent-zone-country")?.addEventListener("change", { geocodeZoneFields() })
@@ -180,6 +182,20 @@ object UrgentRescuerProfilePageModule {
 
     private fun radiusMeters(): Double =
         (((document.getElementById("radius-km") as? HTMLInputElement)?.value?.toDoubleOrNull()) ?: 10.0) * 1000.0
+
+    // Computed directly from lat/lon + radius rather than circle.getBounds(), so the map's zoom
+    // doesn't depend on that method being available/behaving as expected across Leaflet builds.
+    // 111320 = meters per degree of latitude; longitude degrees shrink by cos(latitude).
+    private fun fitToCoverage(lat: Double, lon: Double, radiusMeters: Double) {
+        val leaflet = window.asDynamic().L ?: return
+        val dLat = radiusMeters / 111320.0
+        val dLon = radiusMeters / (111320.0 * kotlin.math.cos(lat * kotlin.math.PI / 180.0))
+        val bounds = leaflet.latLngBounds(
+            leaflet.latLng(lat - dLat, lon - dLon),
+            leaflet.latLng(lat + dLat, lon + dLon)
+        )
+        map.fitBounds(bounds, json("maxZoom" to 15))
+    }
 
     private fun initMap() {
         val leaflet = window.asDynamic().L ?: return
@@ -213,9 +229,9 @@ object UrgentRescuerProfilePageModule {
             circle.setLatLng(point)
         }
         circle.setRadius(radiusMeters())
-        // fitBounds rather than a fixed zoom - a 100+ km radius needs to zoom out much further
-        // than a 1 km one for the circle's edge to actually be visible.
-        if (recenter) map.fitBounds(circle.getBounds(), json("maxZoom" to 15))
+        // Zoom to fit the coverage circle rather than a fixed zoom - a 100+ km radius needs to
+        // zoom out much further than a 1 km one for the circle's edge to actually be visible.
+        if (recenter) fitToCoverage(lat, lon, radiusMeters())
     }
 
     private fun captureLocation() {
