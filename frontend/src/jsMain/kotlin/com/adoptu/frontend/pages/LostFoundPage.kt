@@ -120,6 +120,12 @@ object ReportLostFoundPageModule {
 object LostFoundBrowsePageModule {
     fun init() {
         document.getElementById("search-btn")?.addEventListener("click", { search() })
+        document.querySelectorAll(".kind-btn").forEachElement { node ->
+            node.unsafeCast<HTMLElement>().addEventListener("click", {
+                document.querySelectorAll(".kind-btn").forEachElement { b -> b.unsafeCast<HTMLElement>().classList.remove("active") }
+                node.unsafeCast<HTMLElement>().classList.add("active")
+            })
+        }
     }
 
     private fun search() {
@@ -128,7 +134,7 @@ object LostFoundBrowsePageModule {
         errorDiv?.style?.display = "none"
         container?.innerHTML = "<p>${I18n.t("loading")}</p>"
 
-        val kind = (document.getElementById("browse-kind") as? HTMLSelectElement)?.value ?: "LOST"
+        val kind = (document.querySelector(".kind-btn.active") as? HTMLElement)?.asDynamic()?.dataset?.kind?.toString() ?: "LOST"
         val params = CommonModule.buildLocationSearchParams()
         if (params == null) {
             errorDiv?.style?.display = "block"

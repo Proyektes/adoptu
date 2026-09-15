@@ -115,11 +115,15 @@ fun HTML.lostFoundBrowsePage(navParams: NavParams = NavParams()) {
                 a("/report-lost-found", classes = "btn") { attributes["data-i18n"] = "reportLostFoundTitle"; +"Report a Lost or Found Pet" }
             }
             div(classes = "form-row") {
-                label { htmlFor = "browse-kind"; attributes["data-i18n"] = "showing"; +"Showing" }
-                select {
-                    id = "browse-kind"
-                    option { value = "LOST"; attributes["data-i18n"] = "kindLostPlural"; +"Lost pets" }
-                    option { value = "FOUND"; attributes["data-i18n"] = "kindFoundPlural"; +"Found pets" }
+                div(classes = "kind-toggle") {
+                    button(classes = "kind-btn active", type = ButtonType.button) {
+                        id = "browse-kind-lost"; attributes["data-kind"] = "LOST"
+                        span { attributes["data-i18n"] = "kindLostPlural"; +"Lost pets" }
+                    }
+                    button(classes = "kind-btn", type = ButtonType.button) {
+                        id = "browse-kind-found"; attributes["data-kind"] = "FOUND"
+                        span { attributes["data-i18n"] = "kindFoundPlural"; +"Found pets" }
+                    }
                 }
             }
             div(classes = "location-search-form") {
