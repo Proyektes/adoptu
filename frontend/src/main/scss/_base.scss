@@ -73,6 +73,22 @@ main {
     font-size: 0.8rem;
 }
 
+// A page's h1 plus a primary action button (e.g. LostFoundPage.kt's "Report a Lost or
+// Found Pet"), side by side at the same height instead of the button falling below
+// the title on its own line.
+.page-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+
+    h1 {
+        margin: 0;
+    }
+}
+
 .form-row {
     margin-bottom: 1rem;
 

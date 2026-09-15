@@ -110,8 +110,10 @@ fun HTML.lostFoundBrowsePage(navParams: NavParams = NavParams()) {
             nav { commonNav(navParams.isLoggedIn, navParams.isAdmin, navParams.isRescuerOrAdmin, navParams.isTemporalHomeOrAdmin) }
         }
         main {
-            h1 { attributes["data-i18n"] = "lostFoundBrowseTitle"; +"Lost & Found Pets" }
-            a("/report-lost-found", classes = "btn") { attributes["data-i18n"] = "reportLostFoundTitle"; +"Report a Lost or Found Pet" }
+            div(classes = "page-header-row") {
+                h1 { attributes["data-i18n"] = "lostFoundBrowseTitle"; +"Lost & Found Pets" }
+                a("/report-lost-found", classes = "btn") { attributes["data-i18n"] = "reportLostFoundTitle"; +"Report a Lost or Found Pet" }
+            }
             div(classes = "form-row") {
                 label { htmlFor = "browse-kind"; attributes["data-i18n"] = "showing"; +"Showing" }
                 select {
