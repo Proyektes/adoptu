@@ -118,6 +118,9 @@ object PetDetailPageModule {
             sb.append("<div class=\"promoted-badge-detail\">🏠 ${I18n.t("needsNewHomeBadge")}: ${I18n.t(reasonKey)}${if (detail != null) " - ${CommonModule.escapeHtml(detail)}" else ""}</div>")
         }
 
+        // Share controls on the left, Add to Favorites pinned to the right of the same row.
+        sb.append("<div class=\"pet-actions-row\">")
+
         // navigator.share opens the OS share sheet (Facebook/Instagram/Messages/etc. already
         // included) on mobile/supporting browsers; desktop browsers generally don't implement
         // it, so they get explicit per-platform icons instead of a single dead-end button.
@@ -136,6 +139,7 @@ object PetDetailPageModule {
         if (authenticated) {
             sb.append("<button type=\"button\" class=\"btn btn-secondary\" id=\"favorite-pet-btn\">${I18n.t("addToFavorites")}</button>")
         }
+        sb.append("</div>")
 
         if (canAdopt) {
             sb.append(

@@ -8,11 +8,15 @@
     max-width: none;
 }
 
-// Share/Add to Favorites are appended as bare sibling <button>s with no wrapping
-// container (see PetDetailPageModule.kt), so without this they render flush
-// against each other.
-#share-pet-btn {
-    margin-right: 0.5rem;
+// Wraps the share controls and Add to Favorites (see PetDetailPageModule.kt) - share
+// stays left, favorites is pinned to the right of the same row via space-between.
+.pet-actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
 }
 
 // Desktop fallback for browsers without navigator.share (see shareToFacebook etc.
@@ -21,7 +25,6 @@
 .share-icons {
     display: inline-flex;
     gap: 0.5rem;
-    margin-right: 0.5rem;
     vertical-align: middle;
 }
 
