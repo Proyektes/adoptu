@@ -11,6 +11,8 @@ import kotlinx.browser.window
 import org.w3c.dom.*
 import kotlin.js.Promise
 
+private val emoji = mapOf("DOG" to "🐕", "CAT" to "🐱", "BIRD" to "🐦", "FISH" to "🐟")
+
 @JsExport
 @JsName("ProfilePage")
 object ProfilePageModule {
@@ -711,9 +713,16 @@ object ProfilePageModule {
             empty?.removeAttribute("data-i18n")
             empty?.textContent = ""
             container?.innerHTML = list.joinToString("") { pet ->
-                "<div class=\"card-bg profile-section\"><h3>${pet.name}</h3>" +
+                val images = pet.images as? Array<dynamic>
+                val primaryImage = images?.firstOrNull { it.isPrimary == true } ?: images?.firstOrNull()
+                val thumbHtml = if (primaryImage != null) {
+                    "<img class=\"favorite-thumb\" src=\"${primaryImage.imageUrl}\" alt=\"${pet.name}\" loading=\"lazy\">"
+                } else {
+                    "<div class=\"favorite-thumb favorite-thumb-placeholder\">${emoji[pet.type?.toString()] ?: "🐾"}</div>"
+                }
+                "<div class=\"card-bg profile-section favorite-card\">$thumbHtml<div class=\"favorite-card-body\"><h3>${pet.name}</h3>" +
                     "<a class=\"btn\" href=\"/pet/${pet.id}\">${I18n.t("viewDetails")}</a> " +
-                    "<button type=\"button\" class=\"btn btn-secondary remove-favorite-btn\" data-pet-id=\"${pet.id}\">${I18n.t("removeFromFavorites")}</button></div>"
+                    "<button type=\"button\" class=\"btn btn-secondary remove-favorite-btn\" data-pet-id=\"${pet.id}\">${I18n.t("removeFromFavorites")}</button></div></div>"
             }
             document.querySelectorAll(".remove-favorite-btn").forEachElement { node ->
                 val petId = node.asDynamic().dataset.petId?.toString() ?: return@forEachElement
