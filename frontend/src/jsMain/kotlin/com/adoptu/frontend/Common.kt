@@ -33,6 +33,17 @@ object CommonModule {
         banner.querySelector(".donation-dismiss")?.addEventListener("click", { banner.remove() })
     }
 
+    // PWA installability (Chrome/Edge require an active service worker before offering the
+    // install prompt) - the worker itself (frontend/pwa/sw.js) does no caching, see its own
+    // comment. serviceWorker is undefined on browsers without support (Safari < 11.1, etc.), and
+    // registration is refused entirely outside a secure context (HTTP) - both are silently fine
+    // to skip.
+    fun initServiceWorker() {
+        val serviceWorker = window.navigator.asDynamic().serviceWorker ?: return
+        if (window.location.protocol != "https:" && window.location.hostname != "localhost") return
+        serviceWorker.register("/sw.js").catch<Unit> { /* best-effort - PWA install just won't be offered */ }
+    }
+
     fun onCountryChange() {
         val countrySelect = window.document.getElementById("profile-country")
         val stateContainer = window.document.getElementById("state-container")

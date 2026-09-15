@@ -12,6 +12,13 @@ fun HTML.commonHead(title: String, extraCss: String? = null) {
         link(rel = "icon", href = "https://static.adopt-u.org/favicon.ico", type = "image/x-icon")
         link(rel = "stylesheet", href = "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200")
         extraCss?.let { link(rel = "stylesheet", href = "/static/css/$it") }
+        // PWA: manifest + icons (generated from logo.svg, see frontend/pwa/) + the theme-color
+        // that browser chrome (status bar, task switcher) picks up once installed. Service worker
+        // itself is registered from CommonModule.kt (no inline <script> here, matching the
+        // no-CSP-nonce convention below).
+        link(rel = "manifest", href = "/manifest.webmanifest")
+        link(rel = "apple-touch-icon", href = "/apple-touch-icon.png")
+        meta(name = "theme-color", content = "#0d9488")
         // Generic site-wide share preview - every page except /pet/{id} gets this (that one route
         // has its own real per-pet og:image via the CloudFront-Function-routed
         // GET /api/share/pet/{id} bot path - see infra/cloudfront-functions/site-rewrite.js).

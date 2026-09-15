@@ -58,6 +58,7 @@ fun main() {
         CommonModule.initLocationSearchFilters()
         CommonModule.initAuthNav()
         CommonModule.initDeploySequence()
+        CommonModule.initServiceWorker()
 
         CommonModule.initI18n(null).then<Unit> {
             try {
