@@ -64,7 +64,7 @@ object PetDetailPageModule {
         val yesLabel = I18n.t("yes")
         val noLabel = I18n.t("no")
         sb.append("<span class=\"pet-type\">${I18n.t(pet.type.toString().lowercase())}</span><h1>${pet.name}</h1>")
-        if (pet.breed != null && pet.breed.toString().isNotEmpty()) sb.append("<p class=\"pet-breed\">${pet.breed}</p>")
+        if (pet.breed != null && pet.breed.toString().isNotEmpty()) sb.append("<p class=\"pet-breed\"><strong>${I18n.t("breed")}:</strong> ${pet.breed}</p>")
         sb.append("<p><strong>${I18n.t("weight")}:</strong> ${pet.weight} kg | <strong>${I18n.t("age")}:</strong> ${pet.ageYears} ${I18n.t("years")} ${pet.ageMonths} ${I18n.t("months")} | <strong>${I18n.t("sex")}:</strong> ${I18n.t(pet.sex.toString().lowercase())}</p>")
         sb.append("<p><strong>${I18n.t("status")}:</strong> ${petStatusLabel(pet.status)}</p></div>")
 
