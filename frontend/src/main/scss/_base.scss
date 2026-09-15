@@ -49,6 +49,10 @@ main {
 
     &-secondary {
         background: var(--secondary);
+        // Same color as .pet-details-grid and other info chips (--secondary), so without
+        // a border these buttons visually merge into surrounding content instead of
+        // reading as actionable.
+        border: 1px solid var(--primary-light);
 
         &:hover {
             background: #244426;

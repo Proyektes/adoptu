@@ -682,12 +682,23 @@ form {
         border-radius: 999px;
         font-size: 0.8rem;
         font-weight: 600;
-        margin: 0.35rem 0;
+        margin: 0.35rem 0 0.35rem 0.5rem;
 
         &.status-pending { background: #fff3cd; color: #7a4a00; }
         &.status-under_review { background: #cfe2ff; color: #084298; }
         &.status-approved { background: #d1e7dd; color: #0f5132; }
+        &.status-active { background: #d1e7dd; color: #0f5132; }
         &.status-rejected { background: #f8d7da; color: #842029; }
+    }
+
+    // Renders after .ar-status (see renderVolunteerApplicationRow / renderAdoptionRequestRow /
+    // renderSponsorshipOfferRow in ProfilePage.kt) with no separating markup - needed its own
+    // gap, same as .ar-status needed one from the preceding link.
+    .ar-date {
+        display: inline-block;
+        margin-left: 0.5rem;
+        font-size: 0.85rem;
+        color: var(--text-muted, #666);
     }
 
     .ar-screening {

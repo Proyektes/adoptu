@@ -7,3 +7,20 @@
 #adopt-form {
     max-width: none;
 }
+
+// Share/Add to Favorites are appended as bare sibling <button>s with no wrapping
+// container (see PetDetailPageModule.kt), so without this they render flush
+// against each other.
+#share-pet-btn {
+    margin-right: 0.5rem;
+}
+
+// The body is one long flat flow of appended elements (description, detail grids,
+// fee, buttons, adopt form, sponsor form, suggest-edit) with nothing marking where
+// one section ends and the next begins - a divider above each section heading
+// (Photos, Sponsor This Pet, Suggest an Edit) breaks that up.
+.pet-detail-body h3 {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}

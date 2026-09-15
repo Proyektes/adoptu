@@ -90,7 +90,11 @@ object AdminPageModule {
             val content = document.getElementById(contentId).unsafeCast<HTMLElement?>()
             val btn = document.getElementById(btnId).unsafeCast<HTMLElement?>()
             val active = name == tab
-            content?.style?.display = if (active) "block" else "none"
+            // .hidden is `display: none !important` (see style.scss), so an inline
+            // style.display can never override it - toggle the class itself instead.
+            // (This was silently broken for Manage Pets before this fix: it set
+            // style.display="block" while .hidden stayed applied.)
+            if (active) content?.classList?.remove("hidden") else content?.classList?.add("hidden")
             if (active) btn?.classList?.add("active") else btn?.classList?.remove("active")
         }
         when (tab) {
