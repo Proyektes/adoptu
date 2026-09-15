@@ -10,6 +10,7 @@ import com.adoptu.dto.input.UrgentRescuerLeaderboardEntryDto
 import com.adoptu.dto.input.UrgentRescuerProfileDto
 import com.adoptu.dto.input.UserDto
 import com.adoptu.ports.CaptchaPort
+import com.adoptu.ports.GeocodeResult
 import com.adoptu.ports.GeocodingPort
 import com.adoptu.ports.NotificationPort
 import com.adoptu.ports.ReverseGeocodeResult
@@ -155,10 +156,14 @@ class UrgentRescueService(
         return null
     }
 
-    // --- Reverse geocoding (pre-fills the report form's address fields) --------------------
+    // --- Geocoding (pre-fills the report form's address fields / previews a typed zone on
+    // the urgent rescuer settings map) ------------------------------------------------------
 
     suspend fun reverseGeocode(latitude: Double, longitude: Double): ReverseGeocodeResult? =
         geocodingPort.reverseGeocode(latitude, longitude)
+
+    suspend fun geocode(country: String, state: String?, city: String): GeocodeResult? =
+        geocodingPort.geocode(country, state, city)
 
     // --- Matching + paging -----------------------------------------------------------------
 

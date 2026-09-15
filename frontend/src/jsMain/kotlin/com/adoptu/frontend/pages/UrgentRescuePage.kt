@@ -8,7 +8,6 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.HTMLButtonElement
 import org.w3c.dom.HTMLElement
-import org.w3c.dom.HTMLIFrameElement
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.HTMLSelectElement
 import org.w3c.dom.HTMLTextAreaElement
@@ -143,35 +142,73 @@ object UrgentRescuerProfilePageModule {
     private var hasExistingProfile = false
     private var latitude: Double? = null
     private var longitude: Double? = null
+    private var map: dynamic = null
+    private var marker: dynamic = null
+    private var circle: dynamic = null
+    // Set while a zone-field value is being written *from* the map (reverse geocode after a
+    // drag/capture), so that write doesn't re-trigger the zone-fields' own change listener and
+    // bounce straight back into a forward geocode.
+    private var suppressZoneFieldSync = false
 
     fun init() {
+        initMap()
+
         apiFetch("/api/urgent-rescuers/me").then<Unit> { profile: dynamic ->
             hasExistingProfile = true
             (document.getElementById("urgent-rescuer-active") as? HTMLInputElement)?.checked = profile.active == true
             (document.getElementById("urgent-phone") as? HTMLInputElement)?.value = profile.phone?.toString() ?: ""
             (document.getElementById("radius-km") as? HTMLInputElement)?.value = profile.radiusKm?.toString() ?: "10"
-            if (profile.inputMode == "ZONE") {
-                (document.getElementById("mode-zone") as? HTMLInputElement)?.checked = true
-                (document.getElementById("urgent-zone-country") as? HTMLSelectElement)?.value = profile.zoneCountry?.toString() ?: ""
-                (document.getElementById("urgent-zone-city") as? HTMLInputElement)?.value = profile.zoneCity?.toString() ?: ""
-                toggleMode(zone = true)
+            val lat = profile.latitude as? Double
+            val lon = profile.longitude as? Double
+            if (lat != null && lon != null) {
+                setPin(lat, lon)
+                reverseGeocodeAndFillZoneFields(lat, lon)
             }
-            latitude = profile.latitude as? Double
-            longitude = profile.longitude as? Double
-            val lat = latitude
-            val lon = longitude
-            if (lat != null && lon != null) showLocationMap(lat, lon)
         }.catch<Unit> { /* no profile yet - fine, first save creates one */ }
 
-        document.getElementById("mode-coordinates")?.addEventListener("change", { toggleMode(zone = false) })
-        document.getElementById("mode-zone")?.addEventListener("change", { toggleMode(zone = true) })
         document.getElementById("capture-location-btn")?.addEventListener("click", { captureLocation() })
+        document.getElementById("radius-km")?.addEventListener("change", { circle?.setRadius(radiusMeters()) })
+        document.getElementById("urgent-zone-country")?.addEventListener("change", { geocodeZoneFields() })
+        document.getElementById("urgent-zone-city")?.addEventListener("change", { geocodeZoneFields() })
         document.getElementById("save-urgent-profile-btn")?.addEventListener("click", { save() })
     }
 
-    private fun toggleMode(zone: Boolean) {
-        (document.getElementById("coordinates-fields") as? HTMLElement)?.style?.display = if (zone) "none" else ""
-        (document.getElementById("zone-fields") as? HTMLElement)?.let { if (zone) it.classList.remove("hidden") else it.classList.add("hidden") }
+    private fun radiusMeters(): Double =
+        (((document.getElementById("radius-km") as? HTMLInputElement)?.value?.toDoubleOrNull()) ?: 10.0) * 1000.0
+
+    private fun initMap() {
+        val leaflet = window.asDynamic().L ?: return
+        map = leaflet.map("location-map").setView(leaflet.latLng(20.0, 0.0), 2)
+        leaflet.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            json("attribution" to "&copy; OpenStreetMap contributors", "maxZoom" to 19)
+        ).addTo(map)
+    }
+
+    // Creates the pin + coverage circle on first use, or just moves them afterwards. Centers/zooms
+    // the map on it unless the move originated from dragging the pin itself (recenter = false),
+    // since re-centering under the user's own drag gesture would fight their mouse.
+    private fun setPin(lat: Double, lon: Double, recenter: Boolean = true) {
+        latitude = lat
+        longitude = lon
+        val leaflet = window.asDynamic().L ?: return
+        val point = leaflet.latLng(lat, lon)
+        if (marker == null) {
+            marker = leaflet.marker(point, json("draggable" to true)).addTo(map)
+            marker.on("dragend", {
+                val pos = marker.getLatLng()
+                val newLat = pos.lat.unsafeCast<Double>()
+                val newLon = pos.lng.unsafeCast<Double>()
+                setPin(newLat, newLon, recenter = false)
+                reverseGeocodeAndFillZoneFields(newLat, newLon)
+            })
+            circle = leaflet.circle(point, json("radius" to radiusMeters())).addTo(map)
+        } else {
+            marker.setLatLng(point)
+            circle.setLatLng(point)
+        }
+        circle.setRadius(radiusMeters())
+        if (recenter) map.setView(point, 13)
     }
 
     private fun captureLocation() {
@@ -184,42 +221,56 @@ object UrgentRescuerProfilePageModule {
         }
         geolocation.getCurrentPosition(
             { position: dynamic ->
-                latitude = position.coords.latitude as? Double
-                longitude = position.coords.longitude as? Double
+                val lat = position.coords.latitude as? Double
+                val lon = position.coords.longitude as? Double
                 status?.textContent = I18n.t("locationCaptured")
-                val lat = latitude
-                val lon = longitude
-                if (lat != null && lon != null) showLocationMap(lat, lon)
+                if (lat != null && lon != null) {
+                    setPin(lat, lon)
+                    reverseGeocodeAndFillZoneFields(lat, lon)
+                }
             },
             { _: dynamic -> status?.textContent = I18n.t("locationDenied") }
         )
     }
 
-    // Embedded OpenStreetMap (no JS map library; openstreetmap.org is allowed in the CloudFront
-    // CSP frame-src) centered on the confirmed point with a marker, so the rescuer can see where
-    // they will be paged from. ~2 km wide bbox; re-captures just swap the iframe src.
-    private fun showLocationMap(lat: Double, lon: Double) {
-        val container = document.getElementById("location-map") as? HTMLElement ?: return
-        val dLat = 0.01
-        val dLon = 0.015
-        val bbox = "${lon - dLon},${lat - dLat},${lon + dLon},${lat + dLat}"
-        val src = "https://www.openstreetmap.org/export/embed.html?bbox=$bbox&layer=mapnik&marker=$lat,$lon"
-        val iframe = (container.querySelector("iframe") as? HTMLIFrameElement)
-            ?: (document.createElement("iframe") as HTMLIFrameElement).also {
-                it.setAttribute("title", "map")
-                it.setAttribute("loading", "lazy")
-                it.setAttribute("referrerpolicy", "no-referrer-when-downgrade")
-                container.appendChild(it)
+    // Best-effort - leaves the zone fields as they were on failure (no address found, network
+    // error) rather than clearing them; the map/coordinates are already the source of truth.
+    private fun reverseGeocodeAndFillZoneFields(lat: Double, lon: Double) {
+        apiFetch("/api/urgent-reports/reverse-geocode?lat=$lat&lon=$lon")
+            .then<Unit> { address: dynamic ->
+                suppressZoneFieldSync = true
+                (document.getElementById("urgent-zone-country") as? HTMLSelectElement)?.let {
+                    val country = address.country?.toString()
+                    if (!country.isNullOrBlank()) it.value = country
+                }
+                (address.city?.toString())?.let { (document.getElementById("urgent-zone-city") as? HTMLInputElement)?.value = it }
+                suppressZoneFieldSync = false
             }
-        iframe.src = src
-        container.classList.remove("hidden")
+            .catch<Unit> { suppressZoneFieldSync = false }
+    }
+
+    // Mirror of the above: typing/selecting a zone moves the pin instead. Leaves the pin where it
+    // was on failure (no match, incomplete fields) rather than clearing it.
+    private fun geocodeZoneFields() {
+        if (suppressZoneFieldSync) return
+        val country = (document.getElementById("urgent-zone-country") as? HTMLSelectElement)?.value
+        val city = (document.getElementById("urgent-zone-city") as? HTMLInputElement)?.value
+        if (country.isNullOrBlank() || city.isNullOrBlank()) return
+        val encodedCountry = window.asDynamic().encodeURIComponent(country)
+        val encodedCity = window.asDynamic().encodeURIComponent(city)
+        apiFetch("/api/urgent-reports/geocode?country=$encodedCountry&city=$encodedCity")
+            .then<Unit> { result: dynamic ->
+                val lat = result.latitude as? Double
+                val lon = result.longitude as? Double
+                if (lat != null && lon != null) setPin(lat, lon)
+            }
+            .catch<Unit> { /* no match for that zone - leave the pin where it was */ }
     }
 
     private fun save() {
         val msg = document.getElementById("message")
         val active = (document.getElementById("urgent-rescuer-active") as? HTMLInputElement)?.checked ?: false
         val phone = (document.getElementById("urgent-phone") as? HTMLInputElement)?.value ?: ""
-        val isZoneMode = (document.getElementById("mode-zone") as? HTMLInputElement)?.checked ?: false
         val radiusKm = (document.getElementById("radius-km") as? HTMLInputElement)?.value?.toDoubleOrNull() ?: 10.0
         val zoneCountry = (document.getElementById("urgent-zone-country") as? HTMLSelectElement)?.value
         val zoneCity = (document.getElementById("urgent-zone-city") as? HTMLInputElement)?.value
@@ -229,12 +280,7 @@ object UrgentRescuerProfilePageModule {
             msg?.textContent = I18n.t("phoneRequired")
             return
         }
-        if (!isZoneMode && latitude == null) {
-            msg?.className = "message error"
-            msg?.textContent = I18n.t("locationRequired")
-            return
-        }
-        if (isZoneMode && (zoneCountry.isNullOrBlank() || zoneCity.isNullOrBlank())) {
+        if (latitude == null || longitude == null) {
             msg?.className = "message error"
             msg?.textContent = I18n.t("locationRequired")
             return
@@ -245,7 +291,7 @@ object UrgentRescuerProfilePageModule {
 
         val profileBody = json(
             "phone" to phone,
-            "inputMode" to (if (isZoneMode) "ZONE" else "COORDINATES"),
+            "inputMode" to "COORDINATES",
             "latitude" to latitude,
             "longitude" to longitude,
             "radiusKm" to radiusKm,

@@ -133,48 +133,32 @@ fun HTML.urgentRescuerProfilePage(navParams: NavParams = NavParams()) {
                 }
 
                 div(classes = "form-row") {
-                    label { attributes["data-i18n"] = "coverageAreaMode"; +"Coverage area" }
-                    // Two side-by-side buttons (same look as the lost/found .kind-toggle) rather
-                    // than stacked radios. The radios are kept underneath, visually hidden inside
-                    // the button labels, so the JS (change listeners + .checked in
-                    // UrgentRescuePage.kt/jsMain) is untouched; :has(:checked) paints the active one.
-                    div(classes = "kind-toggle") {
-                        label(classes = "kind-btn") {
-                            input(InputType.radio) { id = "mode-coordinates"; name = "input-mode"; checked = true }
-                            span { attributes["data-i18n"] = "useMyLocationAndRadius"; +"Use my location + a radius" }
-                        }
-                        label(classes = "kind-btn") {
-                            input(InputType.radio) { id = "mode-zone"; name = "input-mode" }
-                            span { attributes["data-i18n"] = "pickAZone"; +"Pick a country/state/city instead" }
-                        }
+                    label { attributes["data-i18n"] = "coverageArea"; +"Coverage area" }
+                    p(classes = "hint-text") {
+                        attributes["data-i18n"] = "coverageAreaHint"
+                        +"Confirm your current location, drag the pin, or type an address below - the map and the fields stay in sync."
                     }
+                    button(classes = "btn btn-secondary", type = ButtonType.button) {
+                        id = "capture-location-btn"
+                        attributes["data-i18n"] = "confirmMyLocation"
+                        +"Confirm my current location"
+                    }
+                    p(classes = "hint-text location-permission-hint") {
+                        attributes["data-i18n"] = "locationPermissionHint"
+                        +"Your browser will ask for permission to share your location; it's only used to page you about reports near you."
+                    }
+                    p(classes = "field-error") { id = "coordinates-status" }
+                    // Interactive Leaflet map (see leafletScripts() below) - a draggable pin plus a
+                    // circle sized to radius-km, kept in sync with the fields in both directions by
+                    // UrgentRescuePage.kt/jsMain. Always visible (not gated behind a captured
+                    // location) so there's always somewhere to drag a pin onto.
+                    div(classes = "location-map") { id = "location-map" }
                 }
-
-                div { id = "coordinates-fields"
-                    div(classes = "form-row") {
-                        // Own key (not the shared "useMyLocation" of the report forms): here the
-                        // click is a confirmation of where the rescuer will be paged from, and the
-                        // captured point is shown on an embedded OpenStreetMap map (#location-map,
-                        // filled by UrgentRescuePage.kt/jsMain; openstreetmap.org is allowed in the
-                        // CloudFront CSP frame-src for it).
-                        button(classes = "btn btn-secondary", type = ButtonType.button) {
-                            id = "capture-location-btn"
-                            attributes["data-i18n"] = "confirmMyLocation"
-                            +"Confirm my current location"
-                        }
-                        p(classes = "hint-text location-permission-hint") {
-                            attributes["data-i18n"] = "locationPermissionHint"
-                            +"Your browser will ask for permission to share your location; it's only used to page you about reports near you."
-                        }
-                        p(classes = "field-error") { id = "coordinates-status" }
-                        div(classes = "location-map hidden") { id = "location-map" }
-                    }
-                    div(classes = "form-row") {
-                        label { htmlFor = "radius-km"; attributes["data-i18n"] = "radiusKm"; +"Radius (km)" }
-                        input(InputType.number) { id = "radius-km"; value = "10"; min = "1"; max = "200" }
-                    }
+                div(classes = "form-row") {
+                    label { htmlFor = "radius-km"; attributes["data-i18n"] = "radiusKm"; +"Radius (km)" }
+                    input(InputType.number) { id = "radius-km"; value = "10"; min = "1"; max = "200" }
                 }
-                div(classes = "form-row-two-col hidden") { id = "zone-fields"
+                div(classes = "form-row-two-col") {
                     div {
                         label { htmlFor = "urgent-zone-country"; attributes["data-i18n"] = "countryLabel"; +"Country" }
                         select { id = "urgent-zone-country"; countrySelect("urgent-zone-country", true) }
@@ -190,6 +174,14 @@ fun HTML.urgentRescuerProfilePage(navParams: NavParams = NavParams()) {
             }
         }
         footer()
+        // Leaflet - draggable pin + coverage-radius circle on #location-map (see
+        // UrgentRescuePage.kt/jsMain). Same page-scoped CDN-script pattern as Cloudflare
+        // Turnstile on reportUrgentPage above; unpkg.com and tile.openstreetmap.org are allowed
+        // in the CloudFront CSP for it (see infra/cloudfront.tf).
+        // Plain blocking script (no defer/async) - must finish before commonScripts()'s bundle
+        // below runs UrgentRescuerProfilePageModule.init(), which calls into the L global.
+        link(rel = "stylesheet", href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css")
+        script(src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js") {}
         commonScripts()
     }
 }

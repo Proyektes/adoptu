@@ -78,6 +78,20 @@ fun HttpRules.urgentRescueRoutes() {
         }
     })
 
+    // Forward direction of the same lookup - previews a typed country/state/city as a point on
+    // the urgent rescuer settings map, same way reverse-geocode above previews a captured point
+    // as an address. Public for the same reason as reverse-geocode.
+    get("/api/urgent-reports/geocode", Handler { req, res ->
+        val country = req.queryParam("country")
+        val state = req.queryParam("state")
+        val city = req.queryParam("city")
+        if (country.isNullOrBlank() || city.isNullOrBlank()) return@Handler res.respondError("country and city are required")
+        runBlocking {
+            val result = urgentRescueService.geocode(country, state, city)
+            if (result == null) res.respondNotFound("No location found for that zone") else res.send(result)
+        }
+    })
+
     // --- Report submission (works with or without a session) -----------------------------
 
     post("/api/urgent-reports/submit", Handler { req, res ->

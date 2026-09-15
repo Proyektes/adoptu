@@ -117,15 +117,17 @@ resource "aws_cloudfront_response_headers_policy" "site_security_headers" {
         # https://challenges.cloudflare.com: Turnstile CAPTCHA widget on /report-urgent
         # (UrgentRescuePage.kt) - api.js (script-src), its challenge iframe (frame-src), and its
         # own XHR calls (connect-src) all need this origin explicitly allowed.
-        "script-src 'self' https://challenges.cloudflare.com",
+        # https://unpkg.com: Leaflet (leaflet.js/leaflet.css) on the urgent-rescuer settings
+        # page's interactive coverage map (UrgentRescuePage.kt) - also serves Leaflet's default
+        # marker icon images, hence img-src below.
+        "script-src 'self' https://challenges.cloudflare.com https://unpkg.com",
         "script-src-attr 'none'",
-        "style-src 'self' https://fonts.googleapis.com",
+        "style-src 'self' https://fonts.googleapis.com https://unpkg.com",
         "font-src 'self' https://fonts.gstatic.com",
-        "img-src 'self' data: blob: https://static.adopt-u.org https://dynamic.adopt-u.org https://*.amazonaws.com",
+        # https://*.tile.openstreetmap.org: the map tile images themselves (a/b/c subdomains).
+        "img-src 'self' data: blob: https://static.adopt-u.org https://dynamic.adopt-u.org https://*.amazonaws.com https://unpkg.com https://*.tile.openstreetmap.org",
         "connect-src 'self' https://challenges.cloudflare.com",
-        # https://www.openstreetmap.org: embedded map (export/embed.html iframe) showing the
-        # confirmed coordinates on the urgent-rescuer settings page (UrgentRescuePage.kt).
-        "frame-src https://challenges.cloudflare.com https://www.openstreetmap.org",
+        "frame-src https://challenges.cloudflare.com",
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'self'",
