@@ -720,9 +720,10 @@ object ProfilePageModule {
                 } else {
                     "<div class=\"favorite-thumb favorite-thumb-placeholder\">${emoji[pet.type?.toString()] ?: "🐾"}</div>"
                 }
-                "<div class=\"card-bg profile-section favorite-card\">$thumbHtml<div class=\"favorite-card-body\"><h3>${pet.name}</h3>" +
-                    "<a class=\"btn\" href=\"/pet/${pet.id}\">${I18n.t("viewDetails")}</a> " +
-                    "<button type=\"button\" class=\"btn btn-secondary remove-favorite-btn\" data-pet-id=\"${pet.id}\">${I18n.t("removeFromFavorites")}</button></div></div>"
+                "<div class=\"card-bg profile-section favorite-card\">$thumbHtml<div class=\"favorite-card-body\">" +
+                    "<h3><a href=\"/pet/${pet.id}\">${pet.name}</a></h3></div>" +
+                    "<button type=\"button\" class=\"remove-favorite-btn\" data-pet-id=\"${pet.id}\" aria-label=\"${I18n.t("removeFromFavorites")}\" title=\"${I18n.t("removeFromFavorites")}\">" +
+                    "<span class=\"material-symbols-outlined\">delete</span></button></div>"
             }
             document.querySelectorAll(".remove-favorite-btn").forEachElement { node ->
                 val petId = node.asDynamic().dataset.petId?.toString() ?: return@forEachElement
