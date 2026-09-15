@@ -1,0 +1,16 @@
+[
+  {
+    "name": "com.adoptu.ports.GeocodeResult",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true
+  },
+  {
+    "name": "com.adoptu.ports.ReverseGeocodeResult",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true
+  }
+]

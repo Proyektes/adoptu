@@ -167,7 +167,12 @@ object UrgentRescuerProfilePageModule {
         }.catch<Unit> { /* no profile yet - fine, first save creates one */ }
 
         document.getElementById("capture-location-btn")?.addEventListener("click", { captureLocation() })
-        document.getElementById("radius-km")?.addEventListener("change", { circle?.setRadius(radiusMeters()) })
+        document.getElementById("radius-km")?.addEventListener("change", {
+            if (circle != null) {
+                circle.setRadius(radiusMeters())
+                map.fitBounds(circle.getBounds(), json("maxZoom" to 15))
+            }
+        })
         document.getElementById("urgent-zone-country")?.addEventListener("change", { geocodeZoneFields() })
         document.getElementById("urgent-zone-city")?.addEventListener("change", { geocodeZoneFields() })
         document.getElementById("save-urgent-profile-btn")?.addEventListener("click", { save() })
@@ -208,7 +213,9 @@ object UrgentRescuerProfilePageModule {
             circle.setLatLng(point)
         }
         circle.setRadius(radiusMeters())
-        if (recenter) map.setView(point, 13)
+        // fitBounds rather than a fixed zoom - a 100+ km radius needs to zoom out much further
+        // than a 1 km one for the circle's edge to actually be visible.
+        if (recenter) map.fitBounds(circle.getBounds(), json("maxZoom" to 15))
     }
 
     private fun captureLocation() {
