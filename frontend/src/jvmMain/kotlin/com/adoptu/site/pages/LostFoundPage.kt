@@ -56,6 +56,9 @@ fun HTML.reportLostFoundPage(navParams: NavParams = NavParams()) {
                         +"Use my current location"
                     }
                     p(classes = "field-error") { id = "location-status" }
+                    // Same interactive Leaflet pin used on Urgent Rescuer Settings and Report a
+                    // Pet in Danger (shared LocationMapWidget in jsMain).
+                    div(classes = "location-map") { id = "location-map" }
                 }
                 div(classes = "form-row-two-col") {
                     div {
@@ -98,6 +101,10 @@ fun HTML.reportLostFoundPage(navParams: NavParams = NavParams()) {
         }
         footer()
         script(src = "https://challenges.cloudflare.com/turnstile/v0/api.js") { attributes["async"] = ""; attributes["defer"] = "" }
+        // Plain blocking script (no defer/async) - must finish before commonScripts()'s bundle
+        // below runs ReportLostFoundPageModule.init(), which calls into the L global.
+        link(rel = "stylesheet", href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css")
+        script(src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js") {}
         commonScripts()
     }
 }

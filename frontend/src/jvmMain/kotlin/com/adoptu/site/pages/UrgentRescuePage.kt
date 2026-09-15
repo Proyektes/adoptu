@@ -44,6 +44,10 @@ fun HTML.reportUrgentPage(navParams: NavParams = NavParams()) {
                         +"Use my current location"
                     }
                     p(classes = "field-error") { id = "location-status" }
+                    // Same interactive Leaflet pin used on Urgent Rescuer Settings (shared
+                    // LocationMapWidget in jsMain) - drag to the exact spot when GPS/typed
+                    // address alone isn't precise enough.
+                    div(classes = "location-map") { id = "location-map" }
                 }
                 div(classes = "form-row-two-col") {
                     div {
@@ -101,6 +105,10 @@ fun HTML.reportUrgentPage(navParams: NavParams = NavParams()) {
         }
         footer()
         script(src = "https://challenges.cloudflare.com/turnstile/v0/api.js") { attributes["async"] = ""; attributes["defer"] = "" }
+        // Plain blocking script (no defer/async) - must finish before commonScripts()'s bundle
+        // below runs ReportUrgentPageModule.init(), which calls into the L global.
+        link(rel = "stylesheet", href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css")
+        script(src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js") {}
         commonScripts()
     }
 }

@@ -16,10 +16,16 @@ import kotlin.js.json
 @JsExport
 @JsName("ReportLostFoundPage")
 object ReportLostFoundPageModule {
-    private var latitude: Double? = null
-    private var longitude: Double? = null
+    private val locationMap = com.adoptu.frontend.components.LocationMapWidget(
+        mapContainerId = "location-map",
+        countryFieldId = "report-country",
+        cityFieldId = "report-city",
+        stateFieldId = "report-state"
+    )
 
     fun init() {
+        locationMap.init()
+
         val emailRow = document.getElementById("reporter-contact-row") as? HTMLElement
         val phoneRow = document.getElementById("reporter-phone-row") as? HTMLElement
         val captchaRow = document.getElementById("captcha-row") as? HTMLElement
@@ -33,7 +39,9 @@ object ReportLostFoundPageModule {
             captchaRow?.classList?.remove("hidden")
         }
 
-        document.getElementById("use-my-location-btn")?.addEventListener("click", { captureLocation() })
+        document.getElementById("use-my-location-btn")?.addEventListener("click", {
+            locationMap.captureCurrentLocation { status -> document.getElementById("location-status")?.textContent = status }
+        })
         document.getElementById("submit-btn")?.addEventListener("click", { submit() })
 
         document.querySelectorAll(".kind-btn").forEachElement { node ->
@@ -43,24 +51,6 @@ object ReportLostFoundPageModule {
                 btn.classList.add("active")
             })
         }
-    }
-
-    private fun captureLocation() {
-        val status = document.getElementById("location-status")
-        status?.textContent = I18n.t("locating")
-        val geolocation = window.navigator.asDynamic().geolocation
-        if (geolocation == null) {
-            status?.textContent = I18n.t("geolocationUnsupported")
-            return
-        }
-        geolocation.getCurrentPosition(
-            { position: dynamic ->
-                latitude = position.coords.latitude as? Double
-                longitude = position.coords.longitude as? Double
-                status?.textContent = I18n.t("locationCaptured")
-            },
-            { _: dynamic -> status?.textContent = I18n.t("locationDenied") }
-        )
     }
 
     private fun submit() {
@@ -96,8 +86,8 @@ object ReportLostFoundPageModule {
             "reporterEmail" to reporterEmail,
             "reporterPhone" to reporterPhone,
             "captchaToken" to captchaToken,
-            "latitude" to latitude,
-            "longitude" to longitude,
+            "latitude" to locationMap.latitude,
+            "longitude" to locationMap.longitude,
             "country" to country,
             "state" to state,
             "city" to city
