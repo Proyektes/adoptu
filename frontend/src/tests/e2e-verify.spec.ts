@@ -162,6 +162,32 @@ test.describe('1 · Test data', () => {
     expect(data.length).toBeGreaterThanOrEqual(5);
   });
 
+  // Every internal extensionless href in the generated site must have a matching <path>.html
+  // (or be one of the dynamic detail routes) - that is exactly what CloudFront's site-rewrite.js
+  // resolves in production; a nested href like "/admin/shelters" only fails there (S3 AccessDenied).
+  test('every internal nav href in the generated site resolves to a generated page', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const siteDir = path.resolve(__dirname, '../../build/site');
+    test.skip(!fs.existsSync(siteDir), 'frontend/build/site not generated (run ./gradlew :frontend:generateSite)');
+    const dynamicPrefixes = ['/pet/', '/temporal-home/', '/lost-found/', '/rescuer/', '/api/', '/logout', '/login/'];
+    const missing = new Set<string>();
+    for (const file of fs.readdirSync(siteDir).filter((f: string) => f.endsWith('.html'))) {
+      const html = fs.readFileSync(path.join(siteDir, file), 'utf8');
+      for (const m of html.matchAll(/href="(\/[^"#?]*)/g)) {
+        const href = m[1];
+        if (href === '/' || dynamicPrefixes.some((p) => href.startsWith(p))) continue;
+        const last = href.substring(href.lastIndexOf('/') + 1);
+        if (last.includes('.')) {
+          if (!fs.existsSync(path.join(siteDir, href.replace(/^\//, '')))) missing.add(`${file}: ${href}`);
+        } else if (!fs.existsSync(path.join(siteDir, href.replace(/^\//, '').replace(/\/$/, '') + '.html'))) {
+          missing.add(`${file}: ${href}`);
+        }
+      }
+    }
+    expect([...missing]).toEqual([]);
+  });
+
   test('shelters endpoint returns data for México', async ({ page }) => {
     const res = await page.request.get(`${BASE}/api/shelters?country=M%C3%A9xico`);
     expect(res.status()).toBe(200);
@@ -943,18 +969,36 @@ test.describe('11 · Admin panel', () => {
     expect(bodyText?.toLowerCase()).toMatch(/admin/i);
   });
 
-  test('admin can access /admin/shelters', async ({ page }) => {
+  // The admin sub-pages are flat generated files (admin-shelters.html, ...) - in production the
+  // CloudFront rewrite appends ".html" to extensionless URLs, so only the flat URL shape exists
+  // there ("/admin/shelters" surfaced as a raw S3 AccessDenied). Test the flat URLs, and the nav
+  // link itself, so a nested href can't sneak back in.
+  test('admin can access /admin-shelters', async ({ page }) => {
     await loginWithPassword(page, 'admin@adoptu.com');
-    await page.goto(`${BASE}/admin/shelters`);
+    await page.goto(`${BASE}/admin-shelters`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
     const bodyText = await page.locator('body').textContent();
     expect(bodyText?.toLowerCase()).toMatch(/shelter|refugio/i);
   });
 
-  test('admin can access /admin/sterilization-locations', async ({ page }) => {
+  test('admin nav "Manage Shelters" link opens the shelters admin page', async ({ page }) => {
     await loginWithPassword(page, 'admin@adoptu.com');
-    await page.goto(`${BASE}/admin/sterilization-locations`);
+    await page.goto(`${BASE}/admin`);
+    await page.waitForLoadState('networkidle');
+    const link = page.locator('a[data-auth="admin"][href="/admin-shelters"]');
+    await expect(link).toHaveCount(1, { timeout: 5000 });
+    await link.first().evaluate((a: HTMLElement) => a.click()); // link may sit in a collapsed nav
+    await page.waitForURL(/\/admin-shelters\/?$/, { timeout: 10000 });
+    await page.waitForLoadState('networkidle');
+    const bodyText = await page.locator('body').textContent();
+    expect(bodyText).not.toMatch(/AccessDenied/);
+    expect(bodyText?.toLowerCase()).toMatch(/shelter|refugio/i);
+  });
+
+  test('admin can access /admin-sterilization-locations', async ({ page }) => {
+    await loginWithPassword(page, 'admin@adoptu.com');
+    await page.goto(`${BASE}/admin-sterilization-locations`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
     const bodyText = await page.locator('body').textContent();

@@ -152,12 +152,14 @@ object AdminPageModule {
         }
         container?.innerHTML = "<div class=\"admin-table-wrap\"><table class=\"admin-table\"><thead><tr><th>Email</th><th>Name</th><th>Roles</th><th>Status</th><th>Actions</th></tr></thead><tbody>" +
             list.joinToString("") { u ->
-                // Each role as its own pill instead of a comma-joined string; ADMIN gets the
-                // accent color so admins stand out at a glance in a long user list.
+                // Each role as its own pill instead of a comma-joined string, colored per role
+                // (badge-role-<role> in _admin.scss, e.g. badge-role-temporal-home) so the mix of
+                // roles in a long user list can be read at a glance; unknown roles fall back to
+                // the neutral .badge-role.
                 val roles = (u.activeRoles as? Array<dynamic>)?.joinToString(" ") { role ->
                     val roleStr = role.toString()
-                    val badgeClass = if (roleStr == "ADMIN") "badge badge-role badge-role-admin" else "badge badge-role"
-                    "<span class=\"$badgeClass\">$roleStr</span>"
+                    val roleClass = "badge-role-" + roleStr.lowercase().replace('_', '-')
+                    "<span class=\"badge badge-role $roleClass\">$roleStr</span>"
                 } ?: ""
                 val isBanned = u.isBanned == true
                 val isInactive = u.deactivatedAt != null

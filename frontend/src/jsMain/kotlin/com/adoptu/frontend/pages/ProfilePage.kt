@@ -770,8 +770,12 @@ object ProfilePageModule {
             val container = document.getElementById("my-volunteer-applications-list")
             val empty = document.getElementById("my-volunteer-applications-empty")
             if (applications.isEmpty()) {
-                empty?.setAttribute("data-i18n", "noVolunteerApplicationsYet")
-                empty?.textContent = I18n.t("noVolunteerApplicationsYet")
+                // Actionable empty state: say where applying actually happens (a rescuer's detail
+                // page) and link there. data-i18n goes on the inner spans/link, not on the
+                // container, so a language switch re-translates the parts without wiping the link.
+                empty?.innerHTML = "<p><span data-i18n=\"noVolunteerApplicationsYet\">${I18n.t("noVolunteerApplicationsYet")}</span> " +
+                    "<span data-i18n=\"howToVolunteerHint\">${I18n.t("howToVolunteerHint")}</span></p>" +
+                    "<a class=\"btn btn-secondary\" href=\"/rescuers\" data-i18n=\"rescuerDirectory\">${I18n.t("rescuerDirectory")}</a>"
                 container?.innerHTML = ""
                 return@then
             }
@@ -801,8 +805,12 @@ object ProfilePageModule {
             val container = document.getElementById("my-sponsorship-offers-list")
             val empty = document.getElementById("my-sponsorship-offers-empty")
             if (offers.isEmpty()) {
-                empty?.setAttribute("data-i18n", "noSponsorshipOffersYet")
-                empty?.textContent = I18n.t("noSponsorshipOffersYet")
+                // Same actionable empty state as the volunteering section: sponsorship offers are
+                // sent from a rescuer's page (general) or a pet's page (that pet's costs).
+                empty?.innerHTML = "<p><span data-i18n=\"noSponsorshipOffersYet\">${I18n.t("noSponsorshipOffersYet")}</span> " +
+                    "<span data-i18n=\"howToSponsorHint\">${I18n.t("howToSponsorHint")}</span></p>" +
+                    "<a class=\"btn btn-secondary\" href=\"/rescuers\" data-i18n=\"rescuerDirectory\">${I18n.t("rescuerDirectory")}</a> " +
+                    "<a class=\"btn btn-secondary\" href=\"/\" data-i18n=\"browsePetsLink\">${I18n.t("browsePetsLink")}</a>"
                 container?.innerHTML = ""
                 return@then
             }

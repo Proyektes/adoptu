@@ -134,24 +134,40 @@ fun HTML.urgentRescuerProfilePage(navParams: NavParams = NavParams()) {
 
                 div(classes = "form-row") {
                     label { attributes["data-i18n"] = "coverageAreaMode"; +"Coverage area" }
-                    div(classes = "checkbox-row") {
-                        input(InputType.radio) { id = "mode-coordinates"; name = "input-mode"; checked = true }
-                        span { attributes["data-i18n"] = "useMyLocationAndRadius"; +"Use my location + a radius" }
-                    }
-                    div(classes = "checkbox-row") {
-                        input(InputType.radio) { id = "mode-zone"; name = "input-mode" }
-                        span { attributes["data-i18n"] = "pickAZone"; +"Pick a country/state/city instead" }
+                    // Two side-by-side buttons (same look as the lost/found .kind-toggle) rather
+                    // than stacked radios. The radios are kept underneath, visually hidden inside
+                    // the button labels, so the JS (change listeners + .checked in
+                    // UrgentRescuePage.kt/jsMain) is untouched; :has(:checked) paints the active one.
+                    div(classes = "kind-toggle") {
+                        label(classes = "kind-btn") {
+                            input(InputType.radio) { id = "mode-coordinates"; name = "input-mode"; checked = true }
+                            span { attributes["data-i18n"] = "useMyLocationAndRadius"; +"Use my location + a radius" }
+                        }
+                        label(classes = "kind-btn") {
+                            input(InputType.radio) { id = "mode-zone"; name = "input-mode" }
+                            span { attributes["data-i18n"] = "pickAZone"; +"Pick a country/state/city instead" }
+                        }
                     }
                 }
 
                 div { id = "coordinates-fields"
                     div(classes = "form-row") {
+                        // Own key (not the shared "useMyLocation" of the report forms): here the
+                        // click is a confirmation of where the rescuer will be paged from, and the
+                        // captured point is shown on an embedded OpenStreetMap map (#location-map,
+                        // filled by UrgentRescuePage.kt/jsMain; openstreetmap.org is allowed in the
+                        // CloudFront CSP frame-src for it).
                         button(classes = "btn btn-secondary", type = ButtonType.button) {
                             id = "capture-location-btn"
-                            attributes["data-i18n"] = "useMyLocation"
-                            +"Use my current location"
+                            attributes["data-i18n"] = "confirmMyLocation"
+                            +"Confirm my current location"
+                        }
+                        p(classes = "hint-text location-permission-hint") {
+                            attributes["data-i18n"] = "locationPermissionHint"
+                            +"Your browser will ask for permission to share your location; it's only used to page you about reports near you."
                         }
                         p(classes = "field-error") { id = "coordinates-status" }
+                        div(classes = "location-map hidden") { id = "location-map" }
                     }
                     div(classes = "form-row") {
                         label { htmlFor = "radius-km"; attributes["data-i18n"] = "radiusKm"; +"Radius (km)" }

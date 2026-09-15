@@ -839,7 +839,11 @@ form {
         cursor: pointer;
     }
 
-    input[type="checkbox"] {
+    // Radios too: .form-row stretches every input to width:100%, which threw the coverage-area
+    // radios on the urgent-rescuer settings page to the middle of the row with their text
+    // pushed to the far right.
+    input[type="checkbox"],
+    input[type="radio"] {
         width: auto;
         height: auto;
         margin: 0;
@@ -876,10 +880,37 @@ form {
         border-color: #22c55e;
     }
 
-    &.active {
+    &.active,
+    &:has(input:checked) {
         background: #22c55e;
         color: white;
         border-color: #22c55e;
+    }
+
+    // Label variant wrapping a hidden radio (urgent-rescuer coverage-area toggle): same button
+    // look, the radio keeps the state for the page's JS. Overrides .form-row label's block /
+    // weight / margin defaults.
+    .form-row & {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+        margin: 0;
+        pointer-events: none;
+    }
+
+    &:has(input:focus-visible) {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
     }
 }
 
@@ -921,6 +952,19 @@ form {
     color: var(--text-muted, #888);
 }
 
+// Urgent-rescuer settings: embedded OpenStreetMap iframe showing the confirmed coordinates.
+.location-map {
+    margin-top: 0.75rem;
+
+    iframe {
+        display: block;
+        width: 100%;
+        height: 260px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+    }
+}
+
 .login-link-row {
     margin-top: 1rem;
     text-align: center;
@@ -934,11 +978,13 @@ form {
     flex: 3;
 }
 
-// Declared last in this section (equal specificity to every other single-class rule above,
-// e.g. .full-width-btn's display: block) so source order always makes .hidden win when both
-// are applied to the same element - that's the whole point of a "hidden" utility class.
+// A "hidden" utility class must win over every other display rule on the same element. Source
+// order alone is not enough: the per-page stylesheets (rescuers.css, shelters.css, mypets.css,
+// ...) `@use 'base'` and are linked after style.css, so they re-emit `.btn { display:
+// inline-block }` AFTER this rule - which made the guest-only Login/Register links (`btn hidden`)
+// reappear for logged-in users on those pages. !important is the standard fix for a utility.
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 

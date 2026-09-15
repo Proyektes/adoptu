@@ -43,6 +43,11 @@ header {
     z-index: 900;
     display: flex;
     flex-direction: column;
+    align-items: stretch;
+    // min-content so a long label (e.g. es "Perdidos/Encontrados") wraps to two rows at its
+    // zero-width-space break instead of widening the stack to the whole one-line label; the
+    // pills' min-width still floors it, and stretch keeps both pills the same width.
+    width: min-content;
     gap: 0.75rem;
 }
 
@@ -56,13 +61,15 @@ header {
 // Anonymous urgent-danger reporting and anonymous lost/found reporting are safety-critical CTAs
 // that deserve their own prominence, not competing for attention with Login/Donate/etc. Shared by
 // both #nav-report-urgent and #nav-report-lost-found so they read as one matched pair of pills.
-// Fixed width keeps the stacked pair aligned.
+// min-width plus the stack's column-flex stretch keeps the pair aligned; labels longer than
+// the pill wrap onto two rows (I18n strings carry a \u200B after the slash for that).
 .nav-urgent-pill {
     display: inline-flex;
     align-items: center;
     justify-content: flex-start;
     gap: 6px;
-    width: 148px;
+    min-width: 156px;
+    line-height: 1.15;
     background-color: #fbbf24;
     border: 2px solid #ea580c;
     color: #7c2d12;
@@ -107,7 +114,7 @@ header {
     }
 
     .nav-urgent-pill {
-        width: 128px;
+        min-width: 132px;
         padding: 0.4rem 0.6rem 0.4rem 0.8rem;
         font-size: 0.85rem;
     }

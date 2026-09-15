@@ -8,6 +8,7 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.HTMLButtonElement
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.HTMLIFrameElement
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.HTMLSelectElement
 import org.w3c.dom.HTMLTextAreaElement
@@ -157,6 +158,9 @@ object UrgentRescuerProfilePageModule {
             }
             latitude = profile.latitude as? Double
             longitude = profile.longitude as? Double
+            val lat = latitude
+            val lon = longitude
+            if (lat != null && lon != null) showLocationMap(lat, lon)
         }.catch<Unit> { /* no profile yet - fine, first save creates one */ }
 
         document.getElementById("mode-coordinates")?.addEventListener("change", { toggleMode(zone = false) })
@@ -183,9 +187,32 @@ object UrgentRescuerProfilePageModule {
                 latitude = position.coords.latitude as? Double
                 longitude = position.coords.longitude as? Double
                 status?.textContent = I18n.t("locationCaptured")
+                val lat = latitude
+                val lon = longitude
+                if (lat != null && lon != null) showLocationMap(lat, lon)
             },
             { _: dynamic -> status?.textContent = I18n.t("locationDenied") }
         )
+    }
+
+    // Embedded OpenStreetMap (no JS map library; openstreetmap.org is allowed in the CloudFront
+    // CSP frame-src) centered on the confirmed point with a marker, so the rescuer can see where
+    // they will be paged from. ~2 km wide bbox; re-captures just swap the iframe src.
+    private fun showLocationMap(lat: Double, lon: Double) {
+        val container = document.getElementById("location-map") as? HTMLElement ?: return
+        val dLat = 0.01
+        val dLon = 0.015
+        val bbox = "${lon - dLon},${lat - dLat},${lon + dLon},${lat + dLat}"
+        val src = "https://www.openstreetmap.org/export/embed.html?bbox=$bbox&layer=mapnik&marker=$lat,$lon"
+        val iframe = (container.querySelector("iframe") as? HTMLIFrameElement)
+            ?: (document.createElement("iframe") as HTMLIFrameElement).also {
+                it.setAttribute("title", "map")
+                it.setAttribute("loading", "lazy")
+                it.setAttribute("referrerpolicy", "no-referrer-when-downgrade")
+                container.appendChild(it)
+            }
+        iframe.src = src
+        container.classList.remove("hidden")
     }
 
     private fun save() {

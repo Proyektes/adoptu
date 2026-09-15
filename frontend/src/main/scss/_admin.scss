@@ -52,7 +52,24 @@
     td {
         padding: 0.75rem 1rem;
         text-align: left;
+    }
+
+    // Cells don't wrap (emails/names stay on one line), except the Actions column ("Ban
+    // Deactivate Reset Password") and the role-badge cell, which fold onto a second row instead
+    // of pushing the table past the card edge (each badge keeps its own nowrap). Wrapped buttons
+    // need a little vertical gap.
+    th,
+    td {
         white-space: nowrap;
+    }
+
+    td:last-child,
+    td:has(.badge-role) {
+        white-space: normal;
+    }
+
+    td .btn {
+        margin: 0.15rem 0;
     }
 
     thead th {
@@ -98,9 +115,42 @@
     color: var(--text);
 }
 
+// One tint per role (same translucent-fill + light-text recipe as .status-active) so a user's
+// role mix reads at a glance; ADMIN keeps the solid primary fill to stand out most. Class names
+// are derived from the enum by AdminPage.kt (lowercase, '_' -> '-').
 .badge-role-admin {
     background: var(--primary);
     color: white;
+}
+
+.badge-role-rescuer {
+    background: rgba(59, 130, 246, 0.22);
+    color: #93c5fd;
+}
+
+.badge-role-adopter {
+    background: rgba(168, 85, 247, 0.22);
+    color: #d8b4fe;
+}
+
+.badge-role-photographer {
+    background: rgba(236, 72, 153, 0.22);
+    color: #f9a8d4;
+}
+
+.badge-role-temporal-home {
+    background: rgba(245, 158, 11, 0.22);
+    color: #fcd34d;
+}
+
+.badge-role-shelter {
+    background: rgba(249, 115, 22, 0.22);
+    color: #fdba74;
+}
+
+.badge-role-sterilization-service {
+    background: rgba(132, 204, 22, 0.22);
+    color: #bef264;
 }
 
 .status-active {
@@ -125,6 +175,12 @@
     font-size: 0.75rem;
     color: #9ca3af;
     white-space: nowrap;
+}
+
+// A standalone .btn placed directly in a tab panel (the pets tab's "Manage Pets" link to
+// /my-pets) sits right above .admin-filter-bar, which has no top margin - keep them apart.
+.admin-tab-content > .btn {
+    margin-bottom: 1rem;
 }
 
 .admin-filter-bar {

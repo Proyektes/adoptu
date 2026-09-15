@@ -183,7 +183,11 @@ fun NAV.commonNav(isLoggedIn: Boolean = false, isAdmin: Boolean = false, isRescu
                     span { attributes["data-i18n"] = "admin"; +"Admin" }
                     span(classes = "material-symbols-outlined") { +Icons.SETTINGS }
                 }
-                a("/admin/shelters", classes = "hidden") {
+                // Flat path: the site is static and CloudFront's site-rewrite.js turns an
+                // extensionless URL into "<path>.html", so the href must match the generated
+                // file (admin-shelters.html, see SiteGenerator.kt). "/admin/shelters" resolved to
+                // a non-existent S3 key and surfaced as a raw S3 AccessDenied.
+                a("/admin-shelters", classes = "hidden") {
                     attributes["data-auth"] = "admin"
                     span { attributes["data-i18n"] = "manageShelters"; +"Manage Shelters" }
                     span(classes = "material-symbols-outlined") { +Icons.HOME }

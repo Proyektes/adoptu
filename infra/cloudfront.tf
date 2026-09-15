@@ -123,7 +123,9 @@ resource "aws_cloudfront_response_headers_policy" "site_security_headers" {
         "font-src 'self' https://fonts.gstatic.com",
         "img-src 'self' data: blob: https://static.adopt-u.org https://dynamic.adopt-u.org https://*.amazonaws.com",
         "connect-src 'self' https://challenges.cloudflare.com",
-        "frame-src https://challenges.cloudflare.com",
+        # https://www.openstreetmap.org: embedded map (export/embed.html iframe) showing the
+        # confirmed coordinates on the urgent-rescuer settings page (UrgentRescuePage.kt).
+        "frame-src https://challenges.cloudflare.com https://www.openstreetmap.org",
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'self'",
