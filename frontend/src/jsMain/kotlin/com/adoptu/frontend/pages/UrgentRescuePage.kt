@@ -130,6 +130,11 @@ object UrgentRescuerProfilePageModule {
             (document.getElementById("urgent-rescuer-active") as? HTMLInputElement)?.checked = profile.active == true
             (document.getElementById("urgent-phone") as? HTMLInputElement)?.value = profile.phone?.toString() ?: ""
             (document.getElementById("radius-km") as? HTMLInputElement)?.value = profile.radiusKm?.toString() ?: "10"
+            // zoneCountry/zoneCity are kept purely for display/editing (see UrgentRescuerProfileDto) -
+            // set them directly from the saved profile rather than re-deriving via reverse-geocode,
+            // which could resolve to a different city than the one the rescuer actually picked.
+            (document.getElementById("urgent-zone-country") as? HTMLSelectElement)?.value = profile.zoneCountry?.toString() ?: ""
+            (document.getElementById("urgent-zone-city") as? HTMLInputElement)?.value = profile.zoneCity?.toString() ?: ""
             val lat = profile.latitude as? Double
             val lon = profile.longitude as? Double
             if (lat != null && lon != null) locationMap.setPin(lat, lon)

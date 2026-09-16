@@ -76,6 +76,9 @@ object AdminPageModule {
         }
         document.getElementById("pet-search")?.addEventListener("input", { debouncedPetSearch() })
 
+        document.getElementById("admin-shelters-country")?.addEventListener("change", { onSheltersCountryChange() })
+        document.getElementById("admin-shelters-state")?.addEventListener("change", { loadSheltersAdmin() })
+
         loadUsers()
     }
 
@@ -100,7 +103,70 @@ object AdminPageModule {
         when (tab) {
             "users" -> loadUsers()
             "pets" -> loadPetsAdmin()
+            "shelters" -> loadSheltersAdmin()
         }
+    }
+
+    private fun onSheltersCountryChange() {
+        val stateSelect = document.getElementById("admin-shelters-state") as? HTMLSelectElement
+        val country = (document.getElementById("admin-shelters-country") as? HTMLSelectElement)?.value ?: ""
+        stateSelect?.innerHTML = "<option value=\"\">${I18n.t("allStates")}</option>"
+        if (country.isEmpty()) {
+            loadSheltersAdmin()
+            return
+        }
+        window.asDynamic().fetch("/api/shelters/countries/" + window.asDynamic().encodeURIComponent(country) + "/states").then { statesRes: dynamic ->
+            if (statesRes.ok == true) {
+                statesRes.json().then { data: dynamic ->
+                    val states = data.states as? Array<dynamic>
+                    states?.forEach { s ->
+                        val option = document.createElement("option")
+                        option.asDynamic().value = s
+                        option.textContent = s.toString()
+                        stateSelect?.appendChild(option)
+                    }
+                }
+            }
+        }
+        loadSheltersAdmin()
+    }
+
+    // Read-only overview for the Admin Panel's Manage Shelters tab. Unlike Manage Pets/Users,
+    // GET /api/admin/shelters has no "list everything" mode - country is required (see
+    // shelterRoutes()) - so this filters by country/state instead of a free-text search box.
+    // Full add/edit stays on the dedicated AdminSheltersPage.kt via the "Add or Edit Shelters" link.
+    private fun loadSheltersAdmin() {
+        val container = document.getElementById("shelters-admin-container").unsafeCast<HTMLElement?>()
+        val country = (document.getElementById("admin-shelters-country") as? HTMLSelectElement)?.value ?: ""
+        val state = (document.getElementById("admin-shelters-state") as? HTMLSelectElement)?.value ?: ""
+        if (country.isEmpty()) {
+            container?.innerHTML = "<p>${I18n.t("selectCountryToFilter")}</p>"
+            return
+        }
+        val query = buildQuery(mapOf("country" to country, "state" to state))
+        window.asDynamic().fetch("/api/admin/shelters$query", js("({credentials: 'include'})")).then { res: dynamic ->
+            if (res.ok != true) throw js("new Error('Failed to load shelters')")
+            res.json().then { shelters: dynamic -> renderSheltersAdmin(shelters, container) }
+        }.catch { _: dynamic ->
+            container?.innerHTML = "<p>Failed to load shelters.</p>"
+        }
+    }
+
+    private fun renderSheltersAdmin(data: dynamic, container: HTMLElement?) {
+        val list = (data as? Array<dynamic>) ?: arrayOf()
+        if (list.isEmpty()) {
+            container?.innerHTML = "<p data-i18n=\"noSheltersFound\">${I18n.t("noSheltersFound")}</p>"
+            return
+        }
+        val rows = list.joinToString("") { s ->
+            val contact = s.phone ?: s.email ?: "-"
+            "<tr><td><strong>${CommonModule.escapeHtml(s.name?.toString())}</strong></td>" +
+                "<td>${CommonModule.escapeHtml(s.city?.toString() ?: "")}, ${CommonModule.escapeHtml(s.state?.toString() ?: "")}</td>" +
+                "<td>${CommonModule.escapeHtml(contact.toString())}</td>" +
+                "<td><a href=\"/admin-shelters?edit=${s.id}\" class=\"btn btn-secondary btn-small\">${I18n.t("edit")}</a></td></tr>"
+        }
+        container?.innerHTML = "<div class=\"admin-table-wrap\"><table class=\"admin-table\"><thead><tr><th>${I18n.t("name")}</th><th>${I18n.t("location")}</th>" +
+            "<th>${I18n.t("contact")}</th><th>${I18n.t("actions")}</th></tr></thead><tbody>$rows</tbody></table></div>"
     }
 
     private fun formatDate(epochMillis: dynamic): String {

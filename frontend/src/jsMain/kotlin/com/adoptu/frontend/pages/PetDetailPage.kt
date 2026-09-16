@@ -355,18 +355,23 @@ object PetDetailPageModule {
         }
     }
 
-    // Web Share API (mobile browsers - one native tap opens the OS share sheet, WhatsApp included)
-    // where available; desktop/unsupported browsers fall back to a direct WhatsApp share link.
+    // Public GET /api/pets/{id}/medical-events - a trust signal for adopters, same visibility as
+    // the legacy free-text "vaccinations" field above it. Renders as its own card (not just a
+    // bare list wedged between detail-section boxes) so it doesn't read as an afterthought.
     private fun loadMedicalSchedule() {
         ApiClientModule.getMedicalEvents(petId).then<Unit> { eventsRaw: dynamic ->
             val events = (eventsRaw as? Array<dynamic>) ?: arrayOf()
             val section = document.getElementById("medical-schedule-section") ?: return@then
             if (events.isEmpty()) {
+                section.className = "hidden"
                 section.innerHTML = ""
                 return@then
             }
+            section.className = "detail-section medical-schedule-section"
             val rows = events.joinToString("") { event ->
-                val categoryLabel = I18n.t(if (event.category == "VACCINATION") "vaccination" else "deworming")
+                val isVaccination = event.category == "VACCINATION"
+                val categoryIcon = if (isVaccination) "vaccines" else "medication"
+                val categoryLabel = I18n.t(if (isVaccination) "vaccination" else "deworming")
                 val administeredDate = js("new Date(event.administeredDate)").toLocaleDateString()
                 val dueHtml = if (event.nextDueDate != null) {
                     val dueDateStr = js("new Date(event.nextDueDate)").toLocaleDateString()
@@ -378,9 +383,15 @@ object PetDetailPageModule {
                     }
                     "<span class=\"medical-due-badge $statusClass\">${I18n.t("nextDueLabel")}: $dueDateStr ($statusLabel)</span>"
                 } else ""
-                "<li>$categoryLabel: ${CommonModule.escapeHtml(event.name?.toString())} - ${I18n.t("givenLabel")} $administeredDate $dueHtml</li>"
+                "<li class=\"medical-schedule-row\">" +
+                    "<span class=\"material-symbols-outlined medical-row-icon\">$categoryIcon</span>" +
+                    "<span class=\"medical-row-info\"><strong>${CommonModule.escapeHtml(event.name?.toString())}</strong>" +
+                    "<span class=\"medical-row-meta\">$categoryLabel &middot; ${I18n.t("givenLabel")} $administeredDate</span></span>" +
+                    dueHtml +
+                    "</li>"
             }
-            section.innerHTML = "<strong>${I18n.t("medicalSchedule")}</strong><ul class=\"medical-schedule-list\">$rows</ul>"
+            section.innerHTML = "<h3><span class=\"material-symbols-outlined\">vaccines</span>${I18n.t("medicalSchedule")}</h3>" +
+                "<ul class=\"medical-schedule-list\">$rows</ul>"
         }
     }
 

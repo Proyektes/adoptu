@@ -30,6 +30,12 @@ object AdminSheltersPageModule {
         stateSelect?.disabled = true
 
         document.getElementById("shelter-form")?.addEventListener("submit", { e: Event -> onSubmit(e) })
+
+        // Deep-link from the Admin Panel's Manage Shelters overview table (AdminPage.kt), which
+        // links straight to a specific shelter's edit form rather than duplicating it inline.
+        val params = js("new URLSearchParams(location.search)")
+        val editId = (params.get("edit") as? String)?.toIntOrNull()
+        if (editId != null) editShelter(editId)
     }
 
     private fun loadShelters() {

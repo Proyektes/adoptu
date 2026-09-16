@@ -67,12 +67,19 @@ fun HTML.adminPage(navParams: NavParams = NavParams()) {
                 div(classes = "admin-pagination") { id = "pets-pagination" }
             }
 
-            // Full add/edit/filter UI lives on the dedicated page (AdminSheltersPage.kt) -
-            // same link-out pattern as the Manage Pets tab above.
+            // Full add/edit UI lives on the dedicated page (AdminSheltersPage.kt) - this tab is a
+            // read-only overview, same pattern as the Manage Pets tab above. Unlike pets, the
+            // backing GET /api/admin/shelters has no "list everything" mode (country is required -
+            // see shelterRoutes()), so the overview is filtered by country/state instead of search.
             div(classes = "admin-tab-content hidden") {
                 id = "shelters-tab"
                 p { attributes["data-i18n"] = "manageSheltersDescription"; +"Manage animal shelters. Add or remove shelters." }
-                a("/admin-shelters") { classes = setOf("btn"); attributes["data-i18n"] = "manageSheltersBtn"; +"Manage Shelters" }
+                a("/admin-shelters") { classes = setOf("btn"); attributes["data-i18n"] = "manageSheltersBtn"; +"Add or Edit Shelters" }
+                div(classes = "admin-filter-bar") {
+                    select { id = "admin-shelters-country"; countrySelect("admin-shelters-country", true, "selectCountryToFilter") }
+                    select { id = "admin-shelters-state" }
+                }
+                div { id = "shelters-admin-container"; +"" }
             }
 
             div(classes = "form-modal hidden") {

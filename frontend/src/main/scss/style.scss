@@ -814,14 +814,67 @@ form {
     }
 }
 
+.medical-schedule-section {
+    border-left: 3px solid var(--accent);
+
+    h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+        font-size: 1.05rem;
+
+        .material-symbols-outlined {
+            color: var(--accent);
+            font-size: 22px;
+        }
+    }
+}
+
 .medical-schedule-list {
     list-style: none;
     padding: 0;
-    margin: 0.5rem 0;
+    margin: 0.75rem 0 0;
 
     li {
-        padding: 0.35rem 0;
+        padding: 0.5rem 0;
         border-bottom: 1px solid var(--border);
+    }
+
+    li:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+}
+
+.medical-schedule-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+
+    .medical-row-icon {
+        color: var(--text-muted, #999);
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .medical-row-info {
+        flex: 1;
+        min-width: 10rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+    }
+
+    .medical-row-meta {
+        font-size: 0.8rem;
+        color: var(--text-muted, #999);
+    }
+
+    .medical-due-badge {
+        margin-left: 0;
+        flex-shrink: 0;
     }
 }
 
