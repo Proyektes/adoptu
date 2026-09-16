@@ -466,6 +466,57 @@ form {
     font-style: italic;
 }
 
+.pet-breed-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+
+    .pet-breed {
+        margin: 0;
+    }
+}
+
+.fee-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #fff3cd;
+    color: #7a4a00;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.pet-status-badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+
+    &.status-available { background: #d1e7dd; color: #0f5132; }
+    &.status-pending { background: #fff3cd; color: #7a4a00; }
+    &.status-adopted { background: #cfe2ff; color: #084298; }
+    &.status-disabled { background: #f8d7da; color: #842029; }
+}
+
+// Small uppercase label above a section's main heading (e.g. Medical History above the
+// Vaccination & Deworming Schedule card) - fills the accent-bordered card's top edge instead of
+// leaving it blank space before the first heading.
+.section-eyebrow {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted, #999);
+    margin-bottom: 0.35rem;
+}
+
 .pet-main-image {
     width: 100%;
     max-height: 400px;
