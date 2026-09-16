@@ -600,19 +600,6 @@ footer {
     }
 }
 
-// Below 600px, the icon-only "Top Rescuers" link moves into the hamburger menu instead of
-// sitting in the main nav row. Placed after .hamburger-menu's base rule (display: none) so this
-// override actually wins the cascade at equal specificity - source order matters here.
-@media (max-width: 600px) {
-    #nav-urgent-leaderboard {
-        display: none;
-    }
-
-    .hamburger-menu {
-        display: inline-flex;
-    }
-}
-
 // Below 525px, the wordmark stacks under the logo mark instead of squeezing inline next to it -
 // keeps it legible without the header running out of horizontal room for nav items. Placed after
 // .logo's base rule for the same cascade-ordering reason as the query above.
@@ -627,10 +614,10 @@ footer {
 
     .logo img {
         margin-top: 0;
-        height: 28px;
+        height: 34px;
     }
 
     .logo span {
-        font-size: 0.65rem;
+        font-size: 0.85rem;
     }
 }
