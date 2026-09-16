@@ -112,7 +112,19 @@ object PetDetailPageModule {
 
         if (pet.vaccinations != null && pet.vaccinations.toString().isNotEmpty()) sb.append("<div class=\"detail-section\"><strong>${I18n.t("vaccinations")}:</strong><p>${pet.vaccinations}</p></div>")
         sb.append("<div class=\"detail-section\" id=\"medical-schedule-section\"></div>")
-        if (pet.rescueLocation != null && pet.rescueLocation.toString().isNotEmpty()) sb.append("<div class=\"detail-section\"><strong>${I18n.t("rescueLocation")}:</strong> ${pet.rescueLocation}</div>")
+        val rescueDateMillis = pet.rescueDate as? Double
+        val rescueLocationText = pet.rescueLocation?.toString()?.takeIf { it.isNotEmpty() }
+        if (rescueDateMillis != null || rescueLocationText != null) {
+            sb.append("<div class=\"rescue-info-row\">")
+            if (rescueDateMillis != null) {
+                val rescueDateStr = js("new Date(rescueDateMillis)").toLocaleDateString()
+                sb.append("<span class=\"info-badge\"><strong>${I18n.t("rescueDate")}:</strong>&nbsp;$rescueDateStr</span>")
+            }
+            if (rescueLocationText != null) {
+                sb.append("<span><strong>${I18n.t("rescueLocation")}:</strong> $rescueLocationText</span>")
+            }
+            sb.append("</div>")
+        }
         if (pet.specialNeeds != null && pet.specialNeeds.toString().isNotEmpty()) sb.append("<div class=\"detail-section\"><strong>${I18n.t("specialNeeds")}:</strong><p>${pet.specialNeeds}</p></div>")
         if (pet.isPromoted == true) {
             val reasonKey = when (pet.promotedReason?.toString()) {
