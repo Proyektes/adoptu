@@ -80,17 +80,23 @@ object RescuerDetailPageModule {
         val isAuthenticated = user.authenticated != false
         val isSelf = isAuthenticated && user.id?.toString() == rescuerId.toString()
         if (isAuthenticated && !isSelf) {
+            sb.append("<div class=\"card-bg profile-section\">")
             sb.append("<h2>${I18n.t("volunteerForThisRescuer")}</h2>")
             sb.append("<p>${I18n.t("volunteerExplanation")}</p>")
             sb.append("<button type=\"button\" class=\"btn\" id=\"volunteer-btn\">${I18n.t("applyToVolunteerBtn")}</button>")
+            sb.append("</div>")
 
+            sb.append("<div class=\"card-bg profile-section\">")
             sb.append("<h2>${I18n.t("sponsorThisRescuerTitle")}</h2>")
             sb.append("<p>${I18n.t("sponsorRescuerExplanation")}</p>")
             sb.append(sponsorFormHtml())
             sb.append("<div id=\"sponsor-form-message\"></div>")
+            sb.append("</div>")
         } else if (!isAuthenticated) {
+            sb.append("<div class=\"card-bg profile-section\">")
             sb.append("<h2>${I18n.t("volunteerForThisRescuer")}</h2>")
             sb.append("<p>${I18n.t("loginToVolunteer")}</p>")
+            sb.append("</div>")
         }
 
         sb.append("<h2>${I18n.t("availablePets")}</h2>")
