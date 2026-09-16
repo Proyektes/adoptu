@@ -10,6 +10,7 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
             nav { commonNav(navParams.isLoggedIn, navParams.isAdmin, navParams.isRescuerOrAdmin, navParams.isTemporalHomeOrAdmin) }
         }
         main {
+            backLink()
             div(classes = "profile-header card-bg sticky-section") {
                 h1 { attributes["data-i18n"] = "profile"; +"Profile" }
                 div(classes = "profile-header-actions") {

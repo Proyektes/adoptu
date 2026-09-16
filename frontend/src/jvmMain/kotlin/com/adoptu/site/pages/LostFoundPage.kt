@@ -14,6 +14,7 @@ fun HTML.reportLostFoundPage(navParams: NavParams = NavParams()) {
             nav { commonNav(navParams.isLoggedIn, navParams.isAdmin, navParams.isRescuerOrAdmin, navParams.isTemporalHomeOrAdmin) }
         }
         main {
+            backLink()
             div(classes = "card-bg profile-section") {
                 h1 { attributes["data-i18n"] = "reportLostFoundTitle"; +"Report a Lost or Found Pet" }
                 p { attributes["data-i18n"] = "reportLostFoundIntro"; +"Lost your pet, or found a stray? File a report and we'll check it against other reports nearby." }
@@ -155,6 +156,7 @@ fun HTML.lostFoundDetailPage(navParams: NavParams = NavParams()) {
             nav { commonNav(navParams.isLoggedIn, navParams.isAdmin, navParams.isRescuerOrAdmin, navParams.isTemporalHomeOrAdmin) }
         }
         main {
+            backLink()
             div { id = "lost-found-detail"; classes = setOf("pet-detail"); +"" }
             div { id = "message"; +"" }
         }
@@ -171,6 +173,7 @@ fun HTML.lostFoundResolvePage(navParams: NavParams = NavParams()) {
             nav { commonNav(navParams.isLoggedIn, navParams.isAdmin, navParams.isRescuerOrAdmin, navParams.isTemporalHomeOrAdmin) }
         }
         main {
+            backLink()
             div(classes = "verification-container") {
                 div(classes = "verification-success hidden") {
                     id = "resolve-success"

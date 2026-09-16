@@ -261,6 +261,17 @@ fun SELECT.countrySelect(id: String, includeSelectOption: Boolean = true, i18nKe
     }
 }
 
+// Browser-history back, not a fixed route - detail/edit pages are reached from several different
+// listing/search contexts, and "wherever you actually came from" is the only destination that's
+// always right. Wired by CommonModule.initBackLinks() (frontend/Common.kt), same delegated-click
+// pattern as data-action - a plain history.back() has no server-renderable href.
+fun MAIN.backLink() {
+    a(href = "#", classes = "back-link") {
+        span(classes = "material-symbols-outlined") { +Icons.ARROW_BACK }
+        span { attributes["data-i18n"] = "back"; +"Back" }
+    }
+}
+
 fun BODY.footer() {
     footer {
         a("/privacy") { attributes["data-i18n"] = "privacyPolicy"; +"Privacy Policy" }

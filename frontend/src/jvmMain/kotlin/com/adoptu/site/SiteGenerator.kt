@@ -40,6 +40,7 @@ fun main(args: Array<String>) {
         "pet-detail" to { petDetailPage() },
         "pets" to { petsPage() },
         "my-pets" to { myPetsPage() },
+        "edit-pet" to { editPetPage() },
         "profile" to { profilePage() },
         "admin" to { adminPage() },
         "admin-shelters" to { adminSheltersPage() },

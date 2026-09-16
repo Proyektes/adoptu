@@ -159,7 +159,7 @@ object PetDetailPageModule {
             )
         }
         if (isOwner) {
-            sb.append("<a href=\"/my-pets?edit=${pet.id}\" class=\"btn\">${I18n.t("editPet")}</a>")
+            sb.append("<a href=\"/edit-pet?id=${pet.id}\" class=\"btn\">${I18n.t("editPet")}</a>")
         }
         if (!isOwner && authenticated) {
             sb.append(sponsorFormHtml())

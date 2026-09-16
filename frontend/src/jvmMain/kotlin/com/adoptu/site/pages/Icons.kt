@@ -19,4 +19,5 @@ object Icons {
     const val WARNING = "warning"
     const val MENU = "menu"
     const val DONATE = "volunteer_activism"
+    const val ARROW_BACK = "arrow_back"
 }

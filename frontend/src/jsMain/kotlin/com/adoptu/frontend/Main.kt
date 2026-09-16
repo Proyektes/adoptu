@@ -3,6 +3,7 @@ package com.adoptu.frontend
 import com.adoptu.frontend.pages.AdminPageModule
 import com.adoptu.frontend.pages.AdminSheltersPageModule
 import com.adoptu.frontend.pages.AdminSterilizationLocationsPageModule
+import com.adoptu.frontend.pages.EditPetPageModule
 import com.adoptu.frontend.pages.EmailChangeVerificationPageModule
 import com.adoptu.frontend.pages.EmailVerificationPageModule
 import com.adoptu.frontend.pages.ForgotPasswordPageModule
@@ -60,6 +61,7 @@ fun main() {
         CommonModule.initDeploySequence()
         CommonModule.initServiceWorker()
         CommonModule.initInstallPrompt()
+        CommonModule.initBackLinks()
 
         CommonModule.initI18n(null).then<Unit> {
             try {
@@ -69,6 +71,7 @@ fun main() {
                     path == "/register" || path == "/register/" -> RegisterPageModule.init()
                     path == "/profile" || path == "/profile/" -> ProfilePageModule.init()
                     path == "/my-pets" || path == "/my-pets/" -> MyPetsPageModule.init()
+                    path == "/edit-pet" || path == "/edit-pet/" -> EditPetPageModule.init()
                     path.startsWith("/pet/") -> PetDetailPageModule.init()
                     path == "/pet-food" || path == "/pet-food/" -> PetFoodPageModule.init()
                     path == "/shelters" || path == "/shelters/" -> SheltersPageModule.init()

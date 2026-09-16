@@ -28,6 +28,7 @@ fun HTML.rescuerDetailPage(navParams: NavParams = NavParams()) {
             nav { commonNav(navParams.isLoggedIn, navParams.isAdmin, navParams.isRescuerOrAdmin, navParams.isTemporalHomeOrAdmin) }
         }
         main {
+            backLink()
             div { id = "rescuer-detail"; classes = setOf("rescuer-detail"); +"" }
             div { id = "message"; +"" }
         }

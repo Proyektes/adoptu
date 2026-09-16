@@ -10,6 +10,7 @@ fun HTML.petDetailPage(navParams: NavParams = NavParams()) {
             nav { commonNav(navParams.isLoggedIn, navParams.isAdmin, navParams.isRescuerOrAdmin, navParams.isTemporalHomeOrAdmin) }
         }
         main {
+            backLink()
             div { id = "pet-detail"; classes = setOf("pet-detail"); +"" }
             div { id = "message"; +"" }
         }

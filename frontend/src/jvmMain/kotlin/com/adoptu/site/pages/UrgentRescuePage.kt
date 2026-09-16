@@ -16,6 +16,7 @@ fun HTML.reportUrgentPage(navParams: NavParams = NavParams()) {
             nav { commonNav(navParams.isLoggedIn, navParams.isAdmin, navParams.isRescuerOrAdmin, navParams.isTemporalHomeOrAdmin) }
         }
         main {
+            backLink()
             div(classes = "card-bg profile-section") {
                 h1 { attributes["data-i18n"] = "reportUrgentTitle"; +"Report a Pet in Danger" }
                 p { attributes["data-i18n"] = "reportUrgentIntro"; +"If you've found an injured, abused, starving, or abandoned pet that needs immediate help, tell us where and what's wrong - we'll alert nearby urgent rescuers right away." }
@@ -125,6 +126,7 @@ fun HTML.urgentRescuerProfilePage(navParams: NavParams = NavParams()) {
             nav { commonNav(navParams.isLoggedIn, navParams.isAdmin, navParams.isRescuerOrAdmin, navParams.isTemporalHomeOrAdmin) }
         }
         main {
+            backLink()
             div(classes = "card-bg profile-section") {
                 h1 { attributes["data-i18n"] = "urgentRescuerSettingsTitle"; +"Urgent Rescuer Settings" }
                 p { attributes["data-i18n"] = "urgentRescuerSettingsIntro"; +"Get paged when a pet in danger is reported near your coverage area. First to accept takes the case." }
@@ -239,6 +241,7 @@ fun HTML.urgentRescueAcceptPage(navParams: NavParams = NavParams()) {
             nav { commonNav(navParams.isLoggedIn, navParams.isAdmin, navParams.isRescuerOrAdmin, navParams.isTemporalHomeOrAdmin) }
         }
         main {
+            backLink()
             div(classes = "verification-container") {
                 div(classes = "verification-success hidden") {
                     id = "accept-success"

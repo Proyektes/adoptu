@@ -10,6 +10,7 @@ fun HTML.temporalHomeProfilePage(navParams: NavParams = NavParams()) {
             nav { commonNav(navParams.isLoggedIn, navParams.isAdmin, navParams.isRescuerOrAdmin, navParams.isTemporalHomeOrAdmin) }
         }
         main {
+            backLink()
             h1 { attributes["data-i18n"] = "myTemporalHome"; +"My Temporal Home" }
             div(classes = "requests-section") {
                 h2 { attributes["data-i18n"] = "requestsFromRescuers"; +"Requests from Rescuers" }
@@ -85,6 +86,7 @@ fun HTML.temporalHomeDetailPage(navParams: NavParams = NavParams()) {
             nav { commonNav(navParams.isLoggedIn, navParams.isAdmin, navParams.isRescuerOrAdmin, navParams.isTemporalHomeOrAdmin) }
         }
         main {
+            backLink()
             div { id = "temporal-home-detail"; classes = setOf("temporal-home-detail"); +"" }
             div { id = "message"; +"" }
         }

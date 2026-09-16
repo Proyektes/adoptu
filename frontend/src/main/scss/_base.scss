@@ -89,6 +89,24 @@ main {
     }
 }
 
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
+    color: var(--text-muted, #999);
+    text-decoration: none;
+    font-size: 0.9rem;
+
+    .material-symbols-outlined {
+        font-size: 20px;
+    }
+
+    &:hover {
+        color: var(--primary-light);
+    }
+}
+
 .form-row {
     margin-bottom: 1rem;
 

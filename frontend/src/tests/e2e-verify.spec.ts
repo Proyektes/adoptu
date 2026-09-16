@@ -740,7 +740,7 @@ test.describe('9 · Pet management', () => {
     const petName = `E2E Test Dog ${Date.now() % 100000}`;
 
     // Look for add-pet button (might be an inline form or a toggle button)
-    const addBtn = page.locator('#add-pet-btn, button:has-text("Add"), button:has-text("Agregar"), button:has-text("New"), button:has-text("Nuevo")').first();
+    const addBtn = page.locator('#add-pet-btn, a:has-text("Add"), button:has-text("Add"), a:has-text("Agregar"), button:has-text("Agregar"), button:has-text("New"), button:has-text("Nuevo")').first();
     if (await addBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
       await addBtn.click();
       await page.waitForTimeout(500);
@@ -804,7 +804,7 @@ test.describe('9 · Pet management', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2500);
 
-    const editBtn = page.locator('button:has-text("Edit"), button:has-text("Editar")').first();
+    const editBtn = page.locator('a:has-text("Edit"), button:has-text("Edit"), a:has-text("Editar"), button:has-text("Editar")').first();
     if (await editBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
       await editBtn.click();
       await page.waitForTimeout(500);

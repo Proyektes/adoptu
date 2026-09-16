@@ -66,6 +66,18 @@ object CommonModule {
         })
     }
 
+    // Wires every .back-link on the page (Shared.kt's backLink()) to browser-history back - a
+    // plain server-rendered href can't know "wherever the visitor actually came from".
+    fun initBackLinks() {
+        val links = document.querySelectorAll(".back-link")
+        for (i in 0 until links.length) {
+            links.item(i)?.addEventListener("click", { e ->
+                e.preventDefault()
+                if (window.history.length > 1) window.history.back() else window.location.href = "/"
+            })
+        }
+    }
+
     fun onCountryChange() {
         val countrySelect = window.document.getElementById("profile-country")
         val stateContainer = window.document.getElementById("state-container")
