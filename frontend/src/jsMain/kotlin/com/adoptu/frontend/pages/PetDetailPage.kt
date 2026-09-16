@@ -76,6 +76,7 @@ object PetDetailPageModule {
         if (adoptionFee > 0) sb.append("<span class=\"fee-badge\">&#129689; ${currencySymbols[pet.currency.toString()] ?: "$"}$adoptionFee ${pet.currency}</span>")
         sb.append("</div></div>")
         sb.append("</div>")
+        if (pet.isUrgent == true) sb.append("<div class=\"urgent-badge\">${I18n.t("urgentBadge")}</div>")
 
         val videoUrl = pet.videoUrl?.toString()
         if (!videoUrl.isNullOrEmpty()) {
@@ -113,7 +114,6 @@ object PetDetailPageModule {
         sb.append("<div class=\"detail-section\" id=\"medical-schedule-section\"></div>")
         if (pet.rescueLocation != null && pet.rescueLocation.toString().isNotEmpty()) sb.append("<div class=\"detail-section\"><strong>${I18n.t("rescueLocation")}:</strong> ${pet.rescueLocation}</div>")
         if (pet.specialNeeds != null && pet.specialNeeds.toString().isNotEmpty()) sb.append("<div class=\"detail-section\"><strong>${I18n.t("specialNeeds")}:</strong><p>${pet.specialNeeds}</p></div>")
-        if (pet.isUrgent == true) sb.append("<div class=\"urgent-badge\">${I18n.t("urgentBadge")}</div>")
         if (pet.isPromoted == true) {
             val reasonKey = when (pet.promotedReason?.toString()) {
                 "MOVING" -> "promotedReasonMoving"
