@@ -64,13 +64,18 @@ object PetDetailPageModule {
         val yesLabel = I18n.t("yes")
         val noLabel = I18n.t("no")
         val adoptionFee = pet.adoptionFee?.unsafeCast<Double?>() ?: 0.0
-        sb.append("<span class=\"pet-type\">${I18n.t(pet.type.toString().lowercase())}</span><h1>${pet.name}</h1>")
+        sb.append("<span class=\"pet-type\">${I18n.t(pet.type.toString().lowercase())}</span>")
+        sb.append("<div class=\"pet-name-row\"><h1>${pet.name}</h1>")
+        sb.append("<span class=\"pet-status-badge status-${pet.status.toString().lowercase()}\">${petStatusLabel(pet.status)}</span></div>")
         sb.append("<div class=\"pet-breed-row\">")
         if (pet.breed != null && pet.breed.toString().isNotEmpty()) sb.append("<p class=\"pet-breed\"><strong>${I18n.t("breed")}:</strong> ${pet.breed}</p>")
+        sb.append("<div class=\"pet-badge-group\">")
+        sb.append("<span class=\"info-badge\">${pet.weight} kg</span>")
+        sb.append("<span class=\"info-badge\">${pet.ageYears} ${I18n.t("years")} ${pet.ageMonths} ${I18n.t("months")}</span>")
+        sb.append("<span class=\"info-badge\">${I18n.t(pet.sex.toString().lowercase())}</span>")
         if (adoptionFee > 0) sb.append("<span class=\"fee-badge\">&#129689; ${currencySymbols[pet.currency.toString()] ?: "$"}$adoptionFee ${pet.currency}</span>")
+        sb.append("</div></div>")
         sb.append("</div>")
-        sb.append("<p><strong>${I18n.t("weightLabel")}:</strong> ${pet.weight} kg | <strong>${I18n.t("age")}:</strong> ${pet.ageYears} ${I18n.t("years")} ${pet.ageMonths} ${I18n.t("months")} | <strong>${I18n.t("sex")}:</strong> ${I18n.t(pet.sex.toString().lowercase())}</p>")
-        sb.append("<p><strong>${I18n.t("status")}:</strong> <span class=\"pet-status-badge status-${pet.status.toString().lowercase()}\">${petStatusLabel(pet.status)}</span></p></div>")
 
         val videoUrl = pet.videoUrl?.toString()
         if (!videoUrl.isNullOrEmpty()) {
