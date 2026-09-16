@@ -455,8 +455,9 @@ fun HttpRules.adminPetsRoutes() {
             val pageSize = req.queryParam("pageSize")?.toIntOrNull() ?: 20
             val search = req.queryParam("search")?.takeIf { it.isNotBlank() }
             val includeInactive = req.queryParam("includeInactive")?.toBoolean() ?: false
+            val country = req.queryParam("country")?.takeIf { it.isNotBlank() }
 
-            val result = petService.getAllForAdmin(page, pageSize, search, includeInactive)
+            val result = petService.getAllForAdmin(page, pageSize, search, includeInactive, country)
             res.send(result)
         }
     })

@@ -38,8 +38,8 @@ class PetService(
     // no country set yet, which the country-required public getAll() above would hide.
     suspend fun getMine(): List<PetDto> = petRepository.getAllUnfiltered()
 
-    suspend fun getAllForAdmin(page: Int = 1, pageSize: Int = 20, search: String? = null, includeInactive: Boolean = false): PagedResult<PetDto> =
-        petRepository.getAllForAdmin(page, pageSize, search, includeInactive)
+    suspend fun getAllForAdmin(page: Int = 1, pageSize: Int = 20, search: String? = null, includeInactive: Boolean = false, country: String? = null): PagedResult<PetDto> =
+        petRepository.getAllForAdmin(page, pageSize, search, includeInactive, country)
 
     suspend fun deactivatePet(petId: Int, deactivatedBy: Int): Boolean = petRepository.deactivatePet(petId, deactivatedBy)
 

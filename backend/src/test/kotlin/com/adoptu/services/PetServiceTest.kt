@@ -978,6 +978,17 @@ class PetServiceTest {
     }
 
     @Test
+    fun `getAllForAdmin filters by country`() = runBlocking {
+        createTestPet(rescuerId = 1, name = "Buddy", type = "DOG", country = "Mexico")
+        createTestPet(rescuerId = 1, name = "Whiskers", type = "CAT", country = "United States")
+
+        val page = petService.getAllForAdmin(page = 1, pageSize = 20, country = "Mexico")
+
+        assertEquals(1, page.items.size)
+        assertEquals("Buddy", page.items.first().name)
+    }
+
+    @Test
     fun `deactivatePet and reactivatePet toggle a pet's active status`() = runBlocking {
         val pet = createTestPet(rescuerId = 1, name = "Buddy", type = "DOG")
 

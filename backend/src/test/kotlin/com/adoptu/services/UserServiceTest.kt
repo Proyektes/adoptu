@@ -2,6 +2,7 @@ package com.adoptu.services
 import com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter
 
 import com.adoptu.adapters.db.EmailVerificationTokens
+import com.adoptu.common.Country
 import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.repositories.PetRepositoryImpl
@@ -101,6 +102,17 @@ class UserServiceTest {
 
         assertEquals(2, result.items.size)
         assertEquals(2, result.total)
+    }
+
+    @Test
+    fun `getAllUsers filters by country`() = runBlocking {
+        createTestUser(username = "mx@test.com", displayName = "Mexico User", country = Country.MEXICO)
+        createTestUser(username = "us@test.com", displayName = "US User", country = Country.UNITED_STATES)
+
+        val result = userService.getAllUsers(country = Country.MEXICO.displayName)
+
+        assertEquals(1, result.items.size)
+        assertEquals("mx@test.com", result.items[0].username)
     }
 
     @Test
@@ -502,13 +514,15 @@ class UserServiceTest {
     private fun createTestUser(
         username: String,
         displayName: String,
-        role: String = "ADOPTER"
+        role: String = "ADOPTER",
+        country: Country? = null
     ): Int {
         val userId = transaction {
             Users.insert {
                 it[Users.username] = username
                 it[Users.displayName] = displayName
                 it[Users.createdAt] = clock.now().toEpochMilliseconds()
+                it[Users.country] = country
             } get Users.id
         }
         

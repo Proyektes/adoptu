@@ -19,7 +19,8 @@ interface UserRepositoryPort {
         role: UserRole?,
         search: String?,
         includeInactive: Boolean,
-        includeBanned: Boolean
+        includeBanned: Boolean,
+        country: String?
     ): PagedResult<UserDto>
     suspend fun getPhotographers(country: String? = null, state: String? = null): List<PhotographerDto>
     suspend fun getRescuers(): List<UserDto>

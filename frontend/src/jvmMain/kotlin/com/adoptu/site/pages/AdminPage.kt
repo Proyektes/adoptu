@@ -45,6 +45,7 @@ fun HTML.adminPage(navParams: NavParams = NavParams()) {
                         option { value = "STERILIZATION_SERVICE"; +"STERILIZATION_SERVICE" }
                     }
                     input(InputType.search) { id = "user-search"; placeholder = "Search by email or name" }
+                    select { id = "user-country-filter"; countrySelect("user-country-filter", true, "selectCountryToFilter") }
                     label { input(InputType.checkBox) { id = "user-show-inactive" }; +" Show inactive" }
                     label { input(InputType.checkBox) { id = "user-show-banned" }; +" Show banned users" }
                 }
@@ -61,6 +62,7 @@ fun HTML.adminPage(navParams: NavParams = NavParams()) {
                 a("/my-pets") { classes = setOf("btn"); attributes["data-i18n"] = "managePetsBtn"; +"Manage Pets" }
                 div(classes = "admin-filter-bar") {
                     input(InputType.search) { id = "pet-search"; placeholder = "Search by pet name" }
+                    select { id = "pet-country-filter"; countrySelect("pet-country-filter", true, "selectCountryToFilter") }
                     label { input(InputType.checkBox) { id = "pet-show-inactive" }; +" Show inactive" }
                 }
                 div { id = "pets-admin-container"; +"" }

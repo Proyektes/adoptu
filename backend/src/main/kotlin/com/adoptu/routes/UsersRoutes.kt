@@ -368,8 +368,9 @@ fun HttpRules.adminUsersRoutes() {
             val search = req.queryParam("search")?.takeIf { it.isNotBlank() }
             val includeInactive = req.queryParam("includeInactive")?.toBoolean() ?: false
             val includeBanned = req.queryParam("includeBanned")?.toBoolean() ?: false
+            val country = req.queryParam("country")?.takeIf { it.isNotBlank() }
 
-            val result = userService.getAllUsers(page, pageSize, role, search, includeInactive, includeBanned)
+            val result = userService.getAllUsers(page, pageSize, role, search, includeInactive, includeBanned, country)
             res.send(result)
         }
     })

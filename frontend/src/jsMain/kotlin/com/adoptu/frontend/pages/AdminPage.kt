@@ -22,10 +22,12 @@ object AdminPageModule {
     private var userSearch: String = ""
     private var userShowInactive = false
     private var userShowBanned = false
+    private var userCountry: String = ""
 
     private var petPage = 1
     private var petSearch: String = ""
     private var petShowInactive = false
+    private var petCountry: String = ""
 
     fun init() {
         window.asDynamic().confirmBan = { confirmBan() }
@@ -64,6 +66,10 @@ object AdminPageModule {
             onUserFilterChange()
         }
         document.getElementById("user-search")?.addEventListener("input", { debouncedUserSearch() })
+        document.getElementById("user-country-filter")?.addEventListener("change", {
+            userCountry = (document.getElementById("user-country-filter") as? HTMLSelectElement)?.value ?: ""
+            onUserFilterChange()
+        })
 
         val onPetFilterChange = { petPage = 1; loadPetsAdmin() }
         document.getElementById("pet-show-inactive")?.addEventListener("change", {
@@ -75,6 +81,10 @@ object AdminPageModule {
             onPetFilterChange()
         }
         document.getElementById("pet-search")?.addEventListener("input", { debouncedPetSearch() })
+        document.getElementById("pet-country-filter")?.addEventListener("change", {
+            petCountry = (document.getElementById("pet-country-filter") as? HTMLSelectElement)?.value ?: ""
+            onPetFilterChange()
+        })
 
         document.getElementById("admin-shelters-country")?.addEventListener("change", { onSheltersCountryChange() })
         document.getElementById("admin-shelters-state")?.addEventListener("change", { loadSheltersAdmin() })
@@ -200,7 +210,8 @@ object AdminPageModule {
                 "role" to userRole,
                 "search" to userSearch,
                 "includeInactive" to userShowInactive.toString(),
-                "includeBanned" to userShowBanned.toString()
+                "includeBanned" to userShowBanned.toString(),
+                "country" to userCountry
             )
         )
         window.asDynamic().fetch("/api/admin/users$query", js("({credentials: 'include'})")).then { res: dynamic ->
@@ -329,7 +340,8 @@ object AdminPageModule {
                 "page" to petPage.toString(),
                 "pageSize" to "20",
                 "search" to petSearch,
-                "includeInactive" to petShowInactive.toString()
+                "includeInactive" to petShowInactive.toString(),
+                "country" to petCountry
             )
         )
         window.asDynamic().fetch("/api/admin/pets$query", js("({credentials: 'include'})")).then { res: dynamic ->

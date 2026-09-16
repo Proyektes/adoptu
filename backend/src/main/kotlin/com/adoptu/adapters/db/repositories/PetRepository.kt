@@ -162,12 +162,16 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
         }
     }
 
-    override suspend fun getAllForAdmin(page: Int, pageSize: Int, search: String?, includeInactive: Boolean): PagedResult<PetDto> = withContext(dbDispatcher) {
+    override suspend fun getAllForAdmin(page: Int, pageSize: Int, search: String?, includeInactive: Boolean, country: String?): PagedResult<PetDto> = withContext(dbDispatcher) {
         transaction {
             var condition: Op<Boolean> = Op.TRUE
             if (!includeInactive) condition = condition and Pets.deactivatedAt.isNull()
             if (!search.isNullOrBlank()) {
                 condition = condition and (Pets.name.lowerCase() like "%${search.trim().lowercase()}%")
+            }
+            if (!country.isNullOrBlank()) {
+                val parsedCountry = Country.fromDisplayName(country) ?: return@transaction PagedResult(items = emptyList(), total = 0, page = page.coerceAtLeast(1), pageSize = pageSize.coerceIn(1, 100))
+                condition = condition and (Pets.country eq parsedCountry)
             }
 
             val total = Pets.selectAll().where { condition }.count().toInt()

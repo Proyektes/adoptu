@@ -130,7 +130,8 @@ class UserRepository(private val clock: Clock) : UserRepositoryPort {
         role: UserRole?,
         search: String?,
         includeInactive: Boolean,
-        includeBanned: Boolean
+        includeBanned: Boolean,
+        country: String?
     ): PagedResult<UserDto> = withContext(dbDispatcher) {
         transaction {
             var condition: Op<Boolean> = Op.TRUE
@@ -147,6 +148,10 @@ class UserRepository(private val clock: Clock) : UserRepositoryPort {
                     .where { UserActiveRoles.role eq role.name }
                     .map { it[UserActiveRoles.userId] }
                 condition = condition and (Users.id inList userIdsWithRole)
+            }
+            if (!country.isNullOrBlank()) {
+                val parsedCountry = Country.fromDisplayName(country) ?: return@transaction PagedResult(items = emptyList(), total = 0, page = page.coerceAtLeast(1), pageSize = pageSize.coerceIn(1, 100))
+                condition = condition and (Users.country eq parsedCountry)
             }
 
             val total = Users.selectAll().where { condition }.count().toInt()

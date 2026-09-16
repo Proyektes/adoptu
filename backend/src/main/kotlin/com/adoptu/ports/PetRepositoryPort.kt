@@ -21,7 +21,7 @@ interface PetRepositoryPort {
     // which has no pagination and stays that way for the rescuer self-service page). No
     // default param values: every call site is PetService.getAllForAdmin(), which already
     // declares its own defaults and always passes explicit args through.
-    suspend fun getAllForAdmin(page: Int, pageSize: Int, search: String?, includeInactive: Boolean): PagedResult<PetDto>
+    suspend fun getAllForAdmin(page: Int, pageSize: Int, search: String?, includeInactive: Boolean, country: String?): PagedResult<PetDto>
     suspend fun getById(id: Int): PetDto?
     suspend fun deactivatePet(petId: Int, deactivatedBy: Int): Boolean
     suspend fun reactivatePet(petId: Int): Boolean

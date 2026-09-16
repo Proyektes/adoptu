@@ -31,8 +31,9 @@ class UserService(
         role: UserRole? = null,
         search: String? = null,
         includeInactive: Boolean = false,
-        includeBanned: Boolean = false
-    ): PagedResult<UserDto> = userRepository.getAllUsers(page, pageSize, role, search, includeInactive, includeBanned)
+        includeBanned: Boolean = false,
+        country: String? = null
+    ): PagedResult<UserDto> = userRepository.getAllUsers(page, pageSize, role, search, includeInactive, includeBanned, country)
     
     suspend fun getRescuers(): List<UserDto> = userRepository.getRescuers()
     
