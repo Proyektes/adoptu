@@ -6,6 +6,8 @@ import com.adoptu.dto.input.PetMedicalEventDto
 interface PetMedicalEventRepositoryPort {
     suspend fun create(petId: Int, request: CreatePetMedicalEventRequest): PetMedicalEventDto
     suspend fun getForPet(petId: Int): List<PetMedicalEventDto>
+    // Every event across every pet owned by rescuerId - backs the Manage Pets overview.
+    suspend fun getForRescuer(rescuerId: Int): List<PetMedicalEventDto>
     suspend fun getById(id: Int): PetMedicalEventDto?
     suspend fun delete(id: Int): Boolean
     // Records with a nextDueDate set and at least one reminder stage not yet sent -

@@ -45,7 +45,7 @@ class PetMedicalEventRoutesE2ETest {
             single { UserService(get(), get(), get()) }
             single { PetsValidationService() }
             single<PetMedicalEventRepositoryPort> { PetMedicalEventRepositoryImpl(get()) }
-            single { PetMedicalEventService(get(), get()) }
+            single { PetMedicalEventService(get(), get(), get()) }
         }
     )
 

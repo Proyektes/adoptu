@@ -838,6 +838,15 @@ form {
     &.overdue { background: #f8d7da; color: #842029; }
 }
 
+.medical-event-pet-link {
+    font-weight: 600;
+    color: var(--primary-light);
+    text-decoration: none;
+    margin-right: 0.4rem;
+
+    &:hover { text-decoration: underline; }
+}
+
 .profile-header {
     display: flex;
     justify-content: space-between;

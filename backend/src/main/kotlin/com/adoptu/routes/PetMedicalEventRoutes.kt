@@ -47,6 +47,20 @@ fun HttpRules.petMedicalEventRoutes() {
         }
     })
 
+    get("/api/users/rescuer/medical-events", Handler { req, res ->
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
+        runBlocking {
+            val userResult = validationService.validateUserById(principal.userId.value.toInt())
+            if (userResult is ServiceResult.NotFound) {
+                return@runBlocking res.respondNotFound()
+            }
+            val user = (userResult as ServiceResult.Success).data
+            val activeRoles = user.activeRoles.map { it.name }.toSet()
+
+            res.respondData(medicalEventService.getForRescuer(principal.userId.value.toInt(), principal.userId.value.toInt(), activeRoles))
+        }
+    })
+
     delete("/api/pets/medical-events/{eventId}", Handler { req, res ->
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {

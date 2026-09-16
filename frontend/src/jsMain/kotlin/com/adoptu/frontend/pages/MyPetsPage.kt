@@ -216,7 +216,7 @@ object MyPetsPageModule {
             ApiClientModule.getPet(editId).then<Unit> { pet ->
                 fillForm(pet)
                 document.getElementById("form-title")?.textContent = "Edit Pet"
-                (document.getElementById("form-container") as? HTMLElement)?.style?.display = "block"
+                (document.getElementById("form-container") as? HTMLElement)?.classList?.remove("hidden")
             }
         }
 
@@ -225,6 +225,42 @@ object MyPetsPageModule {
         loadVolunteerApplications()
         loadPetEditSuggestions()
         loadSponsorshipOffers()
+        loadMedicalEventsOverview()
+    }
+
+    // Cross-pet view of every vaccination/deworming record, sorted overdue-first by the backend -
+    // the "what's due across my whole roster" control the per-pet Medical Events list (inside the
+    // edit form) can't answer on its own.
+    private fun loadMedicalEventsOverview() {
+        val section = document.getElementById("medical-events-overview-section").unsafeCast<HTMLElement?>()
+        val container = document.getElementById("medical-events-overview").unsafeCast<HTMLElement?>()
+        ApiClientModule.getRescuerMedicalEvents().then<Unit> { eventsRaw: dynamic ->
+            val events = (eventsRaw as? Array<dynamic>) ?: arrayOf()
+            if (events.isEmpty()) {
+                section?.classList?.add("hidden")
+                return@then
+            }
+            section?.classList?.remove("hidden")
+            container?.innerHTML = events.joinToString("") { renderRescuerMedicalEventRow(it) }
+        }.catch { section?.classList?.add("hidden") }
+    }
+
+    private fun renderRescuerMedicalEventRow(event: dynamic): String {
+        val categoryLabel = I18n.t(if (event.category == "VACCINATION") "vaccination" else "deworming")
+        val (statusClass, statusLabel) = when (event.urgency?.toString()) {
+            "OVERDUE" -> "overdue" to I18n.t("overdue")
+            "DUE_SOON" -> "due-soon" to I18n.t("dueSoon")
+            else -> "ok" to I18n.t("upToDate")
+        }
+        val dueHtml = if (event.nextDueDate != null) {
+            val dueDateStr = js("new Date(event.nextDueDate)").toLocaleDateString()
+            "<span class=\"medical-due-badge $statusClass\">${I18n.t("nextDueLabel")}: $dueDateStr ($statusLabel)</span>"
+        } else ""
+        val petName = CommonModule.escapeHtml(event.petName?.toString() ?: "")
+        return "<div class=\"medical-event-row\">" +
+            "<a href=\"/my-pets?edit=${event.petId}\" class=\"medical-event-pet-link\">$petName</a> " +
+            "<strong>$categoryLabel: ${CommonModule.escapeHtml(event.name?.toString())}</strong> $dueHtml" +
+            "</div>"
     }
 
     private fun loadSponsorshipOffers() {
@@ -548,7 +584,7 @@ object MyPetsPageModule {
         ApiClientModule.getPet(id.toString()).then<Unit> { pet ->
             fillForm(pet)
             document.getElementById("form-title")?.textContent = "Edit Pet"
-            (document.getElementById("form-container") as? HTMLElement)?.style?.display = "block"
+            (document.getElementById("form-container") as? HTMLElement)?.classList?.remove("hidden")
         }
     }
 
@@ -574,11 +610,11 @@ object MyPetsPageModule {
         document.getElementById("existing-video")?.innerHTML = ""
         updatePreviews()
         document.getElementById("form-title")?.textContent = "Add Pet"
-        (document.getElementById("form-container") as? HTMLElement)?.style?.display = "block"
+        (document.getElementById("form-container") as? HTMLElement)?.classList?.remove("hidden")
     }
 
     private fun closeForm() {
-        (document.getElementById("form-container") as? HTMLElement)?.style?.display = "none"
+        (document.getElementById("form-container") as? HTMLElement)?.classList?.add("hidden")
         window.asDynamic().history.replaceState(js("({})"), "", "/my-pets")
     }
 
@@ -717,7 +753,7 @@ object MyPetsPageModule {
             }.then<Unit> {
                 msg?.className = "message success"
                 msg?.textContent = "Saved!"
-                (document.getElementById("form-container") as? HTMLElement)?.style?.display = "none"
+                (document.getElementById("form-container") as? HTMLElement)?.classList?.add("hidden")
                 load()
             }
         }.catch { err: dynamic -> fail(err?.message?.toString() ?: "Failed to save pet") }

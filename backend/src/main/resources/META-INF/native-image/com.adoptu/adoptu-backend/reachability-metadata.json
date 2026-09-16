@@ -2200,6 +2200,18 @@
       "allDeclaredFields": true
     },
     {
+      "type": "com.adoptu.dto.input.RescuerMedicalEventDto",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "type": "com.adoptu.dto.input.MedicalEventUrgency",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
       "type": "com.adoptu.dto.input.PetAnalyticsDto",
       "allDeclaredConstructors": true,
       "allDeclaredMethods": true,

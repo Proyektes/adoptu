@@ -1,6 +1,7 @@
 package com.adoptu.adapters.db.repositories
 
 import com.adoptu.adapters.db.PetMedicalEvents
+import com.adoptu.adapters.db.Pets
 import com.adoptu.adapters.db.dbDispatcher
 import com.adoptu.dto.input.CreatePetMedicalEventRequest
 import com.adoptu.dto.input.MedicalEventCategory
@@ -67,6 +68,16 @@ class PetMedicalEventRepositoryImpl(private val clock: Clock) : PetMedicalEventR
         transaction {
             PetMedicalEvents.selectAll()
                 .where { PetMedicalEvents.petId eq petId }
+                .orderBy(PetMedicalEvents.administeredDate, SortOrder.DESC)
+                .map(::rowToDto)
+        }
+    }
+
+    override suspend fun getForRescuer(rescuerId: Int): List<PetMedicalEventDto> = withContext(dbDispatcher) {
+        transaction {
+            (PetMedicalEvents innerJoin Pets)
+                .selectAll()
+                .where { Pets.rescuerId eq rescuerId }
                 .orderBy(PetMedicalEvents.administeredDate, SortOrder.DESC)
                 .map(::rowToDto)
         }

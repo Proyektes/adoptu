@@ -335,6 +335,8 @@ object ApiClientModule {
 
     fun deleteMedicalEvent(eventId: Int): Promise<dynamic> = apiFetch("/api/pets/medical-events/$eventId", js("({method: 'DELETE'})"))
 
+    fun getRescuerMedicalEvents(): Promise<dynamic> = apiFetch("/api/users/rescuer/medical-events")
+
     fun createFosterPlacement(petId: String, temporalHomeId: Int, notes: String?): Promise<dynamic> {
         val body = js("({temporalHomeId: temporalHomeId, notes: notes})")
         return apiFetch("/api/pets/$petId/foster-placements", js("({method: 'POST', body: JSON.stringify(body)})"))

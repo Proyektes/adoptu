@@ -7,6 +7,7 @@ import com.adoptu.adapters.db.repositories.PetRepositoryImpl
 import com.adoptu.dto.input.CreatePetMedicalEventRequest
 import com.adoptu.dto.input.Gender
 import com.adoptu.dto.input.MedicalEventCategory
+import com.adoptu.dto.input.MedicalEventUrgency
 import com.adoptu.mocks.TestClock
 import com.adoptu.mocks.TestDatabase
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -55,7 +56,7 @@ class PetMedicalEventServiceTest {
         }
         petRepository = PetRepositoryImpl(clock)
         val medicalEventRepository = PetMedicalEventRepositoryImpl(clock)
-        service = PetMedicalEventService(medicalEventRepository, petRepository)
+        service = PetMedicalEventService(medicalEventRepository, petRepository, clock)
     }
 
     private suspend fun createTestPet(rescuerId: Int) = petRepository.create(
@@ -162,5 +163,49 @@ class PetMedicalEventServiceTest {
         val result = service.delete(999, 1, setOf("RESCUER"))
 
         assertEquals(ServiceResult.NotFound, result)
+    }
+
+    @Test
+    fun `getForRescuer returns Forbidden for a non-owner`() = runBlocking {
+        val result = service.getForRescuer(1, 2, setOf("RESCUER"))
+
+        assertEquals(ServiceResult.Forbidden, result)
+    }
+
+    @Test
+    fun `getForRescuer allows admin regardless of ownership`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1)
+        service.create(pet.id, 1, setOf("RESCUER"), sampleRequest())
+
+        val result = service.getForRescuer(1, 999, setOf("ADMIN"))
+
+        assertTrue(result is ServiceResult.Success)
+        assertEquals(1, result.data.size)
+    }
+
+    @Test
+    fun `getForRescuer includes the pet name and ranks overdue before due-soon before scheduled before undated`() = runBlocking {
+        val pet = createTestPet(rescuerId = 1)
+        val dayMs = 24 * 60 * 60 * 1000L
+        val now = clock.now().toEpochMilliseconds()
+        service.create(pet.id, 1, setOf("RESCUER"), sampleRequest().copy(name = "Far off", nextDueDate = now + 60 * dayMs))
+        service.create(pet.id, 1, setOf("RESCUER"), sampleRequest().copy(name = "No due date", nextDueDate = null))
+        service.create(pet.id, 1, setOf("RESCUER"), sampleRequest().copy(name = "Past due", nextDueDate = now - dayMs))
+        service.create(pet.id, 1, setOf("RESCUER"), sampleRequest().copy(name = "Coming up", nextDueDate = now + 3 * dayMs))
+
+        val result = service.getForRescuer(1, 1, setOf("RESCUER"))
+
+        assertTrue(result is ServiceResult.Success)
+        val events = result.data
+        assertEquals(4, events.size)
+        assertTrue(events.all { it.petName == "Buddy" })
+        assertEquals(
+            listOf("Past due", "Coming up", "Far off", "No due date"),
+            events.map { it.name }
+        )
+        assertEquals(
+            listOf(MedicalEventUrgency.OVERDUE, MedicalEventUrgency.DUE_SOON, MedicalEventUrgency.SCHEDULED, null),
+            events.map { it.urgency }
+        )
     }
 }
