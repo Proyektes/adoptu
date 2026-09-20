@@ -208,9 +208,10 @@ object MyPetsPageModule {
     }
 
     private fun loadPetAnalytics(pets: Array<dynamic>) {
-        pets.forEach { pet ->
-            ApiClientModule.getPetAnalytics(pet.id.toString()).then<Unit> { analytics: dynamic ->
-                val el = document.getElementById("pet-analytics-${pet.id}") ?: return@then
+        if (pets.isEmpty()) return
+        ApiClientModule.getRescuerPetAnalytics().then<Unit> { all: dynamic ->
+            ((all as? Array<dynamic>) ?: arrayOf()).forEach { analytics ->
+                val el = document.getElementById("pet-analytics-${analytics.petId}") ?: return@forEach
                 val views = analytics.viewCount?.toString() ?: "0"
                 val inquiries = analytics.inquiryCount?.toString() ?: "0"
                 val conversionRate = analytics.conversionRate as? Double
@@ -219,8 +220,8 @@ object MyPetsPageModule {
                     " • ${I18n.t("conversionLabel")}: $pct%"
                 } else ""
                 el.textContent = "${I18n.t("viewsLabel")}: $views • ${I18n.t("inquiriesLabel")}: $inquiries$conversionHtml"
-            }.catch { }
-        }
+            }
+        }.catch<Unit> { }
     }
 
     private fun renderPetCard(p: dynamic): String {

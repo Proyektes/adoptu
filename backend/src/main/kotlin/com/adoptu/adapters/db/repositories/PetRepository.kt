@@ -560,6 +560,28 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
         }
     }
 
+    override suspend fun getAnalyticsForRescuer(rescuerId: Int): List<PetAnalyticsDto> = withContext(dbDispatcher) {
+        transaction {
+            val viewsByPet = Pets.select(Pets.id, Pets.viewCount)
+                .where { Pets.rescuerId eq rescuerId }
+                .associate { it[Pets.id] to it[Pets.viewCount] }
+            if (viewsByPet.isEmpty()) return@transaction emptyList()
+            val statusesByPet = AdoptionRequests.select(AdoptionRequests.petId, AdoptionRequests.status)
+                .where { AdoptionRequests.petId inList viewsByPet.keys }
+                .groupBy({ it[AdoptionRequests.petId] }, { it[AdoptionRequests.status] })
+            viewsByPet.map { (petId, viewCount) ->
+                val statuses = statusesByPet[petId] ?: emptyList()
+                PetAnalyticsDto(
+                    petId = petId,
+                    viewCount = viewCount,
+                    inquiryCount = statuses.size,
+                    approvedCount = statuses.count { it == "APPROVED" },
+                    conversionRate = if (viewCount > 0) statuses.size.toDouble() / viewCount else null
+                )
+            }
+        }
+    }
+
     override suspend fun getAvailableForRescuer(rescuerId: Int): List<PetDto> = withContext(dbDispatcher) {
         transaction {
             val rows = Pets.selectAll()

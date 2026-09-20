@@ -295,6 +295,8 @@ class PetService(
 
     suspend fun incrementViewCount(petId: Int) = petRepository.incrementViewCount(petId)
 
+    suspend fun getAnalyticsForRescuer(rescuerId: Int): List<PetAnalyticsDto> = petRepository.getAnalyticsForRescuer(rescuerId)
+
     suspend fun getAnalytics(petId: Int, userId: Int, userRoles: Set<String>): ServiceResult<PetAnalyticsDto> {
         val pet = petRepository.getById(petId) ?: return ServiceResult.NotFound
         val isAdmin = userRoles.contains("ADMIN")

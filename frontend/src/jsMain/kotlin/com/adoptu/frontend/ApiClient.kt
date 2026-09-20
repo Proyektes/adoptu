@@ -365,4 +365,6 @@ object ApiClientModule {
     fun getMyActiveFosterPlacements(): Promise<dynamic> = apiFetch("/api/users/temporal-home/foster-placements")
 
     fun getPetAnalytics(petId: String): Promise<dynamic> = apiFetch("/api/pets/$petId/analytics")
+
+    fun getRescuerPetAnalytics(): Promise<dynamic> = apiFetch("/api/users/rescuer/pet-analytics")
 }
