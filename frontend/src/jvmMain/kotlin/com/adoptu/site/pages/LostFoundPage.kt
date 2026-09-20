@@ -104,8 +104,8 @@ fun HTML.reportLostFoundPage(navParams: NavParams = NavParams()) {
         script(src = "https://challenges.cloudflare.com/turnstile/v0/api.js") { attributes["async"] = ""; attributes["defer"] = "" }
         // Plain blocking script (no defer/async) - must finish before commonScripts()'s bundle
         // below runs ReportLostFoundPageModule.init(), which calls into the L global.
-        link(rel = "stylesheet", href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css")
-        script(src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js") {}
+        link(rel = "stylesheet", href = "/static/vendor/leaflet/leaflet.css")
+        script(src = "/static/vendor/leaflet/leaflet.js") {}
         commonScripts()
     }
 }

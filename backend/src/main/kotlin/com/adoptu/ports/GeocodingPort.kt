@@ -14,7 +14,7 @@ data class ReverseGeocodeResult(
 
 interface GeocodingPort {
     /** Resolves a country/state/city into a center point + a radius that fully covers the zone's bounding box. Null if not found. */
-    suspend fun geocode(country: String, state: String?, city: String): GeocodeResult?
+    suspend fun geocode(country: String, state: String?, city: String?): GeocodeResult?
 
     /** Resolves a coordinate pair into a best-effort street address. Null if the geocoder has nothing for that location. */
     suspend fun reverseGeocode(latitude: Double, longitude: Double): ReverseGeocodeResult?

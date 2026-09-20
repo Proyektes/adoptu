@@ -88,7 +88,7 @@ object MyPetsPageModule {
             else -> "ok" to I18n.t("upToDate")
         }
         val dueHtml = if (event.nextDueDate != null) {
-            val dueDateStr = js("new Date(event.nextDueDate)").toLocaleDateString()
+            val dueDateStr = js("new Date(event.nextDueDate)").toLocaleDateString(I18n.currentLang)
             "<span class=\"medical-due-badge $statusClass\">${I18n.t("nextDueLabel")}: $dueDateStr ($statusLabel)</span>"
         } else ""
         val petName = CommonModule.escapeHtml(event.petName?.toString() ?: "")
@@ -111,7 +111,7 @@ object MyPetsPageModule {
     }
 
     private fun renderSponsorshipOfferCard(o: dynamic): String {
-        val date = js("new Date(o.createdAt)").toLocaleDateString()
+        val date = js("new Date(o.createdAt)").toLocaleDateString(I18n.currentLang)
         val sponsorName = CommonModule.escapeHtml(o.sponsorName?.toString() ?: "")
         val petName = o.petName?.toString()?.takeIf { it.isNotEmpty() }
         val target = if (petName != null) CommonModule.escapeHtml(petName) else I18n.t("generalFundLabel")
@@ -151,7 +151,7 @@ object MyPetsPageModule {
     }
 
     private fun renderEditSuggestionCard(s: dynamic): String {
-        val date = js("new Date(s.createdAt)").toLocaleDateString()
+        val date = js("new Date(s.createdAt)").toLocaleDateString(I18n.currentLang)
         val petName = CommonModule.escapeHtml(s.petName?.toString() ?: "")
         val volunteerName = CommonModule.escapeHtml(s.volunteerName?.toString() ?: "")
         val fields = mutableListOf<String>()
@@ -185,7 +185,7 @@ object MyPetsPageModule {
     }
 
     private fun renderVolunteerApplicationCard(a: dynamic): String {
-        val date = js("new Date(a.createdAt)").toLocaleDateString()
+        val date = js("new Date(a.createdAt)").toLocaleDateString(I18n.currentLang)
         val status = a.status?.toString() ?: "PENDING"
         val statusLabel = when (status) {
             "ACTIVE" -> I18n.t("volunteerStatusActive")
@@ -237,7 +237,7 @@ object MyPetsPageModule {
         val promoted = if (p.isPromoted == true) " 🏠" else ""
         val breedHtml = if (p.breed != null) "<span class=\"pet-breed\">${CommonModule.escapeHtml(p.breed.toString())}</span>" else ""
         val rescueDateHtml = if (p.rescueDate != null) {
-            val date = js("new Date(p.rescueDate)").toLocaleDateString()
+            val date = js("new Date(p.rescueDate)").toLocaleDateString(I18n.currentLang)
             "<span class=\"label\">${I18n.t("rescued")}</span><span class=\"value\">$date</span>"
         } else ""
         return "<div class=\"pet-card\">$imageHtml<div class=\"pet-card-body\">" +
@@ -299,7 +299,7 @@ object MyPetsPageModule {
     }
 
     private fun renderAdoptionRequestCard(r: dynamic): String {
-        val date = js("new Date(r.createdAt)").toLocaleDateString()
+        val date = js("new Date(r.createdAt)").toLocaleDateString(I18n.currentLang)
         val message = if (r.message != null) CommonModule.escapeHtml(r.message.toString()) else I18n.t("noMessage")
         val status = r.status?.toString() ?: "PENDING"
         val actions = when (status) {

@@ -108,8 +108,8 @@ fun HTML.reportUrgentPage(navParams: NavParams = NavParams()) {
         script(src = "https://challenges.cloudflare.com/turnstile/v0/api.js") { attributes["async"] = ""; attributes["defer"] = "" }
         // Plain blocking script (no defer/async) - must finish before commonScripts()'s bundle
         // below runs ReportUrgentPageModule.init(), which calls into the L global.
-        link(rel = "stylesheet", href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css")
-        script(src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js") {}
+        link(rel = "stylesheet", href = "/static/vendor/leaflet/leaflet.css")
+        script(src = "/static/vendor/leaflet/leaflet.js") {}
         commonScripts()
     }
 }
@@ -186,12 +186,12 @@ fun HTML.urgentRescuerProfilePage(navParams: NavParams = NavParams()) {
         footer()
         // Leaflet - draggable pin + coverage-radius circle on #location-map (see
         // UrgentRescuePage.kt/jsMain). Same page-scoped CDN-script pattern as Cloudflare
-        // Turnstile on reportUrgentPage above; unpkg.com and tile.openstreetmap.org are allowed
-        // in the CloudFront CSP for it (see infra/cloudfront.tf).
+        // Turnstile on reportUrgentPage above; served from frontend/static/vendor/leaflet so only
+        // tile.openstreetmap.org needs allowing in the CloudFront CSP (see infra/cloudfront.tf).
         // Plain blocking script (no defer/async) - must finish before commonScripts()'s bundle
         // below runs UrgentRescuerProfilePageModule.init(), which calls into the L global.
-        link(rel = "stylesheet", href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css")
-        script(src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js") {}
+        link(rel = "stylesheet", href = "/static/vendor/leaflet/leaflet.css")
+        script(src = "/static/vendor/leaflet/leaflet.js") {}
         commonScripts()
     }
 }

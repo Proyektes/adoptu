@@ -16,11 +16,11 @@ import kotlin.system.exitProcess
 // (PetDetailPageModule/TemporalHomeDetailPageModule already do this), not baked into the HTML, so
 // serving them for any id just needs a URL rewrite (see rewrites() below / scripts/serve_site.py).
 fun main(args: Array<String>) {
-    if (args.size != 4) {
-        System.err.println("usage: SiteGenerator <cssOutDir> <jsOutDir> <siteOutDir> <pwaAssetsDir>")
+    if (args.size != 5) {
+        System.err.println("usage: SiteGenerator <cssOutDir> <jsOutDir> <siteOutDir> <pwaAssetsDir> <staticAssetsDir>")
         exitProcess(1)
     }
-    val (cssOutDir, jsOutDir, siteOutDirPath, pwaAssetsDir) = args
+    val (cssOutDir, jsOutDir, siteOutDirPath, pwaAssetsDir, staticAssetsDir) = args
     val siteOutDir = File(siteOutDirPath)
     val staticCssDir = File(siteOutDir, "static/css").apply { mkdirs() }
     val staticJsDir = File(siteOutDir, "static/js").apply { mkdirs() }
@@ -30,6 +30,7 @@ fun main(args: Array<String>) {
     // PWA manifest/icons/service worker (frontend/pwa/) - served from the site root so the
     // manifest's icon paths and the service worker's default scope ("/") both just work.
     copyMatching(File(pwaAssetsDir), siteOutDir) { true }
+    File(staticAssetsDir).copyRecursively(File(siteOutDir, "static"), overwrite = true)
 
     val pages: Map<String, HTML.() -> Unit> = linkedMapOf(
         "index" to { indexPage() },

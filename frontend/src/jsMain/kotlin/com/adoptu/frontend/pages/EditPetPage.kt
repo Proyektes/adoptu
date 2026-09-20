@@ -63,7 +63,7 @@ object EditPetPageModule {
             val active = history.firstOrNull { it.endDate == null }
             if (active != null) {
                 activePlacementId = active.id?.toString()?.toIntOrNull()
-                val since = js("new Date(active.startDate)").toLocaleDateString()
+                val since = js("new Date(active.startDate)").toLocaleDateString(I18n.currentLang)
                 val alias = active.temporalHomeAlias?.toString()?.takeIf { it.isNotEmpty() } ?: I18n.t("aTemporalHome")
                 statusEl?.removeAttribute("data-i18n")
                 statusEl?.textContent = "${I18n.t("currentlyWithLabel")} $alias ${I18n.t("sinceLabel")} $since"
@@ -103,9 +103,9 @@ object EditPetPageModule {
 
     private fun renderMedicalEventRow(event: dynamic): String {
         val categoryLabel = I18n.t(if (event.category == "VACCINATION") "vaccination" else "deworming")
-        val administeredDate = js("new Date(event.administeredDate)").toLocaleDateString()
+        val administeredDate = js("new Date(event.administeredDate)").toLocaleDateString(I18n.currentLang)
         val dueHtml = if (event.nextDueDate != null) {
-            val dueDateStr = js("new Date(event.nextDueDate)").toLocaleDateString()
+            val dueDateStr = js("new Date(event.nextDueDate)").toLocaleDateString(I18n.currentLang)
             val daysUntil = js("Math.floor((event.nextDueDate - Date.now()) / 86400000)").unsafeCast<Int>()
             val (statusClass, statusLabel) = when {
                 daysUntil < 0 -> "overdue" to I18n.t("overdue")

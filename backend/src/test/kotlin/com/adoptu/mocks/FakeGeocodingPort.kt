@@ -11,7 +11,7 @@ class FakeGeocodingPort(
     private val results: Map<Triple<String, String?, String>, GeocodeResult> = emptyMap(),
     private val reverseResults: Map<Pair<Double, Double>, ReverseGeocodeResult> = emptyMap()
 ) : GeocodingPort {
-    override suspend fun geocode(country: String, state: String?, city: String): GeocodeResult? =
+    override suspend fun geocode(country: String, state: String?, city: String?): GeocodeResult? =
         results[Triple(country, state, city)]
 
     override suspend fun reverseGeocode(latitude: Double, longitude: Double): ReverseGeocodeResult? =

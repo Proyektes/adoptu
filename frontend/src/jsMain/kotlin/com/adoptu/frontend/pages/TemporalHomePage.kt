@@ -90,7 +90,7 @@ object TemporalHomeDetailPageModule {
             home.state?.toString()?.takeIf { it.isNotEmpty() },
             I18n.translateCountry(home.country?.toString())
         ).joinToString(", ")
-        val memberSince = js("new Date(home.createdAt)").toLocaleDateString()
+        val memberSince = js("new Date(home.createdAt)").toLocaleDateString(I18n.currentLang)
 
         val roles = user.activeRoles as? Array<String>
         val isRescuer = user.authenticated != false && (roles?.contains("RESCUER") == true || roles?.contains("ADMIN") == true)
@@ -216,7 +216,7 @@ object TemporalHomeProfilePageModule {
                 return@then
             }
             container?.innerHTML = list.joinToString("") { p ->
-                val since = js("new Date(p.startDate)").toLocaleDateString()
+                val since = js("new Date(p.startDate)").toLocaleDateString(I18n.currentLang)
                 val petName = p.petName?.toString()?.takeIf { it.isNotEmpty() } ?: "a pet"
                 "<div class=\"request-card\"><p><strong>${CommonModule.escapeHtml(petName)}</strong></p>" +
                     "<p>${I18n.t("sinceLabel")} $since</p>" +

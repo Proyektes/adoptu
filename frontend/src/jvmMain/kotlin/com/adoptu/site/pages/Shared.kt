@@ -58,23 +58,23 @@ fun DIV.languageDropdown() {
     div(classes = "lang-dropdown") {
         button(classes = "lang-dropbtn", type = ButtonType.button) { id = "lang-dropbtn"; +"🌐" }
         div(classes = "lang-dropdown-content") {
-            a(classes = "lang-option") { attributes["data-lang"] = "en"; +"🇺🇸 English" }
-            a(classes = "lang-option") { attributes["data-lang"] = "es"; +"🇪🇸 Español" }
-            a(classes = "lang-option") { attributes["data-lang"] = "fr"; +"🇫🇷 Français" }
-            a(classes = "lang-option") { attributes["data-lang"] = "pt"; +"🇧🇷 Português" }
-            a(classes = "lang-option") { attributes["data-lang"] = "zh"; +"🇨🇳 中文" }
-            a(classes = "lang-option") { attributes["data-lang"] = "ar"; +"🇸🇦 العربية" }
-            a(classes = "lang-option") { attributes["data-lang"] = "ru"; +"🇷🇺 Русский" }
-            a(classes = "lang-option") { attributes["data-lang"] = "ko"; +"🇰🇷 한국어" }
-            a(classes = "lang-option") { attributes["data-lang"] = "ja"; +"🇯🇵 日本語" }
-            a(classes = "lang-option") { attributes["data-lang"] = "sw"; +"🇹🇿 Kiswahili" }
-            a(classes = "lang-option") { attributes["data-lang"] = "ha"; +"🇳🇬 Hausa" }
-            a(classes = "lang-option") { attributes["data-lang"] = "tr"; +"🇹🇷 Türkçe" }
-            a(classes = "lang-option") { attributes["data-lang"] = "ro"; +"🇷🇴 Română" }
-            a(classes = "lang-option") { attributes["data-lang"] = "hi"; +"🇮🇳 हिन्दी" }
-            a(classes = "lang-option") { attributes["data-lang"] = "bn"; +"🇧🇩 বাংলা" }
-            a(classes = "lang-option") { attributes["data-lang"] = "mr"; +"🇮🇳 मराठी" }
-            a(classes = "lang-option") { attributes["data-lang"] = "te"; +"🇮🇳 తెలుగు" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "en"; +"🇺🇸 English" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "es"; +"🇪🇸 Español" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "fr"; +"🇫🇷 Français" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "pt"; +"🇧🇷 Português" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "zh"; +"🇨🇳 中文" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "ar"; +"🇸🇦 العربية" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "ru"; +"🇷🇺 Русский" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "ko"; +"🇰🇷 한국어" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "ja"; +"🇯🇵 日本語" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "sw"; +"🇹🇿 Kiswahili" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "ha"; +"🇳🇬 Hausa" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "tr"; +"🇹🇷 Türkçe" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "ro"; +"🇷🇴 Română" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "hi"; +"🇮🇳 हिन्दी" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "bn"; +"🇧🇩 বাংলা" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "mr"; +"🇮🇳 मराठी" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "te"; +"🇮🇳 తెలుగు" }
         }
     }
 }
@@ -83,23 +83,23 @@ fun NAV.languageDropdown() {
     div(classes = "lang-dropdown") {
         button(classes = "lang-dropbtn", type = ButtonType.button) { id = "lang-dropbtn"; +"🌐" }
         div(classes = "lang-dropdown-content") {
-            a(classes = "lang-option") { attributes["data-lang"] = "en"; +"🇺🇸 English" }
-            a(classes = "lang-option") { attributes["data-lang"] = "es"; +"🇪🇸 Español" }
-            a(classes = "lang-option") { attributes["data-lang"] = "fr"; +"🇫🇷 Français" }
-            a(classes = "lang-option") { attributes["data-lang"] = "pt"; +"🇧🇷 Português" }
-            a(classes = "lang-option") { attributes["data-lang"] = "zh"; +"🇨🇳 中文" }
-            a(classes = "lang-option") { attributes["data-lang"] = "ar"; +"🇸🇦 العربية" }
-            a(classes = "lang-option") { attributes["data-lang"] = "ru"; +"🇷🇺 Русский" }
-            a(classes = "lang-option") { attributes["data-lang"] = "ko"; +"🇰🇷 한국어" }
-            a(classes = "lang-option") { attributes["data-lang"] = "ja"; +"🇯🇵 日本語" }
-            a(classes = "lang-option") { attributes["data-lang"] = "sw"; +"🇹🇿 Kiswahili" }
-            a(classes = "lang-option") { attributes["data-lang"] = "ha"; +"🇳🇬 Hausa" }
-            a(classes = "lang-option") { attributes["data-lang"] = "tr"; +"🇹🇷 Türkçe" }
-            a(classes = "lang-option") { attributes["data-lang"] = "ro"; +"🇷🇴 Română" }
-            a(classes = "lang-option") { attributes["data-lang"] = "hi"; +"🇮🇳 हिन्दी" }
-            a(classes = "lang-option") { attributes["data-lang"] = "bn"; +"🇧🇩 বাংলা" }
-            a(classes = "lang-option") { attributes["data-lang"] = "mr"; +"🇮🇳 मराठी" }
-            a(classes = "lang-option") { attributes["data-lang"] = "te"; +"🇮🇳 తెలుగు" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "en"; +"🇺🇸 English" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "es"; +"🇪🇸 Español" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "fr"; +"🇫🇷 Français" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "pt"; +"🇧🇷 Português" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "zh"; +"🇨🇳 中文" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "ar"; +"🇸🇦 العربية" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "ru"; +"🇷🇺 Русский" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "ko"; +"🇰🇷 한국어" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "ja"; +"🇯🇵 日本語" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "sw"; +"🇹🇿 Kiswahili" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "ha"; +"🇳🇬 Hausa" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "tr"; +"🇹🇷 Türkçe" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "ro"; +"🇷🇴 Română" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "hi"; +"🇮🇳 हिन्दी" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "bn"; +"🇧🇩 বাংলা" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "mr"; +"🇮🇳 मराठी" }
+            button(classes = "lang-option", type = ButtonType.button) { attributes["data-lang"] = "te"; +"🇮🇳 తెలుగు" }
         }
     }
 }

@@ -37,16 +37,16 @@ class NominatimGeocodingAdapter(
         .connectTimeout(Duration.ofSeconds(5))
         .build()
 
-    override suspend fun geocode(country: String, state: String?, city: String): GeocodeResult? {
+    override suspend fun geocode(country: String, state: String?, city: String?): GeocodeResult? {
         // Structured query params (city=/state=/country=) rather than a single freeform q=
         // string - q= is a general free-text search that can resolve to a state/province/region
         // sharing the typed name instead of the city itself; the structured form tells Nominatim
         // specifically which part is the city.
         val query = listOfNotNull(city, state, country).joinToString(", ")
         val params = buildString {
-            append("city=").append(URLEncoder.encode(city, StandardCharsets.UTF_8))
-            if (!state.isNullOrBlank()) append("&state=").append(URLEncoder.encode(state, StandardCharsets.UTF_8))
-            append("&country=").append(URLEncoder.encode(country, StandardCharsets.UTF_8))
+            if (!city.isNullOrBlank()) append("city=").append(URLEncoder.encode(city, StandardCharsets.UTF_8)).append("&")
+            if (!state.isNullOrBlank()) append("state=").append(URLEncoder.encode(state, StandardCharsets.UTF_8)).append("&")
+            append("country=").append(URLEncoder.encode(country, StandardCharsets.UTF_8))
         }
         val uri = URI.create("$baseUrl?$params&format=json&limit=1")
 

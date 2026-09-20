@@ -162,7 +162,7 @@ class UrgentRescueService(
     suspend fun reverseGeocode(latitude: Double, longitude: Double): ReverseGeocodeResult? =
         geocodingPort.reverseGeocode(latitude, longitude)
 
-    suspend fun geocode(country: String, state: String?, city: String): GeocodeResult? =
+    suspend fun geocode(country: String, state: String?, city: String?): GeocodeResult? =
         geocodingPort.geocode(country, state, city)
 
     // --- Matching + paging -----------------------------------------------------------------

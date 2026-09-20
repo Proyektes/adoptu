@@ -56,6 +56,7 @@ object ReportUrgentPageModule {
             locationMap.captureCurrentLocation { status -> document.getElementById("location-status")?.textContent = status }
         })
         document.getElementById("submit-btn")?.addEventListener("click", { submit() })
+        CommonModule.initCountrySelect("report-country") { locationMap.syncToZoneFields() }
     }
 
     private fun submit() {

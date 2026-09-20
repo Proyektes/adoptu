@@ -1156,7 +1156,7 @@ private val englishTranslations = json(
     "yourRoles" to "Tus roles:",
     "resources" to "Recursos",
     "loginWithPasskey" to "Iniciar sesión con Passkey",
-    "signInWithPasskey" to "Sign in with Passkey",
+    "signInWithPasskey" to "Iniciar sesión con Passkey",
     "resendVerificationEmail" to "Reenviar correo de verificación",
     "usesFido" to "Usa FIDO2 / WebAuthn para autenticación segura sin contraseña.",
     "loginWithMagicLink" to "Iniciar sesión con enlace de correo",
@@ -2138,7 +2138,7 @@ private val englishTranslations = json(
     "yourRoles" to "Vos rôles:",
     "resources" to "Ressources",
     "loginWithPasskey" to "Connexion avec Passkey",
-    "signInWithPasskey" to "Sign in with Passkey",
+    "signInWithPasskey" to "Se connecter avec une Passkey",
     "resendVerificationEmail" to "Renvoyer l'e-mail de vérification",
     "usesFido" to "Utilise FIDO2 / WebAuthn pour une authentification sécurisée sans mot de passe.",
     "loginWithMagicLink" to "Connexion avec lien e-mail",
@@ -3120,7 +3120,7 @@ private val portugueseTranslations = json(
     "yourRoles" to "Seus papéis:",
     "resources" to "Recursos",
     "loginWithPasskey" to "Entrar com Passkey",
-    "signInWithPasskey" to "Sign in with Passkey",
+    "signInWithPasskey" to "Entrar com Passkey",
     "resendVerificationEmail" to "Reenviar e-mail de verificação",
     "usesFido" to "Usa FIDO2 / WebAuthn para autenticação segura sem senha.",
     "loginWithMagicLink" to "Entrar com link de e-mail",
@@ -4102,7 +4102,7 @@ private val chineseTranslations = json(
     "yourRoles" to "您的角色：",
     "resources" to "资源",
     "loginWithPasskey" to "使用 Passkey 登录",
-    "signInWithPasskey" to "Sign in with Passkey",
+    "signInWithPasskey" to "使用通行密钥登录",
     "resendVerificationEmail" to "重新发送验证邮件",
     "usesFido" to "使用 FIDO2 / WebAuthn 实现无密码安全认证。",
     "loginWithMagicLink" to "使用邮件链接登录",
@@ -16894,7 +16894,11 @@ object I18n {
             val key = el.getAttribute("data-i18n-aria-label") ?: continue
             el.setAttribute("aria-label", t(key))
         }
+        val heading = document.querySelector("main h1[data-i18n]")
+        if (heading != null) document.title = heading.textContent + " - Adopt-U"
     }
+
+    fun formatDate(value: dynamic): String = js("new Date(value)").toLocaleDateString(currentLang).unsafeCast<String>()
 
     fun updateActiveLangOption() {
         val options = document.querySelectorAll(".lang-option")

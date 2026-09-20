@@ -117,7 +117,7 @@ object PetDetailPageModule {
         if (rescueDateMillis != null || rescueLocationText != null) {
             sb.append("<div class=\"rescue-info-row\">")
             if (rescueDateMillis != null) {
-                val rescueDateStr = js("new Date(rescueDateMillis)").toLocaleDateString()
+                val rescueDateStr = js("new Date(rescueDateMillis)").toLocaleDateString(I18n.currentLang)
                 sb.append("<span class=\"info-badge\"><strong>${I18n.t("rescueDate")}:</strong>&nbsp;$rescueDateStr</span>")
             }
             if (rescueLocationText != null) {
@@ -395,9 +395,9 @@ object PetDetailPageModule {
                 val isVaccination = event.category == "VACCINATION"
                 val categoryIcon = if (isVaccination) "vaccines" else "medication"
                 val categoryLabel = I18n.t(if (isVaccination) "vaccination" else "deworming")
-                val administeredDate = js("new Date(event.administeredDate)").toLocaleDateString()
+                val administeredDate = js("new Date(event.administeredDate)").toLocaleDateString(I18n.currentLang)
                 val dueHtml = if (event.nextDueDate != null) {
-                    val dueDateStr = js("new Date(event.nextDueDate)").toLocaleDateString()
+                    val dueDateStr = js("new Date(event.nextDueDate)").toLocaleDateString(I18n.currentLang)
                     val daysUntil = js("Math.floor((event.nextDueDate - Date.now()) / 86400000)").unsafeCast<Int>()
                     val (statusClass, statusLabel) = when {
                         daysUntil < 0 -> "overdue" to I18n.t("overdue")

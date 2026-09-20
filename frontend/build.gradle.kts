@@ -85,6 +85,7 @@ val compileSass by tasks.registering(Exec::class) {
 
 val siteOutDir = layout.buildDirectory.dir("site")
 val pwaAssetsDir = layout.projectDirectory.dir("pwa")
+val staticAssetsDir = layout.projectDirectory.dir("static")
 
 val generateSite by tasks.registering(JavaExec::class) {
     dependsOn(compileSass, tasks.named("jsBrowserProductionWebpack"))
@@ -97,6 +98,7 @@ val generateSite by tasks.registering(JavaExec::class) {
         layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable").get().asFile.absolutePath,
         siteOutDir.get().asFile.absolutePath,
         pwaAssetsDir.asFile.absolutePath,
+        staticAssetsDir.asFile.absolutePath,
     )
 }
 

@@ -73,7 +73,7 @@ class UsersRoutesE2ETest {
     }
 
     private object FakeGeocodingPort : GeocodingPort {
-        override suspend fun geocode(country: String, state: String?, city: String): GeocodeResult? =
+        override suspend fun geocode(country: String, state: String?, city: String?): GeocodeResult? =
             GeocodeResult(latitude = 0.0, longitude = 0.0, radiusKm = 50.0)
         override suspend fun reverseGeocode(latitude: Double, longitude: Double): ReverseGeocodeResult? = null
     }

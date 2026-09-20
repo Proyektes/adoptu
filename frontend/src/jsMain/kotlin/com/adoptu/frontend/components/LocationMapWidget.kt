@@ -158,21 +158,26 @@ class LocationMapWidget(
 
     // Mirror of the above: typing/selecting a zone moves the pin instead. Leaves the pin where it
     // was on failure (no match, incomplete fields) rather than clearing it.
+    fun syncToZoneFields() = geocodeZoneFields()
+
     private fun geocodeZoneFields() {
         if (suppressZoneFieldSync) return
         val country = (document.getElementById(countryFieldId) as? HTMLSelectElement)?.value
         val state = stateFieldId?.let { (document.getElementById(it) as? HTMLInputElement)?.value }
         val city = (document.getElementById(cityFieldId) as? HTMLInputElement)?.value
-        if (country.isNullOrBlank() || city.isNullOrBlank()) return
+        if (country.isNullOrBlank()) return
+        val countryOnly = city.isNullOrBlank()
+        if (countryOnly && latitude != null) return
         val params = js("new URLSearchParams()")
         params.append("country", country)
         if (!state.isNullOrBlank()) params.append("state", state)
-        params.append("city", city)
+        if (!countryOnly) params.append("city", city)
         apiFetch("/api/urgent-reports/geocode?" + params.toString())
             .then<Unit> { result: dynamic ->
                 val lat = result.latitude as? Double
                 val lon = result.longitude as? Double
-                if (lat != null && lon != null) setPin(lat, lon)
+                if (lat == null || lon == null) return@then
+                if (countryOnly) map.setView(window.asDynamic().L.latLng(lat, lon), 5) else setPin(lat, lon)
             }
             .catch<Unit> { /* no match for that zone - leave the pin where it was */ }
     }

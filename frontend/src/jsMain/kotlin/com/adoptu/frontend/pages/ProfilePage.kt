@@ -761,7 +761,7 @@ object ProfilePageModule {
     }
 
     private fun renderMyAdoptionRequestRow(request: dynamic, petName: String): String {
-        val date = js("new Date(request.createdAt)").toLocaleDateString()
+        val date = js("new Date(request.createdAt)").toLocaleDateString(I18n.currentLang)
         val status = request.status?.toString() ?: "PENDING"
         val statusLabel = when (status) {
             "UNDER_REVIEW" -> I18n.t("adoptionStatusUnderReview")
@@ -796,7 +796,7 @@ object ProfilePageModule {
     }
 
     private fun renderVolunteerApplicationRow(application: dynamic): String {
-        val date = js("new Date(application.createdAt)").toLocaleDateString()
+        val date = js("new Date(application.createdAt)").toLocaleDateString(I18n.currentLang)
         val status = application.status?.toString() ?: "PENDING"
         val statusLabel = when (status) {
             "ACTIVE" -> I18n.t("volunteerStatusActive")
@@ -831,7 +831,7 @@ object ProfilePageModule {
     }
 
     private fun renderMySponsorshipOfferRow(o: dynamic): String {
-        val date = js("new Date(o.createdAt)").toLocaleDateString()
+        val date = js("new Date(o.createdAt)").toLocaleDateString(I18n.currentLang)
         val rescuerName = CommonModule.escapeHtml(o.rescuerName?.toString() ?: "")
         val petName = o.petName?.toString()?.takeIf { it.isNotEmpty() }
         val target = if (petName != null) CommonModule.escapeHtml(petName) else I18n.t("generalFundLabel")

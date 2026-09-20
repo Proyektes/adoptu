@@ -45,6 +45,7 @@ object ReportLostFoundPageModule {
             locationMap.captureCurrentLocation { status -> document.getElementById("location-status")?.textContent = status }
         })
         document.getElementById("submit-btn")?.addEventListener("click", { submit() })
+        CommonModule.initCountrySelect("report-country") { locationMap.syncToZoneFields() }
 
         document.querySelectorAll(".kind-btn").forEachElement { node ->
             val btn = node.unsafeCast<HTMLElement>()

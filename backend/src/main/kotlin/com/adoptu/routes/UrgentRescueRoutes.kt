@@ -85,7 +85,7 @@ fun HttpRules.urgentRescueRoutes() {
         val country = req.queryParam("country")
         val state = req.queryParam("state")
         val city = req.queryParam("city")
-        if (country.isNullOrBlank() || city.isNullOrBlank()) return@Handler res.respondError("country and city are required")
+        if (country.isNullOrBlank()) return@Handler res.respondError("country is required")
         runBlocking {
             val result = urgentRescueService.geocode(country, state, city)
             if (result == null) res.respondNotFound("No location found for that zone") else res.send(result)

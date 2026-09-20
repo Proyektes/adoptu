@@ -181,7 +181,7 @@ object AdminPageModule {
 
     private fun formatDate(epochMillis: dynamic): String {
         val date = js("new Date(epochMillis)")
-        return date.toLocaleDateString().unsafeCast<String>()
+        return date.toLocaleDateString(I18n.currentLang).unsafeCast<String>()
     }
 
     private fun buildQuery(params: Map<String, String>): String {

@@ -4,3 +4,4 @@ Disallow: /admin
 Disallow: /profile
 Disallow: /my-pets
 Disallow: /api/
+Sitemap: https://adopt-u.org/sitemap.xml
