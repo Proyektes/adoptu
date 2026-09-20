@@ -103,9 +103,9 @@ object EditPetPageModule {
 
     private fun renderMedicalEventRow(event: dynamic): String {
         val categoryLabel = I18n.t(if (event.category == "VACCINATION") "vaccination" else "deworming")
-        val administeredDate = js("new Date(event.administeredDate)").toLocaleDateString(I18n.currentLang)
+        val administeredDate = I18n.formatDateOnly(event.administeredDate)
         val dueHtml = if (event.nextDueDate != null) {
-            val dueDateStr = js("new Date(event.nextDueDate)").toLocaleDateString(I18n.currentLang)
+            val dueDateStr = I18n.formatDateOnly(event.nextDueDate)
             val daysUntil = js("Math.floor((event.nextDueDate - Date.now()) / 86400000)").unsafeCast<Int>()
             val (statusClass, statusLabel) = when {
                 daysUntil < 0 -> "overdue" to I18n.t("overdue")

@@ -219,11 +219,7 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
                     div(classes = "fee-input-group") {
                         input(InputType.number) { id = "photographerFee"; step = "0.01"; value = "0"; this.min = "0" }
                         select { id = "photographerCurrency"
-                            option { value = "USD"; +"$ USD" }
-                            option { value = "EUR"; +"€ EUR" }
-                            option { value = "GBP"; +"£ GBP" }
-                            option { value = "CAD"; +"$ CAD" }
-                            option { value = "AUD"; +"$ AUD" }
+                            feeCurrencyOptions()
                         }
                     }
                 }

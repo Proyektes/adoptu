@@ -48,7 +48,7 @@ object PetDetailPageModule {
 
         val canAdopt = try {
             val roles = user.activeRoles as? Array<String>
-            pet.status == "AVAILABLE" && roles?.contains("ADOPTER") == true
+            pet.status == "AVAILABLE" && !isOwner && roles?.contains("ADOPTER") == true
         } catch (e: dynamic) { false }
 
         val images = pet.images as? Array<dynamic>
@@ -117,7 +117,7 @@ object PetDetailPageModule {
         if (rescueDateMillis != null || rescueLocationText != null) {
             sb.append("<div class=\"rescue-info-row\">")
             if (rescueDateMillis != null) {
-                val rescueDateStr = js("new Date(rescueDateMillis)").toLocaleDateString(I18n.currentLang)
+                val rescueDateStr = I18n.formatDateOnly(rescueDateMillis)
                 sb.append("<span class=\"info-badge\"><strong>${I18n.t("rescueDate")}:</strong>&nbsp;$rescueDateStr</span>")
             }
             if (rescueLocationText != null) {
@@ -395,9 +395,9 @@ object PetDetailPageModule {
                 val isVaccination = event.category == "VACCINATION"
                 val categoryIcon = if (isVaccination) "vaccines" else "medication"
                 val categoryLabel = I18n.t(if (isVaccination) "vaccination" else "deworming")
-                val administeredDate = js("new Date(event.administeredDate)").toLocaleDateString(I18n.currentLang)
+                val administeredDate = I18n.formatDateOnly(event.administeredDate)
                 val dueHtml = if (event.nextDueDate != null) {
-                    val dueDateStr = js("new Date(event.nextDueDate)").toLocaleDateString(I18n.currentLang)
+                    val dueDateStr = I18n.formatDateOnly(event.nextDueDate)
                     val daysUntil = js("Math.floor((event.nextDueDate - Date.now()) / 86400000)").unsafeCast<Int>()
                     val (statusClass, statusLabel) = when {
                         daysUntil < 0 -> "overdue" to I18n.t("overdue")

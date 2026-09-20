@@ -295,3 +295,31 @@ fun BODY.footer() {
         span(classes = "deploy-sequence") { id = "deploy-sequence" }
     }
 }
+
+val feeCurrencies: List<Pair<String, String>> = listOf(
+    "USD" to "\$ USD",
+    "EUR" to "€ EUR",
+    "GBP" to "£ GBP",
+    "CAD" to "\$ CAD",
+    "AUD" to "\$ AUD",
+    "MXN" to "\$ MXN",
+    "ARS" to "\$ ARS",
+    "CLP" to "\$ CLP",
+    "COP" to "\$ COP",
+    "BRL" to "R\$ BRL",
+    "PEN" to "S/ PEN",
+    "UYU" to "\$ UYU",
+    "PYG" to "₲ PYG",
+    "BOB" to "Bs BOB",
+    "VES" to "Bs VES",
+    "CRC" to "₡ CRC",
+    "GTQ" to "Q GTQ",
+    "HNL" to "L HNL",
+    "NIO" to "C\$ NIO",
+    "DOP" to "RD\$ DOP",
+    "PAB" to "B/. PAB",
+)
+
+fun SELECT.feeCurrencyOptions() {
+    feeCurrencies.forEach { (code, label) -> option { value = code; +label } }
+}

@@ -70,27 +70,7 @@ fun HTML.editPetPage(navParams: NavParams = NavParams()) {
                 div(classes = "fee-input-group") {
                     input(InputType.number) { id = "adoptionFee"; classes = setOf("fee-amount-wide"); step = "0.01"; value = "0"; this.min = "0" }
                     select { id = "currency"
-                        option { value = "USD"; +"$ USD" }
-                        option { value = "EUR"; +"€ EUR" }
-                        option { value = "GBP"; +"£ GBP" }
-                        option { value = "CAD"; +"$ CAD" }
-                        option { value = "AUD"; +"$ AUD" }
-                        option { value = "MXN"; +"$ MXN" }
-                        option { value = "ARS"; +"$ ARS" }
-                        option { value = "CLP"; +"$ CLP" }
-                        option { value = "COP"; +"$ COP" }
-                        option { value = "BRL"; +"R$ BRL" }
-                        option { value = "PEN"; +"S/ PEN" }
-                        option { value = "UYU"; +"$ UYU" }
-                        option { value = "PYG"; +"₲ PYG" }
-                        option { value = "BOB"; +"Bs BOB" }
-                        option { value = "VES"; +"Bs VES" }
-                        option { value = "CRC"; +"₡ CRC" }
-                        option { value = "GTQ"; +"Q GTQ" }
-                        option { value = "HNL"; +"L HNL" }
-                        option { value = "NIO"; +"C\$ NIO" }
-                        option { value = "DOP"; +"RD\$ DOP" }
-                        option { value = "PAB"; +"B/. PAB" }
+                        feeCurrencyOptions()
                     }
                 }
                 div { classes = setOf("checkbox-group")

@@ -237,7 +237,7 @@ object MyPetsPageModule {
         val promoted = if (p.isPromoted == true) " 🏠" else ""
         val breedHtml = if (p.breed != null) "<span class=\"pet-breed\">${CommonModule.escapeHtml(p.breed.toString())}</span>" else ""
         val rescueDateHtml = if (p.rescueDate != null) {
-            val date = js("new Date(p.rescueDate)").toLocaleDateString(I18n.currentLang)
+            val date = I18n.formatDateOnly(p.rescueDate)
             "<span class=\"label\">${I18n.t("rescued")}</span><span class=\"value\">$date</span>"
         } else ""
         return "<div class=\"pet-card\">$imageHtml<div class=\"pet-card-body\">" +
