@@ -4,8 +4,10 @@ import com.adoptu.common.Country
 import kotlinx.html.*
 
 fun HTML.commonHead(title: String, extraCss: String? = null) {
+    lang = "en"
     head {
         meta(charset = "UTF-8")
+        meta(name = "description", content = "Free pet adoption, urgent rescue paging, and lost & found reporting.")
         meta(name = "viewport", content = "width=device-width, initial-scale=1.0")
         this.title { +title }
         link(rel = "stylesheet", href = "/static/css/style.css")
@@ -118,12 +120,16 @@ fun NAV.commonNav(isLoggedIn: Boolean = false, isAdmin: Boolean = false, isRescu
         a("/report-urgent") {
             id = "nav-report-urgent"
             classes = setOf("nav-urgent-pill")
+            attributes["aria-label"] = "Report a pet in danger"
+            attributes["data-i18n-aria-label"] = "reportUrgent"
             span(classes = "material-symbols-outlined") { +Icons.WARNING }
             span { attributes["data-i18n"] = "reportUrgent"; +"Urgent" }
         }
         a("/lost-found") {
             id = "nav-report-lost-found"
             classes = setOf("nav-urgent-pill")
+            attributes["aria-label"] = "Report a lost or found pet"
+            attributes["data-i18n-aria-label"] = "reportLostFound"
             unsafe {
                 // Paw-in-lens: the real Material Symbols "pets" glyph path (same source as
                 // Icons.PAW) remapped from its native 0,-960,960,960 viewBox into a 34x34 box
@@ -137,7 +143,7 @@ fun NAV.commonNav(isLoggedIn: Boolean = false, isAdmin: Boolean = false, isRescu
         }
     }
     div(classes = "nav-right") {
-        div(classes = "hidden") { attributes["data-auth"] = "user"; commonResourcesDropdown() }
+        div { commonResourcesDropdown() }
         a("/urgent-rescuer-leaderboard") {
             id = "nav-urgent-leaderboard"
             classes = setOf("nav-icon-only")

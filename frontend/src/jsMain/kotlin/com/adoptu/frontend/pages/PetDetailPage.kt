@@ -71,7 +71,7 @@ object PetDetailPageModule {
         sb.append("<div class=\"pet-badge-group\">")
         if (pet.breed != null && pet.breed.toString().isNotEmpty()) sb.append("<span class=\"info-badge\"><strong>${I18n.t("breed")}:</strong>&nbsp;${pet.breed}</span>")
         sb.append("<span class=\"info-badge\">${pet.weight} kg</span>")
-        sb.append("<span class=\"info-badge\">${pet.ageYears} ${I18n.t("years")} ${pet.ageMonths} ${I18n.t("months")}</span>")
+        sb.append("<span class=\"info-badge\">${CommonModule.formatAge(pet.ageYears, pet.ageMonths)}</span>")
         sb.append("<span class=\"info-badge\">${I18n.t(pet.sex.toString().lowercase())}</span>")
         if (adoptionFee > 0) sb.append("<span class=\"fee-badge\">&#129689; ${currencySymbols[pet.currency.toString()] ?: "$"}$adoptionFee ${pet.currency}</span>")
         sb.append("</div></div>")
@@ -177,6 +177,9 @@ object PetDetailPageModule {
                     "<button type=\"submit\" class=\"btn\">${I18n.t("requestAdoption")}</button></form>"
             )
         }
+        if (!authenticated && pet.status == "AVAILABLE") {
+            sb.append("<a href=\"${CommonModule.loginUrlWithReturn()}\" class=\"btn\" id=\"login-to-adopt-btn\">${I18n.t("loginToAdopt")}</a>")
+        }
         if (isOwner) {
             sb.append("<a href=\"/edit-pet?id=${pet.id}\" class=\"btn\">${I18n.t("editPet")}</a>")
         }
@@ -187,6 +190,7 @@ object PetDetailPageModule {
         sb.append("</div>")
 
         container.innerHTML = sb.toString()
+        document.title = "${pet.name} - Adopt-U"
 
         loadMedicalSchedule()
         if (!isOwner && authenticated) {

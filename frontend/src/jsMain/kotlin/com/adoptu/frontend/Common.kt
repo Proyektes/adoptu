@@ -215,7 +215,24 @@ object CommonModule {
     // live in LocationSearchFilters.kt (a static page has no per-response CSP nonce to stamp on
     // an inline script) - called unconditionally from Main.kt, no-ops when the page has no
     // #search-country element (Shelters/Photographers/SterilizationLocations/TemporalHome only).
-    private const val SELECTED_COUNTRY_KEY = "adoptuSelectedCountry"
+    fun loginUrlWithReturn(): String {
+        val here = window.location.pathname + window.location.search
+        return "/login?next=" + window.asDynamic().encodeURIComponent(here)
+    }
+
+    fun postLoginTarget(): String {
+        val next = js("new URLSearchParams(window.location.search)").get("next")?.toString()
+        return if (next != null && next.startsWith("/") && !next.startsWith("//")) next else "/profile"
+    }
+
+    fun formatAge(years: dynamic, months: dynamic): String {
+        val y = years?.toString()?.toIntOrNull() ?: 0
+        val m = months?.toString()?.toIntOrNull() ?: 0
+        val parts = mutableListOf<String>()
+        if (y > 0) parts.add("$y ${I18n.t(if (y == 1) "year" else "years")}")
+        if (m > 0 || parts.isEmpty()) parts.add("$m ${I18n.t(if (m == 1) "month" else "months")}")
+        return parts.joinToString(" ")
+    }
 
     fun initLocationSearchFilters() {
         val countrySelect = document.getElementById("search-country") as? HTMLSelectElement ?: return
@@ -223,7 +240,7 @@ object CommonModule {
         fun onCountryChange() {
             val hasCountry = countrySelect.value.isNotEmpty()
             if (hasCountry) {
-                try { window.localStorage.setItem(SELECTED_COUNTRY_KEY, countrySelect.value) } catch (e: dynamic) {}
+                try { window.localStorage.setItem(COUNTRY_STORAGE_KEY, countrySelect.value) } catch (e: dynamic) {}
             }
             for (id in listOf("search-state", "search-city", "search-zip", "search-neighborhood")) {
                 val el = document.getElementById(id) as? HTMLInputElement ?: continue
@@ -251,7 +268,7 @@ object CommonModule {
 
         countrySelect.addEventListener("change", { onCountryChange() })
         if (countrySelect.value.isEmpty()) {
-            val saved = try { window.localStorage.getItem(SELECTED_COUNTRY_KEY) } catch (e: dynamic) { null }
+            val saved = try { window.localStorage.getItem(COUNTRY_STORAGE_KEY) } catch (e: dynamic) { null }
             if (!saved.isNullOrEmpty()) countrySelect.value = saved
         }
         onCountryChange()

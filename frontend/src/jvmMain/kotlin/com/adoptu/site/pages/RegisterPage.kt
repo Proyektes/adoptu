@@ -30,7 +30,8 @@ fun HTML.registerPage(navParams: NavParams = NavParams()) {
                             classes = setOf("checkbox-row")
                             input(InputType.checkBox) { name = "roles"; value = "ADOPTER"; id = "role-adopter"; checked = true; disabled = true }
                             span { attributes["data-i18n"] = "adoptPet"; +"Adopt a pet" }
-                            +" (required)"
+                            +" "
+                            span { attributes["data-i18n"] = "requiredMarker"; +"(required)" }
                         }
                         div {
                             classes = setOf("checkbox-row")

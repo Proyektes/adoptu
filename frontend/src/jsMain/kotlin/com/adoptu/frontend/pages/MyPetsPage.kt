@@ -245,7 +245,7 @@ object MyPetsPageModule {
             "<span class=\"pet-sex $sexClass\">${I18n.t(p.sex.toString().lowercase())}</span>$sizeHtml" +
             "<div class=\"pet-name\"><h3>${CommonModule.escapeHtml(p.name?.toString())}$urgent$promoted</h3>$breedHtml</div>" +
             "<p class=\"pet-info\"><span class=\"pet-age\"><span class=\"label\">${I18n.t("age")}</span>" +
-            "<span class=\"value\">${p.ageYears} ${I18n.t("years")} ${p.ageMonths} ${I18n.t("months")} • ${p.weight} kg</span></span>" +
+            "<span class=\"value\">${CommonModule.formatAge(p.ageYears, p.ageMonths)} • ${p.weight} kg</span></span>" +
             "<span class=\"pet-rescue-date\">$rescueDateHtml</span></p>" +
             "<p class=\"pet-status\">${petStatusLabel(p.status)}</p>" +
             "<div class=\"pet-analytics\" id=\"pet-analytics-${p.id}\"></div>" +

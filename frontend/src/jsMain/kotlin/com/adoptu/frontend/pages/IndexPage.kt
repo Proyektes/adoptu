@@ -97,7 +97,7 @@ object IndexPageModule {
     private fun toggleFavorite(btn: HTMLElement) {
         val petId = btn.asDynamic().dataset.petId?.toString() ?: return
         if (!isAuthenticated) {
-            window.location.href = "/login"
+            window.location.href = CommonModule.loginUrlWithReturn()
             return
         }
         val id = petId.toIntOrNull() ?: return
@@ -171,12 +171,12 @@ object IndexPageModule {
         val filtersDiv = document.getElementById("pets-filters").unsafeCast<HTMLElement?>()
         val hasCountry = countrySelect?.value?.isNotEmpty() == true
         hint?.style?.display = if (hasCountry) "none" else "block"
-        filtersDiv?.style?.display = if (hasCountry) "block" else "none"
+        filtersDiv?.classList?.toggle("hidden", !hasCountry)
     }
 
     private fun showEmptyState(titleKey: String, hintKey: String) {
         val emptyDiv = document.getElementById("pets-empty").unsafeCast<HTMLElement?>() ?: return
-        emptyDiv.innerHTML = "$PAW_ICON<h3>${I18n.t(titleKey)}</h3><p>${I18n.t(hintKey)}</p>"
+        emptyDiv.innerHTML = "$PAW_ICON<h2>${I18n.t(titleKey)}</h2><p>${I18n.t(hintKey)}</p>"
         emptyDiv.style.display = "flex"
     }
 
@@ -211,7 +211,7 @@ object IndexPageModule {
             "<span class=\"pet-sex $sexClass\">${I18n.t(p.sex.toString().lowercase())}</span>$sizeHtml" +
             "<div class=\"pet-name\"><h3>${p.name}$urgent</h3>$breedHtml</div>" +
             "<p class=\"pet-info\"><span class=\"pet-age\"><span class=\"label\">${I18n.t("age")}</span>" +
-            "<span class=\"value\">${p.ageYears} ${I18n.t("years")} ${p.ageMonths} ${I18n.t("months")}</span></span>" +
+            "<span class=\"value\">${CommonModule.formatAge(p.ageYears, p.ageMonths)}</span></span>" +
             "<span class=\"pet-rescue-date\">$rescueDateHtml</span></p>" +
             "<p class=\"pet-status\">${petStatusLabel(p.status)}</p></div></a>"
     }

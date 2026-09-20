@@ -48,7 +48,7 @@ fun HttpRules.photographerRoutes() {
         // a wildcard here would risk serving one user's private request
         // list to another from the shared edge cache.
         res.header(HeaderNames.CACHE_CONTROL, "public, max-age=30")
-        res.send(photographers)
+        res.send(photographers.map { it.copy(username = null) })
     })
 
     // Own photographer settings - a second call rather than denormalizing these fields onto

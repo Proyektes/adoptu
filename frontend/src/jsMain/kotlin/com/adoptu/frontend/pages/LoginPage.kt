@@ -1,5 +1,6 @@
 package com.adoptu.frontend.pages
 
+import com.adoptu.frontend.CommonModule
 import com.adoptu.frontend.I18n
 import com.adoptu.frontend.WebAuthnModule
 import com.adoptu.frontend.apiFetch
@@ -82,7 +83,7 @@ object LoginPageModule {
                 messageEl?.textContent = "Requesting passkey..."
                 WebAuthnModule.authenticate()
                     .then<Unit> {
-                        window.location.href = "/profile"
+                        window.location.href = CommonModule.postLoginTarget()
                     }
                     .catch { error: dynamic ->
                         val errName = error?.name?.toString() ?: ""
@@ -162,7 +163,7 @@ object LoginPageModule {
                     }
                     .then { data: dynamic ->
                         if (data.success == true) {
-                            window.location.href = "/profile"
+                            window.location.href = CommonModule.postLoginTarget()
                         } else {
                             msgEl?.textContent = data.error ?: "Invalid credentials"
                         }

@@ -110,6 +110,7 @@ object ReportLostFoundPageModule {
 object LostFoundBrowsePageModule {
     fun init() {
         document.getElementById("search-btn")?.addEventListener("click", { search() })
+        CommonModule.initCountrySelect("search-country") { window.asDynamic().onCountryChange() }
         document.querySelectorAll(".kind-btn").forEachElement { node ->
             node.unsafeCast<HTMLElement>().addEventListener("click", {
                 document.querySelectorAll(".kind-btn").forEachElement { b -> b.unsafeCast<HTMLElement>().classList.remove("active") }

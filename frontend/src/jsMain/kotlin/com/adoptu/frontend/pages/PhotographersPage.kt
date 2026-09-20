@@ -13,9 +13,12 @@ import org.w3c.dom.events.Event
 @JsExport
 @JsName("PhotographersPage")
 object PhotographersPageModule {
+    private var isAuthenticated = false
+
     fun init() {
         window.asDynamic().searchPhotographers = { search() }
         createRequestModal()
+        ApiClientModule.me().then<Unit> { result: dynamic -> isAuthenticated = result.authenticated == true }.catch<Unit> { }
 
         document.getElementById("search-btn")?.addEventListener("click", { search() })
         val debounced = CommonModule.debounce(500) { search() }
@@ -68,6 +71,10 @@ object PhotographersPageModule {
         document.querySelectorAll(".request-btn").forEachElement { node ->
             val btn = node.unsafeCast<HTMLElement>()
             btn.addEventListener("click", {
+                if (!isAuthenticated) {
+                    window.location.href = CommonModule.loginUrlWithReturn()
+                    return@addEventListener
+                }
                 val id = btn.asDynamic().dataset.id.toString().toInt()
                 val name = btn.asDynamic().dataset.name.toString()
                 val fee = btn.asDynamic().dataset.fee.toString()
