@@ -1,4 +1,6 @@
 package com.adoptu.services
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.and
 import com.adoptu.adapters.authkit.AdoptuUserRepositoryAdapter
 
 import com.adoptu.adapters.db.UserActiveRoles
@@ -153,9 +155,24 @@ class TemporalHomeServiceTest {
     }
 
     @Test
+    fun `searchTemporalHomes excludes homes whose user no longer holds the role`() = runBlocking {
+        val active = createTestUser("active-home@test.com", "Active Home", "TEMPORAL_HOME")
+        val lapsed = createTestUser("lapsed-home@test.com", "Lapsed Home", "TEMPORAL_HOME")
+        createTemporalHome(active, "Active", "Mexico", null, "Guadalajara")
+        createTemporalHome(lapsed, "Lapsed", "Mexico", null, "Guadalajara")
+        transaction {
+            UserActiveRoles.deleteWhere { (UserActiveRoles.userId eq lapsed) and (UserActiveRoles.role eq "TEMPORAL_HOME") }
+        }
+
+        val result = service.searchTemporalHomes(TemporalHomeSearchParams(country = "Mexico"))
+
+        assertEquals(listOf(active), result.map { it.userId })
+    }
+
+    @Test
     fun `searchTemporalHomes filters by country`() = runBlocking {
-        val user1 = createTestUser("home1@test.com", "Home 1")
-        val user2 = createTestUser("home2@test.com", "Home 2")
+        val user1 = createTestUser("home1@test.com", "Home 1", "TEMPORAL_HOME")
+        val user2 = createTestUser("home2@test.com", "Home 2", "TEMPORAL_HOME")
         createTemporalHome(user1, "US Home", "United States", "California", "LA")
         createTemporalHome(user2, "MX Home", "Mexico", null, "Mexico City")
 
@@ -167,8 +184,8 @@ class TemporalHomeServiceTest {
 
     @Test
     fun `searchTemporalHomes filters by country and state`() = runBlocking {
-        val user1 = createTestUser("ca@test.com", "CA User")
-        val user2 = createTestUser("ny@test.com", "NY User")
+        val user1 = createTestUser("ca@test.com", "CA User", "TEMPORAL_HOME")
+        val user2 = createTestUser("ny@test.com", "NY User", "TEMPORAL_HOME")
         createTemporalHome(user1, "CA Home", "United States", "California", "LA")
         createTemporalHome(user2, "NY Home", "United States", "New York", "NY")
 
@@ -182,8 +199,8 @@ class TemporalHomeServiceTest {
 
     @Test
     fun `searchTemporalHomes filters by all params`() = runBlocking {
-        val user1 = createTestUser("la@test.com", "LA User")
-        val user2 = createTestUser("sf@test.com", "SF User")
+        val user1 = createTestUser("la@test.com", "LA User", "TEMPORAL_HOME")
+        val user2 = createTestUser("sf@test.com", "SF User", "TEMPORAL_HOME")
         createTemporalHome(user1, "LA Home", "United States", "California", "Los Angeles")
         createTemporalHome(user2, "SF Home", "United States", "California", "San Francisco")
 

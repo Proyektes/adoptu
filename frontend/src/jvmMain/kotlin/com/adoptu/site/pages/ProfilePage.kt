@@ -223,6 +223,9 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
                         }
                     }
                 }
+                h3 { attributes["data-i18n"] = "photoRequestsReceived"; +"Photo Session Requests Received" }
+                div { id = "received-photo-requests-empty"; +"" }
+                div { id = "received-photo-requests-list"; +"" }
             }
 
             div(classes = "card-bg profile-section temporal-home-section hidden") {
@@ -328,6 +331,12 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
                 h2 { attributes["data-i18n"] = "mySponsorshipOffers"; +"My Sponsorship Offers" }
                 div { id = "my-sponsorship-offers-empty"; +"" }
                 div { id = "my-sponsorship-offers-list"; +"" }
+            }
+
+            div(classes = "card-bg profile-section") {
+                h2 { attributes["data-i18n"] = "myPhotoRequests"; +"My Photo Session Requests" }
+                div { id = "my-photo-requests-empty"; +"" }
+                div { id = "my-photo-requests-list"; +"" }
             }
 
             div(classes = "card-bg profile-section") {

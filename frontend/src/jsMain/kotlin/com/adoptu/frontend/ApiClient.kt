@@ -244,6 +244,13 @@ object ApiClientModule {
 
     fun getMySponsorshipOffers(): Promise<dynamic> = apiFetch("/api/users/sponsorships/mine")
 
+    fun getSentPhotographyRequests(): Promise<dynamic> = apiFetch("/api/photographers/requests?scope=sent")
+
+    fun getReceivedPhotographyRequests(): Promise<dynamic> = apiFetch("/api/photographers/requests?scope=received")
+
+    fun updatePhotographyRequestStatus(id: Int, status: String): Promise<dynamic> =
+        apiFetch("/api/photographers/requests/$id", js("({method: 'PUT', body: JSON.stringify({status: status})})"))
+
     fun searchTemporalHomes(query: dynamic): Promise<dynamic> = apiFetch("/api/temporal-homes/search", js("({method: 'POST', body: JSON.stringify(query)})"))
 
     fun getTemporalHomeById(id: String): Promise<dynamic> = apiFetch("/api/temporal-homes/$id")

@@ -1,5 +1,9 @@
 package com.adoptu.adapters.db.repositories
 
+import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.jdbc.select
+import com.adoptu.dto.input.UserRole
+import com.adoptu.adapters.db.UserActiveRoles
 import com.adoptu.adapters.db.BlockedRescuers
 import com.adoptu.adapters.db.SpamReportTokens
 import com.adoptu.adapters.db.TemporalHomeRequests
@@ -164,11 +168,13 @@ class TemporalHomeRepositoryImpl(
                 conditions = conditions?.and(TemporalHomes.neighborhood eq neighborhood) ?: (TemporalHomes.neighborhood eq neighborhood)
             }
 
-            val query = if (conditions != null) {
-                TemporalHomes.selectAll().where { conditions }
-            } else {
-                TemporalHomes.selectAll()
-            }
+            val activeHomeUserIds = UserActiveRoles.select(UserActiveRoles.userId)
+                .where { UserActiveRoles.role eq UserRole.TEMPORAL_HOME.name }
+                .map { it[UserActiveRoles.userId] }
+            val activeOnly = TemporalHomes.userId inList activeHomeUserIds
+            conditions = conditions?.and(activeOnly) ?: activeOnly
+
+            val query = TemporalHomes.selectAll().where { conditions!! }
 
             query.map { row ->
                 TemporalHomeDto(

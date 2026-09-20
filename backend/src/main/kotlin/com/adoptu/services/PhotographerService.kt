@@ -146,10 +146,15 @@ class PhotographerService(
         )
     }
 
-    suspend fun getRequestsForUser(user: UserDto): List<Map<String, Any?>> {
+    suspend fun getRequestsForUser(user: UserDto, scope: String? = null): List<Map<String, Any?>> {
         val activeRoles = user.activeRoles.map { it.name }
+        val received = when (scope) {
+            "received" -> true
+            "sent" -> false
+            else -> activeRoles.contains("PHOTOGRAPHER")
+        }
 
-        return if (activeRoles.contains("PHOTOGRAPHER")) {
+        return if (received) {
             photographerRepository.getRequestsForPhotographer(user.id).map { dto ->
                 val requester = userRepository.getById(dto.requesterId)
                 mapOf(

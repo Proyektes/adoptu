@@ -139,10 +139,13 @@ object LoginPageModule {
         }
     }
 
+    private var passwordLoginInFlight = false
+
     private fun setupPasswordLoginButton() {
         val btn = document.getElementById("password-login-btn")
         if (btn != null) {
             btn.addEventListener("click", { e ->
+                if (passwordLoginInFlight) return@addEventListener
                 val msgEl = document.getElementById("password-login-message")
                 val emailInput = document.getElementById("password-email") as? HTMLInputElement
                 val passwordInput = document.getElementById("password-password") as? HTMLInputElement
@@ -155,6 +158,7 @@ object LoginPageModule {
                 }
 
                 msgEl?.textContent = "Signing in..."
+                passwordLoginInFlight = true
 
                 getPublicKey()
                     .then { publicKey -> RsaCryptoModule.encrypt("$email:$password", publicKey) }
@@ -165,10 +169,12 @@ object LoginPageModule {
                         if (data.success == true) {
                             window.location.href = CommonModule.postLoginTarget()
                         } else {
+                            passwordLoginInFlight = false
                             msgEl?.textContent = data.error ?: "Invalid credentials"
                         }
                     }
                     .catch { e: dynamic ->
+                        passwordLoginInFlight = false
                         msgEl?.textContent = "Error: ${e?.message ?: "Unknown"}"
                     }
             })

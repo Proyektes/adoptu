@@ -53,6 +53,8 @@ object ProfilePageModule {
         loadMyAdoptionRequests()
         loadMyVolunteerApplications()
         loadMySponsorshipOffers()
+        loadMyPhotoRequests()
+        setupPhotoRequestActions()
 
         listOf("role-rescuer", "role-photographer", "role-temporal-home", "role-shelter", "role-sterilization").forEach { id ->
             (document.getElementById(id) as? HTMLInputElement)?.checked = when (id) {
@@ -131,6 +133,7 @@ object ProfilePageModule {
         if (currentRoles.contains("PHOTOGRAPHER")) {
             (document.querySelector(".photographer-section") as? HTMLElement)?.classList?.remove("hidden")
             loadPhotographer()
+            loadReceivedPhotoRequests()
         }
         if (currentRoles.contains("TEMPORAL_HOME")) {
             (document.querySelector(".temporal-home-section") as? HTMLElement)?.classList?.remove("hidden")
@@ -839,6 +842,73 @@ object ProfilePageModule {
             empty?.textContent = ""
             container?.innerHTML = offers.joinToString("") { renderMySponsorshipOfferRow(it) }
         }
+    }
+
+    private fun setupPhotoRequestActions() {
+        window.asDynamic().approvePhotoRequest = { id: dynamic -> updatePhotoRequest(id, "APPROVED") }
+        window.asDynamic().rejectPhotoRequest = { id: dynamic -> updatePhotoRequest(id, "REJECTED") }
+        window.asDynamic().cancelPhotoRequest = { id: dynamic -> updatePhotoRequest(id, "CANCELLED") }
+    }
+
+    private fun updatePhotoRequest(id: dynamic, status: String) {
+        val requestId = id.toString().toIntOrNull() ?: return
+        ApiClientModule.updatePhotographyRequestStatus(requestId, status).then<Unit> {
+            loadMyPhotoRequests()
+            loadReceivedPhotoRequests()
+        }.catch<Unit> { err: dynamic -> window.alert(err?.message?.toString() ?: "Failed to update request") }
+    }
+
+    private fun photoStatusLabel(status: String): String = when (status) {
+        "APPROVED" -> I18n.t("photoStatusApproved")
+        "REJECTED" -> I18n.t("photoStatusRejected")
+        "CANCELLED" -> I18n.t("photoStatusCancelled")
+        "COMPLETED" -> I18n.t("photoStatusCompleted")
+        else -> I18n.t("photoStatusPending")
+    }
+
+    private fun loadMyPhotoRequests() {
+        ApiClientModule.getSentPhotographyRequests().then<Unit> { raw: dynamic ->
+            val requests = (raw as? Array<dynamic>) ?: arrayOf()
+            val container = document.getElementById("my-photo-requests-list")
+            val empty = document.getElementById("my-photo-requests-empty")
+            if (requests.isEmpty()) {
+                empty?.innerHTML = "<p>${I18n.t("noPhotoRequestsYet")}</p><a class=\"btn btn-secondary\" href=\"/photographers\">${I18n.t("photographers")}</a>"
+                container?.innerHTML = ""
+                return@then
+            }
+            empty?.textContent = ""
+            container?.innerHTML = requests.joinToString("") { r ->
+                val status = r.status?.toString() ?: "PENDING"
+                val name = CommonModule.escapeHtml(r.photographerName?.toString() ?: "")
+                val cancel = if (status == "PENDING") "<div class=\"ar-actions\"><button class=\"btn btn-secondary\" data-action=\"cancelPhotoRequest\" data-arg=\"${r.id}\">${I18n.t("cancelRequest")}</button></div>" else ""
+                "<div class=\"adoption-request-card\">$name<span class=\"ar-status status-${status.lowercase()}\">${photoStatusLabel(status)}</span>" +
+                    "<span class=\"ar-date\">${I18n.formatDate(r.createdAt)}</span>$cancel</div>"
+            }
+        }.catch<Unit> { }
+    }
+
+    private fun loadReceivedPhotoRequests() {
+        ApiClientModule.getReceivedPhotographyRequests().then<Unit> { raw: dynamic ->
+            val requests = (raw as? Array<dynamic>) ?: arrayOf()
+            val container = document.getElementById("received-photo-requests-list")
+            val empty = document.getElementById("received-photo-requests-empty")
+            if (requests.isEmpty()) {
+                empty?.innerHTML = "<p>${I18n.t("noPhotoRequestsReceived")}</p>"
+                container?.innerHTML = ""
+                return@then
+            }
+            empty?.textContent = ""
+            container?.innerHTML = requests.joinToString("") { r ->
+                val status = r.status?.toString() ?: "PENDING"
+                val name = CommonModule.escapeHtml(r.requesterName?.toString() ?: "")
+                val message = CommonModule.escapeHtml(r.message?.toString() ?: "")
+                val actions = if (status == "PENDING") "<div class=\"ar-actions\"><button class=\"btn btn-secondary\" data-action=\"approvePhotoRequest\" data-arg=\"${r.id}\">${I18n.t("approve")}</button>" +
+                    "<button class=\"btn btn-secondary\" data-action=\"rejectPhotoRequest\" data-arg=\"${r.id}\">${I18n.t("reject")}</button></div>" else ""
+                "<div class=\"adoption-request-card\">$name<span class=\"ar-status status-${status.lowercase()}\">${photoStatusLabel(status)}</span>" +
+                    "<span class=\"ar-date\">${I18n.formatDate(r.createdAt)}</span>" +
+                    (if (message.isNotEmpty()) "<p class=\"ar-message\">$message</p>" else "") + actions + "</div>"
+            }
+        }.catch<Unit> { }
     }
 
     private fun renderMySponsorshipOfferRow(o: dynamic): String {

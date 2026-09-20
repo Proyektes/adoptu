@@ -171,7 +171,7 @@ fun HttpRules.photographerRoutes() {
             }
             val user = (userResult as ServiceResult.Success).data
 
-            val result = photographerService.getRequestsForUser(user)
+            val result = photographerService.getRequestsForUser(user, req.queryParam("scope"))
             res.send(result)
         }
     })
