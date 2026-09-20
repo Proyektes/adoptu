@@ -73,7 +73,11 @@ object ApiClientModule {
     // the refresh token is still good. One refresh-and-recheck, scoped to just this accessor -
     // deliberately not changing /api/auth/me's own status-code contract, which every other page
     // already assumes is always 200.
-    fun me(): Promise<dynamic> = apiFetch("/api/auth/me").then<dynamic> { user ->
+    private var sessionCheck: Promise<dynamic>? = null
+
+    fun me(): Promise<dynamic> = sessionCheck ?: fetchMe().also { sessionCheck = it }
+
+    private fun fetchMe(): Promise<dynamic> = apiFetch("/api/auth/me").then<dynamic> { user ->
         if (user?.authenticated == false) {
             window.asDynamic().fetch("/api/auth/refresh", js("({method: 'POST', credentials: 'include'})")).then { refreshRes ->
                 if (refreshRes.unsafeCast<dynamic>().ok == true) apiFetch("/api/auth/me") else user
@@ -83,7 +87,10 @@ object ApiClientModule {
         }
     }
 
-    fun logout(): Promise<dynamic> = apiFetch("/api/auth/logout", js("({method: 'POST'})"))
+    fun logout(): Promise<dynamic> {
+        sessionCheck = null
+        return apiFetch("/api/auth/logout", js("({method: 'POST'})"))
+    }
 
     fun detectCountry(locale: String? = null): Promise<dynamic> {
         val query = if (!locale.isNullOrEmpty()) "?locale=" + window.asDynamic().encodeURIComponent(locale) else ""

@@ -71,6 +71,7 @@ fun main(args: Array<String>) {
         "lost-found" to { lostFoundBrowsePage() },
         "lost-found-detail" to { lostFoundDetailPage() },
         "lost-found-resolve" to { lostFoundResolvePage() },
+        "404" to { notFoundPage() },
     )
 
     for ((name, render) in pages) {

@@ -83,7 +83,7 @@ fun HTML.reportUrgentPage(navParams: NavParams = NavParams()) {
                 div(classes = "form-row") {
                     id = "reporter-contact-row"
                     label { htmlFor = "reporter-email"; attributes["data-i18n"] = "email"; +"Your email (so we can follow up)" }
-                    input(InputType.email) { id = "reporter-email" }
+                    input(InputType.email) { id = "reporter-email"; required = true }
                 }
                 div(classes = "form-row") {
                     id = "reporter-phone-row"

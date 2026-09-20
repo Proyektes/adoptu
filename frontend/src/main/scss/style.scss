@@ -210,6 +210,10 @@ form {
         margin: 0;
     }
 
+    &.not-found-state {
+        display: flex;
+    }
+
     p {
         margin: 0;
         max-width: 32rem;

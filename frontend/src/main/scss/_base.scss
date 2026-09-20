@@ -3,6 +3,7 @@
 :root {
     --primary: #{$primary};
     --primary-light: #{$primary-light};
+    --primary-dark: #{$primary-dark};
     --secondary: #{$secondary};
     --accent: #{$accent};
     --bg: #{$bg};
@@ -35,7 +36,7 @@ main {
 .btn {
     display: inline-block;
     padding: 0.5rem 1rem;
-    background: var(--primary);
+    background: var(--primary-dark);
     color: white;
     border: none;
     border-radius: 6px;

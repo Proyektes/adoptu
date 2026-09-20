@@ -16,6 +16,7 @@ import kotlin.js.json
 @JsExport
 @JsName("ReportLostFoundPage")
 object ReportLostFoundPageModule {
+    private var isAuthenticated = false
     private val locationMap = com.adoptu.frontend.components.LocationMapWidget(
         mapContainerId = "location-map",
         countryFieldId = "report-country",
@@ -32,6 +33,7 @@ object ReportLostFoundPageModule {
 
         ApiClientModule.me().then<Unit> { result: dynamic ->
             val authenticated = result.authenticated == true
+            isAuthenticated = authenticated
             emailRow?.style?.display = if (authenticated) "none" else ""
             phoneRow?.style?.display = if (authenticated) "none" else ""
             captchaRow?.classList?.let { if (!authenticated) it.remove("hidden") else it.add("hidden") }
@@ -73,6 +75,12 @@ object ReportLostFoundPageModule {
         if (country.isNullOrBlank()) {
             msg?.className = "message error"
             msg?.textContent = I18n.t("locationRequired")
+            return
+        }
+        if (!isAuthenticated && reporterEmail.isNullOrBlank()) {
+            msg?.className = "message error"
+            msg?.textContent = I18n.t("emailRequired")
+            (document.getElementById("reporter-email") as? HTMLInputElement)?.focus()
             return
         }
 

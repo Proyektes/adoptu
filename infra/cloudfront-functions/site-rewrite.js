@@ -12,6 +12,51 @@ import cf from 'cloudfront';
 // GET /api/share/pet/{id}) instead - real visitors are untouched, still get /pet-detail.html below.
 var CRAWLER_UA_RE = /facebookexternalhit|Facebot|Twitterbot|WhatsApp|LinkedInBot|Slackbot|TelegramBot|Discordbot|SkypeUriPreview|Pinterest|redditbot|Applebot/i;
 
+// Every page SiteGenerator.kt writes - an extensionless path outside this table is served the
+// generated 404.html instead of S3's raw AccessDenied XML. Keep in sync with SiteGenerator's map.
+var PAGES = {
+    "index": true,
+    "login": true,
+    "register": true,
+    "photographers": true,
+    "pet-food": true,
+    "pet-detail": true,
+    "pets": true,
+    "my-pets": true,
+    "edit-pet": true,
+    "profile": true,
+    "admin": true,
+    "admin-shelters": true,
+    "privacy": true,
+    "terms": true,
+    "temporal-home": true,
+    "temporal-homes": true,
+    "temporal-home-block": true,
+    "temporal-home-detail": true,
+    "shelters": true,
+    "rescuers": true,
+    "rescuer-detail": true,
+    "sterilization-locations": true,
+    "admin-sterilization-locations": true,
+    "verify": true,
+    "verify-email": true,
+    "forgot-password": true,
+    "reset-password": true,
+    "magic-link-login": true,
+    "verify-email-change": true,
+    "verify-profile-email": true,
+    "report-urgent": true,
+    "urgent-rescuer-profile": true,
+    "urgent-rescuer-dashboard": true,
+    "urgent-rescuer-leaderboard": true,
+    "urgent-rescue-accept": true,
+    "report-lost-found": true,
+    "lost-found": true,
+    "lost-found-detail": true,
+    "lost-found-resolve": true,
+    "404": true,
+};
+
 function handler(event) {
     var request = event.request;
     var uri = request.uri;
@@ -46,7 +91,8 @@ function handler(event) {
 
     var lastSegment = uri.substring(uri.lastIndexOf("/") + 1);
     if (lastSegment.indexOf(".") === -1) {
-        request.uri = uri + ".html";
+        var page = uri.replace(/\/+$/, "").substring(1);
+        request.uri = PAGES[page] ? "/" + page + ".html" : "/404.html";
     }
     return request;
 }

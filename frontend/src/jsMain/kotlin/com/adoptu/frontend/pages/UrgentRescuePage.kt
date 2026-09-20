@@ -31,6 +31,8 @@ object ReportUrgentPageModule {
         }
     )
 
+    private var isAuthenticated = false
+
     fun init() {
         locationMap.init()
 
@@ -40,6 +42,7 @@ object ReportUrgentPageModule {
 
         ApiClientModule.me().then<Unit> { result: dynamic ->
             val authenticated = result.authenticated == true
+            isAuthenticated = authenticated
             // A logged-in session already has a real, verified email on file - only ask
             // anonymous visitors for contact info and a CAPTCHA (see UrgentRescueService.submitReport).
             emailRow?.style?.display = if (authenticated) "none" else ""
@@ -77,6 +80,12 @@ object ReportUrgentPageModule {
         if (locationMap.latitude == null && (country.isNullOrBlank() || city.isNullOrBlank())) {
             msg?.className = "message error"
             msg?.textContent = I18n.t("locationRequired")
+            return
+        }
+        if (!isAuthenticated && reporterEmail.isNullOrBlank()) {
+            msg?.className = "message error"
+            msg?.textContent = I18n.t("emailRequired")
+            (document.getElementById("reporter-email") as? HTMLInputElement)?.focus()
             return
         }
 

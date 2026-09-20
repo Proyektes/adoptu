@@ -109,16 +109,6 @@ header {
         gap: 0.5rem;
     }
 
-    .nav-pill-stack {
-        bottom: 6rem;
-    }
-
-    .nav-urgent-pill {
-        min-width: 132px;
-        padding: 0.4rem 0.6rem 0.4rem 0.8rem;
-        font-size: 0.85rem;
-    }
-
     #nav-donate {
         top: 92px;
         right: -1rem;
@@ -131,12 +121,16 @@ header {
     }
 }
 
-// At phone widths even the shrunk pill above (~130px wide, two stacked) is large enough to cover
-// real content scrolled underneath it (a form field, a share button) - collapse to icon-only
-// circles instead, small enough to stay out of the way while remaining reachable/recognizable.
-@media (max-width: 480px) {
+// The pills and the Donate button float over the page, so at any width where the centered
+// <main> reaches the viewport edges they would sit on top of card text, form labels and the
+// page-header action button. Below 1560px (1200px main plus room for a pill on each side) the
+// pills collapse to icon-only circles, <main> keeps a matching left gutter and .page-header-row
+// leaves room for Donate on the right; below 640px the pills become a full-width bar docked
+// above the fixed footer instead, so nothing scrolls underneath them.
+@media (max-width: 1560px) {
     .nav-pill-stack {
         left: 0.5rem;
+        bottom: 6rem;
     }
 
     .nav-urgent-pill {
@@ -150,6 +144,56 @@ header {
         span[data-i18n] {
             display: none;
         }
+    }
+
+    main {
+        padding-left: 4.5rem;
+    }
+
+    .page-header-row {
+        padding-right: 7rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .nav-pill-stack {
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: auto;
+        flex-direction: row;
+        gap: 0;
+        z-index: 1000;
+    }
+
+    .nav-urgent-pill {
+        flex: 1;
+        width: auto;
+        height: 52px;
+        border-radius: 0;
+        border-width: 2px 0 0 0;
+        box-shadow: none;
+
+        span[data-i18n] {
+            display: inline;
+        }
+    }
+
+    .nav-urgent-pill + .nav-urgent-pill {
+        border-left-width: 2px;
+    }
+
+    main {
+        padding-left: 2rem;
+    }
+
+    // body > footer outranks the plain footer rule declared further down this file.
+    body > footer {
+        padding-bottom: calc(1rem + 52px);
+    }
+
+    body {
+        padding-bottom: 112px;
     }
 }
 
@@ -444,7 +488,7 @@ footer {
         display: block;
         margin-top: 0.25rem;
         font-size: 0.7rem;
-        color: var(--border);
+        color: #9ca3af;
     }
 }
 
