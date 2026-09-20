@@ -164,7 +164,7 @@ object LostFoundBrowsePageModule {
         val petType = report.petType?.toString()?.takeIf { it.isNotEmpty() }
         return """
             <div class="card-bg profile-section">
-                <h3>${petType?.let { CommonModule.escapeHtml(it) } ?: I18n.t("petType")}</h3>
+                <h3>${petType?.let { I18n.t(it.lowercase()) } ?: I18n.t("petType")}</h3>
                 <p>$location</p>
                 <p>$description</p>
                 <a class="btn" href="/lost-found/${report.id}">${I18n.t("viewDetails")}</a>
@@ -200,12 +200,12 @@ object LostFoundDetailPageModule {
 
         val kindLabel = if (report.kind.toString() == "LOST") I18n.t("kindLost") else I18n.t("kindFound")
         val petTypeText = report.petType?.toString()
-        val petTypeSuffix = if (!petTypeText.isNullOrEmpty()) " - " + CommonModule.escapeHtml(petTypeText) else ""
+        val petTypeSuffix = if (!petTypeText.isNullOrEmpty()) " - " + I18n.t(petTypeText.lowercase()) else ""
         container.innerHTML = """
             <h1>$kindLabel$petTypeSuffix</h1>
             <p>${CommonModule.escapeHtml(report.locationLabel?.toString())}</p>
             <p>${CommonModule.escapeHtml(report.description?.toString())}</p>
-            <div class="form-row">
+            <div class="form-row" id="contact-email-row">
                 <label for="contact-email">${I18n.t("yourEmail")}</label>
                 <input type="email" id="contact-email">
             </div>
@@ -215,6 +215,13 @@ object LostFoundDetailPageModule {
             </div>
             <button type="button" class="btn" id="contact-btn">${I18n.t("contactReporter")}</button>
         """.trimIndent()
+
+        ApiClientModule.me().then<Unit> { user ->
+            if (user?.authenticated == true) {
+                (document.getElementById("contact-email") as? org.w3c.dom.HTMLInputElement)?.value = user.email?.toString() ?: ""
+                (document.getElementById("contact-email-row") as? HTMLElement)?.classList?.add("hidden")
+            }
+        }.catch<Unit> { }
 
         document.getElementById("contact-btn")?.addEventListener("click", { sendContact() })
     }

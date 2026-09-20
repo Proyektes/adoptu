@@ -13,6 +13,7 @@ interface PhotographerRepositoryPort {
     suspend fun getRequestById(requestId: Int): PhotographyRequestDto?
     suspend fun updatePhotographyRequest(requestId: Int, status: String?, scheduledDate: Long?)
     suspend fun getPhotographerById(userId: Int): PhotographerDto?
+    suspend fun getOwnPhotographerSettings(userId: Int): PhotographerDto?
     suspend fun getPhotographers(country: String? = null, state: String? = null): List<PhotographerDto>
     suspend fun updatePhotographerSettings(userId: Int, request: PhotographerSettingsRequest): PhotographerDto?
     suspend fun activatePhotographerProfile(userId: Int): UserDto?

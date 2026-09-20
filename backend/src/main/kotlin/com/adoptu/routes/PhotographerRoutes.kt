@@ -56,7 +56,9 @@ fun HttpRules.photographerRoutes() {
     get("/api/photographers/me", Handler { req, res ->
         val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         runBlocking {
-            val photographer = photographerService.getPhotographerById(principal.userId.value.toInt())
+            // The owner reads their own settings even while the role is switched off, so the
+            // profile can refill the section when the role is switched back on.
+            val photographer = photographerService.getOwnPhotographerSettings(principal.userId.value.toInt())
                 ?: return@runBlocking res.respondNotFound()
             res.send(photographer)
         }

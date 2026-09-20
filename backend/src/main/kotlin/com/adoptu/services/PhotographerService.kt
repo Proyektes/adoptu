@@ -26,6 +26,8 @@ class PhotographerService(
 
     suspend fun getPhotographerById(userId: Int): PhotographerDto? = photographerRepository.getPhotographerById(userId)
 
+    suspend fun getOwnPhotographerSettings(userId: Int): PhotographerDto? = photographerRepository.getOwnPhotographerSettings(userId)
+
     suspend fun updatePhotographerSettings(userId: Int, request: PhotographerSettingsRequest): PhotographerDto? =
         photographerRepository.updatePhotographerSettings(userId, request)
 

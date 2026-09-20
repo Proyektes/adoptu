@@ -105,7 +105,7 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
                 }
                 div(classes = "form-row") {
                     label { htmlFor = "shelter-country"; attributes["data-i18n"] = "countryLabel"; +"Country" }
-                    select { id = "shelter-country"; countrySelect("shelter-country", false) }
+                    select { id = "shelter-country"; countrySelect("shelter-country", true) }
                     span(classes = "field-error") { id = "shelter-country-error" }
                 }
                 div(classes = "form-row-two-col") {
@@ -158,7 +158,7 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
                 }
                 div(classes = "form-row") {
                     label { htmlFor = "sterilization-country"; attributes["data-i18n"] = "countryLabel"; +"Country" }
-                    select { id = "sterilization-country"; countrySelect("sterilization-country", false) }
+                    select { id = "sterilization-country"; countrySelect("sterilization-country", true) }
                     span(classes = "field-error") { id = "sterilization-country-error" }
                 }
                 div(classes = "form-row-two-col") {
@@ -206,7 +206,7 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
                 h2 { attributes["data-i18n"] = "photographerSettings"; +"Photographer Settings" }
                 div(classes = "form-row") {
                     label { htmlFor = "photographerCountry"; attributes["data-i18n"] = "countryLabel"; +"Country" }
-                    select { id = "photographerCountry"; countrySelect("photographerCountry", false) }
+                    select { id = "photographerCountry"; countrySelect("photographerCountry", true) }
                     span(classes = "field-error") { id = "photographerCountry-error" }
                 }
                 div(classes = "form-row") {
@@ -237,7 +237,7 @@ fun HTML.profilePage(navParams: NavParams = NavParams()) {
                 }
                 div(classes = "form-row") {
                     label { htmlFor = "th-country"; attributes["data-i18n"] = "countryLabel"; +"Country" }
-                    select { id = "th-country"; countrySelect("th-country", false) }
+                    select { id = "th-country"; countrySelect("th-country", true) }
                     span(classes = "field-error") { id = "th-country-error" }
                 }
                 div(classes = "form-row-two-col") {

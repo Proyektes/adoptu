@@ -221,6 +221,22 @@ class PhotographerRepositoryImpl(
         }
     }
 
+    override suspend fun getOwnPhotographerSettings(userId: Int): PhotographerDto? = withContext(dbDispatcher) {
+        transaction {
+            val user = Users.selectAll().where { Users.id eq userId }.firstOrNull() ?: return@transaction null
+            val photographer = Photographers.selectAll().where { Photographers.userId eq userId }.firstOrNull()
+            PhotographerDto(
+                userId = userId,
+                displayName = user[Users.displayName],
+                username = user[Users.username],
+                photographerFee = photographer?.get(Photographers.photographerFee)?.toDouble(),
+                photographerCurrency = photographer?.get(Photographers.photographerCurrency),
+                country = photographer?.get(Photographers.country)?.displayName,
+                state = photographer?.get(Photographers.state)
+            )
+        }
+    }
+
     override suspend fun getPhotographers(country: String?, state: String?): List<PhotographerDto> = withContext(dbDispatcher) {
         transaction {
             val parsedFilterCountry: Country? = if (!country.isNullOrBlank()) {

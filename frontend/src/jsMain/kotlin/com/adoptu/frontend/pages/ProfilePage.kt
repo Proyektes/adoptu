@@ -103,6 +103,8 @@ object ProfilePageModule {
     }
 
     private fun setupRoleToggles() {
+        // Re-checking a role whose data still exists (roles can be switched off and on again)
+        // refills the section from the saved record instead of showing empty required fields.
         // .profile-section starts class="... hidden" in the server-rendered markup (see
         // ProfilePage.kt/jvmMain), and .hidden is `display: none !important` (style.scss) - an
         // inline style.display can never win against that !important rule, so toggling the
@@ -111,21 +113,25 @@ object ProfilePageModule {
             val checked = (it.asDynamic().target.checked as Boolean)
             val section = document.querySelector(".photographer-section") as? HTMLElement
             section?.classList?.toggle("hidden", !checked)
+            if (checked) loadPhotographer()
         })
         (document.getElementById("role-temporal-home") as? HTMLInputElement)?.addEventListener("change", {
             val checked = (it.asDynamic().target.checked as Boolean)
             val section = document.querySelector(".temporal-home-section") as? HTMLElement
             section?.classList?.toggle("hidden", !checked)
+            if (checked) loadTemporalHome()
         })
         (document.getElementById("role-shelter") as? HTMLInputElement)?.addEventListener("change", {
             val checked = (it.asDynamic().target.checked as Boolean)
             val section = document.querySelector(".shelter-section") as? HTMLElement
             section?.classList?.toggle("hidden", !checked)
+            if (checked) loadShelter()
         })
         (document.getElementById("role-sterilization") as? HTMLInputElement)?.addEventListener("change", {
             val checked = (it.asDynamic().target.checked as Boolean)
             val section = document.querySelector(".sterilization-section") as? HTMLElement
             section?.classList?.toggle("hidden", !checked)
+            if (checked) loadSterilization()
         })
     }
 
