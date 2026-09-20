@@ -225,14 +225,15 @@ class PhotographerRepositoryImpl(
         transaction {
             val user = Users.selectAll().where { Users.id eq userId }.firstOrNull() ?: return@transaction null
             val photographer = Photographers.selectAll().where { Photographers.userId eq userId }.firstOrNull()
+                ?: return@transaction null
             PhotographerDto(
                 userId = userId,
                 displayName = user[Users.displayName],
                 username = user[Users.username],
-                photographerFee = photographer?.get(Photographers.photographerFee)?.toDouble(),
-                photographerCurrency = photographer?.get(Photographers.photographerCurrency),
-                country = photographer?.get(Photographers.country)?.displayName,
-                state = photographer?.get(Photographers.state)
+                photographerFee = photographer[Photographers.photographerFee]?.toDouble(),
+                photographerCurrency = photographer[Photographers.photographerCurrency],
+                country = photographer[Photographers.country]?.displayName,
+                state = photographer[Photographers.state]
             )
         }
     }
