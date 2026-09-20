@@ -405,12 +405,30 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
         }
     }
 
+    // Rescuer-facing reads carry who is asking (name + account email, the contact channel the
+    // privacy policy promises) and which pet, so the rescuer never has to resolve ids by hand.
+    private fun adoptionRequestsWithParties(condition: Op<Boolean>): List<AdoptionRequestDto> =
+        AdoptionRequests
+            .join(Pets, JoinType.INNER, AdoptionRequests.petId, Pets.id)
+            .join(Users, JoinType.INNER, AdoptionRequests.adopterId, Users.id)
+            .selectAll()
+            .where { condition }
+            .orderBy(AdoptionRequests.createdAt, SortOrder.DESC)
+            .map { row ->
+                rowToAdoptionRequestDto(row).copy(
+                    adopterName = row[Users.displayName],
+                    adopterEmail = row[Users.username],
+                    petName = row[Pets.name],
+                    petType = row[Pets.type]
+                )
+            }
+
     override suspend fun getAdoptionRequestsForPet(petId: Int): List<AdoptionRequestDto> = withContext(dbDispatcher) {
-        transaction {
-            AdoptionRequests.selectAll()
-                .where { AdoptionRequests.petId eq petId }
-                .map(::rowToAdoptionRequestDto)
-        }
+        transaction { adoptionRequestsWithParties(AdoptionRequests.petId eq petId) }
+    }
+
+    override suspend fun getAdoptionRequestsForRescuer(rescuerId: Int): List<AdoptionRequestDto> = withContext(dbDispatcher) {
+        transaction { adoptionRequestsWithParties(Pets.rescuerId eq rescuerId) }
     }
 
     override suspend fun getAdoptionRequestsForUser(userId: Int): List<AdoptionRequestDto> = withContext(dbDispatcher) {

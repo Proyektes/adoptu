@@ -71,6 +71,7 @@ interface PetRepositoryPort {
         experienceLevel: AdoptionExperience? = null
     ): AdoptionRequestDto
     suspend fun getAdoptionRequestsForPet(petId: Int): List<AdoptionRequestDto>
+    suspend fun getAdoptionRequestsForRescuer(rescuerId: Int): List<AdoptionRequestDto>
     suspend fun getAdoptionRequestsForUser(userId: Int): List<AdoptionRequestDto>
     suspend fun updateAdoptionRequestStatus(requestId: Int, status: String, reviewNote: String? = null): Boolean
     suspend fun getAdoptionRequestById(requestId: Int): AdoptionRequestDto?

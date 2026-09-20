@@ -344,6 +344,9 @@ class PetService(
         return ServiceResult.Success(petRepository.getAdoptionRequestsForPet(petId))
     }
 
+    suspend fun getAdoptionRequestsForRescuer(rescuerId: Int): List<AdoptionRequestDto> =
+        petRepository.getAdoptionRequestsForRescuer(rescuerId)
+
     // Adopter's own view of their requests - reviewNote is rescuer-private and must never reach
     // the person being reviewed, so it's stripped here rather than at the DTO/repository level
     // (which is shared with the rescuer-facing getAdoptionRequestsForPet above).

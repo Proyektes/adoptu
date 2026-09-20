@@ -155,3 +155,12 @@
         grid-column: 1 / -1;
     }
 }
+.adoption-request-card .ar-adopter {
+    font-size: 0.9rem;
+    color: #d1d5db;
+    margin: 0.25rem 0;
+
+    a {
+        color: var(--accent);
+    }
+}

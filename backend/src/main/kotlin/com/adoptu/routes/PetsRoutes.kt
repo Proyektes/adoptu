@@ -401,6 +401,13 @@ fun HttpRules.petsRoutes() {
         }
     })
 
+    get("/api/users/rescuer/adoption-requests", Handler { req, res ->
+        val principal = req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
+        runBlocking {
+            res.send(petService.getAdoptionRequestsForRescuer(principal.userId.value.toInt()))
+        }
+    })
+
     get("/api/pets/{id}/adoption-requests", Handler { req, res ->
         val principal = req.currentPrincipal()
             ?: return@Handler res.respondUnauthorized()

@@ -88,7 +88,7 @@ object MyPetsPageModule {
             else -> "ok" to I18n.t("upToDate")
         }
         val dueHtml = if (event.nextDueDate != null) {
-            val dueDateStr = js("new Date(event.nextDueDate)").toLocaleDateString(I18n.currentLang)
+            val dueDateStr = I18n.formatDateOnly(event.nextDueDate)
             "<span class=\"medical-due-badge $statusClass\">${I18n.t("nextDueLabel")}: $dueDateStr ($statusLabel)</span>"
         } else ""
         val petName = CommonModule.escapeHtml(event.petName?.toString() ?: "")
@@ -264,25 +264,14 @@ object MyPetsPageModule {
 
     private fun loadAdoptionRequests(pets: Array<dynamic>) {
         val container = document.getElementById("adoption-requests").unsafeCast<HTMLElement?>()
-        val allRequests = mutableListOf<dynamic>()
-        var remaining = pets.size
-        if (remaining == 0) {
+        if (pets.isEmpty()) {
             container?.innerHTML = "<p data-i18n=\"noAdoptionRequests\">${I18n.t("noAdoptionRequests")}</p>"
             return
         }
-        pets.forEach { pet ->
-            ApiClientModule.getAdoptionRequests(pet.id as Int).then<Unit> { requests ->
-                val list = requests as? Array<dynamic>
-                list?.forEach { r ->
-                    r.petName = pet.name
-                    r.petType = pet.type
-                    allRequests.add(r)
-                }
-            }.catch { }.finally {
-                remaining--
-                if (remaining == 0) renderAdoptionRequests(allRequests, container)
-            }
-        }
+        ApiClientModule.getRescuerAdoptionRequests().then<Unit> { requests ->
+            val list = (requests as? Array<dynamic>)?.toList() ?: emptyList()
+            renderAdoptionRequests(list, container)
+        }.catch<Unit> { renderAdoptionRequests(emptyList(), container) }
     }
 
     private fun renderAdoptionRequests(allRequests: List<dynamic>, container: HTMLElement?) {
@@ -318,8 +307,14 @@ object MyPetsPageModule {
             "REJECTED" -> I18n.t("adoptionStatusRejected")
             else -> I18n.t("adoptionStatusPending")
         }
+        val adopterName = CommonModule.escapeHtml(r.adopterName?.toString() ?: "")
+        val adopterEmail = CommonModule.escapeHtml(r.adopterEmail?.toString() ?: "")
+        val adopterHtml = if (adopterName.isNotEmpty() || adopterEmail.isNotEmpty()) {
+            "<div class=\"ar-adopter\">${I18n.t("adopter")}: $adopterName" +
+                (if (adopterEmail.isNotEmpty()) " &middot; <a href=\"mailto:$adopterEmail\">$adopterEmail</a>" else "") + "</div>"
+        } else ""
         return "<div class=\"adoption-request-card\"><div class=\"ar-pet\">${emoji[r.petType.toString()] ?: "🐾"} ${CommonModule.escapeHtml(r.petName?.toString())}</div>" +
-            "<div class=\"ar-status status-${status.lowercase()}\">$statusLabel</div>" +
+            "<div class=\"ar-status status-${status.lowercase()}\">$statusLabel</div>$adopterHtml" +
             "<div class=\"ar-message\">$message</div>$screening<div class=\"ar-date\">$date</div>" +
             "<div class=\"ar-review-note\"><label for=\"review-note-${r.id}\">${I18n.t("reviewNoteLabel")}</label>" +
             "<textarea id=\"review-note-${r.id}\">${CommonModule.escapeHtml(reviewNote)}</textarea>" +

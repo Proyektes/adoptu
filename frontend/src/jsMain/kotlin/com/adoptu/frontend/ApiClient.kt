@@ -288,6 +288,8 @@ object ApiClientModule {
 
     fun getAdoptionRequests(petId: Int): Promise<dynamic> = apiFetch("/api/pets/$petId/adoption-requests")
 
+    fun getRescuerAdoptionRequests(): Promise<dynamic> = apiFetch("/api/users/rescuer/adoption-requests")
+
     fun getMyAdoptionRequests(): Promise<dynamic> = apiFetch("/api/pets/my-adoption-requests")
 
     fun updateAdoptionRequest(requestId: Int, status: String, reviewNote: String? = null): Promise<dynamic> {
