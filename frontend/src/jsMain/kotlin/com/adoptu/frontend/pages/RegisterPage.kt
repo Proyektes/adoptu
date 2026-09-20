@@ -86,11 +86,11 @@ object RegisterPageModule {
         val closeBtn = document.getElementById("passkey-info-close") as? HTMLElement
 
         infoBtn?.addEventListener("click", { _ ->
-            modal?.style?.display = "flex"
+            modal?.classList?.remove("hidden")
         })
 
         closeBtn?.addEventListener("click", { _ ->
-            modal?.style?.display = "none"
+            modal?.classList?.add("hidden")
         })
 
         modal?.addEventListener("click", { e ->

@@ -1,5 +1,7 @@
 package com.adoptu.adapters.db.repositories
 
+import org.jetbrains.exposed.v1.core.inList
+import com.adoptu.adapters.db.Users
 import com.adoptu.adapters.db.AdoptionRequests
 import com.adoptu.adapters.db.PetImages
 import com.adoptu.adapters.db.Pets
@@ -185,7 +187,12 @@ class PetRepositoryImpl(private val clock: Clock) : PetRepositoryPort {
                 .offset(((safePage - 1) * safePageSize).toLong())
                 .toList()
 
-            PagedResult(items = rowsToPetDtos(rows), total = total, page = safePage, pageSize = safePageSize)
+            val pets = rowsToPetDtos(rows)
+            val rescuerIds = pets.map { it.rescuerId }.distinct()
+            val namesById = if (rescuerIds.isEmpty()) emptyMap() else Users.select(Users.id, Users.displayName)
+                .where { Users.id inList rescuerIds }
+                .associate { it[Users.id] to it[Users.displayName] }
+            PagedResult(items = pets.map { it.copy(rescuerName = namesById[it.rescuerId]) }, total = total, page = safePage, pageSize = safePageSize)
         }
     }
 

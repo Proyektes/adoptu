@@ -272,11 +272,11 @@ object AdminPageModule {
         banUserId = id
         document.getElementById("ban-user-name")?.textContent = name
         (document.getElementById("ban-reason") as? HTMLTextAreaElement)?.value = ""
-        (document.getElementById("ban-modal") as? HTMLElement)?.style?.display = "flex"
+        (document.getElementById("ban-modal") as? HTMLElement)?.classList?.remove("hidden")
     }
 
     private fun hideBanModal() {
-        (document.getElementById("ban-modal") as? HTMLElement)?.style?.display = "none"
+        (document.getElementById("ban-modal") as? HTMLElement)?.classList?.add("hidden")
         banUserId = null
     }
 
@@ -377,7 +377,7 @@ object AdminPageModule {
                 } else {
                     "<button class=\"btn btn-danger btn-small\" data-action=\"deactivatePet\" data-arg=\"${p.id}\">Deactivate</button>"
                 }
-                "<tr><td>$name</td><td>${p.type}</td><td>$statusCell</td><td>Rescuer #${p.rescuerId}</td>" +
+                "<tr><td>$name</td><td>${p.type}</td><td>$statusCell</td><td>${CommonModule.escapeHtml(p.rescuerName?.toString() ?: "#${p.rescuerId}")}</td>" +
                     "<td><a href=\"/pet/${p.id}\" class=\"btn btn-secondary btn-small\">View</a> $deactivateAction</td></tr>"
             } + "</tbody></table></div>"
     }

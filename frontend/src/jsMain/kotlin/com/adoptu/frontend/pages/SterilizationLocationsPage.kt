@@ -130,12 +130,12 @@ object AdminSterilizationLocationsPageModule {
     private fun showForm() {
         editingId = null
         (document.getElementById("location-form") as? HTMLFormElement)?.reset()
-        (document.getElementById("form-modal") as? HTMLElement)?.style?.display = "flex"
+        (document.getElementById("form-modal") as? HTMLElement)?.classList?.remove("hidden")
         loadCountries()
     }
 
     private fun hideForm() {
-        (document.getElementById("form-modal") as? HTMLElement)?.style?.display = "none"
+        (document.getElementById("form-modal") as? HTMLElement)?.classList?.add("hidden")
         editingId = null
     }
 
@@ -155,7 +155,7 @@ object AdminSterilizationLocationsPageModule {
                     (form.asDynamic().email as HTMLInputElement).value = loc.email?.toString() ?: ""
                     (form.asDynamic().website as HTMLInputElement).value = loc.website?.toString() ?: ""
                     (form.asDynamic().description as HTMLTextAreaElement).value = loc.description?.toString() ?: ""
-                    (document.getElementById("form-modal") as HTMLElement).style.display = "flex"
+                    (document.getElementById("form-modal") as HTMLElement).classList.remove("hidden")
                 }
             }
         }
