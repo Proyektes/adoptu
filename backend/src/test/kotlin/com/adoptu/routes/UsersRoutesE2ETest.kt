@@ -151,7 +151,7 @@ class UsersRoutesE2ETest {
 
     /** Verbatim port of the old Ktor test's inline `module { ... }` block of mocked adapters. */
     private fun buildTestModules(): List<Module> {
-        val config = AppConfig.fromMap(mapOf("env" to "test", "admin.email" to "admin@adopt-u.com"))
+        val config = AppConfig.fromMap(mapOf("env" to "test", "admin.email" to "adopt-u@adopt-u.org"))
         val mockNotificationAdapter = MockNotificationAdapter()
 
         return listOf(module {

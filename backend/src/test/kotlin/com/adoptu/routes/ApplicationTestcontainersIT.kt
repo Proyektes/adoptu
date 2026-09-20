@@ -68,8 +68,8 @@ class ApplicationTestcontainersIT {
             "storage.test.access_key_id" to localstackContainer.accessKey,
             "storage.test.secret_access_key" to localstackContainer.secretKey,
             "storage.test.path_style_access" to "true",
-            "email.from" to "test@adopt-u.com",
-            "admin.email" to "admin@adopt-u.com"
+            "email.from" to "test@adopt-u.org",
+            "admin.email" to "adopt-u@adopt-u.org"
         )
     }
 

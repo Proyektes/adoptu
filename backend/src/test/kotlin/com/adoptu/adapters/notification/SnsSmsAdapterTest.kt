@@ -36,7 +36,7 @@ class SnsSmsAdapterTest {
             description = "Injured dog near the highway overpass, needs immediate help",
             dangerType = "traffic",
             locationLabel = "Route 9 overpass",
-            acceptLink = "https://adopt-u.com/rescue/accept/abc123"
+            acceptLink = "https://adopt-u.org/rescue/accept/abc123"
         )
 
         assertTrue(result, "Publish to a phone number should succeed against localstack's fake SNS with no topic/subscription setup")
@@ -51,7 +51,7 @@ class SnsSmsAdapterTest {
             description = longDescription,
             dangerType = "flood",
             locationLabel = "Riverside Park",
-            acceptLink = "https://adopt-u.com/rescue/accept/def456"
+            acceptLink = "https://adopt-u.org/rescue/accept/def456"
         )
 
         assertTrue(result, "A description well over the 1500-char take() limit should still be published successfully")
@@ -66,7 +66,7 @@ class SnsSmsAdapterTest {
             description = "Cat stuck in a storm drain",
             dangerType = "trapped",
             locationLabel = "Elm Street",
-            acceptLink = "https://adopt-u.com/rescue/accept/ghi789"
+            acceptLink = "https://adopt-u.org/rescue/accept/ghi789"
         )
 
         assertTrue(!result, "An unreachable SNS endpoint should be caught and reported as a failed send")

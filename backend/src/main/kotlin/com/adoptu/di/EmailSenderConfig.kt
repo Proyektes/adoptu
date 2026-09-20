@@ -39,7 +39,7 @@ fun emailSenderPortFromConfig(config: AppConfig): EmailSenderPort {
     val env = config.propertyOrNull("env")?.getString() ?: "prod"
     val isDev = env.lowercase() == "dev"
     val emailPrefix = if (isDev) "email.dev" else "email.prod"
-    val fromEmail = config.propertyOrNull("$emailPrefix.from")?.getString() ?: "noreply@adopt-u.com"
+    val fromEmail = config.propertyOrNull("$emailPrefix.from")?.getString() ?: "noreply@adopt-u.org"
 
     if (isDev) {
         return SmtpEmailAdapter(

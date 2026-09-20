@@ -107,7 +107,7 @@ class PetsRoutesE2ETest {
     private fun startTestServer() = TestServer.start(
         modules = listOf(
             module {
-                single { com.adoptu.config.AppConfig.fromMap(mapOf("admin.email" to "admin@adopt-u.com")) }
+                single { com.adoptu.config.AppConfig.fromMap(mapOf("admin.email" to "adopt-u@adopt-u.org")) }
                 single<Clock> { Clock.System }
                 single {
                     WebAuthnService(get(), get())
@@ -1704,7 +1704,7 @@ class PetsRoutesE2ETest {
     private fun startTestServerWithPetService(petService: PetService) = TestServer.start(
         modules = listOf(
             module {
-                single { com.adoptu.config.AppConfig.fromMap(mapOf("admin.email" to "admin@adopt-u.com")) }
+                single { com.adoptu.config.AppConfig.fromMap(mapOf("admin.email" to "adopt-u@adopt-u.org")) }
                 single<Clock> { Clock.System }
                 single { WebAuthnService(get(), get()) }
                 single<ImageStoragePort> { MockImageStorage() }

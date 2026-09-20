@@ -56,7 +56,7 @@ fun defaultTestConfig(dbName: String): Map<String, Any> = mapOf(
     "storage.test.endpoint" to "",
     "storage.test.path_style_access" to "false",
     "email.from" to "test@test.com",
-    "admin.email" to "admin@adopt-u.com"
+    "admin.email" to "adopt-u@adopt-u.org"
 )
 
 object TestServer {

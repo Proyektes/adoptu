@@ -136,7 +136,7 @@ fun HttpRules.authRoutes() {
     val forgotPasswordUseCase by Deps.inject<ForgotPasswordUseCase>()
     val resetPasswordUseCase by Deps.inject<ResetPasswordUseCase>()
     val rateLimiter by Deps.inject<RateLimiter>()
-    val adminEmail = config.propertyOrNull("admin.email")?.getString() ?: "admin@adopt-u.com"
+    val adminEmail = config.propertyOrNull("admin.email")?.getString() ?: "adopt-u@adopt-u.org"
     val cookieSecure = config.propertyOrNull("session.cookieSecure")?.getString()?.toBoolean() ?: true
     val userRepository = UserRepository(clock = kotlin.time.Clock.System)
 
