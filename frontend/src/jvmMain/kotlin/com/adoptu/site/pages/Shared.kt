@@ -3,6 +3,10 @@ package com.adoptu.site.pages
 import com.adoptu.common.Country
 import kotlinx.html.*
 
+// Cloudflare Web Analytics site token (public, it is visible in every page). Read at site-generation
+// time from CF_WEB_ANALYTICS_TOKEN; when unset, no beacon is emitted (local builds, forks).
+private val cloudflareWebAnalyticsToken: String? = System.getenv("CF_WEB_ANALYTICS_TOKEN")?.takeIf { it.isNotBlank() }
+
 fun HTML.commonHead(title: String, extraCss: String? = null) {
     lang = "en"
     head {
@@ -36,6 +40,12 @@ fun HTML.commonHead(title: String, extraCss: String? = null) {
         meta { attributes["property"] = "og:description"; attributes["content"] = "Adopt-U: pets in need of loving homes." }
         meta { attributes["property"] = "og:image"; attributes["content"] = "https://static.adopt-u.org/og-image.png" }
         meta { name = "twitter:card"; content = "summary_large_image" }
+        cloudflareWebAnalyticsToken?.let { token ->
+            script(src = "https://static.cloudflareinsights.com/beacon.min.js") {
+                defer = true
+                attributes["data-cf-beacon"] = """{"token": "$token"}"""
+            }
+        }
     }
 }
 

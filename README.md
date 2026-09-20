@@ -88,6 +88,14 @@ frontend/src/
 `./gradlew :frontend:generateSite` renders `frontend/src/jvmMain/.../site/pages/*.kt` to
 `frontend/build/site/*.html`, alongside the compiled CSS/JS - the deployable static site.
 
+## Web Analytics
+
+Pages include the Cloudflare Web Analytics beacon when `CF_WEB_ANALYTICS_TOKEN` is set while the
+static site is generated (`./gradlew :frontend:generateSite`). Get the token from the Cloudflare
+dashboard under Analytics & Logs > Web Analytics for adopt-u.org, and set it in `buildspec.yml` or
+the CodeBuild project environment. It is a public value. Without it the beacon is omitted, which is
+the default for local builds.
+
 ## Testing
 
 ```bash

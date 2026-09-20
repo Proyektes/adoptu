@@ -2,6 +2,9 @@ version: 1.0
 env:
   variables:
     ADOPTU_ENV: prod
+    # Cloudflare Web Analytics site token (dashboard: Analytics & Logs > Web Analytics > adopt-u.org).
+    # Public value, safe here; leave empty to build the site without the beacon.
+    CF_WEB_ANALYTICS_TOKEN: ""
     ADOPTU_ADMIN_USERNAME: admin
     # Must match infra/variables.tf's ecr_repository_name default; override
     # via a CodeBuild project environment variable if that ever diverges.

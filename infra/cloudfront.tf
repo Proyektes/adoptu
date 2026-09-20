@@ -118,13 +118,15 @@ resource "aws_cloudfront_response_headers_policy" "site_security_headers" {
         # (UrgentRescuePage.kt) - api.js (script-src), its challenge iframe (frame-src), and its
         # own XHR calls (connect-src) all need this origin explicitly allowed.
         # Leaflet (map pages) is vendored under /static/vendor/leaflet, so it is covered by 'self'.
-        "script-src 'self' https://challenges.cloudflare.com",
+        # https://static.cloudflareinsights.com: Cloudflare Web Analytics beacon (Shared.kt, emitted when
+        # CF_WEB_ANALYTICS_TOKEN is set at site-generation time); it reports to cloudflareinsights.com.
+        "script-src 'self' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
         "script-src-attr 'none'",
         "style-src 'self' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
         # https://*.tile.openstreetmap.org: the map tile images themselves (a/b/c subdomains).
         "img-src 'self' data: blob: https://static.adopt-u.org https://dynamic.adopt-u.org https://*.amazonaws.com https://*.tile.openstreetmap.org",
-        "connect-src 'self' https://challenges.cloudflare.com",
+        "connect-src 'self' https://challenges.cloudflare.com https://cloudflareinsights.com",
         "frame-src https://challenges.cloudflare.com",
         "object-src 'none'",
         "base-uri 'self'",
