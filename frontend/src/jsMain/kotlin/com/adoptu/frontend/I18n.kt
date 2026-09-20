@@ -17293,6 +17293,9 @@ object I18n {
             el.addEventListener("click", { _ ->
                 val lang = el.getAttribute("data-lang") ?: return@addEventListener
                 window.localStorage.setItem("preferredLanguage", lang)
+                ApiClientModule.me().then<Unit> { user ->
+                    if (user?.authenticated == true) ApiClientModule.updateLanguage(lang)
+                }.catch<Unit> { }
                 loadLang(lang).then {
                     updatePage()
                     updateActiveLangOption()

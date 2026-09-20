@@ -63,7 +63,7 @@ fun main() {
         CommonModule.initInstallPrompt()
         CommonModule.initBackLinks()
 
-        CommonModule.initI18n(null).then<Unit> {
+        CommonModule.initI18nForSession().then<Unit> {
             try {
                 when {
                     path == "/" || path == "/pets" -> IndexPageModule.init()

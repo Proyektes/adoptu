@@ -99,6 +99,15 @@ object CommonModule {
         }
     }
 
+    // A signed-in user's saved profile language wins over the browser-local choice, so the site
+    // follows the account across devices; anonymous visitors keep the localStorage value.
+    fun initI18nForSession(): Promise<dynamic> =
+        ApiClientModule.me().then<String?> { user ->
+            val lang = if (user?.authenticated == true) user.language?.toString()?.takeIf { it.isNotEmpty() } else null
+            if (lang != null) window.localStorage.setItem("preferredLanguage", lang)
+            lang
+        }.catch<String?> { null }.then<dynamic> { lang -> initI18n(lang) }
+
     // Delegated click handler backing every data-action="fnName" [data-arg="..."] [data-arg2="..."]
     // element - replaces per-element onclick="..." attributes, which a nonce-based CSP script-src
     // can't allow (nonces apply to <script> elements, not inline event-handler attributes) without
