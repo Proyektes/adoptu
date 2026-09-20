@@ -26,6 +26,13 @@ ECS_CLUSTER="${ECS_CLUSTER:-adoptu}"
 ECS_SERVICE="${ECS_SERVICE:-adoptu}"
 DOMAIN_NAME="${DOMAIN_NAME:-adopt-u.org}"
 SITE_DIR="$REPO_ROOT/frontend/build/site"
+# Public Cloudflare Web Analytics site token; export it before running this script or the site is
+# generated without the beacon (see README, "Web Analytics").
+CF_WEB_ANALYTICS_TOKEN="${CF_WEB_ANALYTICS_TOKEN:-}"
+export CF_WEB_ANALYTICS_TOKEN
+if [ -z "$CF_WEB_ANALYTICS_TOKEN" ]; then
+  echo "==> CF_WEB_ANALYTICS_TOKEN is not set: building the site without Cloudflare Web Analytics"
+fi
 
 APPLY=false
 for arg in "$@"; do
