@@ -57,7 +57,7 @@ private val labelText: Map<String, String> = mapOf(
     "termsAccountTerminationText" to "Adopt-U reserves the right to suspend or terminate accounts that violate these terms, engage in prohibited activities, or bring the platform into disrepute. We may also remove listings that contain false, misleading, or inappropriate content.",
     "termsModificationsH2" to "Modifications to Terms",
     "termsModificationsText" to "We reserve the right to modify these terms at any time. Continued use of the platform after changes constitutes acceptance of the modified terms. We will notify users of significant changes via email or platform announcements.",
-    "termsContactText" to "If you have any questions about these Terms and Conditions, please contact us at admin@adopt-u.com."
+    "termsContactText" to "If you have any questions about these Terms and Conditions, please contact us at adopt-u@adopt-u.org."
 )
 
 fun HTML.termsPage(navParams: NavParams = NavParams()) {
@@ -142,7 +142,7 @@ fun HTML.termsPage(navParams: NavParams = NavParams()) {
                 p { attributes["data-i18n"] = "termsModificationsText"; +"We reserve the right to modify these terms at any time. Continued use of the platform after changes constitutes acceptance of the modified terms. We will notify users of significant changes via email or platform announcements." }
 
                 h2 { attributes["data-i18n"] = "privacyContactH2"; +"Contact Us" }
-                p { attributes["data-i18n"] = "termsContactText"; +"If you have any questions about these Terms and Conditions, please contact us at admin@adopt-u.com." }
+                p { attributes["data-i18n"] = "termsContactText"; +"If you have any questions about these Terms and Conditions, please contact us at adopt-u@adopt-u.org." }
             }
         }
         footer()

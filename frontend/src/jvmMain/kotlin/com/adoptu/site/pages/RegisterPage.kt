@@ -62,6 +62,16 @@ fun HTML.registerPage(navParams: NavParams = NavParams()) {
                                 input(InputType.checkBox) { name = "method"; value = "passkey"; id = "method-passkey"; checked = true }
                                 span { attributes["data-i18n"] = "registerPasskeyOption"; +"Passkey (most secure, works on all your devices)" }
                             }
+                    p(classes = "register-consent") {
+                        span { attributes["data-i18n"] = "registerConsentPrefix"; +"By creating an account you accept our" }
+                        +" "
+                        a("/terms") { attributes["data-i18n"] = "registerConsentTerms"; +"Terms and Conditions" }
+                        +" "
+                        span { attributes["data-i18n"] = "registerConsentAnd"; +"and" }
+                        +" "
+                        a("/privacy") { attributes["data-i18n"] = "registerConsentPrivacy"; +"Privacy Policy" }
+                        +"."
+                    }
                             button(type = ButtonType.button, classes = "info-icon-btn") {
                                 id = "passkey-info-btn"
                                 attributes["aria-label"] = "How passkeys work"

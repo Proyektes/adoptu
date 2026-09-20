@@ -70,7 +70,7 @@ private val labelText: Map<String, String> = mapOf(
     "privacyRightCorrection" to "Correction: You may request that we correct any inaccurate information",
     "privacyRightDeletion" to "Deletion: You may request that we delete your account and all associated data",
     "privacyRightPortability" to "Portability: You may request that we provide your data in a commonly used format",
-    "privacyExerciseRights" to "To exercise any of these rights, please contact us at admin@adopt-u.com.",
+    "privacyExerciseRights" to "To exercise any of these rights, please contact us at adopt-u@adopt-u.org.",
     "privacyCookiesH2" to "Cookies",
     "privacyCookiesText" to "Adopt-U uses minimal cookies necessary for platform functionality, including session management and language preferences. We do not use advertising cookies or tracking cookies.",
     "privacyThirdPartyH2" to "Third-Party Services",
@@ -83,7 +83,7 @@ private val labelText: Map<String, String> = mapOf(
     "privacyChangesH2" to "Changes to This Policy",
     "privacyChangesText" to "We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. We will notify users of significant changes via email or prominent notice on the platform.",
     "privacyContactH2" to "Contact Us",
-    "privacyContactText" to "If you have any questions or concerns about this Privacy Policy, or to exercise your data rights, please contact us at admin@adopt-u.com.",
+    "privacyContactText" to "If you have any questions or concerns about this Privacy Policy, or to exercise your data rights, please contact us at adopt-u@adopt-u.org.",
     "privacyPolicy" to "Privacy Policy"
 )
 
@@ -167,7 +167,7 @@ fun HTML.privacyPage(navParams: NavParams = NavParams()) {
                     i18nLi("privacyRightDeletion")
                     i18nLi("privacyRightPortability")
                 }
-                p { attributes["data-i18n"] = "privacyExerciseRights"; +"To exercise any of these rights, please contact us at admin@adopt-u.com." }
+                p { attributes["data-i18n"] = "privacyExerciseRights"; +"To exercise any of these rights, please contact us at adopt-u@adopt-u.org." }
 
                 h2 { attributes["data-i18n"] = "privacyCookiesH2"; +"Cookies" }
                 p { attributes["data-i18n"] = "privacyCookiesText"; +"Adopt-U uses minimal cookies necessary for platform functionality, including session management and language preferences. We do not use advertising cookies or tracking cookies." }
@@ -187,7 +187,7 @@ fun HTML.privacyPage(navParams: NavParams = NavParams()) {
                 p { attributes["data-i18n"] = "privacyChangesText"; +"We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. We will notify users of significant changes via email or prominent notice on the platform." }
 
                 h2 { attributes["data-i18n"] = "privacyContactH2"; +"Contact Us" }
-                p { attributes["data-i18n"] = "privacyContactText"; +"If you have any questions or concerns about this Privacy Policy, or to exercise your data rights, please contact us at admin@adopt-u.com." }
+                p { attributes["data-i18n"] = "privacyContactText"; +"If you have any questions or concerns about this Privacy Policy, or to exercise your data rights, please contact us at adopt-u@adopt-u.org." }
             }
         }
         footer()

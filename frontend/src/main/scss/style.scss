@@ -1226,3 +1226,12 @@ form {
     border-radius: 4px;
     font-weight: 500;
 }
+.register-consent {
+    font-size: 0.85rem;
+    color: #9ca3af;
+    margin: 0.75rem 0;
+
+    a {
+        color: var(--accent);
+    }
+}
