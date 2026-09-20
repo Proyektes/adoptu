@@ -55,6 +55,7 @@ var PAGES = {
     "lost-found-detail": true,
     "lost-found-resolve": true,
     "404": true,
+    "logout": true,
 };
 
 function handler(event) {

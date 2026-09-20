@@ -73,6 +73,7 @@ fun main(args: Array<String>) {
         "lost-found-detail" to { lostFoundDetailPage() },
         "lost-found-resolve" to { lostFoundResolvePage() },
         "404" to { notFoundPage() },
+        "logout" to { logoutPage() },
     )
 
     for ((name, render) in pages) {

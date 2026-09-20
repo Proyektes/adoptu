@@ -67,6 +67,7 @@ fun main() {
             try {
                 when {
                     path == "/" || path == "/pets" -> IndexPageModule.init()
+                    path == "/logout" -> ApiClientModule.logout().then<Unit> { window.location.replace("/") }.catch<Unit> { window.location.replace("/") }
                     path == "/login" || path == "/login/" -> LoginPageModule.init()
                     path == "/register" || path == "/register/" -> RegisterPageModule.init()
                     path == "/profile" || path == "/profile/" -> ProfilePageModule.init()
