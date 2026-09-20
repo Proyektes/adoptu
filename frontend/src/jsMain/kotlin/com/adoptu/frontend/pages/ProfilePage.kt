@@ -17,6 +17,7 @@ private val emoji = mapOf("DOG" to "🐕", "CAT" to "🐱", "BIRD" to "🐦", "F
 @JsName("ProfilePage")
 object ProfilePageModule {
     private var currentRoles = emptyList<String>()
+    private var messageDismissTimeoutId: Int? = null
     private var hasTemporalHomeProfile = false
     private var hasShelterProfile = false
     private var hasSterilizationProfile = false
@@ -100,43 +101,47 @@ object ProfilePageModule {
     }
 
     private fun setupRoleToggles() {
+        // .profile-section starts class="... hidden" in the server-rendered markup (see
+        // ProfilePage.kt/jvmMain), and .hidden is `display: none !important` (style.scss) - an
+        // inline style.display can never win against that !important rule, so toggling the
+        // section must remove/add the "hidden" class itself, not just set style.display.
         (document.getElementById("role-photographer") as? HTMLInputElement)?.addEventListener("change", {
             val checked = (it.asDynamic().target.checked as Boolean)
             val section = document.querySelector(".photographer-section") as? HTMLElement
-            section?.style?.display = if (checked) "block" else "none"
+            section?.classList?.toggle("hidden", !checked)
         })
         (document.getElementById("role-temporal-home") as? HTMLInputElement)?.addEventListener("change", {
             val checked = (it.asDynamic().target.checked as Boolean)
             val section = document.querySelector(".temporal-home-section") as? HTMLElement
-            section?.style?.display = if (checked) "block" else "none"
+            section?.classList?.toggle("hidden", !checked)
         })
         (document.getElementById("role-shelter") as? HTMLInputElement)?.addEventListener("change", {
             val checked = (it.asDynamic().target.checked as Boolean)
             val section = document.querySelector(".shelter-section") as? HTMLElement
-            section?.style?.display = if (checked) "block" else "none"
+            section?.classList?.toggle("hidden", !checked)
         })
         (document.getElementById("role-sterilization") as? HTMLInputElement)?.addEventListener("change", {
             val checked = (it.asDynamic().target.checked as Boolean)
             val section = document.querySelector(".sterilization-section") as? HTMLElement
-            section?.style?.display = if (checked) "block" else "none"
+            section?.classList?.toggle("hidden", !checked)
         })
     }
 
     private fun loadRoleSections(user: dynamic) {
         if (currentRoles.contains("PHOTOGRAPHER")) {
-            (document.querySelector(".photographer-section") as? HTMLElement)?.style?.display = "block"
+            (document.querySelector(".photographer-section") as? HTMLElement)?.classList?.remove("hidden")
             loadPhotographer()
         }
         if (currentRoles.contains("TEMPORAL_HOME")) {
-            (document.querySelector(".temporal-home-section") as? HTMLElement)?.style?.display = "block"
+            (document.querySelector(".temporal-home-section") as? HTMLElement)?.classList?.remove("hidden")
             loadTemporalHome()
         }
         if (currentRoles.contains("SHELTER")) {
-            (document.querySelector(".shelter-section") as? HTMLElement)?.style?.display = "block"
+            (document.querySelector(".shelter-section") as? HTMLElement)?.classList?.remove("hidden")
             loadShelter()
         }
         if (currentRoles.contains("STERILIZATION_SERVICE")) {
-            (document.querySelector(".sterilization-section") as? HTMLElement)?.style?.display = "block"
+            (document.querySelector(".sterilization-section") as? HTMLElement)?.classList?.remove("hidden")
             loadSterilization()
         }
     }
@@ -163,7 +168,7 @@ object ProfilePageModule {
                 (document.getElementById("th-max-capacity") as? HTMLInputElement)?.value = th.maxCapacity?.toString() ?: ""
             }
             undefined
-        }
+        }.catch<Unit> { }
     }
 
     private fun loadShelter() {
@@ -339,14 +344,20 @@ object ProfilePageModule {
     }
 
     private fun showMessage(msg: HTMLElement, type: String, text: String) {
+        // A leftover auto-dismiss timer from an earlier call must not wipe out a message set by a
+        // later call (e.g. two failed Save attempts within 3s of each other) - cancel any pending
+        // timer before showing new text, and before arming a fresh one below.
+        messageDismissTimeoutId?.let { window.clearTimeout(it) }
+        messageDismissTimeoutId = null
         msg.className = "message $type"
         msg.textContent = text
         msg.style.display = "block"
         if (type == "error") {
             scrollToFirstError(msg)
-            window.setTimeout({
+            messageDismissTimeoutId = window.setTimeout({
                 msg.style.display = "none"
                 msg.textContent = ""
+                messageDismissTimeoutId = null
             }, 3000)
         }
     }
