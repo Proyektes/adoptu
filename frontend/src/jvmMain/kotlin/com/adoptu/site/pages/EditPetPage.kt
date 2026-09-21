@@ -95,7 +95,7 @@ fun HTML.editPetPage(navParams: NavParams = NavParams()) {
                 div(classes = "storage-dropzone") {
                     id = "storage-dropzone"
                     div { classes = setOf("dropzone-content"); attributes["data-i18n"] = "dropImagesHint"; +"Drop images here or click to browse" }
-                    input(InputType.file) { id = "pet-images"; accept = "storage/*"; multiple = true; classes = setOf("file-input") }
+                    input(InputType.file) { id = "pet-images"; accept = "image/*"; multiple = true; classes = setOf("file-input") }
                 }
                 div { id = "storage-previews"; classes = setOf("storage-previews") }
                 div(classes = "form-row") {

@@ -39,7 +39,7 @@ header {
 .nav-pill-stack {
     position: fixed;
     bottom: 7rem;
-    left: -1.25rem;
+    inset-inline-start: -1.25rem;
     z-index: 900;
     display: flex;
     flex-direction: column;
@@ -111,8 +111,9 @@ header {
 
     #nav-donate {
         top: 92px;
-        right: -1rem;
-        padding: 0.4rem 1.15rem 0.4rem 0.6rem;
+        inset-inline-end: -1rem;
+        padding-block: 0.4rem;
+        padding-inline: 0.6rem 1.15rem;
         font-size: 0.85rem;
 
         .material-symbols-outlined {
@@ -129,7 +130,7 @@ header {
 // above the fixed footer instead, so nothing scrolls underneath them.
 @media (max-width: 1560px) {
     .nav-pill-stack {
-        left: 0.5rem;
+        inset-inline-start: 0.5rem;
         bottom: 6rem;
     }
 
@@ -147,11 +148,11 @@ header {
     }
 
     main {
-        padding-left: 4.5rem;
+        padding-inline-start: 4.5rem;
     }
 
     .page-header-row {
-        padding-right: 7rem;
+        padding-inline-end: 7rem;
     }
 }
 
@@ -201,11 +202,12 @@ header {
 // of the header) so it stays reachable while scrolling instead of competing for space in the nav
 // row. Own color scheme (unrelated to the urgent-report pills) - its curve bleeds off the right
 // edge of the viewport the same way the left-stack pills bleed off the left, with padding shifted
-// to the right side to re-center the icon/text past the clipped curve.
+// to the right side to re-center the icon/text past the clipped curve. Logical (inline-start/end)
+// properties so the whole arrangement mirrors under dir="rtl" (Arabic) instead of colliding with the logo.
 #nav-donate {
     position: fixed;
     top: 102px;
-    right: -1.25rem;
+    inset-inline-end: -1.25rem;
     z-index: 900;
     margin: 0;
     display: inline-flex;
@@ -214,7 +216,8 @@ header {
     background-color: #b91c1c;
     border: 2px solid #ff6b6b;
     color: white;
-    padding: 0.5rem 1.75rem 0.5rem 1rem;
+    padding-block: 0.5rem;
+    padding-inline: 1rem 1.75rem;
     border-radius: 999px;
     font-weight: bold;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);

@@ -213,6 +213,15 @@ object UrgentRescuerProfilePageModule {
 @JsExport
 @JsName("UrgentRescuerDashboardPage")
 object UrgentRescuerDashboardPageModule {
+    private fun dangerTypeLabel(type: String?): String = when (type) {
+        "INJURED" -> I18n.t("dangerInjured")
+        "ABUSED" -> I18n.t("dangerAbused")
+        "STARVING" -> I18n.t("dangerStarving")
+        "TOO_YOUNG" -> I18n.t("dangerTooYoung")
+        "OTHER" -> I18n.t("dangerOther")
+        else -> CommonModule.escapeHtml(type)
+    }
+
     fun init() {
         apiFetch("/api/urgent-rescuers/my-pages").then<Unit> { pages: dynamic ->
             val container = document.getElementById("pages-container")
@@ -240,7 +249,7 @@ object UrgentRescuerDashboardPageModule {
             "<p><em>${I18n.t("referenceNotes")}: ${CommonModule.escapeHtml(referenceNotes)}</em></p>"
         } else ""
         card.innerHTML = """
-            <h2>${CommonModule.escapeHtml(page.dangerType?.toString())}</h2>
+            <h2>${dangerTypeLabel(page.dangerType?.toString())}</h2>
             <p>${CommonModule.escapeHtml(page.locationLabel?.toString())}</p>
             $referenceNotesHtml
             <p>${CommonModule.escapeHtml(page.description?.toString())}</p>
@@ -256,8 +265,16 @@ object UrgentRescuerDashboardPageModule {
                     CommonModule.showDonationPrompt(document.getElementById("pages-container"))
                     card.remove()
                 }
-                .catch<Unit> { _: dynamic ->
-                    card.innerHTML += "<p class=\"message error\">${I18n.t("alreadyAccepted")}</p>"
+                .catch<Unit> { err: dynamic ->
+                    // Only a 409 from the accept endpoint means someone else won the report; any
+                    // other failure (network, server) must not be reported as "already accepted".
+                    val message = err?.message?.toString() ?: ""
+                    val text = if (message.contains("already been accepted")) I18n.t("alreadyAccepted") else message.ifEmpty { I18n.t("alreadyAccepted") }
+                    // Never rewrite card.innerHTML here: that would replace acceptBtn with a fresh
+                    // node and drop its click listener, leaving the visible button dead.
+                    card.querySelector(".message.error")?.remove()
+                    card.insertAdjacentHTML("beforeend", "<p class=\"message error\">${CommonModule.escapeHtml(text)}</p>")
+                    acceptBtn.disabled = false
                 }
         })
         card.appendChild(acceptBtn)

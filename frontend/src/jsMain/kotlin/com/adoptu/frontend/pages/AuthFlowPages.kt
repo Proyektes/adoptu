@@ -199,10 +199,10 @@ object EmailChangeVerificationPageModule {
             res.json().then { result: dynamic ->
                 if (result.success == true) {
                     msg?.className = "message success"
-                    msg?.textContent = result.message?.toString() ?: I18n.t("emailChangedSuccess")
+                    msg?.textContent = I18n.t("emailChangedSuccess")
                 } else {
                     msg?.className = "message error"
-                    msg?.textContent = result.message?.toString() ?: I18n.t("failedChangeEmailExpired")
+                    msg?.textContent = I18n.t("failedChangeEmailExpired")
                 }
             }
         }.catch { _: dynamic ->
@@ -228,10 +228,10 @@ object ProfileEmailVerificationPageModule {
             res.json().then { result: dynamic ->
                 if (result.success == true) {
                     msg?.className = "message success"
-                    msg?.textContent = result.message?.toString() ?: I18n.t("emailVerifiedSuccess")
+                    msg?.textContent = I18n.t("emailVerifiedSuccess")
                 } else {
                     msg?.className = "message error"
-                    msg?.textContent = result.message?.toString() ?: I18n.t("failedVerifyEmailExpired")
+                    msg?.textContent = I18n.t("failedVerifyEmailExpired")
                 }
             }
         }.catch { _: dynamic ->

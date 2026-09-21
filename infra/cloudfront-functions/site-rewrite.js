@@ -73,6 +73,10 @@ function handler(event) {
         request.uri = "/pet-detail.html";
         return request;
     }
+    if (uri === "/temporal-home/block") {
+        request.uri = "/temporal-home-block.html";
+        return request;
+    }
     if (/^\/temporal-home\/[0-9]+$/.test(uri)) {
         request.uri = "/temporal-home-detail.html";
         return request;

@@ -100,18 +100,6 @@ object AdminSterilizationLocationsPageModule {
         loadLocations()
     }
 
-    private fun loadCountries(): dynamic =
-        window.asDynamic().fetch("/api/sterilization-locations/countries").then { res: dynamic ->
-            res.json().then { data: dynamic ->
-                val select = document.getElementById("form-country") as? HTMLSelectElement
-                val countries = data.countries as? Array<dynamic> ?: arrayOf()
-                val options = countries.joinToString("") { c ->
-                    "<option value=\"$c\">${CommonModule.escapeHtml(I18n.translateCountry(c.toString()))}</option>"
-                }
-                select?.innerHTML = "<option value=\"\">${I18n.t("selectCountry")}</option>$options"
-            }
-        }
-
     private fun loadLocations() {
         val container = document.getElementById("locations-container").unsafeCast<HTMLElement?>()
         window.asDynamic().fetch("/api/admin/sterilization-locations").then { res: dynamic ->
@@ -131,7 +119,6 @@ object AdminSterilizationLocationsPageModule {
         editingId = null
         (document.getElementById("location-form") as? HTMLFormElement)?.reset()
         (document.getElementById("form-modal") as? HTMLElement)?.classList?.remove("hidden")
-        loadCountries()
     }
 
     private fun hideForm() {
@@ -143,20 +130,18 @@ object AdminSterilizationLocationsPageModule {
         editingId = id
         window.asDynamic().fetch("/api/sterilization-locations/$id").then { res: dynamic ->
             res.json().then { loc: dynamic ->
-                loadCountries().then<Unit> {
-                    val form = document.getElementById("location-form") as HTMLFormElement
-                    (form.asDynamic().name as HTMLInputElement).value = loc.name.toString()
-                    (document.getElementById("form-country") as HTMLSelectElement).value = loc.country.toString()
-                    (form.asDynamic().state as HTMLInputElement).value = loc.state?.toString() ?: ""
-                    (form.asDynamic().city as HTMLInputElement).value = loc.city.toString()
-                    (form.asDynamic().address as HTMLInputElement).value = loc.address.toString()
-                    (form.asDynamic().zip as HTMLInputElement).value = loc.zip?.toString() ?: ""
-                    (form.asDynamic().phone as HTMLInputElement).value = loc.phone?.toString() ?: ""
-                    (form.asDynamic().email as HTMLInputElement).value = loc.email?.toString() ?: ""
-                    (form.asDynamic().website as HTMLInputElement).value = loc.website?.toString() ?: ""
-                    (form.asDynamic().description as HTMLTextAreaElement).value = loc.description?.toString() ?: ""
-                    (document.getElementById("form-modal") as HTMLElement).classList.remove("hidden")
-                }
+                val form = document.getElementById("location-form") as HTMLFormElement
+                (form.asDynamic().name as HTMLInputElement).value = loc.name.toString()
+                (document.getElementById("form-country") as HTMLSelectElement).value = loc.country.toString()
+                (form.asDynamic().state as HTMLInputElement).value = loc.state?.toString() ?: ""
+                (form.asDynamic().city as HTMLInputElement).value = loc.city.toString()
+                (form.asDynamic().address as HTMLInputElement).value = loc.address.toString()
+                (form.asDynamic().zip as HTMLInputElement).value = loc.zip?.toString() ?: ""
+                (form.asDynamic().phone as HTMLInputElement).value = loc.phone?.toString() ?: ""
+                (form.asDynamic().email as HTMLInputElement).value = loc.email?.toString() ?: ""
+                (form.asDynamic().website as HTMLInputElement).value = loc.website?.toString() ?: ""
+                (form.asDynamic().description as HTMLTextAreaElement).value = loc.description?.toString() ?: ""
+                (document.getElementById("form-modal") as HTMLElement).classList.remove("hidden")
             }
         }
     }

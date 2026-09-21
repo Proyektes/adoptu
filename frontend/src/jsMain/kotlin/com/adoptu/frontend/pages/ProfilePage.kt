@@ -945,7 +945,7 @@ object ProfilePageModule {
             container?.innerHTML = list.joinToString("") { search ->
                 val type = search.type?.toString()?.takeIf { it.isNotEmpty() }?.let { I18n.t(it.lowercase()) } ?: I18n.t("all")
                 "<div class=\"saved-search-row\">" +
-                    "<span>$type - ${search.country}</span> " +
+                    "<span>$type - ${I18n.translateCountry(search.country?.toString() ?: "")}</span> " +
                     "<button type=\"button\" class=\"btn btn-secondary remove-saved-search-btn\" data-id=\"${search.id}\">${I18n.t("delete")}</button></div>"
             }
             document.querySelectorAll(".remove-saved-search-btn").forEachElement { node ->

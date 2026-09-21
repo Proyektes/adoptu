@@ -101,6 +101,7 @@ private val SERVE_JSON = """
   "cleanUrls": true,
   "rewrites": [
     { "source": "^/pet/[0-9]+${'$'}", "destination": "/pet-detail.html" },
+    { "source": "^/temporal-home/block${'$'}", "destination": "/temporal-home-block.html" },
     { "source": "^/temporal-home/[0-9]+${'$'}", "destination": "/temporal-home-detail.html" },
     { "source": "^/rescuer/[0-9]+${'$'}", "destination": "/rescuer-detail.html" },
     { "source": "^/lost-found/[0-9]+${'$'}", "destination": "/lost-found-detail.html" }

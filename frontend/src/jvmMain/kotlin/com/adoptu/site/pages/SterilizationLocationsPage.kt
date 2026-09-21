@@ -60,44 +60,44 @@ fun HTML.adminSterilizationLocationsPage(navParams: NavParams = NavParams()) {
                     form(classes = "auth-form") {
                         id = "location-form"
                         div(classes = "form-row") {
-                            label { attributes["data-i18n"] = "name"; +"Name" }
-                            input(type = InputType.text) { name = "name"; required = true }
+                            label { htmlFor = "loc-name"; attributes["data-i18n"] = "name"; +"Name" }
+                            input(type = InputType.text) { name = "name"; id = "loc-name"; required = true }
                         }
                         div(classes = "form-row") {
-                            label { attributes["data-i18n"] = "country"; +"Country" }
-                            select { name = "country"; required = true; id = "form-country" }
+                            label { htmlFor = "form-country"; attributes["data-i18n"] = "country"; +"Country" }
+                            select { name = "country"; required = true; id = "form-country"; countrySelect("form-country") }
                         }
                         div(classes = "form-row") {
-                            label { attributes["data-i18n"] = "state"; +"State" }
-                            input(type = InputType.text) { name = "state" }
+                            label { htmlFor = "loc-state"; attributes["data-i18n"] = "state"; +"State" }
+                            input(type = InputType.text) { name = "state"; id = "loc-state" }
                         }
                         div(classes = "form-row") {
-                            label { attributes["data-i18n"] = "city"; +"City" }
-                            input(type = InputType.text) { name = "city"; required = true }
+                            label { htmlFor = "loc-city"; attributes["data-i18n"] = "city"; +"City" }
+                            input(type = InputType.text) { name = "city"; id = "loc-city"; required = true }
                         }
                         div(classes = "form-row") {
-                            label { attributes["data-i18n"] = "address"; +"Address" }
-                            input(type = InputType.text) { name = "address"; required = true }
+                            label { htmlFor = "loc-address"; attributes["data-i18n"] = "address"; +"Address" }
+                            input(type = InputType.text) { name = "address"; id = "loc-address"; required = true }
                         }
                         div(classes = "form-row") {
-                            label { attributes["data-i18n"] = "zip"; +"ZIP" }
-                            input(type = InputType.text) { name = "zip" }
+                            label { htmlFor = "loc-zip"; attributes["data-i18n"] = "zip"; +"ZIP" }
+                            input(type = InputType.text) { name = "zip"; id = "loc-zip" }
                         }
                         div(classes = "form-row") {
-                            label { attributes["data-i18n"] = "phone"; +"Phone" }
-                            input(type = InputType.tel) { name = "phone" }
+                            label { htmlFor = "loc-phone"; attributes["data-i18n"] = "phone"; +"Phone" }
+                            input(type = InputType.tel) { name = "phone"; id = "loc-phone" }
                         }
                         div(classes = "form-row") {
-                            label { attributes["data-i18n"] = "email"; +"Email" }
-                            input(type = InputType.email) { name = "email" }
+                            label { htmlFor = "loc-email"; attributes["data-i18n"] = "email"; +"Email" }
+                            input(type = InputType.email) { name = "email"; id = "loc-email" }
                         }
                         div(classes = "form-row") {
-                            label { attributes["data-i18n"] = "website"; +"Website" }
-                            input(type = InputType.url) { name = "website" }
+                            label { htmlFor = "loc-website"; attributes["data-i18n"] = "website"; +"Website" }
+                            input(type = InputType.url) { name = "website"; id = "loc-website" }
                         }
                         div(classes = "form-row") {
-                            label { attributes["data-i18n"] = "description"; +"Description" }
-                            textArea { name = "description"; rows = "4" }
+                            label { htmlFor = "loc-description"; attributes["data-i18n"] = "description"; +"Description" }
+                            textArea { name = "description"; id = "loc-description"; rows = "4" }
                         }
                         div(classes = "form-actions") {
                             button(type = ButtonType.submit) {

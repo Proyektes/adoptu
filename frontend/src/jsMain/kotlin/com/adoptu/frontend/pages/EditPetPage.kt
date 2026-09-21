@@ -365,7 +365,9 @@ object EditPetPageModule {
         val savePromise: dynamic = if (id.isNotEmpty()) ApiClientModule.updatePet(id, data) else ApiClientModule.createPet(data)
         savePromise.then { pet: dynamic ->
             val petId = if (id.isNotEmpty()) id else pet.id.toString()
-            uploadImages(petId).then<Unit> {
+            // then { } (not then<Unit> { }) so the returned upload promise is awaited - with the
+            // lambda typed to Unit the promise was dropped and the redirect aborted the upload.
+            uploadImages(petId).then {
                 uploadVideoIfSelected(petId)
             }.then<Unit> {
                 window.location.href = "/my-pets"

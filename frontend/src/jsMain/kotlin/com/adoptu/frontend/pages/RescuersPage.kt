@@ -59,7 +59,7 @@ object RescuerDetailPageModule {
             ApiClientModule.me().then<Unit> { user -> render(rescuer, user) }.catch { render(rescuer, js("({authenticated: false})")) }
         }.catch {
             val container = document.getElementById("rescuer-detail").unsafeCast<HTMLElement?>()
-            container?.innerHTML = "<p>${I18n.t("rescuerNotFound")}</p><a href=\"/rescuers\">${I18n.t("backToSearch")}</a>"
+            container?.innerHTML = "<p>${I18n.t("rescuerNotFound")}</p><a class=\"btn\" href=\"/rescuers\">${I18n.t("backToSearch")}</a>"
         }
     }
 
