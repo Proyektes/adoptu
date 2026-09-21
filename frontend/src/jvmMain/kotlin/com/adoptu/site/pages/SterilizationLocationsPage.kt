@@ -32,7 +32,7 @@ fun HTML.sterilizationLocationsPage(navParams: NavParams = NavParams()) {
 }
 
 fun HTML.adminSterilizationLocationsPage(navParams: NavParams = NavParams()) {
-    commonHead("Manage Sterilization Locations - Adopt-U")
+    commonHead("Manage Sterilization Locations - Adopt-U", "sterilization.css")
     body {
         attributes["data-auth-required"] = "admin"
         header {
@@ -42,7 +42,7 @@ fun HTML.adminSterilizationLocationsPage(navParams: NavParams = NavParams()) {
         main {
             div {
                 h1 { attributes["data-i18n"] = "adminSterilizationLocations"; +"Manage Sterilization Locations" }
-                a("/sterilization-locations") { attributes["data-i18n"] = "viewPublic"; +"View Public Page" }
+                a("/sterilization-locations", classes = "btn") { attributes["data-i18n"] = "viewPublic"; +"View Public Page" }
             }
             div { id = "message"; +"" }
             

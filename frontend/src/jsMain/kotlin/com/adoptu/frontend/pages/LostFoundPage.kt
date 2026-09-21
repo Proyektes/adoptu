@@ -267,10 +267,12 @@ object LostFoundResolvePageModule {
         document.getElementById("resolve-success")?.className = "verification-success"
         document.getElementById("resolve-error")?.className = "verification-error hidden"
         CommonModule.showDonationPrompt(document.getElementById("resolve-success"))
+        I18n.updateTitle()
     }
 
     private fun showError() {
         document.getElementById("resolve-error")?.className = "verification-error"
         document.getElementById("resolve-success")?.className = "verification-success hidden"
+        I18n.updateTitle()
     }
 }

@@ -17286,8 +17286,23 @@ object I18n {
             val key = el.getAttribute("data-i18n-aria-label") ?: continue
             el.setAttribute("aria-label", t(key))
         }
+        updateTitle()
+    }
+
+    // Derive the tab title from the page's translated <h1>. Pages that render several outcome
+    // headings (e.g. success/error panels, all but one hidden) use the first one that is not
+    // inside a .hidden container; call this again after toggling which panel is visible.
+    fun updateTitle() {
         val headings = document.querySelectorAll("main h1[data-i18n]")
-        if (headings.length == 1) document.title = headings.item(0)?.textContent + " - Adopt-U"
+        if (headings.length == 0) return
+        var chosen: Element? = null
+        for (i in 0 until headings.length) {
+            val el = headings.item(i)?.unsafeCast<Element>() ?: continue
+            if (el.closest(".hidden") == null) { chosen = el; break }
+        }
+        if (chosen == null && headings.length == 1) chosen = headings.item(0)?.unsafeCast<Element>()
+        val text = chosen?.textContent?.trim().orEmpty()
+        if (text.isNotEmpty()) document.title = "$text - Adopt-U"
     }
 
     fun formatDate(value: dynamic): String = js("new Date(value)").toLocaleDateString(currentLang).unsafeCast<String>()
