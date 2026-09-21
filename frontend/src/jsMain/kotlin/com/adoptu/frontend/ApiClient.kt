@@ -286,6 +286,12 @@ object ApiClientModule {
         return apiFetch("/api/photographers/requests", js("({method: 'POST', body: JSON.stringify(body)})"))
     }
 
+    // Up to 3 photographers per call (PhotographerService enforces the cap and the weekly limit).
+    fun createMultiPhotographyRequest(photographerIds: Array<Int>, petId: Int?, message: String): Promise<dynamic> {
+        val body = js("({photographerIds: photographerIds, petId: petId, message: message})")
+        return apiFetch("/api/photographers/requests/multiple", js("({method: 'POST', body: JSON.stringify(body)})"))
+    }
+
     fun getAdoptionRequests(petId: Int): Promise<dynamic> = apiFetch("/api/pets/$petId/adoption-requests")
 
     fun getRescuerAdoptionRequests(): Promise<dynamic> = apiFetch("/api/users/rescuer/adoption-requests")

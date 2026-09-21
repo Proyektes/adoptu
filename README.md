@@ -46,7 +46,7 @@ Then open http://localhost:4000
 
 ## Development Services
 
-Start Postgres, LocalStack (S3), and Mailpit (email):
+Start Postgres, LocalStack (S3 + SNS), and Mailpit (email):
 
 ```bash
 ./gradlew dockerUp
@@ -55,6 +55,10 @@ Start Postgres, LocalStack (S3), and Mailpit (email):
 - **Database**: PostgreSQL on `localhost:5432`
 - **S3**: LocalStack on `localhost:4566`
 - **Email**: Mailpit web UI at http://localhost:8025
+- **SMS** (urgent-rescuer paging): LocalStack SNS. Run the backend with
+  `ADOPTU_SNS_ENDPOINT=http://localhost:4566` and read the sent texts at
+  http://localhost:4566/_aws/sns/sms-messages (no real phone is contacted). Without the
+  variable the SNS client points at real AWS and the send fails closed (logged, not thrown).
 
 Stop services:
 
