@@ -29,6 +29,9 @@ COPY build.gradle.kts settings.gradle.kts ./
 COPY backend/build.gradle.kts backend/build.gradle.kts
 COPY frontend/build.gradle.kts frontend/build.gradle.kts
 COPY common/build.gradle.kts common/build.gradle.kts
+# settings.gradle.kts includeBuild("dfk-codegen") - the DataFormatsKit codegen included build
+# must be present or Gradle fails configuration with "Included build '/app/dfk-codegen' does not exist".
+COPY dfk-codegen dfk-codegen
 RUN chmod +x gradlew
 
 COPY backend/src backend/src
@@ -47,10 +50,10 @@ COPY common/src common/src
 # constrained-memory CI container. Running them separately lets the first
 # JVM fully exit before native-image starts.
 #
-# GITHUB_ACTOR/PAYMENT_KIT_TOKEN/AUTH_KIT_TOKEN/STORAGE_KIT_TOKEN/IMAGE_KIT_TOKEN (same names
-# backend/build.gradle.kts's credential() reads, same names exported in ~/.profile for
-# host-side builds) authenticate the five private GitHub Packages repos (EmailKit/RateLimitKit,
-# AuthKit, StorageKit, ImageKit). Passed as build secrets mounted as files (not --build-arg) so the
+# GITHUB_ACTOR/PAYMENT_KIT_TOKEN/AUTH_KIT_TOKEN/STORAGE_KIT_TOKEN/IMAGE_KIT_TOKEN/
+# DATA_FORMATS_KIT_TOKEN (same names backend/build.gradle.kts's credential() reads, same names
+# exported in ~/.profile for host-side builds) authenticate the six private GitHub Packages repos
+# (EmailKit/RateLimitKit, AuthKit, StorageKit, ImageKit, DataFormatsKit). Passed as build secrets mounted as files (not --build-arg) so the
 # token values never land in image layer history - only this RUN's shell reads them, via a
 # subshell `export` from the mounted path. Podman's --mount=type=secret has no env= shorthand
 # (unlike Docker buildx), so this file+export form is what works on both. Caller must pass matching
@@ -61,11 +64,13 @@ RUN --mount=type=cache,target=/root/.gradle \
     --mount=type=secret,id=auth_kit_token \
     --mount=type=secret,id=storage_kit_token \
     --mount=type=secret,id=image_kit_token \
+    --mount=type=secret,id=data_formats_kit_token \
     export GITHUB_ACTOR="$(cat /run/secrets/github_actor)" \
       PAYMENT_KIT_TOKEN="$(cat /run/secrets/payment_kit_token)" \
       AUTH_KIT_TOKEN="$(cat /run/secrets/auth_kit_token)" \
       STORAGE_KIT_TOKEN="$(cat /run/secrets/storage_kit_token)" \
-      IMAGE_KIT_TOKEN="$(cat /run/secrets/image_kit_token)" && \
+      IMAGE_KIT_TOKEN="$(cat /run/secrets/image_kit_token)" \
+      DATA_FORMATS_KIT_TOKEN="$(cat /run/secrets/data_formats_kit_token)" && \
     ./gradlew :backend:jar :backend:shadowJar --no-daemon
 RUN --mount=type=cache,target=/root/.gradle \
     --mount=type=secret,id=github_actor \
@@ -73,11 +78,13 @@ RUN --mount=type=cache,target=/root/.gradle \
     --mount=type=secret,id=auth_kit_token \
     --mount=type=secret,id=storage_kit_token \
     --mount=type=secret,id=image_kit_token \
+    --mount=type=secret,id=data_formats_kit_token \
     export GITHUB_ACTOR="$(cat /run/secrets/github_actor)" \
       PAYMENT_KIT_TOKEN="$(cat /run/secrets/payment_kit_token)" \
       AUTH_KIT_TOKEN="$(cat /run/secrets/auth_kit_token)" \
       STORAGE_KIT_TOKEN="$(cat /run/secrets/storage_kit_token)" \
-      IMAGE_KIT_TOKEN="$(cat /run/secrets/image_kit_token)" && \
+      IMAGE_KIT_TOKEN="$(cat /run/secrets/image_kit_token)" \
+      DATA_FORMATS_KIT_TOKEN="$(cat /run/secrets/data_formats_kit_token)" && \
     ./gradlew :backend:nativeCompile --no-daemon -PnativeGc=$NATIVE_GC \
       -Porg.gradle.java.installations.paths=$JAVA_HOME \
       -Porg.gradle.java.installations.auto-detect=false \
