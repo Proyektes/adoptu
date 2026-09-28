@@ -4,6 +4,49 @@
 # console-created ones until cutover. See infra/README.md for the
 # migration/cutover plan.
 
+locals {
+  # Runtime profile by task size (see "Runtime profile by task size" in AGENTS.md for the full rule
+  # table and rationale):
+  #   < 1 vCPU (< 1024 cpu units):        native image, Serial GC (build-time choice)
+  #   1-2 vCPU (1024-2047 cpu units):     native image, G1 GC (build-time choice)
+  #   >= 2 vCPU and >= 2GB, long-lived:   JVM (JDK 25), G1 + AOTCache at runtime
+  runtime_profile = (
+    var.task_cpu >= 2048 && var.task_memory >= 2048 ? "jvm" :
+    var.task_cpu >= 1024 ? "native-g1" :
+    "native-serial"
+  )
+
+  # Same heap cap for every profile: 60% of task memory, whether that's Substrate VM's
+  # -XX:MaximumHeapSizePercent (native) or a computed -Xmx (JVM).
+  heap_percent = 60
+
+  # Only meaningful for the "jvm" profile -- the native runtime stage doesn't read JAVA_OPTS, only
+  # HEAP_PERCENT (see root Dockerfile's native ENTRYPOINT).
+  runtime_java_opts = local.runtime_profile == "jvm" ? join(" ", [
+    "-XX:+UseG1GC",
+    "-Xmx${floor(var.task_memory * local.heap_percent / 100)}m",
+    "-XX:MaxMetaspaceSize=96m",
+    "-XX:ReservedCodeCacheSize=64m",
+    "-XX:+UseCompactObjectHeaders",
+    # -XX:AOTCache=app.aot intentionally omitted until a training run produces app.aot in the
+    # image -- see root Dockerfile's jvm stage TODO(AOTCache).
+  ]) : ""
+}
+
+# Fails `tofu plan` if var.task_cpu/var.task_memory and runtime_profile ever drift apart, e.g. a
+# future resize to 2 vCPU / 2GB without updating the profile logic above, or the reverse (jvm
+# profile force-picked on a task too small for it).
+check "runtime_profile_matches_task_size" {
+  assert {
+    condition     = !(local.runtime_profile == "jvm" && var.task_memory < 2048)
+    error_message = "runtime_profile is 'jvm' but task_memory (${var.task_memory} MiB) is below the 2048 MiB floor the JVM profile assumes -- see 'Runtime profile by task size' in AGENTS.md."
+  }
+  assert {
+    condition     = !(local.runtime_profile != "jvm" && var.task_cpu >= 2048 && var.task_memory >= 2048)
+    error_message = "Task is >= 2 vCPU / >= 2GB but runtime_profile resolved to '${local.runtime_profile}' instead of 'jvm' -- check the runtime_profile expression in infra/ecs.tf."
+  }
+}
+
 resource "aws_ecs_cluster" "this" {
   name = "adoptu"
 }
@@ -87,6 +130,12 @@ resource "aws_ecs_task_definition" "app" {
         { name = "ADOPTU_WEB_AUTHN_ORIGINS", value = var.webauthn_origins },
         { name = "ADOPTU_WEB_AUTHN_RP_ID", value = var.webauthn_rp_id },
         { name = "ADOPTU_DEPLOY_SEQUENCE", value = var.deploy_sequence },
+        # Runtime sizing derived from local.runtime_profile (var.task_cpu/var.task_memory above) --
+        # see "Runtime profile by task size" in AGENTS.md. HEAP_PERCENT feeds the native image's
+        # -XX:MaximumHeapSizePercent (root Dockerfile's ENTRYPOINT); JAVA_OPTS is only non-empty
+        # for the "jvm" profile.
+        { name = "HEAP_PERCENT", value = tostring(local.heap_percent) },
+        { name = "JAVA_OPTS", value = local.runtime_java_opts },
       ]
 
       # Was a plaintext environment variable in the live task definition.

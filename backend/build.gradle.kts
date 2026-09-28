@@ -258,15 +258,15 @@ graalvmNative {
             // ECS Fargate x86_64 hosts are Xeon Platinum / EPYC - both guarantee AVX2 (x86-64-v3
             // baseline). Do NOT target v4/AVX-512: Fargate doesn't guarantee it across the x86 fleet.
             buildArgs.add("-march=x86-64-v3")
-            // Serial GC. Previously pinned here because native-image-community:25 rejected --gc=G1
-            // outright ("Accepted values are 'epsilon', 'serial'") - now that the builder is Oracle
-            // GraalVM (which does support G1), that's no longer the reason, but Serial is still the
-            // right choice: this task runs at 0.25-0.5 vCPU / 512MB-1GB on ECS Fargate, and G1's
-            // concurrent marking/refinement threads need a spare core to run alongside the mutator
-            // (which this task doesn't have below 1 vCPU) plus ~50-100MB of region-bookkeeping RSS
+            // GC choice is BUILD-time for native-image, so it's a Gradle property, not a runtime
+            // flag: -PnativeGc=serial|G1, defaulting to serial (this task's current 0.25-0.5 vCPU /
+            // 512MB-1GB Fargate size -- see "Runtime profile by task size" in AGENTS.md). Below 1
+            // vCPU, G1's concurrent marking/refinement threads need a spare core to run alongside
+            // the mutator (which this task doesn't have) plus ~50-100MB of region-bookkeeping RSS
             // this task's memory budget can't spare. Serial has no concurrent threads and the
-            // smallest footprint of any native-image collector.
-            buildArgs.add("--gc=serial")
+            // smallest footprint of any native-image collector. Once the task grows to 1-2 vCPU,
+            // the Dockerfile's NATIVE_GC build arg flips this to G1 without touching this file.
+            buildArgs.add("--gc=" + (findProperty("nativeGc") ?: "serial"))
             // ImageCompressor uses javax.imageio, which touches java.awt.Toolkit at class
             // init. Without this, Toolkit tries the X11-backed libawt_xawt.so - the
             // oraclelinux:10-slim runtime image has no X11 libraries installed at all, so

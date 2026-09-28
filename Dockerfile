@@ -13,6 +13,12 @@
 FROM container-registry.oracle.com/graalvm/native-image:25 AS builder
 # FROM ghcr.io/graalvm/native-image-community:25 AS builder
 
+# BUILD-time GC choice (native-image bakes the collector into the binary, it can't be picked at
+# runtime): serial|G1, defaulting to serial for this task's current 0.25-0.5 vCPU / 512MB-1GB
+# Fargate size. See "Runtime profile by task size" in AGENTS.md for the full rule table -- pass
+# --build-arg NATIVE_GC=G1 once the task grows past 1 vCPU.
+ARG NATIVE_GC=serial
+
 WORKDIR /app
 
 # Files that change rarely go first so the Gradle dependency layer survives
@@ -72,13 +78,47 @@ RUN --mount=type=cache,target=/root/.gradle \
       AUTH_KIT_TOKEN="$(cat /run/secrets/auth_kit_token)" \
       STORAGE_KIT_TOKEN="$(cat /run/secrets/storage_kit_token)" \
       IMAGE_KIT_TOKEN="$(cat /run/secrets/image_kit_token)" && \
-    ./gradlew :backend:nativeCompile --no-daemon
+    ./gradlew :backend:nativeCompile --no-daemon -PnativeGc=$NATIVE_GC
 
-# Runtime stage - same OS family/glibc as the builder (Oracle Linux 10.1,
-# glibc 2.39) for ABI compatibility with the dynamically linked native
-# binary. No JDK/JRE needed at all, just CA certs for outbound TLS
+# ---------------------------------------------------------------------------
+# JVM runtime stage -- `docker build --target jvm` (>= 2 vCPU / >= 2GB, long-lived tasks; see
+# "Runtime profile by task size" in AGENTS.md). Reuses the builder's :backend:jar output (built
+# above) instead of a separate installDist stage - the app is a plain fat/uber-ish Gradle `jar`
+# with a manifest Main-Class, run directly with `java -jar`.
+# ---------------------------------------------------------------------------
+FROM amazoncorretto:25-alpine AS jvm
+
+RUN addgroup -S app && adduser -S app -G app
+
+WORKDIR /app
+
+COPY --from=builder /app/backend/build/libs/*.jar ./adoptu-backend.jar
+COPY backend/src/main/resources/application.conf .
+
+ENV ADOPTU_ENV="prod"
+
+USER app
+EXPOSE 8080
+
+# JAVA_TOOL_OPTIONS is read by any `java` launcher automatically; JAVA_OPTS is appended explicitly
+# below since this is a plain `java -jar`, not a Gradle-generated start script. Set either from the
+# ECS task's `environment` block. Suggested baseline for this profile:
+#   JAVA_OPTS=-XX:+UseG1GC -Xmx<60% of task memory> -XX:MaxMetaspaceSize=96m \
+#             -XX:ReservedCodeCacheSize=64m -XX:+UseCompactObjectHeaders -XX:AOTCache=app.aot
+# TODO(AOTCache): app.aot is not produced by this image. It needs a representative
+# `-XX:AOTMode=record` training run of the running app (real DB/HTTP traffic) which isn't safe to
+# do unattended at image-build time here -- until that training run is scripted, drop
+# -XX:AOTCache=app.aot from JAVA_OPTS (an AppCDS `-XX:ArchiveClassesAtExit` fallback on a
+# --help/dry-run start is the next thing to try if a real training run stays impractical).
+ENTRYPOINT ["/bin/sh", "-c", "exec java $JAVA_OPTS -jar adoptu-backend.jar"]
+
+# ---------------------------------------------------------------------------
+# Native runtime stage (default target -- `docker build .` with no --target still builds this).
+# Same OS family/glibc as the builder (Oracle Linux 10.1, glibc 2.39) for ABI compatibility with
+# the dynamically linked native binary. No JDK/JRE needed at all, just CA certs for outbound TLS
 # (Postgres/S3/SES).
-FROM docker.io/oraclelinux:10-slim
+# ---------------------------------------------------------------------------
+FROM docker.io/oraclelinux:10-slim AS native
 
 RUN microdnf install -y ca-certificates shadow-utils \
     && microdnf clean all \
@@ -100,4 +140,8 @@ ENV ADOPTU_ENV="prod"
 USER app
 EXPOSE 8080
 
-ENTRYPOINT ["./adoptu-backend"]
+# -XX:MaximumHeapSizePercent is a Substrate VM runtime option (works with both Serial and G1 native
+# images, unlike a JVM -Xmx which native-image has no equivalent flag for) -- HEAP_PERCENT comes
+# from the ECS task's `environment` block, sized off task memory. See "Runtime profile by task
+# size" in AGENTS.md.
+ENTRYPOINT ["/bin/sh", "-c", "exec ./adoptu-backend -XX:MaximumHeapSizePercent=${HEAP_PERCENT:-60}"]

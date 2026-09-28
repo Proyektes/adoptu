@@ -70,6 +70,25 @@ aws ecr get-login-password --profile "$AWS_PROFILE" --region "$AWS_REGION" \
   | podman login --username AWS --password-stdin "${ECR_REPO%%/*}"
 
 echo "==> Building $ECR_REPO:$IMAGE_TAG"
+# Runtime profile (native-serial / native-g1 / jvm) -- mirrors infra/ecs.tf's
+# local.runtime_profile, derived from infra/variables.tf's task_cpu/task_memory defaults (512 /
+# 1024, unchanged). If the task is ever resized there, update these two numbers to match. See
+# "Runtime profile by task size" in AGENTS.md for the full rule table this encodes.
+TASK_CPU=512
+TASK_MEMORY=1024
+if [[ "$TASK_CPU" -ge 2048 && "$TASK_MEMORY" -ge 2048 ]]; then
+  RUNTIME_PROFILE="jvm"
+elif [[ "$TASK_CPU" -ge 1024 ]]; then
+  RUNTIME_PROFILE="native-g1"
+else
+  RUNTIME_PROFILE="native-serial"
+fi
+case "$RUNTIME_PROFILE" in
+  jvm) DOCKER_TARGET="jvm"; NATIVE_GC="" ;;
+  native-g1) DOCKER_TARGET="native"; NATIVE_GC="G1" ;;
+  native-serial) DOCKER_TARGET="native"; NATIVE_GC="serial" ;;
+esac
+echo "    Runtime profile: ${RUNTIME_PROFILE} (--target ${DOCKER_TARGET}${NATIVE_GC:+, --build-arg NATIVE_GC=$NATIVE_GC})"
 # GITHUB_ACTOR/PAYMENT_KIT_TOKEN/AUTH_KIT_TOKEN/STORAGE_KIT_TOKEN/IMAGE_KIT_TOKEN authenticate
 # the private GitHub Packages repos (EmailKit/RateLimitKit, AuthKit, StorageKit, ImageKit) the
 # backend depends on - same names ~/.profile exports for host-side Gradle builds. Passed as build
@@ -81,6 +100,8 @@ echo "==> Building $ECR_REPO:$IMAGE_TAG"
 : "${STORAGE_KIT_TOKEN:?STORAGE_KIT_TOKEN must be set (see ~/.profile)}"
 : "${IMAGE_KIT_TOKEN:?IMAGE_KIT_TOKEN must be set (see ~/.profile)}"
 podman build \
+  --target "$DOCKER_TARGET" \
+  ${NATIVE_GC:+--build-arg "NATIVE_GC=$NATIVE_GC"} \
   --secret id=github_actor,env=GITHUB_ACTOR \
   --secret id=payment_kit_token,env=PAYMENT_KIT_TOKEN \
   --secret id=auth_kit_token,env=AUTH_KIT_TOKEN \
