@@ -148,8 +148,8 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonKotlinVersion")
     // DataFormatsKit: generated JSON codecs (`@JsonDecodable`/`@JsonEncodable`, dfk-codegen/)
     // replacing Jackson for backend/{dto,web} - see JsonSupport.kt.
-    implementation("com.universaliun:dataformatskit-jvm:0.1.0")
-    implementation("com.universaliun:dataformatskit-helidon-media:0.1.0")
+    implementation("com.universaliun:dataformatskit-jvm:0.2.0")
+    implementation("com.universaliun:dataformatskit-helidon-media:0.2.0")
     implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.12.0")
     implementation("com.typesafe:config:1.4.5")
 

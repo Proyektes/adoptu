@@ -49,7 +49,7 @@ kotlin.sourceSets.named("main") {
 
 dependencies {
     // The annotations the DTOs carry, and the JsonConverter SPI.
-    implementation("com.universaliun:dataformatskit-jvm:0.1.0")
+    implementation("com.universaliun:dataformatskit-jvm:0.2.0")
     // The KSP processor itself.
-    ksp("com.universaliun:dataformatskit-codegen-processor:0.1.0")
+    ksp("com.universaliun:dataformatskit-codegen-processor:0.2.0")
 }
