@@ -94,6 +94,22 @@ repositories {
         }
         content { includeGroup("com.universaliun.imagekit") }
     }
+
+    // DataFormatsKit (generated JSON codecs, `dataformatskit-jvm` + its Helidon 4 media support
+    // `dataformatskit-helidon-media`) -- see Libraries/DataFormatsKit/README.md and
+    // docs/codegen-consumers.md / docs/helidon.md in that repo. GITHUB_ACTOR /
+    // DATA_FORMATS_KIT_TOKEN in the environment; content{} scopes this repository to the bare
+    // com.universaliun group (DataFormatsKit's own coordinates, distinct from every other Kit's
+    // com.universaliun.<kit> subgroup above).
+    maven {
+        name = "DataFormatsKitGitHubPackages"
+        url = uri("https://maven.pkg.github.com/ULibraries/DataFormatsKit")
+        credentials {
+            username = credential("GITHUB_ACTOR")
+            password = credential("DATA_FORMATS_KIT_TOKEN")
+        }
+        content { includeGroup("com.universaliun") }
+    }
 }
 
 // EmailKit is consumed as a `1.0-SNAPSHOT` ("changing") dependency -- same reasoning as the other
@@ -132,8 +148,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonKotlinVersion")
     // DataFormatsKit: generated JSON codecs (`@JsonDecodable`/`@JsonEncodable`, dfk-codegen/)
     // replacing Jackson for backend/{dto,web} - see JsonSupport.kt.
-    // TODO replace by the GitHub Packages artifact once DataFormatsKit 0.1.0 is published
-    implementation("com.universaliun:DataFormatsKit-jvm:0.1.0")
+    implementation("com.universaliun:dataformatskit-jvm:0.1.0")
     implementation("com.universaliun:dataformatskit-helidon-media:0.1.0")
     implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.12.0")
     implementation("com.typesafe:config:1.4.5")

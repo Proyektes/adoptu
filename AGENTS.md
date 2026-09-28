@@ -74,6 +74,15 @@ task runs the scan build's `:scan:kspKotlin` and `compileKotlin` depends on it; 
 lands under `dfk-codegen/scan/build/generated/ksp/main/kotlin` and is added as an ordinary
 `backend` source dir.
 
+DataFormatsKit itself is consumed as a published GitHub Packages artifact (not a local composite
+build): `com.universaliun:dataformatskit-jvm:0.1.0`, `com.universaliun:dataformatskit-helidon-media:0.1.0`,
+and (KSP processor, `dfk-codegen/scan` only) `com.universaliun:dataformatskit-codegen-processor:0.1.0`,
+all from `https://maven.pkg.github.com/ULibraries/DataFormatsKit` — see the
+`DataFormatsKitGitHubPackages` repository block in `backend/build.gradle.kts` and
+`dfk-codegen/scan/build.gradle.kts`. Requires `GITHUB_ACTOR` / `DATA_FORMATS_KIT_TOKEN` (a GitHub
+PAT with `read:packages`) in the environment, same pattern as EmailKit/RateLimitKit/AuthKit/
+StorageKit/ImageKit above.
+
 Jackson (`helidon-http-media-jackson`) stays on the classpath as the fallback `MediaSupport`,
 registered after `DataFormatsKitMediaSupport` in `JsonSupport.mediaContext()`, for whatever
 `DataFormatsKitMediaSupport` reports `NOT_SUPPORTED` for: `PagedResult<T>` (a generic wrapper class

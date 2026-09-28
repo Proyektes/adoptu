@@ -3,14 +3,26 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-// TODO replace by the GitHub Packages artifact once DataFormatsKit 0.1.0 is published --
-// mavenLocal() first because the orchestrating session publishes the library + processor there
-// before this build runs (see docs/codegen-consumers.md section 4, "Publishing", in the
-// DataFormatsKit repo: consumers normally have no mavenLocal() at all, but the artifact isn't on
-// GitHub Packages yet).
+// Env var first (terminal builds), falling back to a Gradle property of the same name --
+// same helper backend/build.gradle.kts uses for its own GitHub-Packages-consumed Universaliun
+// libraries.
+fun credential(name: String): String? = System.getenv(name) ?: findProperty(name) as String?
+
 repositories {
-    mavenLocal()
     mavenCentral()
+
+    // DataFormatsKit (library + KSP processor) -- see Libraries/DataFormatsKit/README.md.
+    // GITHUB_ACTOR / DATA_FORMATS_KIT_TOKEN in the environment; content{} scopes this repository
+    // to the bare com.universaliun group (DataFormatsKit's own coordinates).
+    maven {
+        name = "DataFormatsKitGitHubPackages"
+        url = uri("https://maven.pkg.github.com/ULibraries/DataFormatsKit")
+        credentials {
+            username = credential("GITHUB_ACTOR")
+            password = credential("DATA_FORMATS_KIT_TOKEN")
+        }
+        content { includeGroup("com.universaliun") }
+    }
 }
 
 kotlin { jvmToolchain(21) }
@@ -37,7 +49,7 @@ kotlin.sourceSets.named("main") {
 
 dependencies {
     // The annotations the DTOs carry, and the JsonConverter SPI.
-    implementation("com.universaliun:DataFormatsKit-jvm:0.1.0")
+    implementation("com.universaliun:dataformatskit-jvm:0.1.0")
     // The KSP processor itself.
     ksp("com.universaliun:dataformatskit-codegen-processor:0.1.0")
 }
