@@ -1,5 +1,7 @@
 package com.adoptu.dto.input
 
+import com.universaliun.formats.json.JsonDecodable
+import com.universaliun.formats.json.JsonEncodable
 
 enum class Gender {
     MALE, FEMALE
@@ -20,6 +22,8 @@ enum class PromotedReason {
     MOVING, COMPLAINTS, PET_CONFLICT, OTHER
 }
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class PetDto(
     val id: Int,
     val rescuerId: Int,
@@ -62,6 +66,8 @@ data class PetDto(
     val videoUrl: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class PetImageDto(
     val id: Int,
     val imageUrl: String,
@@ -69,6 +75,8 @@ data class PetImageDto(
     val sortOrder: Int
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class CreatePetRequest(
     val name: String,
     val type: String,
@@ -104,6 +112,8 @@ data class CreatePetRequest(
     val promotedReasonDetail: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class UpdatePetRequest(
     val name: String? = null,
     val type: String? = null,
@@ -137,6 +147,3 @@ data class UpdatePetRequest(
     val promotedReason: PromotedReason? = null,
     val promotedReasonDetail: String? = null
 )
-
-
-

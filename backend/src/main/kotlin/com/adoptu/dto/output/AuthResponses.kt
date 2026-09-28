@@ -1,6 +1,10 @@
 package com.adoptu.dto.output
 
+import com.universaliun.formats.json.JsonDecodable
+import com.universaliun.formats.json.JsonEncodable
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class AuthMeResponse(
     val authenticated: Boolean,
     val id: Int? = null,
@@ -16,6 +20,8 @@ data class AuthMeResponse(
     val banReason: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class SuccessWithErrorResponse(
     val success: Boolean,
     val error: String? = null,
@@ -23,12 +29,16 @@ data class SuccessWithErrorResponse(
     val email: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class RegistrationResponse(
     val success: Boolean,
     val message: String? = null,
     val emailVerificationSent: Boolean = false
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class VerificationResponse(
     val success: Boolean,
     val message: String? = null

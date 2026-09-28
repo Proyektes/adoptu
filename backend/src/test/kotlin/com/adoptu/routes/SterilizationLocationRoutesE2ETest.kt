@@ -645,7 +645,7 @@ class SterilizationLocationRoutesE2ETest {
             val response = TestHttp.delete("${handle.baseUrl}/api/admin/sterilization-locations/$id", cookie)
 
             assertEquals(200, response.statusCode())
-            assertTrue(response.body().contains("\"success\": true"))
+            assertTrue(response.body().contains("\"success\":true"))
 
             val followUp = TestHttp.get("${handle.baseUrl}/api/admin/sterilization-locations/$id", cookie)
             assertEquals(404, followUp.statusCode())

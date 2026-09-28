@@ -153,9 +153,9 @@ class SponsorshipRoutesE2ETest {
 
             assertEquals(200, response.statusCode())
             val body = response.body()
-            assertTrue(body.contains("\"sponsorId\": 2"))
-            assertTrue(body.contains("\"rescuerId\": 1"))
-            assertTrue(body.contains("\"status\": \"SENT\""))
+            assertTrue(body.contains("\"sponsorId\":2"))
+            assertTrue(body.contains("\"rescuerId\":1"))
+            assertTrue(body.contains("\"status\":\"SENT\""))
         } finally {
             handle.stop()
         }
@@ -272,7 +272,7 @@ class SponsorshipRoutesE2ETest {
             val response = TestHttp.putJson("${handle.baseUrl}/api/sponsorships/$id/read", "", rescuerCookie)
 
             assertEquals(200, response.statusCode())
-            assertTrue(response.body().contains("\"status\": \"READ\""))
+            assertTrue(response.body().contains("\"status\":\"READ\""))
         } finally {
             handle.stop()
         }
@@ -294,7 +294,7 @@ class SponsorshipRoutesE2ETest {
             val response = TestHttp.putJson("${handle.baseUrl}/api/sponsorships/$id/read", "", adminCookie)
 
             assertEquals(200, response.statusCode())
-            assertTrue(response.body().contains("\"status\": \"READ\""))
+            assertTrue(response.body().contains("\"status\":\"READ\""))
         } finally {
             handle.stop()
         }
@@ -341,8 +341,11 @@ class SponsorshipRoutesE2ETest {
 
             assertEquals(200, response.statusCode())
             val body = response.body()
-            assertTrue(body.contains("\"rescuerId\": 1"))
-            assertTrue(body.contains("\"sponsorId\": 2"))
+            // Bare List<SponsorshipOfferDto> response - DataFormatsKitMediaSupport only has a
+            // registration for the element type (see JsonSupport.kt), so this falls through to
+            // the Jackson MediaSupport and keeps Jackson's pretty-printed spacing.
+            assertTrue(body.contains("\"rescuerId\":1") || body.contains("\"rescuerId\": 1"))
+            assertTrue(body.contains("\"sponsorId\":2") || body.contains("\"sponsorId\": 2"))
         } finally {
             handle.stop()
         }
@@ -376,8 +379,10 @@ class SponsorshipRoutesE2ETest {
 
             assertEquals(200, response.statusCode())
             val body = response.body()
-            assertTrue(body.contains("\"sponsorId\": 2"))
-            assertTrue(body.contains("\"rescuerId\": 1"))
+            // Bare List<SponsorshipOfferDto> response - see the comment on the equivalent
+            // assertion in `GET users rescuer sponsorships returns offers sent to the caller`.
+            assertTrue(body.contains("\"sponsorId\":2") || body.contains("\"sponsorId\": 2"))
+            assertTrue(body.contains("\"rescuerId\":1") || body.contains("\"rescuerId\": 1"))
         } finally {
             handle.stop()
         }

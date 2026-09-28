@@ -1,9 +1,14 @@
 package com.adoptu.dto.input
 
+import com.universaliun.formats.json.JsonDecodable
+import com.universaliun.formats.json.JsonEncodable
+
 enum class LostFoundKind { LOST, FOUND }
 
 enum class LostFoundStatus { OPEN, RESOLVED }
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class LostFoundReportDto(
     val id: Int,
     val kind: LostFoundKind,
@@ -31,6 +36,8 @@ data class LostFoundReportDto(
 // SubmitUrgentReportRequest. country is always explicit (a dropdown, like every other search/browse
 // page in this app) so browsing-by-country never needs reverse geocoding; latitude/longitude
 // (browser Geolocation) are optional and only sharpen the distance-based match/notify step.
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class SubmitLostFoundReportRequest(
     val kind: LostFoundKind,
     val petType: String? = null,
@@ -47,6 +54,8 @@ data class SubmitLostFoundReportRequest(
     val lastSeenAt: Long? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class ContactLostFoundReporterRequest(
     val fromEmail: String,
     val message: String

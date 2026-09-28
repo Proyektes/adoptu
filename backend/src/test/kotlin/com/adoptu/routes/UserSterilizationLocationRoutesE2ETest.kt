@@ -181,7 +181,7 @@ class UserSterilizationLocationRoutesE2ETest {
             assertEquals(200, response.statusCode())
             val body = response.body()
             assertTrue(body.contains("My Location"))
-            assertTrue(body.contains("\"userId\": 1"))
+            assertTrue(body.contains("\"userId\":1"))
         } finally {
             handle.stop()
         }

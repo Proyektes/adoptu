@@ -94,6 +94,22 @@ repositories {
         }
         content { includeGroup("com.universaliun.imagekit") }
     }
+
+    // DataFormatsKit (generated JSON codecs, `dataformatskit-jvm` + its Helidon 4 media support
+    // `dataformatskit-helidon-media`) -- see Libraries/DataFormatsKit/README.md and
+    // docs/codegen-consumers.md / docs/helidon.md in that repo. GITHUB_ACTOR /
+    // DATA_FORMATS_KIT_TOKEN in the environment; content{} scopes this repository to the bare
+    // com.universaliun group (DataFormatsKit's own coordinates, distinct from every other Kit's
+    // com.universaliun.<kit> subgroup above).
+    maven {
+        name = "DataFormatsKitGitHubPackages"
+        url = uri("https://maven.pkg.github.com/ULibraries/DataFormatsKit")
+        credentials {
+            username = credential("GITHUB_ACTOR")
+            password = credential("DATA_FORMATS_KIT_TOKEN")
+        }
+        content { includeGroup("com.universaliun") }
+    }
 }
 
 // EmailKit is consumed as a `1.0-SNAPSHOT` ("changing") dependency -- same reasoning as the other
@@ -123,9 +139,17 @@ dependencies {
     implementation(project(":common"))
     implementation("io.helidon.webserver:helidon-webserver:$helidonVersion")
     implementation("io.helidon.webserver:helidon-webserver-static-content:$helidonVersion")
+    // Jackson stays: fallback MediaSupport for PagedResult<T> (a generic wrapper the codegen
+    // does not support - see JsonSupport.kt's comment) and for the request DTOs declared
+    // directly in routes/AuthRoutes.kt + routes/UsersRoutes.kt, plus multipart image/video
+    // upload parsing (MultiPartSupport, unrelated to JSON).
     implementation("io.helidon.http.media:helidon-http-media-jackson:$helidonVersion")
     implementation("io.helidon.http.media:helidon-http-media-multipart:$helidonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonKotlinVersion")
+    // DataFormatsKit: generated JSON codecs (`@JsonDecodable`/`@JsonEncodable`, dfk-codegen/)
+    // replacing Jackson for backend/{dto,web} - see JsonSupport.kt.
+    implementation("com.universaliun:dataformatskit-jvm:0.2.0")
+    implementation("com.universaliun:dataformatskit-helidon-media:0.2.0")
     implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.12.0")
     implementation("com.typesafe:config:1.4.5")
 
@@ -219,6 +243,22 @@ dependencies {
     testImplementation("com.microsoft.playwright:playwright:$playwrightVersion")
 }
 
+// DataFormatsKit JSON codegen: the `dfk-codegen` composite build (root settings.gradle.kts) runs
+// KSP over backend/src/main/kotlin/com/adoptu/{dto/**,web/JsonResponses.kt} in an isolated
+// Kotlin 2.3.10 compile (this module is on Kotlin 2.4.0, which has no KSP release yet - see
+// docs/codegen-consumers.md section 3 in the DataFormatsKit repo). The generated
+// decodeAsFoo()/Foo.encodeToJson() extensions land under
+// dfk-codegen/scan/build/generated/ksp/main/kotlin and are added here as an ordinary source dir.
+val generateJsonCodecs by tasks.registering {
+    dependsOn(gradle.includedBuild("dfk-codegen").task(":scan:kspKotlin"))
+}
+kotlin.sourceSets.main {
+    kotlin.srcDir(rootProject.projectDir.resolve("dfk-codegen/scan/build/generated/ksp/main/kotlin"))
+}
+tasks.named("compileKotlin") {
+    dependsOn(generateJsonCodecs)
+}
+
 application {
     mainClass.set("com.adoptu.ApplicationKt")
 }
@@ -245,17 +285,36 @@ graalvmNative {
             javaLauncher.set(
                 javaToolchains.launcherFor {
                     languageVersion.set(JavaLanguageVersion.of(25))
-                    vendor.set(JvmVendorSpec.matching("GraalVM"))
+                    // Defaults to "Oracle": the container-registry.oracle.com/graalvm/native-image
+                    // builder image's own JDK reports java.vendor=Oracle Corporation (the string
+                    // "GraalVM" only shows up in java.vendor.version there), so matching("GraalVM")
+                    // never matches it and Gradle silently auto-provisions a graalvm_community
+                    // toolchain via Foojay instead - whose native-image came out as a 0-byte,
+                    // non-executable stub on at least one build host (Exec failed, error: 13
+                    // Permission denied). Override with -PnativeToolchainVendor=GraalVM for a local
+                    // GraalVM Community installation instead of the Oracle Docker builder.
+                    vendor.set(JvmVendorSpec.matching(findProperty("nativeToolchainVendor") as? String ?: "Oracle"))
                 }
             )
             buildArgs.add("--no-fallback")
             buildArgs.add("-H:+ReportExceptionStackTraces")
-            // G1 requires Oracle GraalVM (Enterprise) as of this native-image-community:25 build -
-            // "Invalid option '--gc'. 'G1' is not an accepted value. Accepted values are 'epsilon',
-            // 'serial'." Community Edition only ships Serial and Epsilon GC, so explicitly pin
-            // Serial (single-threaded, optimized for footprint/startup - native-image's own
-            // default) rather than relying on the implicit default.
-            buildArgs.add("--gc=serial")
+            // -O3: full optimization. Oracle GraalVM's -O3 (the builder image in the root
+            // Dockerfile) additionally uses ML-inferred profiles, which measurably beats
+            // Community's -O3 - worth the longer build for a task that runs at steady state far
+            // longer than it ever spends compiling.
+            buildArgs.add("-O3")
+            // ECS Fargate x86_64 hosts are Xeon Platinum / EPYC - both guarantee AVX2 (x86-64-v3
+            // baseline). Do NOT target v4/AVX-512: Fargate doesn't guarantee it across the x86 fleet.
+            buildArgs.add("-march=x86-64-v3")
+            // GC choice is BUILD-time for native-image, so it's a Gradle property, not a runtime
+            // flag: -PnativeGc=serial|G1, defaulting to serial (this task's current 0.25-0.5 vCPU /
+            // 512MB-1GB Fargate size -- see "Runtime profile by task size" in AGENTS.md). Below 1
+            // vCPU, G1's concurrent marking/refinement threads need a spare core to run alongside
+            // the mutator (which this task doesn't have) plus ~50-100MB of region-bookkeeping RSS
+            // this task's memory budget can't spare. Serial has no concurrent threads and the
+            // smallest footprint of any native-image collector. Once the task grows to 1-2 vCPU,
+            // the Dockerfile's NATIVE_GC build arg flips this to G1 without touching this file.
+            buildArgs.add("--gc=" + (findProperty("nativeGc") ?: "serial"))
             // ImageCompressor uses javax.imageio, which touches java.awt.Toolkit at class
             // init. Without this, Toolkit tries the X11-backed libawt_xawt.so - the
             // oraclelinux:10-slim runtime image has no X11 libraries installed at all, so

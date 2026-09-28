@@ -1,9 +1,14 @@
 package com.adoptu.dto.input
 
+import com.universaliun.formats.json.JsonDecodable
+import com.universaliun.formats.json.JsonEncodable
+
 enum class SponsorshipOfferType {
     MONEY, IN_KIND
 }
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class SponsorshipOfferDto(
     val id: Int,
     val sponsorId: Int,
@@ -21,6 +26,8 @@ data class SponsorshipOfferDto(
     val createdAt: Long
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class CreateSponsorshipOfferRequest(
     val rescuerId: Int,
     val petId: Int? = null,

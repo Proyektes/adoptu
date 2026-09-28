@@ -63,6 +63,40 @@ static site generator, see `SiteGenerator.kt`), and `common` (shared JVM/JS code
 | `dto/input/` | Request DTOs |
 | `dto/output/` | Response DTOs |
 
+### JSON
+
+`dto/`, `web/JsonResponses.kt` (`ErrorResponse`/`SuccessResponse`) and `web/JsonSupport.kt` use
+DataFormatsKit generated codecs (`@JsonDecodable(strict = false)`/`@JsonEncodable`, KSP-generated
+via `dfk-codegen/`, an isolated Kotlin 2.3.10 + KSP composite build — see
+`docs/codegen-consumers.md` in the DataFormatsKit repo, section 3, for why `backend`'s Kotlin
+2.4.x can't apply KSP directly) instead of Jackson. `backend/build.gradle.kts`'s `generateJsonCodecs`
+task runs the scan build's `:scan:kspKotlin` and `compileKotlin` depends on it; the generated file
+lands under `dfk-codegen/scan/build/generated/ksp/main/kotlin` and is added as an ordinary
+`backend` source dir.
+
+DataFormatsKit itself is consumed as a published GitHub Packages artifact (not a local composite
+build): `com.universaliun:dataformatskit-jvm:0.1.0`, `com.universaliun:dataformatskit-helidon-media:0.1.0`,
+and (KSP processor, `dfk-codegen/scan` only) `com.universaliun:dataformatskit-codegen-processor:0.1.0`,
+all from `https://maven.pkg.github.com/ULibraries/DataFormatsKit` — see the
+`DataFormatsKitGitHubPackages` repository block in `backend/build.gradle.kts` and
+`dfk-codegen/scan/build.gradle.kts`. Requires `GITHUB_ACTOR` / `DATA_FORMATS_KIT_TOKEN` (a GitHub
+PAT with `read:packages`) in the environment, same pattern as EmailKit/RateLimitKit/AuthKit/
+StorageKit/ImageKit above.
+
+Jackson (`helidon-http-media-jackson`) stays on the classpath as the fallback `MediaSupport`,
+registered after `DataFormatsKitMediaSupport` in `JsonSupport.mediaContext()`, for whatever
+`DataFormatsKitMediaSupport` reports `NOT_SUPPORTED` for: `PagedResult<T>` (a generic wrapper class
+— `@JsonDecodable`/`@JsonEncodable` do not support generic type parameters on the annotated class
+itself), the request DTOs declared directly in `routes/AuthRoutes.kt`/`routes/UsersRoutes.kt`
+(outside this migration's `{dto,web}` scope), and multipart image/video uploads (`MultiPartSupport`,
+unrelated to JSON).
+
+**Wire format**: identical to Jackson's, with one known difference — Jackson's
+`CompactEmptyContainerPrettyPrinter` pretty-printed non-empty responses (indented, one field per
+line); DataFormatsKit always writes compact JSON (no whitespace), including for non-empty objects.
+Nothing on the frontend or in tests parses response formatting rather than response content, but a
+snapshot/golden-file test asserting exact response bytes would need updating.
+
 ### Environment selection
 
 `ADOPTU_ENV` defaults to `"prod"`. Config sections are keyed by `db.dev` / `db.prod`, `storage.dev` / `storage.prod`. The env value selects which section is used.
@@ -115,7 +149,41 @@ Dev mode uses SMTP via Mailpit. Run `./gradlew dockerUp` to start Mailpit, then 
 - **SCSS → CSS flow**: source lives in `frontend/src/main/scss/*.scss` (real hand-authored, using `@use` partials -- see `_variables.scss`, `_base.scss`, `_layout.scss`, `_location-search-form.scss`, `_admin.scss`). `:frontend:compileSass` (an `Exec` task shelling out to the standalone Dart Sass CLI, `sass` on PATH -- no npm/Node) compiles it to `build/generated/scss/main/static/css/`, which `:frontend:generateSite` copies into the static site's `static/css/` alongside the compiled JS bundle. Moved here from `:backend` along with the page templates - the backend doesn't serve any static assets anymore.
 - **Source dirs**: JVM sources are at `src/main/kotlin/` and `src/test/kotlin/` (non-standard for KMP, configured explicitly via `setSrcDirs`).
 - `gradle.properties` has extensive `--add-opens` JVM args required for Kotlin 2.3+ and ByteBuddy
-- Builder stage uses GraalVM native-image-community 25 (not Corretto). The Dockerfile only builds `:backend:jar`/`:backend:nativeCompile` (no Sass/Node dependency at all) - the static site (`:frontend:generateSite`) is a separate build/deploy pipeline (destined for S3 + CloudFront), not part of this image.
+- Builder stage uses the Oracle GraalVM `native-image` 25 image (free for production under the GFTC licence; `native-image-community` kept as a commented fallback in the Dockerfile), not Corretto. The Dockerfile only builds `:backend:jar`/`:backend:nativeCompile` (no Sass/Node dependency at all) - the static site (`:frontend:generateSite`) is a separate build/deploy pipeline (destined for S3 + CloudFront), not part of this image.
+- `backend/build.gradle.kts`'s `graalvmNative` block adds `-O3`, `-march=x86-64-v3`, and `--gc=<nativeGc property, default serial>`, sized for the production ECS Fargate task (0.25-0.5 vCPU / 512MB-1GB): Serial GC because G1's concurrent threads need a spare core the task doesn't have and cost RSS the task can't spare; `x86-64-v3` because Fargate's x86_64 hosts (Xeon Platinum / EPYC) guarantee AVX2 but not AVX-512/v4; `-O3` for Oracle's ML-inferred-profile optimizer.
+
+#### Runtime profile by task size
+
+GC and runtime both change with the ECS task's size, so growing the machines doesn't silently ship
+the wrong config. `infra/ecs.tf`'s `local.runtime_profile` derives the profile below from
+`var.task_cpu`/`var.task_memory` (currently 512 / 1024, unchanged from before), and a `check` block
+fails `tofu plan` if a future resize and the profile ever drift apart. This service is long-lived,
+so JIT warm-up time is not a concern -- the JVM tier starts as soon as the task clears 1 vCPU **and**
+1 GB, and the old 1-2 vCPU "native-g1" middle tier is gone (there's no CPU range left for it once
+the JVM tier starts at 1 vCPU):
+
+| Task size | Profile | GC | How it's selected |
+| --- | --- | --- | --- |
+| < 1 vCPU (Fargate cpu units < 1024) | Native image, Serial GC | Serial | Build-time: `nativeGc` Gradle property (default `serial`), Dockerfile's `ARG NATIVE_GC=serial` |
+| >= 1 vCPU (>= 1024 cpu units) but < 1 GB memory | Native image, Serial GC | Serial | Same as above -- CPU alone clears the JVM bar but there isn't enough memory for it |
+| >= 1 vCPU (>= 1024 cpu units) and >= 1 GB memory, long-lived | JVM (JDK 25) | G1 | `docker build --target jvm`; runtime flags via `JAVA_OPTS`/`JAVA_TOOL_OPTIONS` |
+
+Heap cap is the same rule for every profile: 60% of task memory (`HEAP_PERCENT` in the ECS task's
+`environment`, defaulting to 60). Native targets read it as Substrate VM's
+`-XX:MaximumHeapSizePercent` (Dockerfile's native `ENTRYPOINT`); the `jvm` target computes an
+equivalent `-Xmx` inside `local.runtime_java_opts`.
+
+**AOTCache TODO**: the `jvm` target's suggested `-XX:AOTCache=app.aot` isn't wired up yet -- it
+needs a representative `-XX:AOTMode=record` training run of the running app (real DB/HTTP
+traffic), which isn't safe to script unattended at image-build time. Until that exists, `JAVA_OPTS`
+omits `-XX:AOTCache`; an AppCDS `-XX:ArchiveClassesAtExit` fallback on a dry-run start is the next
+thing to try if a real training run stays impractical.
+
+Resizing the task for real means updating `task_cpu`/`task_memory` in `infra/terraform.tfvars` (or
+the defaults in `infra/variables.tf`) and the mirrored `TASK_CPU`/`TASK_MEMORY` in
+`scripts/deploy.sh` -- everything else (build args, `--target`, `HEAP_PERCENT`/`JAVA_OPTS`) follows
+automatically.
+
 - `kotlin-js-store/` is auto-generated by Kotlin/JS (yarn.lock), safe to delete, recreated on build.
 - AWS SDK `platform()` BOM is deprecated in Kotlin 2.3 — use explicit versioned dependencies instead.
 - **E2E tests excluded from regular test run**: E2E tests in `com.adoptu.e2e.*` are excluded from `./gradlew :backend:test` and must be run via `./gradlew e2eTest` (requires Docker).

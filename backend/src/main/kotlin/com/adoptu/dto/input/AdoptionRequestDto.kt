@@ -1,5 +1,7 @@
 package com.adoptu.dto.input
 
+import com.universaliun.formats.json.JsonDecodable
+import com.universaliun.formats.json.JsonEncodable
 
 enum class HousingType {
     HOUSE, APARTMENT
@@ -9,6 +11,8 @@ enum class AdoptionExperience {
     FIRST_TIME, EXPERIENCED
 }
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class AdoptionRequestDto(
     val id: Int,
     val petId: Int,
@@ -29,6 +33,8 @@ data class AdoptionRequestDto(
     val petType: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class CreateAdoptionRequestRequest(
     val message: String = "",
     val housingType: HousingType? = null,

@@ -222,7 +222,7 @@ class PetFosterPlacementRoutesE2ETest {
 
             assertEquals(200, createResponse.statusCode())
             val createBody = createResponse.body()
-            assertTrue(createBody.contains("\"temporalHomeId\": 4"))
+            assertTrue(createBody.contains("\"temporalHomeId\":4"))
             assertTrue(createBody.contains("Casa Feliz"))
 
             val historyResponse = TestHttp.get("${handle.baseUrl}/api/pets/$petId/foster-placements", cookie)

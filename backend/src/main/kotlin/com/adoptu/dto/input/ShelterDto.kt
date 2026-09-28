@@ -1,6 +1,10 @@
 package com.adoptu.dto.input
 
+import com.universaliun.formats.json.JsonDecodable
+import com.universaliun.formats.json.JsonEncodable
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class ShelterDto(
     val id: Int,
     val userId: Int? = null,
@@ -26,6 +30,8 @@ data class ShelterDto(
     val updatedAt: Long
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class CreateShelterRequest(
     val name: String,
     val country: String,
@@ -47,6 +53,8 @@ data class CreateShelterRequest(
     val description: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class UpdateShelterRequest(
     val name: String? = null,
     val country: String? = null,
@@ -68,6 +76,8 @@ data class UpdateShelterRequest(
     val description: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class UserShelterDto(
     val userId: Int,
     val name: String,
@@ -92,6 +102,8 @@ data class UserShelterDto(
     val createdAt: Long
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class CreateUserShelterRequest(
     val name: String,
     val country: String,
@@ -113,6 +125,8 @@ data class CreateUserShelterRequest(
     val description: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class UpdateUserShelterRequest(
     val name: String? = null,
     val country: String? = null,
