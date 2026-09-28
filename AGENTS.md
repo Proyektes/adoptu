@@ -123,13 +123,16 @@ Dev mode uses SMTP via Mailpit. Run `./gradlew dockerUp` to start Mailpit, then 
 GC and runtime both change with the ECS task's size, so growing the machines doesn't silently ship
 the wrong config. `infra/ecs.tf`'s `local.runtime_profile` derives the profile below from
 `var.task_cpu`/`var.task_memory` (currently 512 / 1024, unchanged from before), and a `check` block
-fails `tofu plan` if a future resize and the profile ever drift apart:
+fails `tofu plan` if a future resize and the profile ever drift apart. This service is long-lived,
+so JIT warm-up time is not a concern -- the JVM tier starts as soon as the task clears 1 vCPU **and**
+1 GB, and the old 1-2 vCPU "native-g1" middle tier is gone (there's no CPU range left for it once
+the JVM tier starts at 1 vCPU):
 
 | Task size | Profile | GC | How it's selected |
 | --- | --- | --- | --- |
-| < 1 vCPU (Fargate 256/512 cpu units) | Native image, Serial GC | Serial | Build-time: `nativeGc` Gradle property (default `serial`), Dockerfile's `ARG NATIVE_GC=serial` |
-| 1-2 vCPU | Native image, G1 GC | G1 | Build-time: `--build-arg NATIVE_GC=G1` (`scripts/deploy.sh` picks this automatically) |
-| >= 2 vCPU and >= 2 GB, long-lived | JVM (JDK 25) | G1 | `docker build --target jvm`; runtime flags via `JAVA_OPTS`/`JAVA_TOOL_OPTIONS` |
+| < 1 vCPU (Fargate cpu units < 1024) | Native image, Serial GC | Serial | Build-time: `nativeGc` Gradle property (default `serial`), Dockerfile's `ARG NATIVE_GC=serial` |
+| >= 1 vCPU (>= 1024 cpu units) but < 1 GB memory | Native image, Serial GC | Serial | Same as above -- CPU alone clears the JVM bar but there isn't enough memory for it |
+| >= 1 vCPU (>= 1024 cpu units) and >= 1 GB memory, long-lived | JVM (JDK 25) | G1 | `docker build --target jvm`; runtime flags via `JAVA_OPTS`/`JAVA_TOOL_OPTIONS` |
 
 Heap cap is the same rule for every profile: 60% of task memory (`HEAP_PERCENT` in the ECS task's
 `environment`, defaulting to 60). Native targets read it as Substrate VM's

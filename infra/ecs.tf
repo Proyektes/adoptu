@@ -6,13 +6,16 @@
 
 locals {
   # Runtime profile by task size (see "Runtime profile by task size" in AGENTS.md for the full rule
-  # table and rationale):
-  #   < 1 vCPU (< 1024 cpu units):        native image, Serial GC (build-time choice)
-  #   1-2 vCPU (1024-2047 cpu units):     native image, G1 GC (build-time choice)
-  #   >= 2 vCPU and >= 2GB, long-lived:   JVM (JDK 25), G1 + AOTCache at runtime
+  # table and rationale). This service is long-lived, so JIT warm-up time is not a concern -- the
+  # only question is whether the task is big enough for the JVM to be worth it:
+  #   < 1 vCPU (< 1024 cpu units):              native image, Serial GC (build-time choice)
+  #   >= 1 vCPU (1024 cpu units) and >= 1 GB:   JVM (JDK 25), G1 + AOTCache at runtime
+  #   >= 1 vCPU but < 1 GB memory:               native image, Serial GC -- CPU alone clears the
+  #                                               JVM bar but there isn't enough memory for it
+  # The old 1-2 vCPU "native-g1" middle tier is gone: once the JVM tier starts at 1 vCPU, there's
+  # no CPU range left for it to occupy.
   runtime_profile = (
-    var.task_cpu >= 2048 && var.task_memory >= 2048 ? "jvm" :
-    var.task_cpu >= 1024 ? "native-g1" :
+    var.task_cpu >= 1024 && var.task_memory >= 1024 ? "jvm" :
     "native-serial"
   )
 
@@ -38,12 +41,15 @@ locals {
 # profile force-picked on a task too small for it).
 check "runtime_profile_matches_task_size" {
   assert {
-    condition     = !(local.runtime_profile == "jvm" && var.task_memory < 2048)
-    error_message = "runtime_profile is 'jvm' but task_memory (${var.task_memory} MiB) is below the 2048 MiB floor the JVM profile assumes -- see 'Runtime profile by task size' in AGENTS.md."
+    condition     = !(local.runtime_profile == "jvm" && (var.task_cpu < 1024 || var.task_memory < 1024))
+    error_message = "runtime_profile is 'jvm' but task_cpu (${var.task_cpu} cpu units) / task_memory (${var.task_memory} MiB) is below the 1 vCPU (1024 cpu units) / 1 GB (1024 MiB) floor the JVM profile assumes -- see 'Runtime profile by task size' in AGENTS.md."
   }
   assert {
-    condition     = !(local.runtime_profile != "jvm" && var.task_cpu >= 2048 && var.task_memory >= 2048)
-    error_message = "Task is >= 2 vCPU / >= 2GB but runtime_profile resolved to '${local.runtime_profile}' instead of 'jvm' -- check the runtime_profile expression in infra/ecs.tf."
+    # Note the deliberate gap this does NOT flag: task_cpu >= 1024 with task_memory < 1024 stays
+    # 'native-serial' on purpose (see the comment above local.runtime_profile) -- CPU alone isn't
+    # enough to earn the JVM profile.
+    condition     = !(local.runtime_profile != "jvm" && var.task_cpu >= 1024 && var.task_memory >= 1024)
+    error_message = "Task is >= 1 vCPU / >= 1 GB but runtime_profile resolved to '${local.runtime_profile}' instead of 'jvm' -- check the runtime_profile expression in infra/ecs.tf."
   }
 }
 
