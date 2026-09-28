@@ -285,7 +285,15 @@ graalvmNative {
             javaLauncher.set(
                 javaToolchains.launcherFor {
                     languageVersion.set(JavaLanguageVersion.of(25))
-                    vendor.set(JvmVendorSpec.matching("GraalVM"))
+                    // Defaults to "Oracle": the container-registry.oracle.com/graalvm/native-image
+                    // builder image's own JDK reports java.vendor=Oracle Corporation (the string
+                    // "GraalVM" only shows up in java.vendor.version there), so matching("GraalVM")
+                    // never matches it and Gradle silently auto-provisions a graalvm_community
+                    // toolchain via Foojay instead - whose native-image came out as a 0-byte,
+                    // non-executable stub on at least one build host (Exec failed, error: 13
+                    // Permission denied). Override with -PnativeToolchainVendor=GraalVM for a local
+                    // GraalVM Community installation instead of the Oracle Docker builder.
+                    vendor.set(JvmVendorSpec.matching(findProperty("nativeToolchainVendor") as? String ?: "Oracle"))
                 }
             )
             buildArgs.add("--no-fallback")

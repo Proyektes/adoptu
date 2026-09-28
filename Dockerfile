@@ -66,7 +66,7 @@ RUN --mount=type=cache,target=/root/.gradle \
       AUTH_KIT_TOKEN="$(cat /run/secrets/auth_kit_token)" \
       STORAGE_KIT_TOKEN="$(cat /run/secrets/storage_kit_token)" \
       IMAGE_KIT_TOKEN="$(cat /run/secrets/image_kit_token)" && \
-    ./gradlew :backend:jar --no-daemon
+    ./gradlew :backend:jar :backend:shadowJar --no-daemon
 RUN --mount=type=cache,target=/root/.gradle \
     --mount=type=secret,id=github_actor \
     --mount=type=secret,id=payment_kit_token \
@@ -78,13 +78,18 @@ RUN --mount=type=cache,target=/root/.gradle \
       AUTH_KIT_TOKEN="$(cat /run/secrets/auth_kit_token)" \
       STORAGE_KIT_TOKEN="$(cat /run/secrets/storage_kit_token)" \
       IMAGE_KIT_TOKEN="$(cat /run/secrets/image_kit_token)" && \
-    ./gradlew :backend:nativeCompile --no-daemon -PnativeGc=$NATIVE_GC
+    ./gradlew :backend:nativeCompile --no-daemon -PnativeGc=$NATIVE_GC \
+      -Porg.gradle.java.installations.paths=$JAVA_HOME \
+      -Porg.gradle.java.installations.auto-detect=false \
+      -Porg.gradle.java.installations.auto-download=false
 
 # ---------------------------------------------------------------------------
 # JVM runtime stage -- `docker build --target jvm` (>= 2 vCPU / >= 2GB, long-lived tasks; see
-# "Runtime profile by task size" in AGENTS.md). Reuses the builder's :backend:jar output (built
-# above) instead of a separate installDist stage - the app is a plain fat/uber-ish Gradle `jar`
-# with a manifest Main-Class, run directly with `java -jar`.
+# "Runtime profile by task size" in AGENTS.md). Reuses the builder's :backend:shadowJar output
+# (built above) - the plain :backend:jar is a thin, app-classes-only jar with no bundled
+# dependencies and no runnable Main-Class manifest entry (`java -jar` on it crash-loops with
+# "no main manifest attribute"); the shadow-produced *-all.jar is the fat jar with a real
+# manifest, run directly with `java -jar`.
 # ---------------------------------------------------------------------------
 FROM amazoncorretto:25-alpine AS jvm
 
@@ -92,7 +97,7 @@ RUN addgroup -S app && adduser -S app -G app
 
 WORKDIR /app
 
-COPY --from=builder /app/backend/build/libs/*.jar ./adoptu-backend.jar
+COPY --from=builder /app/backend/build/libs/*-all.jar ./adoptu-backend.jar
 COPY backend/src/main/resources/application.conf .
 
 ENV ADOPTU_ENV="prod"
