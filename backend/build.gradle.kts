@@ -123,9 +123,18 @@ dependencies {
     implementation(project(":common"))
     implementation("io.helidon.webserver:helidon-webserver:$helidonVersion")
     implementation("io.helidon.webserver:helidon-webserver-static-content:$helidonVersion")
+    // Jackson stays: fallback MediaSupport for PagedResult<T> (a generic wrapper the codegen
+    // does not support - see JsonSupport.kt's comment) and for the request DTOs declared
+    // directly in routes/AuthRoutes.kt + routes/UsersRoutes.kt, plus multipart image/video
+    // upload parsing (MultiPartSupport, unrelated to JSON).
     implementation("io.helidon.http.media:helidon-http-media-jackson:$helidonVersion")
     implementation("io.helidon.http.media:helidon-http-media-multipart:$helidonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonKotlinVersion")
+    // DataFormatsKit: generated JSON codecs (`@JsonDecodable`/`@JsonEncodable`, dfk-codegen/)
+    // replacing Jackson for backend/{dto,web} - see JsonSupport.kt.
+    // TODO replace by the GitHub Packages artifact once DataFormatsKit 0.1.0 is published
+    implementation("com.universaliun:DataFormatsKit-jvm:0.1.0")
+    implementation("com.universaliun:dataformatskit-helidon-media:0.1.0")
     implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.12.0")
     implementation("com.typesafe:config:1.4.5")
 
@@ -217,6 +226,22 @@ dependencies {
     testImplementation("org.testcontainers:localstack:1.21.4")
     testImplementation("org.testcontainers:postgresql:1.21.4")
     testImplementation("com.microsoft.playwright:playwright:$playwrightVersion")
+}
+
+// DataFormatsKit JSON codegen: the `dfk-codegen` composite build (root settings.gradle.kts) runs
+// KSP over backend/src/main/kotlin/com/adoptu/{dto/**,web/JsonResponses.kt} in an isolated
+// Kotlin 2.3.10 compile (this module is on Kotlin 2.4.0, which has no KSP release yet - see
+// docs/codegen-consumers.md section 3 in the DataFormatsKit repo). The generated
+// decodeAsFoo()/Foo.encodeToJson() extensions land under
+// dfk-codegen/scan/build/generated/ksp/main/kotlin and are added here as an ordinary source dir.
+val generateJsonCodecs by tasks.registering {
+    dependsOn(gradle.includedBuild("dfk-codegen").task(":scan:kspKotlin"))
+}
+kotlin.sourceSets.main {
+    kotlin.srcDir(rootProject.projectDir.resolve("dfk-codegen/scan/build/generated/ksp/main/kotlin"))
+}
+tasks.named("compileKotlin") {
+    dependsOn(generateJsonCodecs)
 }
 
 application {

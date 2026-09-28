@@ -1,5 +1,8 @@
 package com.adoptu.dto.input
 
+import com.universaliun.formats.json.JsonDecodable
+import com.universaliun.formats.json.JsonEncodable
+
 // COORDINATES: rescuer/report location is a browser-Geolocation-captured lat/lng pair.
 // ZONE: rescuer/report location was entered as country/state/city text and geocoded server-side
 // (see GeocodingPort) into a lat/lng + covering radius - zoneCountry/zoneState/zoneCity are kept
@@ -12,6 +15,8 @@ enum class UrgentReportPageStatus { PAGED, ACCEPTED, MISSED }
 
 enum class UrgentDangerType { INJURED, ABUSED, STARVING, TOO_YOUNG, OTHER }
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class UrgentRescuerProfileDto(
     val userId: Int,
     val phone: String,
@@ -26,6 +31,8 @@ data class UrgentRescuerProfileDto(
     val createdAt: Long
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class CreateUrgentRescuerProfileRequest(
     val phone: String,
     val inputMode: LocationInputMode,
@@ -39,6 +46,8 @@ data class CreateUrgentRescuerProfileRequest(
     val zoneCity: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class UpdateUrgentRescuerProfileRequest(
     val phone: String? = null,
     val active: Boolean? = null,
@@ -51,6 +60,8 @@ data class UpdateUrgentRescuerProfileRequest(
     val zoneCity: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class UrgentReportDto(
     val id: Int,
     val reporterUserId: Int? = null,
@@ -77,6 +88,8 @@ data class UrgentReportDto(
 
 // Anonymous submitters must supply reporterEmail + captchaToken; a logged-in session fills
 // reporterEmail from the account and skips CAPTCHA (see UrgentReportRoutes).
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class SubmitUrgentReportRequest(
     val description: String,
     val dangerType: UrgentDangerType,
@@ -99,6 +112,8 @@ data class SubmitUrgentReportRequest(
     val referenceNotes: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class UrgentReportPageDto(
     val id: Int,
     val reportId: Int,
@@ -112,6 +127,8 @@ data class UrgentReportPageDto(
     val createdAt: Long
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class UrgentRescuerLeaderboardEntryDto(
     val userId: Int,
     val displayName: String,

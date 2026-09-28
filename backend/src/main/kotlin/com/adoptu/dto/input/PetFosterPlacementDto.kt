@@ -1,6 +1,10 @@
 package com.adoptu.dto.input
 
+import com.universaliun.formats.json.JsonDecodable
+import com.universaliun.formats.json.JsonEncodable
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class PetFosterPlacementDto(
     val id: Int,
     val petId: Int,
@@ -13,6 +17,8 @@ data class PetFosterPlacementDto(
     val createdAt: Long
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class CreateFosterPlacementRequest(
     val temporalHomeId: Int,
     val notes: String? = null

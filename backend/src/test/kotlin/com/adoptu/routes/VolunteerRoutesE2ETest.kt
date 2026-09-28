@@ -150,8 +150,8 @@ class VolunteerRoutesE2ETest {
 
             assertEquals(200, response.statusCode())
             val body = response.body()
-            assertTrue(body.contains("\"rescuerId\": 1"))
-            assertTrue(body.contains("\"volunteerId\": 2"))
+            assertTrue(body.contains("\"rescuerId\":1"))
+            assertTrue(body.contains("\"volunteerId\":2"))
             assertTrue(body.contains("PENDING"))
         } finally {
             handle.stop()
@@ -319,8 +319,12 @@ class VolunteerRoutesE2ETest {
 
             assertEquals(200, response.statusCode())
             val body = response.body()
-            assertTrue(body.contains("\"rescuerId\": 1"))
-            assertTrue(body.contains("\"volunteerId\": 2"))
+            // This endpoint returns a bare List<VolunteerDto>, which DataFormatsKitMediaSupport
+            // does not have a registration for (only the element type is registered - see
+            // JsonSupport.kt), so it falls through to the Jackson MediaSupport and keeps
+            // Jackson's pretty-printed spacing rather than DataFormatsKit's compact format.
+            assertTrue(body.contains("\"rescuerId\":1") || body.contains("\"rescuerId\": 1"))
+            assertTrue(body.contains("\"volunteerId\":2") || body.contains("\"volunteerId\": 2"))
         } finally {
             handle.stop()
         }
@@ -366,8 +370,10 @@ class VolunteerRoutesE2ETest {
 
             assertEquals(200, response.statusCode())
             val body = response.body()
-            assertTrue(body.contains("\"rescuerId\": 1"))
-            assertTrue(body.contains("\"volunteerId\": 2"))
+            // Bare List<VolunteerDto> response - see the comment on the equivalent assertion in
+            // `GET users volunteer applications returns the caller's own submitted applications`.
+            assertTrue(body.contains("\"rescuerId\":1") || body.contains("\"rescuerId\": 1"))
+            assertTrue(body.contains("\"volunteerId\":2") || body.contains("\"volunteerId\": 2"))
         } finally {
             handle.stop()
         }
@@ -410,7 +416,9 @@ class VolunteerRoutesE2ETest {
 
             val rescuerVolunteers = TestHttp.get("${handle.baseUrl}/api/users/rescuer/volunteers", rescuerCookie)
             assertEquals(200, rescuerVolunteers.statusCode())
-            assertTrue(rescuerVolunteers.body().contains("\"volunteerId\": 2"))
+            // Bare List<VolunteerDto> response, still Jackson-formatted - see the comment on
+            // `GET users rescuer volunteers returns applications submitted to the caller as rescuer`.
+            assertTrue(rescuerVolunteers.body().contains("\"volunteerId\":2") || rescuerVolunteers.body().contains("\"volunteerId\": 2"))
 
             val approveResponse = TestHttp.putJson(
                 "${handle.baseUrl}/api/volunteers/$id/status",

@@ -807,6 +807,9 @@
       "type": "io.helidon.http.media.jackson.JacksonMediaSupportProvider"
     },
     {
+      "type": "com.universaliun.formats.helidon.DataFormatsKitMediaSupportProvider"
+    },
+    {
       "type": "io.helidon.metrics.api.MeterRegistryFactory__ServiceDescriptor",
       "fields": [
         {

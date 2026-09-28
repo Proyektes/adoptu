@@ -63,6 +63,31 @@ static site generator, see `SiteGenerator.kt`), and `common` (shared JVM/JS code
 | `dto/input/` | Request DTOs |
 | `dto/output/` | Response DTOs |
 
+### JSON
+
+`dto/`, `web/JsonResponses.kt` (`ErrorResponse`/`SuccessResponse`) and `web/JsonSupport.kt` use
+DataFormatsKit generated codecs (`@JsonDecodable(strict = false)`/`@JsonEncodable`, KSP-generated
+via `dfk-codegen/`, an isolated Kotlin 2.3.10 + KSP composite build — see
+`docs/codegen-consumers.md` in the DataFormatsKit repo, section 3, for why `backend`'s Kotlin
+2.4.x can't apply KSP directly) instead of Jackson. `backend/build.gradle.kts`'s `generateJsonCodecs`
+task runs the scan build's `:scan:kspKotlin` and `compileKotlin` depends on it; the generated file
+lands under `dfk-codegen/scan/build/generated/ksp/main/kotlin` and is added as an ordinary
+`backend` source dir.
+
+Jackson (`helidon-http-media-jackson`) stays on the classpath as the fallback `MediaSupport`,
+registered after `DataFormatsKitMediaSupport` in `JsonSupport.mediaContext()`, for whatever
+`DataFormatsKitMediaSupport` reports `NOT_SUPPORTED` for: `PagedResult<T>` (a generic wrapper class
+— `@JsonDecodable`/`@JsonEncodable` do not support generic type parameters on the annotated class
+itself), the request DTOs declared directly in `routes/AuthRoutes.kt`/`routes/UsersRoutes.kt`
+(outside this migration's `{dto,web}` scope), and multipart image/video uploads (`MultiPartSupport`,
+unrelated to JSON).
+
+**Wire format**: identical to Jackson's, with one known difference — Jackson's
+`CompactEmptyContainerPrettyPrinter` pretty-printed non-empty responses (indented, one field per
+line); DataFormatsKit always writes compact JSON (no whitespace), including for non-empty objects.
+Nothing on the frontend or in tests parses response formatting rather than response content, but a
+snapshot/golden-file test asserting exact response bytes would need updating.
+
 ### Environment selection
 
 `ADOPTU_ENV` defaults to `"prod"`. Config sections are keyed by `db.dev` / `db.prod`, `storage.dev` / `storage.prod`. The env value selects which section is used.

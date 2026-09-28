@@ -158,8 +158,8 @@ class LostFoundRoutesE2ETest {
 
             assertEquals(200, response.statusCode())
             val body = response.body()
-            assertTrue(body.contains("\"reporterEmail\": \"finder@test.com\""))
-            assertTrue(body.contains("\"status\": \"OPEN\""))
+            assertTrue(body.contains("\"reporterEmail\":\"finder@test.com\""))
+            assertTrue(body.contains("\"status\":\"OPEN\""))
         } finally {
             handle.stop()
         }
@@ -211,8 +211,8 @@ class LostFoundRoutesE2ETest {
 
             assertEquals(200, response.statusCode())
             val body = response.body()
-            assertTrue(body.contains("\"reporterEmail\": \"owner@test.com\""))
-            assertTrue(body.contains("\"reporterUserId\": 1"))
+            assertTrue(body.contains("\"reporterEmail\":\"owner@test.com\""))
+            assertTrue(body.contains("\"reporterUserId\":1"))
         } finally {
             handle.stop()
         }
@@ -317,7 +317,11 @@ class LostFoundRoutesE2ETest {
             )
 
             assertEquals(200, response.statusCode())
-            assertTrue(response.body().contains("\"success\": true"))
+            // This handler sends a raw Map<String, Boolean> (`res.send(mapOf("success" to
+            // true))`), not the `SuccessResponse` data class, so DataFormatsKitMediaSupport
+            // reports NOT_SUPPORTED and it falls through to the Jackson MediaSupport, keeping
+            // Jackson's pretty-printed spacing.
+            assertTrue(response.body().contains("\"success\":true") || response.body().contains("\"success\": true"))
         } finally {
             handle.stop()
         }
@@ -367,7 +371,7 @@ class LostFoundRoutesE2ETest {
             val response = TestHttp.get("${handle.baseUrl}/api/lost-found/resolve?token=$token")
 
             assertEquals(200, response.statusCode())
-            assertTrue(response.body().contains("\"status\": \"RESOLVED\""))
+            assertTrue(response.body().contains("\"status\":\"RESOLVED\""))
         } finally {
             handle.stop()
         }
@@ -411,7 +415,7 @@ class LostFoundRoutesE2ETest {
             val response = TestHttp.post("${handle.baseUrl}/api/lost-found/reports/$id/resolve", cookie)
 
             assertEquals(200, response.statusCode())
-            assertTrue(response.body().contains("\"status\": \"RESOLVED\""))
+            assertTrue(response.body().contains("\"status\":\"RESOLVED\""))
         } finally {
             handle.stop()
         }

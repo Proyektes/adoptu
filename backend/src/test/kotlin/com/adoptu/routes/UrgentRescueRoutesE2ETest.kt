@@ -234,7 +234,7 @@ class UrgentRescueRoutesE2ETest {
             assertEquals(200, response.statusCode())
             val body = response.body()
             assertTrue(body.contains("+15551234567"))
-            assertTrue(body.contains("\"userId\":1") || body.contains("\"userId\": 1"))
+            assertTrue(body.contains("\"userId\":1"))
         } finally {
             handle.stop()
         }
@@ -398,8 +398,8 @@ class UrgentRescueRoutesE2ETest {
 
             assertEquals(200, response.statusCode())
             val body = response.body()
-            assertTrue(body.contains("\"locationLabel\": \"Main St 42, Testville, Testland\""))
-            assertTrue(body.contains("\"referenceNotes\": \"Red door, next to the bakery\""))
+            assertTrue(body.contains("\"locationLabel\":\"Main St 42, Testville, Testland\""))
+            assertTrue(body.contains("\"referenceNotes\":\"Red door, next to the bakery\""))
         } finally {
             handle.stop()
         }

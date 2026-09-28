@@ -1,6 +1,10 @@
 package com.adoptu.dto.input
 
+import com.universaliun.formats.json.JsonDecodable
+import com.universaliun.formats.json.JsonEncodable
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class SterilizationLocationDto(
     val id: Int,
     val userId: Int? = null,
@@ -19,6 +23,8 @@ data class SterilizationLocationDto(
     val updatedAt: Long
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class CreateSterilizationLocationRequest(
     val name: String,
     val country: String,
@@ -33,6 +39,8 @@ data class CreateSterilizationLocationRequest(
     val description: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class UpdateSterilizationLocationRequest(
     val name: String? = null,
     val country: String? = null,
@@ -47,21 +55,29 @@ data class UpdateSterilizationLocationRequest(
     val description: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class SterilizationLocationsByLocation(
     val country: String,
     val states: List<SterilizationLocationsByState>
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class SterilizationLocationsByState(
     val state: String?,
     val cities: List<SterilizationLocationsByCity>
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class SterilizationLocationsByCity(
     val city: String,
     val locations: List<SterilizationLocationDto>
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class UserSterilizationLocationDto(
     val userId: Int,
     val name: String,
@@ -79,6 +95,8 @@ data class UserSterilizationLocationDto(
     val createdAt: Long
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class CreateUserSterilizationLocationRequest(
     val name: String,
     val country: String,
@@ -93,6 +111,8 @@ data class CreateUserSterilizationLocationRequest(
     val description: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class UpdateUserSterilizationLocationRequest(
     val name: String? = null,
     val country: String? = null,

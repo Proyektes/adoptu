@@ -179,7 +179,7 @@ class UserShelterRoutesE2ETest {
             assertEquals(200, response.statusCode())
             val body = response.body()
             assertTrue(body.contains("My Shelter"))
-            assertTrue(body.contains("\"userId\": 1"))
+            assertTrue(body.contains("\"userId\":1"))
         } finally {
             handle.stop()
         }

@@ -6,8 +6,8 @@ import io.helidon.http.HeaderNames
 import io.helidon.http.Status
 import io.helidon.webserver.http.ServerResponse
 
-data class ErrorResponse(val error: String)
-data class SuccessResponse(val success: Boolean)
+// ErrorResponse/SuccessResponse moved to JsonResponses.kt (same package) - see that file's
+// comment for why.
 
 fun ServerResponse.respondError(message: String, status: Int = 400) {
     status(status).send(ErrorResponse(error = message))

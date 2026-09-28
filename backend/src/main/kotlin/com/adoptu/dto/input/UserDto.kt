@@ -1,10 +1,14 @@
 package com.adoptu.dto.input
 
+import com.universaliun.formats.json.JsonDecodable
+import com.universaliun.formats.json.JsonEncodable
 
 enum class UserRole {
     ADMIN, RESCUER, ADOPTER, PHOTOGRAPHER, TEMPORAL_HOME, SHELTER, STERILIZATION_SERVICE, URGENT_RESCUER
 }
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class UserDto(
     val id: Int,
     val username: String,
@@ -22,10 +26,14 @@ data class UserDto(
     val deactivatedBy: Int? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class BanUserRequest(
     val reason: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class PhotographerDto(
     val userId: Int,
     val displayName: String,
@@ -36,11 +44,15 @@ data class PhotographerDto(
     val state: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class AcceptTermsRequest(
     val acceptPrivacyPolicy: Boolean = false,
     val acceptTermsAndConditions: Boolean = false
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class PhotographerSettingsRequest(
     val photographerFee: Double,
     val photographerCurrency: String,
@@ -48,6 +60,8 @@ data class PhotographerSettingsRequest(
     val state: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class PhotographyRequestDto(
     val id: Int,
     val photographerId: Int,
@@ -62,27 +76,37 @@ data class PhotographyRequestDto(
     val createdAt: Long
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class CreatePhotographyRequestRequest(
     val photographerId: Int,
     val petId: Int? = null,
     val message: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class UpdatePhotographyRequestRequest(
     val status: String? = null,
     val scheduledDate: Long? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class CreateMultiPhotographerRequestRequest(
     val photographerIds: List<Int>,
     val petId: Int? = null,
     val message: String
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class RoleActivationRequest(
     val activate: Boolean
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class TemporalHomeDto(
     val userId: Int,
     val alias: String,
@@ -95,6 +119,8 @@ data class TemporalHomeDto(
     val createdAt: Long
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class TemporalHomeSearchParams(
     val country: String? = null,
     val state: String? = null,
@@ -103,6 +129,8 @@ data class TemporalHomeSearchParams(
     val neighborhood: String? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class CreateTemporalHomeRequest(
     val alias: String,
     val country: String,
@@ -115,6 +143,8 @@ data class CreateTemporalHomeRequest(
     val maxCapacity: Int? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class UpdateTemporalHomeRequest(
     val alias: String? = null,
     val country: String? = null,
@@ -127,16 +157,22 @@ data class UpdateTemporalHomeRequest(
     val maxCapacity: Int? = null
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class SendTemporalHomeRequestRequest(
     val temporalHomeId: Int,
     val petId: Int? = null,
     val message: String
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class BlockRescuerRequest(
     val rescuerId: Int
 )
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class TemporalHomeRequestDto(
     val id: Int,
     val temporalHomeId: Int,

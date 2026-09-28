@@ -7850,6 +7850,520 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-07T21:57:30.658Z"
+    },
+    {
+      "id": "bug-477",
+      "timestamp": "2026-09-15T18:21:38.526Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/pwa/manifest.webmanifest",
+      "root_cause": "Had \"#0f172a\"",
+      "fix": "Changed to \"#111827\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "webmanifest"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-15T18:21:38.526Z"
+    },
+    {
+      "id": "bug-478",
+      "timestamp": "2026-09-15T18:22:28.846Z",
+      "error_message": "Significant refactor of ",
+      "file": "frontend/src/jvmMain/kotlin/com/adoptu/site/SiteGenerator.kt",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 12→15 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-15T18:22:28.846Z"
+    },
+    {
+      "id": "bug-479",
+      "timestamp": "2026-09-15T18:23:17.254Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/Common.kt",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-15T18:23:17.254Z"
+    },
+    {
+      "id": "bug-480",
+      "timestamp": "2026-09-15T20:21:53.649Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/Common.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-15T20:21:53.649Z"
+    },
+    {
+      "id": "bug-481",
+      "timestamp": "2026-09-15T20:48:04.754Z",
+      "error_message": "CSS fix: border",
+      "file": "frontend/src/main/scss/style.scss",
+      "root_cause": "border: none → 2px solid var(--card-bg, #fff)",
+      "fix": "Changed border: none → 2px solid var(--card-bg, #fff)",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-15T20:48:04.754Z"
+    },
+    {
+      "id": "bug-482",
+      "timestamp": "2026-09-15T20:49:27.020Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/6f7313f0-b1b3-451b-8745-6b8d6e8e77a4/scratchpad/fav-test.html",
+      "root_cause": "Had \"favorite-thumb\"",
+      "fix": "Changed to \"favorite-thumb favorite-thumb-placeholder\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-15T20:49:27.020Z"
+    },
+    {
+      "id": "bug-483",
+      "timestamp": "2026-09-15T20:58:32.017Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/PetDetailPage.kt",
+      "root_cause": "Had \">${pet.breed}</p>\"",
+      "fix": "Changed to \"><strong>${I18n.t(\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-15T20:58:32.017Z"
+    },
+    {
+      "id": "bug-484",
+      "timestamp": "2026-09-16T01:05:54.354Z",
+      "error_message": "Wrong reference: dbDispatcher should be Pets",
+      "file": "backend/src/main/kotlin/com/adoptu/adapters/db/repositories/PetMedicalEventRepository.kt",
+      "root_cause": "Used \"dbDispatcher\" instead of \"Pets\"",
+      "fix": "Changed dbDispatcher → Pets",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T01:05:54.354Z"
+    },
+    {
+      "id": "bug-485",
+      "timestamp": "2026-09-16T01:06:42.189Z",
+      "error_message": "Null/undefined access in ",
+      "file": "backend/src/main/kotlin/com/adoptu/services/PetMedicalEventService.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T01:06:42.189Z"
+    },
+    {
+      "id": "bug-486",
+      "timestamp": "2026-09-16T01:09:43.653Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/MyPetsPage.kt",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T01:09:43.653Z"
+    },
+    {
+      "id": "bug-487",
+      "timestamp": "2026-09-16T01:10:01.257Z",
+      "error_message": "CSS fix: color",
+      "file": "frontend/src/main/scss/style.scss",
+      "root_cause": "color: #842029 → var(--primary-light)",
+      "fix": "Changed color: #842029 → var(--primary-light)",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T01:10:01.257Z"
+    },
+    {
+      "id": "bug-488",
+      "timestamp": "2026-09-16T02:40:14.123Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/Common.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T02:40:14.123Z"
+    },
+    {
+      "id": "bug-489",
+      "timestamp": "2026-09-16T02:44:10.029Z",
+      "error_message": "Significant refactor of ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/MyPetsPage.kt",
+      "root_cause": "126 lines replaced/restructured",
+      "fix": "Rewrote 189→33 lines (126 removed) | Also: private fun fillForm(pet: dynamic) {; (document.getElementById(\"pet-id\") as HTMLInputEle",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-09-16T02:44:56.868Z"
+    },
+    {
+      "id": "bug-490",
+      "timestamp": "2026-09-16T02:44:29.458Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/MyPetsPage.kt",
+      "root_cause": "Had \"<button class=\\\"",
+      "fix": "Changed to \"<a href=\\\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T02:44:29.459Z"
+    },
+    {
+      "id": "bug-491",
+      "timestamp": "2026-09-16T02:49:28.068Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/src/tests/e2e-verify.spec.ts",
+      "root_cause": "Had 'button:has-text(\"",
+      "fix": "Changed to 'a:has-text(\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-09-16T02:49:42.045Z"
+    },
+    {
+      "id": "bug-492",
+      "timestamp": "2026-09-16T03:51:20.864Z",
+      "error_message": "Significant refactor of ",
+      "file": "frontend/src/jvmMain/kotlin/com/adoptu/site/pages/AdminPage.kt",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 7→14 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T03:51:20.864Z"
+    },
+    {
+      "id": "bug-493",
+      "timestamp": "2026-09-16T03:51:51.210Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminPage.kt",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T03:51:51.211Z"
+    },
+    {
+      "id": "bug-494",
+      "timestamp": "2026-09-16T03:52:07.551Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/AdminSheltersPage.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T03:52:07.551Z"
+    },
+    {
+      "id": "bug-495",
+      "timestamp": "2026-09-16T04:27:32.253Z",
+      "error_message": "Significant refactor of ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/PetDetailPage.kt",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 28→39 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T04:27:32.253Z"
+    },
+    {
+      "id": "bug-496",
+      "timestamp": "2026-09-16T04:27:45.383Z",
+      "error_message": "CSS fix: margin, padding, border-bottom",
+      "file": "frontend/src/main/scss/style.scss",
+      "root_cause": "margin: 0.5rem 0 → 0.75rem 0 0; padding: 0.35rem 0 → 0.5rem 0; border-bottom: 1px solid var(--border) → none",
+      "fix": "Changed margin: 0.5rem 0 → 0.75rem 0 0; padding: 0.35rem 0 → 0.5rem 0; border-bottom: 1px solid var(--border) → none",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T04:27:45.383Z"
+    },
+    {
+      "id": "bug-497",
+      "timestamp": "2026-09-16T13:14:46.145Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/PetDetailPage.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T13:14:46.145Z"
+    },
+    {
+      "id": "bug-498",
+      "timestamp": "2026-09-16T13:14:51.370Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/PetDetailPage.kt",
+      "root_cause": "Had \"><strong>${I18n.t(\"",
+      "fix": "Changed to \">${I18n.t(\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-09-16T13:15:02.469Z"
+    },
+    {
+      "id": "bug-499",
+      "timestamp": "2026-09-16T13:15:30.249Z",
+      "error_message": "CSS fix: font-size, color",
+      "file": "frontend/src/main/scss/style.scss",
+      "root_cause": "font-size: 1.2rem → 0.75rem; color: var(--primary-light) → var(--text-muted, #999)",
+      "fix": "Changed font-size: 1.2rem → 0.75rem; color: var(--primary-light) → var(--text-muted, #999)",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T13:15:30.249Z"
+    },
+    {
+      "id": "bug-500",
+      "timestamp": "2026-09-16T21:04:56.640Z",
+      "error_message": "Wrong reference: weight should be weightLabel",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/PetDetailPage.kt",
+      "root_cause": "Used \"weight\" instead of \"weightLabel\"",
+      "fix": "Changed weight → weightLabel",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T21:04:56.640Z"
+    },
+    {
+      "id": "bug-501",
+      "timestamp": "2026-09-16T21:06:58.921Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/PetDetailPage.kt",
+      "root_cause": "Had \"<p><strong>${I18n.t(\"",
+      "fix": "Changed to \"</div>\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T21:06:58.921Z"
+    },
+    {
+      "id": "bug-502",
+      "timestamp": "2026-09-16T21:31:28.600Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/src/jvmMain/kotlin/com/adoptu/site/pages/AdminPage.kt",
+      "root_cause": "Had \"pet-show-inactive\"",
+      "fix": "Changed to \"pet-country-filter\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T21:31:28.600Z"
+    },
+    {
+      "id": "bug-503",
+      "timestamp": "2026-09-16T21:47:49.212Z",
+      "error_message": "CSS fix: gap",
+      "file": "frontend/src/main/scss/style.scss",
+      "root_cause": "gap: 0.75rem → 0.6rem",
+      "fix": "Changed gap: 0.75rem → 0.6rem",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T21:47:49.212Z"
+    },
+    {
+      "id": "bug-504",
+      "timestamp": "2026-09-16T21:50:28.657Z",
+      "error_message": "Significant refactor of ",
+      "file": "frontend/src/main/scss/style.scss",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 10→6 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T21:50:28.657Z"
+    },
+    {
+      "id": "bug-505",
+      "timestamp": "2026-09-16T21:52:41.101Z",
+      "error_message": "CSS fix: height, font-size",
+      "file": "frontend/src/main/scss/_layout.scss",
+      "root_cause": "height: 28px → 34px; font-size: 0.65rem → 0.85rem",
+      "fix": "Changed height: 28px → 34px; font-size: 0.65rem → 0.85rem",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T21:52:41.101Z"
+    },
+    {
+      "id": "bug-506",
+      "timestamp": "2026-09-16T22:11:06.380Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/pages/PetDetailPage.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T22:11:06.380Z"
+    },
+    {
+      "id": "bug-507",
+      "timestamp": "2026-09-16T22:11:28.126Z",
+      "error_message": "CSS fix: display",
+      "file": "frontend/src/main/scss/style.scss",
+      "root_cause": "display: inline-flex → flex",
+      "fix": "Changed display: inline-flex → flex",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "scss"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-16T22:11:28.126Z"
+    },
+    {
+      "id": "bug-508",
+      "timestamp": "2026-09-28T05:27:54.000Z",
+      "error_message": "15 RoutesE2ETest failures after DataFormatsKit JSON migration: assertTrue(body.contains(...)) checks expecting Jackson's pretty-printed \"field\": value (space after colon) against DataFormatsKit's compact \"field\":value output",
+      "file": "backend/src/test/kotlin/com/adoptu/routes/{Sponsorship,Volunteer,LostFound,Shelter,UrgentRescue,SavedSearch,SterilizationLocation,UserShelter,UserSterilizationLocation,PetFosterPlacement}RoutesE2ETest.kt",
+      "root_cause": "DataFormatsKitMediaSupport (registered ahead of the Jackson fallback in JsonSupport.mediaContext()) writes compact JSON for every type explicitly registered via .register(Xxx::class.java, ...) in JsonSupport.kt, unlike Jackson's JsonSupport.objectMapper which pretty-printed non-empty objects (space after every \":\"). Test bodies asserting exact substrings broke for endpoints returning a registered single DTO. A second, opposite case: endpoints returning a bare List<Dto> or a raw Map (e.g. LostFoundRoutes.kt's POST .../contact, which sends mapOf(\"success\" to true) instead of the SuccessResponse data class) have no matching registration - DataFormatsKitMediaSupport reports NOT_SUPPORTED and Helidon falls through to the Jackson MediaSupport, so those responses are STILL pretty-printed with the space. A blind find-and-replace of the space-after-colon pattern across all 10 files broke 6 previously-passing list/map-endpoint assertions.",
+      "fix": "For endpoints returning a single registered DTO: dropped the space in the assertion (matches DataFormatsKit's compact output). For endpoints returning a bare List<Dto> or a raw Map (still Jackson-formatted): used an OR of both spellings (body.contains(\"\\\"x\\\":1\") || body.contains(\"\\\"x\\\": 1\")), the same defensive pattern already used elsewhere in UsersRoutesE2ETest.kt, with a comment explaining why. Documented the wire-format difference in AGENTS.md's new JSON section.",
+      "tags": [
+        "dataformatskit",
+        "json-migration",
+        "wire-format",
+        "test-assertion",
+        "pretty-print-vs-compact"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-28T05:27:54.000Z"
     }
   ]
 }

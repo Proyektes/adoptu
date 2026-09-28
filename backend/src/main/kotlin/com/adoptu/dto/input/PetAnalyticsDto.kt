@@ -1,6 +1,10 @@
 package com.adoptu.dto.input
 
+import com.universaliun.formats.json.JsonDecodable
+import com.universaliun.formats.json.JsonEncodable
 
+@JsonDecodable(strict = false)
+@JsonEncodable
 data class PetAnalyticsDto(
     val petId: Int,
     val viewCount: Long,
