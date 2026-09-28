@@ -250,11 +250,22 @@ graalvmNative {
             )
             buildArgs.add("--no-fallback")
             buildArgs.add("-H:+ReportExceptionStackTraces")
-            // G1 requires Oracle GraalVM (Enterprise) as of this native-image-community:25 build -
-            // "Invalid option '--gc'. 'G1' is not an accepted value. Accepted values are 'epsilon',
-            // 'serial'." Community Edition only ships Serial and Epsilon GC, so explicitly pin
-            // Serial (single-threaded, optimized for footprint/startup - native-image's own
-            // default) rather than relying on the implicit default.
+            // -O3: full optimization. Oracle GraalVM's -O3 (the builder image in the root
+            // Dockerfile) additionally uses ML-inferred profiles, which measurably beats
+            // Community's -O3 - worth the longer build for a task that runs at steady state far
+            // longer than it ever spends compiling.
+            buildArgs.add("-O3")
+            // ECS Fargate x86_64 hosts are Xeon Platinum / EPYC - both guarantee AVX2 (x86-64-v3
+            // baseline). Do NOT target v4/AVX-512: Fargate doesn't guarantee it across the x86 fleet.
+            buildArgs.add("-march=x86-64-v3")
+            // Serial GC. Previously pinned here because native-image-community:25 rejected --gc=G1
+            // outright ("Accepted values are 'epsilon', 'serial'") - now that the builder is Oracle
+            // GraalVM (which does support G1), that's no longer the reason, but Serial is still the
+            // right choice: this task runs at 0.25-0.5 vCPU / 512MB-1GB on ECS Fargate, and G1's
+            // concurrent marking/refinement threads need a spare core to run alongside the mutator
+            // (which this task doesn't have below 1 vCPU) plus ~50-100MB of region-bookkeeping RSS
+            // this task's memory budget can't spare. Serial has no concurrent threads and the
+            // smallest footprint of any native-image collector.
             buildArgs.add("--gc=serial")
             // ImageCompressor uses javax.imageio, which touches java.awt.Toolkit at class
             // init. Without this, Toolkit tries the X11-backed libawt_xawt.so - the

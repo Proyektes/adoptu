@@ -6,7 +6,12 @@
 # the accumulated class-init/reflection config under
 # backend/src/main/resources/META-INF/native-image/). The runtime stage
 # below matches this image's own OS/glibc for ABI compatibility.
-FROM ghcr.io/graalvm/native-image-community:25 AS builder
+# Oracle GraalVM builder: free for production use under the GraalVM Free Terms and Conditions
+# (GFTC) licence, and its -O3 uses ML-inferred profiles that measurably beat Community's -O3 on
+# startup/throughput. Same JDK 25 / native-image / OS family as the Community image below (kept as
+# a commented fallback in case the Oracle Container Registry is ever unreachable from the build host).
+FROM container-registry.oracle.com/graalvm/native-image:25 AS builder
+# FROM ghcr.io/graalvm/native-image-community:25 AS builder
 
 WORKDIR /app
 
