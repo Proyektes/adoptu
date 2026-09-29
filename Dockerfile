@@ -72,6 +72,12 @@ RUN --mount=type=cache,target=/root/.gradle \
       IMAGE_KIT_TOKEN="$(cat /run/secrets/image_kit_token)" \
       DATA_FORMATS_KIT_TOKEN="$(cat /run/secrets/data_formats_kit_token)" && \
     ./gradlew :backend:jar :backend:shadowJar --no-daemon
+# installations.paths + auto-detect=false keep this image's own GraalVM JDK 25 as the sole
+# candidate for the native-image launcher toolchain. auto-download must stay TRUE, though: the
+# dfk-codegen included build pins jvmToolchain(21) (dfk-codegen/scan/build.gradle.kts) and this
+# image ships only JDK 25, so with auto-download=false Gradle has no way to provision JDK 21 and
+# the build fails at configuration ("Toolchain auto-provisioning is not enabled") before
+# nativeCompile even starts. Same flag Bitakore/Locate-u's backend/Dockerfile carries.
 RUN --mount=type=cache,target=/root/.gradle \
     --mount=type=secret,id=github_actor \
     --mount=type=secret,id=payment_kit_token \
@@ -88,7 +94,7 @@ RUN --mount=type=cache,target=/root/.gradle \
     ./gradlew :backend:nativeCompile --no-daemon -PnativeGc=$NATIVE_GC \
       -Porg.gradle.java.installations.paths=$JAVA_HOME \
       -Porg.gradle.java.installations.auto-detect=false \
-      -Porg.gradle.java.installations.auto-download=false
+      -Porg.gradle.java.installations.auto-download=true
 
 # ---------------------------------------------------------------------------
 # JVM runtime stage -- `docker build --target jvm` (>= 2 vCPU / >= 2GB, long-lived tasks; see
