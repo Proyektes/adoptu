@@ -8382,6 +8382,24 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-10-14T18:50:00-06:00"
+    },
+    {
+      "id": "bug-510",
+      "timestamp": "2026-10-14T19:30:00-06:00",
+      "error_message": "deploy.sh nativeCompile: configured GraalVM reachability metadata repository ... is missing required schema files",
+      "file": "Dockerfile",
+      "root_cause": "partially-extracted metadata repo persisted in /root/.gradle podman cache mount",
+      "fix": "rm -rf /root/.gradle/native-build-tools before nativeCompile (commit 87c3cd27)",
+      "tags": [
+        "docker",
+        "graalvm",
+        "native-image",
+        "deploy",
+        "cache"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T19:30:00-06:00"
     }
   ]
 }
