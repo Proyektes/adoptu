@@ -91,6 +91,10 @@ RUN --mount=type=cache,target=/root/.gradle \
       STORAGE_KIT_TOKEN="$(cat /run/secrets/storage_kit_token)" \
       IMAGE_KIT_TOKEN="$(cat /run/secrets/image_kit_token)" \
       DATA_FORMATS_KIT_TOKEN="$(cat /run/secrets/data_formats_kit_token)" && \
+    # The reachability-metadata repo lives in the shared /root/.gradle cache mount, which survives
+    # across builds - a partially-extracted copy left there by an earlier failed build fails every
+    # later one ("missing required schema files"). It's small, so re-fetch it fresh each build.
+    rm -rf /root/.gradle/native-build-tools && \
     ./gradlew :backend:nativeCompile --no-daemon -PnativeGc=$NATIVE_GC \
       -Porg.gradle.java.installations.paths=$JAVA_HOME \
       -Porg.gradle.java.installations.auto-detect=false \
