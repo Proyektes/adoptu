@@ -17,6 +17,25 @@ private fun rejectWithApiError(r: dynamic): Promise<dynamic> =
         throw js("new Error(message)")
     }.unsafeCast<Promise<dynamic>>()
 
+// Single-flight refresh: /api/auth/refresh rotates the refresh-token cookie and revokes the old
+// one, so concurrent 401s (a page firing /api/auth/me plus its own data calls right after the
+// 15-minute access token expires) each POSTing their own refresh would race - the first rotates,
+// the rest present an already-revoked token and fail (and can trip reuse detection, revoking the
+// whole session). Every caller shares the one in-flight request instead; resolves to whether the
+// refresh succeeded.
+private var inFlightRefresh: Promise<Boolean>? = null
+
+internal fun refreshSession(): Promise<Boolean> {
+    inFlightRefresh?.let { return it }
+    val p = window.asDynamic().fetch(REFRESH_PATH, js("({method: 'POST', credentials: 'include'})"))
+        .then { res: dynamic -> res.ok == true }
+        .catch { false }
+        .unsafeCast<Promise<Boolean>>()
+    inFlightRefresh = p
+    p.then { inFlightRefresh = null }
+    return p
+}
+
 fun apiFetch(path: String, init: dynamic = null): Promise<dynamic> = apiFetchInternal(path, init, alreadyRetried = false)
 
 /**
@@ -44,8 +63,8 @@ private fun apiFetchInternal(path: String, init: dynamic, alreadyRetried: Boolea
         try {
             val r = res.unsafeCast<dynamic>()
             if (r.status == 401 && path != REFRESH_PATH && !alreadyRetried) {
-                window.asDynamic().fetch(REFRESH_PATH, js("({method: 'POST', credentials: 'include'})")).then { refreshRes ->
-                    if (refreshRes.unsafeCast<dynamic>().ok == true) {
+                refreshSession().then { ok ->
+                    if (ok) {
                         apiFetchInternal(path, init, alreadyRetried = true)
                     } else {
                         rejectWithApiError(r)
@@ -79,8 +98,8 @@ object ApiClientModule {
 
     private fun fetchMe(): Promise<dynamic> = apiFetch("/api/auth/me").then<dynamic> { user ->
         if (user?.authenticated == false) {
-            window.asDynamic().fetch("/api/auth/refresh", js("({method: 'POST', credentials: 'include'})")).then { refreshRes ->
-                if (refreshRes.unsafeCast<dynamic>().ok == true) apiFetch("/api/auth/me") else user
+            refreshSession().then { ok ->
+                if (ok) apiFetch("/api/auth/me") else user
             }
         } else {
             user

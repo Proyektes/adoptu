@@ -7,6 +7,7 @@ private const val SEARCH_FILTER = "search-filter"
 fun HTML.photographersPage(navParams: NavParams = NavParams()) {
     commonHead("Photographers - Adopt-U", "photographers.css")
     body {
+        attributes["data-auth-required"] = "user"
         header {
             a("/") { commonLogo() }
             nav { commonNav(navParams.isLoggedIn, navParams.isAdmin, navParams.isRescuerOrAdmin, navParams.isTemporalHomeOrAdmin) }

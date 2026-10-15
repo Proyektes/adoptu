@@ -38,16 +38,14 @@ fun HttpRules.photographerRoutes() {
     }
 
     get("/api/photographers", Handler { req, res ->
+        req.currentPrincipal() ?: return@Handler res.respondUnauthorized()
         val country = req.queryParam("country")
         val state = req.queryParam("state")
         val photographers = runBlocking { photographerService.getPhotographers(country, state) }
-        // Public, unauthenticated listing - cached at the CDN edge via an
-        // EXACT path_pattern ("/api/photographers", no wildcard) in
-        // infra/cloudfront.tf. This prefix also has authenticated routes
-        // like GET /api/photographers/requests (a user's own requests) -
-        // a wildcard here would risk serving one user's private request
-        // list to another from the shared edge cache.
-        res.header(HeaderNames.CACHE_CONTROL, "public, max-age=30")
+        // Login-only listing - must never be cached at a shared edge (CloudFront's public
+        // listings cache policy keys on no cookies, so a cached 200 would reach logged-out
+        // viewers).
+        res.header(HeaderNames.CACHE_CONTROL, "private, no-store")
         res.send(photographers.map { it.copy(username = null) })
     })
 

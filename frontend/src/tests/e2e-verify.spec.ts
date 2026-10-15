@@ -155,7 +155,13 @@ test.describe('1 · Test data', () => {
     expect(total).toBeGreaterThanOrEqual(100);
   });
 
+  test('photographers endpoint requires login', async ({ page }) => {
+    const res = await page.request.get(`${BASE}/api/photographers`);
+    expect(res.status()).toBe(401);
+  });
+
   test('photographers endpoint returns data', async ({ page }) => {
+    await loginWithPassword(page, 'admin@adoptu.com');
     const res = await page.request.get(`${BASE}/api/photographers`);
     expect(res.status()).toBe(200);
     const data = await res.json();
@@ -364,7 +370,13 @@ test.describe('6 · Search sections', () => {
     expect(await cards.locator('.pet-type').first().textContent()).toMatch(/dog/i);
   });
 
+  test('photographers page redirects to login when logged out', async ({ page }) => {
+    await page.goto(`${BASE}/photographers`);
+    await page.waitForURL(url => url.pathname.startsWith('/login'), { timeout: 10000 });
+  });
+
   test('photographers page loads with cards', async ({ page }) => {
+    await loginWithPassword(page, 'admin@adoptu.com');
     await page.goto(`${BASE}/photographers`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -376,6 +388,7 @@ test.describe('6 · Search sections', () => {
   });
 
   test('photographers search by México returns results', async ({ page }) => {
+    await loginWithPassword(page, 'admin@adoptu.com');
     await page.goto(`${BASE}/photographers`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
@@ -460,6 +473,7 @@ test.describe('6 · Search sections', () => {
     { path: 'temporal-homes', label: 'temporal homes' },
   ]) {
     test(`${label} search filters by city and zip narrow results`, async ({ page }) => {
+      if (path === 'photographers') await loginWithPassword(page, 'admin@adoptu.com'); // login-only page
       await page.goto(`${BASE}/${path}`);
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(800);
@@ -498,11 +512,6 @@ test.describe('6 · Search sections', () => {
     await page.waitForTimeout(300);
 
     // Navigating to a different search page should pre-select the same country
-    await page.goto(`${BASE}/photographers`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
-    await expect(page.locator('#search-country')).toHaveValue('Argentina');
-
     await page.goto(`${BASE}/sterilization-locations`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(500);
@@ -526,7 +535,7 @@ test.describe('6 · Search sections', () => {
 // =============================================================================
 test.describe('7 · Internationalization', () => {
   const LANGS = ['en', 'es', 'fr', 'pt', 'zh'];
-  const PUBLIC_PAGES = ['/', '/photographers', '/shelters', '/sterilization-locations', '/temporal-homes', '/login', '/register'];
+  const PUBLIC_PAGES = ['/', '/shelters', '/sterilization-locations', '/temporal-homes', '/login', '/register'];
 
   test('every data-i18n key used on public pages is translated in all 5 languages', async ({ page }) => {
     const keys = new Set<string>();

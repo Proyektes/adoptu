@@ -240,11 +240,23 @@ class PhotographerRoutesE2ETest {
     // ==================== GET /api/photographers ====================
 
     @Test
+    fun `GET photographers returns 401 when not logged in`() {
+        val handle = startServer()
+        try {
+            val response = TestHttp.get("${handle.baseUrl}/api/photographers")
+            assertEquals(401, response.statusCode())
+        } finally {
+            handle.stop()
+        }
+    }
+
+    @Test
     fun `GET photographers returns empty list when no photographers`() {
         TestDatabase.clearAllData()
         val handle = startServer()
         try {
-            val response = TestHttp.get("${handle.baseUrl}/api/photographers")
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.get("${handle.baseUrl}/api/photographers", cookie)
             assertEquals(200, response.statusCode())
             assertEquals("[]", response.body())
         } finally {
@@ -256,7 +268,8 @@ class PhotographerRoutesE2ETest {
     fun `GET photographers returns all photographers`() {
         val handle = startServer()
         try {
-            val response = TestHttp.get("${handle.baseUrl}/api/photographers")
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.get("${handle.baseUrl}/api/photographers", cookie)
             assertEquals(200, response.statusCode())
             val body = response.body()
             assertTrue(body.contains("Test Photographer"))
@@ -270,7 +283,8 @@ class PhotographerRoutesE2ETest {
     fun `GET photographers filters by country and state`() {
         val handle = startServer()
         try {
-            val response = TestHttp.get("${handle.baseUrl}/api/photographers?country=United%20States&state=NY")
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.get("${handle.baseUrl}/api/photographers?country=United%20States&state=NY", cookie)
             assertEquals(200, response.statusCode())
             val body = response.body()
             assertTrue(body.contains("Second Photographer"))
@@ -284,7 +298,8 @@ class PhotographerRoutesE2ETest {
     fun `GET photographers filters out non-matching state`() {
         val handle = startServer()
         try {
-            val response = TestHttp.get("${handle.baseUrl}/api/photographers?country=United%20States&state=TX")
+            val cookie = TestHttp.loginAs(handle.baseUrl, 1)
+            val response = TestHttp.get("${handle.baseUrl}/api/photographers?country=United%20States&state=TX", cookie)
             assertEquals(200, response.statusCode())
             assertEquals("[]", response.body())
         } finally {

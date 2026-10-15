@@ -8364,6 +8364,24 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-28T05:27:54.000Z"
+    },
+    {
+      "id": "bug-509",
+      "timestamp": "2026-10-14T18:50:00-06:00",
+      "error_message": "User saw admin panel after weeks without logging in, then next page showed Login/Register (logged out)",
+      "file": "frontend/src/jsMain/kotlin/com/adoptu/frontend/ApiClient.kt",
+      "root_cause": "Refresh token is 30-day sliding+rotating; after access token expiry each concurrent 401 (me() + page data calls) POSTed its own /api/auth/refresh, first rotated, rest presented revoked token -> session killed",
+      "fix": "Single-flight refreshSession() shared by apiFetchInternal and me(). Also made /photographers login-only (page data-auth-required=user, API 401 w/o principal, Cache-Control private no-store, removed CloudFront /api/photographers public cache behavior)",
+      "tags": [
+        "auth",
+        "refresh-token",
+        "race",
+        "photographers",
+        "cloudfront"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T18:50:00-06:00"
     }
   ]
 }

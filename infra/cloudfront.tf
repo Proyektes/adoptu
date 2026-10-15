@@ -37,7 +37,7 @@ resource "aws_cloudfront_origin_request_policy" "all_viewer_plus_country" {
 }
 
 # Shared by every public, unauthenticated listing endpoint (pets, shelters,
-# sterilization-locations, photographers, temporal-homes). Load testing
+# sterilization-locations, temporal-homes). Load testing
 # GET /api/pets showed origin CPU (JSON serialization + DB query) is the
 # throughput bottleneck at realistic concurrency - the same shape applies to
 # the other listings. Managed-CachingOptimized isn't used here because it
@@ -46,7 +46,7 @@ resource "aws_cloudfront_origin_request_policy" "all_viewer_plus_country" {
 # strings instead so filtered requests don't collide with unfiltered ones.
 resource "aws_cloudfront_cache_policy" "api_public_listings" {
   name        = "adoptu-api-public-listings"
-  comment     = "Public GET listings (pets/shelters/sterilization-locations/photographers/temporal-homes) - vary by query string"
+  comment     = "Public GET listings (pets/shelters/sterilization-locations/temporal-homes) - vary by query string"
   default_ttl = 30
   min_ttl     = 0
   max_ttl     = 300
@@ -323,21 +323,6 @@ resource "aws_cloudfront_distribution" "app" {
   # /api/admin/sterilization-locations prefix.
   ordered_cache_behavior {
     path_pattern             = "/api/sterilization-locations*"
-    target_origin_id         = "ecs-task"
-    viewer_protocol_policy   = "redirect-to-https"
-    allowed_methods          = ["GET", "HEAD", "OPTIONS"]
-    cached_methods           = ["GET", "HEAD"]
-    compress                 = true
-    cache_policy_id          = aws_cloudfront_cache_policy.api_public_listings.id
-    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.all_viewer.id
-  }
-
-  # Exact path match only (no wildcard) - GET /api/photographers/requests
-  # (a user's own request list) is authenticated and shares this prefix; a
-  # wildcard would risk serving one user's private requests to another from
-  # the shared edge cache.
-  ordered_cache_behavior {
-    path_pattern             = "/api/photographers"
     target_origin_id         = "ecs-task"
     viewer_protocol_policy   = "redirect-to-https"
     allowed_methods          = ["GET", "HEAD", "OPTIONS"]
