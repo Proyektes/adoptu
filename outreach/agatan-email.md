@@ -8,7 +8,7 @@
 
 Estimada Dirección General de la Agencia de Atención Animal de la Ciudad de México:
 
-Mi nombre es Iván Gómez, y me dirijo a ustedes como responsable de **Adopt-U**, una plataforma digital sin fines de lucro para la adopción de animales de compañía, desarrollada en México.
+Mi nombre es Iván Gómez, y me dirijo a ustedes como responsable de **Adopt-U**, una plataforma digital sin fines de lucro para la adopción de animales de compañía.
 
 Conocemos y valoramos el trabajo de la Agencia: el catálogo de ADOPTABLES del Hospital Veterinario y del centro de Chapultepec, las Adoptatones y el convenio firmado en 2025 con el Heroico Cuerpo de Bomberos, que contempla expresamente la coordinación para la difusión de adopciones.
 
@@ -16,14 +16,27 @@ Precisamente en materia de difusión creemos poder aportar valor. Hoy, una perso
 
 1. **Catálogo digital permanente** de los ejemplares en adopción (fotografías, edad, tamaño, carácter), con páginas individuales que se comparten con un toque en WhatsApp y redes sociales, y que aparecen en los resultados de Google.
 2. **Gestión de solicitudes de adopción**: recepción, filtrado y seguimiento de solicitantes en un solo lugar, en sustitución de formularios y hojas de cálculo dispersas.
-3. **Registro interno por ejemplar**: historial de ingreso, atención veterinaria y estatus, visible únicamente para el personal de la Agencia.
-4. **Reportes** de adopciones concretadas y solicitudes en curso, útiles para informes institucionales.
+3. **Registro interno por ejemplar**: historial de ingreso, atención veterinaria y estatus, con recordatorios de vacunas y tratamientos, visible únicamente para el personal de la Agencia.
+4. **Reportes y estadísticas**: adopciones concretadas, solicitudes en curso y visitas por ejemplar, útiles para informes institucionales.
+
+Además, alrededor del catálogo, la plataforma ofrece servicios que amplían el alcance de la Agencia:
+
+5. **Red de rescatistas, refugios y hogares temporales**: directorio de rescatistas y refugios de la ciudad, y registro de **hogares temporales** que pueden recibir animales mientras encuentran familia, aliviando la ocupación de los centros.
+6. **Alertas de rescate urgente**: cualquier ciudadano puede reportar un animal herido, maltratado o abandonado, con ubicación, y la plataforma avisa de inmediato a los rescatistas urgentes cercanos.
+7. **Mascotas perdidas y encontradas**: reporte con fotografía y ubicación, con seguimiento hasta que el animal vuelve con su familia.
+8. **Directorio de esterilización**: ubicación de clínicas y campañas de esterilización, donde podemos destacar las jornadas de la Agencia.
+9. **Servicios de apoyo a la adopción**: fotógrafos voluntarios que hacen sesiones a los ejemplares en adopción (una buena foto multiplica las solicitudes) e información de alimento para mascotas.
+10. **Accesible para todos**: disponible en español, inglés, francés, portugués y chino, en computadora y celular, e instalable como app.
 
 La información cargada sería en todo momento propiedad de AGATAN, con protección de los datos personales de los solicitantes conforme a la normatividad aplicable.
 
-Nos gustaría proponer un **convenio de colaboración** — en los términos que la Agencia acostumbra — iniciando, si lo consideran conveniente, con un **piloto en el Hospital Veterinario de la CDMX**, sin compromiso y reversible en cualquier momento.
+La plataforma se encuentra en su etapa final antes del lanzamiento, por lo que actualmente muestra datos de prueba. Pueden registrarse desde ahora y sus ejemplares estarán entre los primeros publicados.
 
-¿Tendrían disponibilidad para una reunión breve (presencial o virtual) en las próximas semanas? Con gusto haríamos una demostración de la plataforma en vivo. Adjunto una página con el resumen de la propuesta.
+Nos gustaría proponer un **convenio de colaboración**, en los términos que la Agencia acostumbra, sin costo y sin exclusividad. No hace falta ningún trámite para empezar: el equipo de AGATAN puede **registrarse directamente en [adopt-u.org](https://adopt-u.org)** y publicar sus ejemplares el mismo día. Adjunto una página con el resumen de la propuesta.
+
+Si conocen otros refugios, asociaciones protectoras, rescatistas o dependencias de gobierno que puedan estar interesados, les agradeceríamos mucho que nos los recomienden o les compartan este mensaje. Y si tienen ideas o sugerencias para mejorar la plataforma, con gusto las recibimos: Adopt-U se construye a partir de las necesidades reales de quienes trabajan por los animales.
+
+Quedamos a su disposición para ampliar cualquier punto de esta propuesta.
 
 Agradezco de antemano su atención y quedo a sus órdenes.
 

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-17T16:24:34.826Z
-> Files: 684 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-15T01:17:21.203Z
+> Files: 687 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../tmp/claude-1000/
 
@@ -74,6 +74,10 @@
 ## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/ef09ce2d-73ac-405b-b896-679b22649311/scratchpad/
 
 - `mini_smtp.py` — handle, main (~495 tok)
+
+## ../../../../tmp/claude-1000/-home-laf-Proyektes-adoptu/fad7a975-0359-4778-9c89-70147feb711b/scratchpad/
+
+- `onepager.html` — Adopt-U × AGATAN — Propuesta de convenio de colaboración (~1516 tok)
 
 ## ../../.claude/plans/
 
@@ -752,6 +756,9 @@
 
 - `AppModuleTest.kt` — Declares AppModuleTest (~1218 tok)
 
+## backend/src/test/kotlin/com/adoptu/dto/input/, dto/output/
+
+
 ## backend/src/test/kotlin/com/adoptu/mocks/
 
 - `MockNotificationAdapter.kt` — Data class: MockNotificationAdapter (~933 tok)
@@ -815,29 +822,6 @@
 - `HtmlTest.kt` — Unit test for [respondHtml]. The backend is JSON-API-only since the static-site migration (see (~366 tok)
 - `JsonResponsesTest.kt` — Round-trip test for `ErrorResponse`/`SuccessResponse` through the DataFormatsKit-generated `encodeToJson`/`decodeAsErrorResponse`/`decodeAsSuccessResponse`. (~110 tok)
 
-## backend/src/test/kotlin/com/adoptu/dto/input/, dto/output/
-
-14 round-trip + wire-compat test files, one per migrated DTO group (`AdoptionRequestDtoTest.kt`,
-`LostFoundDtoTest.kt`, `PetAnalyticsDtoTest.kt`, `PetDtoTest.kt`, `PetEditSuggestionDtoTest.kt`,
-`PetFosterPlacementDtoTest.kt`, `PetMedicalEventDtoTest.kt`, `RescuerDirectoryDtoTest.kt`,
-`SavedSearchDtoTest.kt`, `ShelterDtoTest.kt`, `SponsorshipOfferDtoTest.kt`,
-`SterilizationLocationDtoTest.kt`, `UrgentRescueDtoTest.kt`, `UserDtoTest.kt`, `VolunteerDtoTest.kt`,
-`dto/output/AuthResponsesTest.kt`). Each asserts `original.encodeToJson().decodeAsXxx() ==
-original`, enum-by-Kotlin-name encoding, explicit-null retention, and default-field decoding when a
-field is absent from the wire (see PetDtoTest.kt for the fullest example).
-
-## dfk-codegen/
-
-Separate composite build (`includeBuild("dfk-codegen")` in the root `settings.gradle.kts`) that
-runs DataFormatsKit's KSP processor in an isolated Kotlin 2.3.10 compile over
-`backend/src/main/kotlin/com/adoptu/{dto/**,web/JsonResponses.kt}` only - `backend` itself is on
-Kotlin 2.4.x, which has no KSP release. `scan/build.gradle.kts` sets
-`ksp { arg("dfk.generatedFileName", "GeneratedCodecs_adoptu") }` so its generated file facade class
-doesn't collide with another consumer's scan on the same classpath. Output lands under
-`dfk-codegen/scan/build/generated/ksp/main/kotlin` and `backend/build.gradle.kts` adds it as an
-ordinary source dir (`generateJsonCodecs` task, `compileKotlin` depends on it). See
-`docs/codegen-consumers.md` in the DataFormatsKit repo.
-
 ## common/
 
 - `build.gradle.kts` (~104 tok)
@@ -852,6 +836,9 @@ ordinary source dir (`generateJsonCodecs` task, `compileKotlin` depends on it). 
 
 - `ImageScalingTest.kt` — ImageScalingTest: solidColor (~411 tok)
 - `JPEGCodecTest.kt` — JPEGCodecTest: gradient (~766 tok)
+
+## dfk-codegen/
+
 
 ## frontend/
 

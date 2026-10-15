@@ -17,14 +17,18 @@
 >
 > Sabemos cómo se lleva un rescate hoy: fotos en el celular, publicaciones en varios grupos, solicitudes por inbox y WhatsApp, y una libreta o Excel para no perder el hilo de cada animalito.
 >
-> Somos **Adopt-U**, una plataforma mexicana **sin fines de lucro** hecha para eso:
+> Somos **Adopt-U**, una plataforma **sin fines de lucro** hecha para eso:
 >
 > ✅ Una página con foto para cada peludito, para compartir con un toque en WhatsApp y Facebook
 > ✅ Las solicitudes de adopción te llegan ordenadas a un solo lugar (se acabó buscar en el inbox)
-> ✅ Expediente de cada animal: vacunas, esterilización, tratamientos
+> ✅ Expediente de cada animal: vacunas, esterilización, tratamientos, con recordatorios
+> ✅ Red de hogares temporales y alertas de rescate urgente a rescatistas cercanos
+> ✅ Mascotas perdidas y encontradas, directorio de esterilización y fotógrafos voluntarios
 > ✅ Sin costo, sin anuncios sobre tus animalitos, tus datos son tuyos
 >
-> Registro en minutos: [enlace] — y si prefieres, te ayudamos personalmente por WhatsApp/correo: adopt-u@adopt-u.org
+> Estamos en la etapa final antes del lanzamiento (por ahora verás datos de prueba): regístrate desde ahora y tus peluditos estarán entre los primeros publicados 👉 [enlace] — dudas: adopt-u@adopt-u.org
+>
+> ¿Se te ocurre algo que le falte? Cuéntanos, la estamos construyendo con rescatistas.
 >
 > Si conoces a una rescatista que se ahogue en pendientes, etiquétala 👇
 >
@@ -32,7 +36,7 @@
 
 ### A2 — Versión corta y cálida (grupos más estrictos)
 
-> Rescatista: si hoy llevas tus adopciones entre el inbox, WhatsApp y una libreta, hicimos una herramienta **gratuita y mexicana** para ti. Página propia para cada peludito, solicitudes ordenadas en un solo lugar y expediente médico de cada animal. Sin costo, sin fines de lucro, sin letras chiquitas. Escríbeme por inbox o a adopt-u@adopt-u.org y te lo enseño en 10 minutos. 🐾
+> Rescatista: si hoy llevas tus adopciones entre el inbox, WhatsApp y una libreta, hicimos una herramienta **gratuita** para ti. Página propia para cada peludito, solicitudes ordenadas en un solo lugar y expediente médico de cada animal. Sin costo, sin fines de lucro, sin letras chiquitas. Estamos por lanzar (por ahora hay datos de prueba): regístrate desde ahora y tus peluditos estarán entre los primeros publicados. Dudas por correo a adopt-u@adopt-u.org 🐾
 >
 > [FOTO: un solo animal, con nombre e historia breve]
 
@@ -61,7 +65,7 @@
 
 ### B2 — Post de catálogo (páginas propias y grupos que lo permitan)
 
-> ¿Estás pensando en adoptar en [CDMX]? En Adopt-U puedes ver en un solo lugar a los peluditos de varias rescatistas y protectoras — con fotos, su historia y su expediente — y mandar tu solicitud en línea, sin perseguir inboxes. Adoptar es gratis; la plataforma es mexicana y sin fines de lucro. 🐾 [enlace]
+> ¿Estás pensando en adoptar en [CDMX]? En Adopt-U puedes ver en un solo lugar a los peluditos de varias rescatistas y protectoras — con fotos, su historia y su expediente — y mandar tu solicitud en línea, sin perseguir inboxes. Adoptar es gratis; la plataforma es sin fines de lucro. 🐾 [enlace]
 >
 > [FOTO: collage con 4–6 animales disponibles]
 
@@ -83,13 +87,13 @@
 
 ## D. Mensaje directo a administradores de grupo (antes de publicar donde hay dudas)
 
-> Hola [nombre], ¡gracias por el trabajo de mantener [nombre del grupo]! Soy Iván, de Adopt-U, una plataforma mexicana sin fines de lucro que ayuda a rescatistas a gestionar sus adopciones gratis (páginas por animal, solicitudes ordenadas, expediente). Antes de publicar algo en el grupo quería preguntarte si está permitido y en qué formato prefieren — y si te late, con gusto te enseño la plataforma primero. Sin prisa y gracias por tu tiempo. 🐾
+> Hola [nombre], ¡gracias por el trabajo de mantener [nombre del grupo]! Soy Iván, de Adopt-U, una plataforma sin fines de lucro que ayuda a rescatistas a gestionar sus adopciones gratis (páginas por animal, solicitudes ordenadas, expediente). Antes de publicar algo en el grupo quería preguntarte si está permitido y en qué formato prefieren. Y si conoces rescatistas o protectoras a quienes les pueda servir, o tienes ideas para mejorarla, me encantaría escucharte. Sin prisa y gracias por tu tiempo. 🐾
 
 ---
 
 ## E. Notas de segmentación
 
-- **Grupos de PERDIDOS** (Perros Perdidos EDOMEX/CDMX, Mascotas perdidas CDMX, etc.): **no publicar promoción de adopciones ahí** — son grupos de emergencia con reglas estrictas y otra misión. Participar solo ayudando (compartiendo avisos). Considerarlos como canal únicamente si algún día Adopt-U lanza módulo de perdidos/encontrados.
+- **Grupos de PERDIDOS** (Perros Perdidos EDOMEX/CDMX, Mascotas perdidas CDMX, etc.): **no publicar promoción de adopciones ahí** — son grupos de emergencia con reglas estrictas y otra misión. Participar solo ayudando (compartiendo avisos). Adopt-U ya tiene módulo de perdidos/encontrados: cuando un aviso del grupo encaje, se puede sugerir (sin insistir y respetando las reglas) registrarlo también ahí; preguntar antes a los admins con el mensaje D.
 - **Páginas grandes** (Adóptame México ~216k, Adopta.Mx ~75k): no son grupos donde publicar, son cuentas a las que proponer colaboración (mensaje tipo D, adaptado: intercambio de difusión, o invitarlas a listar sus animales en la plataforma).
 - **Orden sugerido:** 2 semanas de participación genuina → A2/A3 en 3–4 grupos medianos → medir registros → A1 en grupos grandes que lo permitan → B y C en cuanto haya catálogo con 10+ animales.
 - Sustituir todos los `[enlace]` cuando el sitio esté publicado; mientras no lo esté, usar solo variantes A2/A3 (contacto por inbox/correo).
